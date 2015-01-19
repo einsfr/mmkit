@@ -1,5 +1,3 @@
-import os
-
 from mmkit.conf.common import *
 
 DEBUG = True
