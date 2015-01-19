@@ -27,8 +27,11 @@ class Storage(models.Model):
         path_list = self._build_path_list(item_id)
         return os.path.join(self.base_url, *path_list)
 
-    def build_path(self, item_id):
-        path_list = self._build_path_list(item_id)
+    def build_path(self, item_id=0):
+        if item_id:
+            path_list = self._build_path_list(item_id)
+        else:
+            path_list = []
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
         return os.path.join(storage_root, self.mount_dir, *path_list)
 
@@ -60,6 +63,9 @@ class Item(models.Model):
     def get_storage_url(self):
         return self.storage.build_url(self.id)
 
+    def get_storage_path(self):
+        return self.storage.build_path(self.id)
+
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
 
@@ -84,6 +90,12 @@ class ItemFolder(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_storage_url(self):
+        return os.path.join(self.item.get_storage_url(), self.name)
+
+    def get_storage_path(self):
+        return os.path.join(self.item.get_storage_path(), self.name)
 
 
 class ItemFile(models.Model):

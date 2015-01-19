@@ -13,8 +13,8 @@ DATABASES = {
     }
 }
 
-EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_dev')
+SECRET_KEY = 'my_very_secret_test_key'
 
-EFSW_ARCH_SKIP_FS_OPS = False
+EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_test')
 
-from mmkit.conf.dev_local import *
+EFSW_ARCH_SKIP_FS_OPS = True
