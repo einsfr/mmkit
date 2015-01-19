@@ -1,0 +1,25 @@
+[
+  {
+    "model": "archive.ItemCategory",
+    "pk": 1,
+    "fields": {
+      "name": "Готовые программы"
+    }
+  },
+
+  {
+    "model": "archive.ItemCategory",
+    "pk": 2,
+    "fields": {
+      "name": "Исходные материалы"
+    }
+  },
+
+  {
+    "model": "archive.ItemCategory",
+    "pk": 3,
+    "fields": {
+      "name": "Смонтированные репортажи"
+    }
+  }
+]

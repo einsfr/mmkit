@@ -1,0 +1,119 @@
+{% extends 'archive/app_base.html' %}
+
+{% block title %}{{ block.super }} - Детали элемента {{ object.id }}{% endblock %}
+
+{% block content %}
+    <h1>Детали элемента</h1>
+    <h2>Свойства элемента <small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>ID</th>
+                <td>{{ object.id }}</td>
+            </tr>
+            <tr>
+                <th>Дата создания</th>
+                <td>{{ object.created }}</td>
+            </tr>
+            <tr>
+                <th>Категория</th>
+                <td>{{ object.category.name }}</td>
+            </tr>
+            <tr>
+                <th>Название</th>
+                <td>{{ object.name }}</td>
+            </tr>
+            <tr>
+                <th>Описание</th>
+                <td>{{ object.description }}</td>
+            </tr>
+            <tr>
+                <th>Автор</th>
+                <td>{{ object.author }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h2>Расположение в хранилище <small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Хранилище</th>
+                <td>{{ object.storage.name }}</td>
+            </tr>
+            <tr>
+                <th>Путь к элементу</th>
+                <td>{{ object.get_storage_path }}</td>
+            </tr>
+            <tr>
+                <th>Файлы</th>
+                <td>
+                    <ul>
+                        {% for folder in object.folders.all %}
+                            <li><strong>{{ folder.name }}</strong><br>
+                                <ul>
+                                    {% for f in folder.files.all %}
+                                        <li>{{ f.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h2>Связи с другими элементами <small><a href="{{ object.get_update_url }}link/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Входит в</th>
+                <td>
+                    {% if object.included_in.all %}
+                        <ul>
+                            {% for item in object.included_in.all %}
+                                <li><a href="{{ item.get_absolute_url }}"
+                                       title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Включает</th>
+                <td>
+                    {% if object.includes.all %}
+                        <ul>
+                            {% for item in object.includes.all %}
+                                <li><a href="{{ item.get_absolute_url }}"
+                                       title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h2>Журнал</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Дата и время</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log_item in object.log.all %}
+                <tr>
+                    <td>{{ log_item.dt }}</td>
+                    <td>{{ log_item.get_action_name }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="2">Записи не найдены</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

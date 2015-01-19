@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ block.super }} - Архив{% endblock %}
+
+{% block content_wrapper %}
+    <ul class="nav nav-pills">
+        <li role="presentation" class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+                Элементы <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu">
+                <li role="presentation"><a href="{% url 'efsw.archive:item_index' %}" title="Индекс элементов">Индекс</a></li>
+                <li role="presentation"><a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a></li>
+            </ul>
+        </li>
+    </ul>
+    {% block content %}{% endblock %}
+{% endblock %}

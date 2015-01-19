@@ -1,0 +1,81 @@
+[
+  {
+    "model": "archive.ItemLog",
+    "pk": 1,
+    "fields": {
+      "item": 1,
+      "dt": "2015-01-16T12:24:52+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 2,
+    "fields": {
+      "item": 2,
+      "dt": "2015-01-16T13:41:50+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 3,
+    "fields": {
+      "item": 3,
+      "dt": "2015-01-16T17:20:35+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 4,
+    "fields": {
+      "item": 4,
+      "dt": "2015-01-17T18:10:03+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 5,
+    "fields": {
+      "item": 5,
+      "dt": "2015-01-17T12:06:23+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 6,
+    "fields": {
+      "item": 6,
+      "dt": "2015-01-17T14:25:52+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 7,
+    "fields": {
+      "item": 7,
+      "dt": "2015-01-17T17:01:48+03:00",
+      "action": "ADD"
+    }
+  },
+
+  {
+    "model": "archive.ItemLog",
+    "pk": 8,
+    "fields": {
+      "item": 5,
+      "dt": "2015-01-17T12:29:32+03:00",
+      "action": "UPD"
+    }
+  }
+]
