@@ -3,7 +3,9 @@ import os
 from django.test import TestCase
 from django.core import urlresolvers
 from django.utils import timezone
+from django.conf import settings
 
+from efsw.archive import default_settings
 from efsw.archive import models
 
 
@@ -15,9 +17,15 @@ class ArchiveTestCase(TestCase):
     def test_storage_build_path(self):
         storage = models.Storage()
         storage.base_url = "\\\\192.168.1.1"
-        self.assertEqual(storage.build_path(1), os.path.join(storage.base_url, '00', '00', '00', '01'))
-        self.assertEqual(storage.build_path(476), os.path.join(storage.base_url, '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_path(1000000000), os.path.join(storage.base_url, '3b', '9a', 'ca', '00'))
+        self.assertEqual(storage.build_url(1), os.path.join(storage.base_url, '00', '00', '00', '01'))
+        self.assertEqual(storage.build_url(476), os.path.join(storage.base_url, '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_url(1000000000), os.path.join(storage.base_url, '3b', '9a', 'ca', '00'))
+
+        storage.mount_dir = "test"
+        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
+        self.assertEqual(storage.build_path(1), os.path.join(storage_root, storage.mount_dir, '00', '00', '00', '01'))
+        self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00'))
 
     def test_object_not_found(self):
 

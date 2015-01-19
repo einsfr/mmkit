@@ -2,6 +2,9 @@ import os
 
 from django.db import models
 from django.core import urlresolvers
+from django.conf import settings
+
+from efsw.archive import default_settings
 
 
 class Storage(models.Model):
@@ -16,10 +19,18 @@ class Storage(models.Model):
     def __str__(self):
         return self.name
 
-    def build_path(self, item_id):
+    def _build_path_list(self, item_id):
         formatted_id = "{:0>8}".format(hex(item_id)[2:])
-        path_list = [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
+        return [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
+
+    def build_url(self, item_id):
+        path_list = self._build_path_list(item_id)
         return os.path.join(self.base_url, *path_list)
+
+    def build_path(self, item_id):
+        path_list = self._build_path_list(item_id)
+        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
+        return os.path.join(storage_root, self.mount_dir, *path_list)
 
 
 class ItemCategory(models.Model):
@@ -46,8 +57,8 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
-    def get_storage_path(self):
-        return self.storage.build_path(self.id)
+    def get_storage_url(self):
+        return self.storage.build_url(self.id)
 
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
