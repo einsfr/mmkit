@@ -13,6 +13,8 @@ DATABASES = {
     }
 }
 
-EFSW_ARCH_STORAGE_MOUNT = os.path.join(BASE_DIR, 'dev_storage')
+EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, 'dev_storage')
+
+EFSW_ARCH_SKIP_FS_OPS = False
 
 from mmkit.conf.dev_local import *

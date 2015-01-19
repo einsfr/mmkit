@@ -10,7 +10,7 @@ class Storage(models.Model):
     name = models.CharField(max_length=255)
     # это URL для доступа пользователей
     base_url = models.CharField(max_length=255)
-    # а это путь внутри папки EFSW_ARCH_STORAGE_MOUNT для операций с файловой системой
+    # а это путь внутри папки EFSW_ARCH_STORAGE_ROOT для операций с файловой системой, его нужно проверять на присутствие только букв и цифр
     mount_dir = models.CharField(max_length=32)
 
     def __str__(self):
