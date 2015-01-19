@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Item',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField()),
                 ('created', models.DateField()),
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ItemCategory',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=64)),
             ],
             options={
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ItemFile',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=255)),
             ],
             options={
@@ -46,9 +46,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ItemFolder',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=32)),
-                ('item', models.ForeignKey(related_name='folders', to='archive.Item')),
+                ('item', models.ForeignKey(to='archive.Item', related_name='folders')),
             ],
             options={
             },
@@ -57,10 +57,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ItemLog',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('dt', models.DateTimeField(auto_now=True)),
-                ('action', models.CharField(max_length=3, choices=[('UPD', 'Обновление'), ('ADD', 'Добавление')])),
-                ('item', models.ForeignKey(related_name='log', to='archive.Item')),
+                ('action', models.CharField(choices=[('ADD', 'Добавление'), ('UPD', 'Обновление')], max_length=3)),
+                ('item', models.ForeignKey(to='archive.Item', related_name='log')),
             ],
             options={
             },
@@ -69,9 +69,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Storage',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=255)),
-                ('base_url', models.CharField(max_length=255, blank=True)),
+                ('base_url', models.CharField(max_length=255)),
+                ('mount_dir', models.CharField(max_length=32)),
             ],
             options={
             },
@@ -80,25 +81,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='itemfile',
             name='folder',
-            field=models.ForeignKey(related_name='files', to='archive.ItemFolder'),
+            field=models.ForeignKey(to='archive.ItemFolder', related_name='files'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='item',
             name='category',
-            field=models.ForeignKey(related_name='items', to='archive.ItemCategory'),
+            field=models.ForeignKey(to='archive.ItemCategory', related_name='items'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='item',
             name='includes',
-            field=models.ManyToManyField(related_name='included_in', to='archive.Item'),
+            field=models.ManyToManyField(to='archive.Item', related_name='included_in'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='item',
             name='storage',
-            field=models.ForeignKey(related_name='items', to='archive.Storage'),
+            field=models.ForeignKey(to='archive.Storage', related_name='items'),
             preserve_default=True,
         ),
     ]

@@ -8,7 +8,10 @@ class Storage(models.Model):
     """ Модель, описывающая архивное онлайн хранилище """
 
     name = models.CharField(max_length=255)
-    base_url = models.CharField(max_length=255, blank=True)
+    # это URL для доступа пользователей
+    base_url = models.CharField(max_length=255)
+    # а это путь внутри папки EFSW_ARCH_STORAGE_MOUNT для операций с файловой системой
+    mount_dir = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name

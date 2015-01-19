@@ -13,4 +13,6 @@ DATABASES = {
     }
 }
 
+EFSW_ARCH_STORAGE_MOUNT = os.path.join(BASE_DIR, 'dev_storage')
+
 from mmkit.conf.dev_local import *
