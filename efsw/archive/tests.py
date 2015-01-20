@@ -155,4 +155,5 @@ class ArchiveTestCase(TestCase):
                 i.save()
                 self.assertTrue(os.path.isdir(os.path.join(i.get_storage_path(), models.ItemFolder.DEFAULT_FOLDER_NAME)))
             finally:
-                shutil.rmtree(test_storage_root)
+                if os.path.isdir(test_storage_root):
+                    shutil.rmtree(test_storage_root)

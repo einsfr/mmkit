@@ -61,3 +61,8 @@ STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'mmkit', 'templates')]
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'mmkit', 'static')]
+
+
+EFSW_ARCH_DIR_MODE = 0o775
+
+EFSW_ARCH_FILE_MODE = 0o664
