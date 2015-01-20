@@ -13,6 +13,8 @@ DATABASES = {
     }
 }
 
+INSTALLED_APPS += ('debug_toolbar', )
+
 EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_dev')
 
 EFSW_ARCH_SKIP_FS_OPS = False

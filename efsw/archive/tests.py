@@ -148,7 +148,7 @@ class ArchiveTestCase(TestCase):
             i.storage = s
             i.category = c
 
-            if (os.path.isdir(test_storage_root)):
+            if os.path.isdir(test_storage_root):
                 shutil.rmtree(test_storage_root)
             os.mkdir(test_storage_root)
             try:
