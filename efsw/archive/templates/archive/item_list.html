@@ -1,5 +1,7 @@
 {% extends 'archive/app_base.html' %}
 
+{% load field_verbose_name from model %}
+
 {% block title %}{{ block.super }} - Индекс элементов {{ object.id }}{% endblock %}
 
 {% block content %}
@@ -8,7 +10,7 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Дата создания</th>
+                <th>{% field_verbose_name object_list.0 'name' %}</th>  <!--  @TODO: Добавить автоматическую работу со списками элементов -->
                 <th>Категория</th>
                 <th>Название</th>
                 <th>&nbsp;</th>

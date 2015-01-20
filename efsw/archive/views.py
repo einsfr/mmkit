@@ -1,6 +1,7 @@
 from django.views import generic
 
 from efsw.archive import models
+from efsw.archive import forms
 
 
 class IndexView(generic.ListView):
@@ -11,14 +12,14 @@ class DetailView(generic.DetailView):
     model = models.Item
 
 
-class CreateView(generic.CreateView):
-    model = models.Item
-    fields = ['name', 'description', 'created', 'author', 'storage', 'category']
+class CreateView(generic.FormView):
+    template_name = 'archive/item_form.html'
+    form_class = forms.ItemCreateForm
 
 
-class UpdateView(generic.UpdateView):
-    model = models.Item
-    fields = ['name', 'description', 'created', 'author', 'category']
+class UpdateView(generic.FormView):
+    template_name = 'archive/item_form.html'
+    form_class = forms.ItemUpdateForm
 
 
 class UpdateStorageView(generic.UpdateView):

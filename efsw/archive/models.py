@@ -48,10 +48,20 @@ class ItemCategory(models.Model):
 class Item(models.Model):
     """ Модель, описывающая элемент архива """
 
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    created = models.DateField()
-    author = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        verbose_name='название',
+    )
+    description = models.TextField(
+        verbose_name='описание',
+    )
+    created = models.DateField(
+        verbose_name='дата создания',
+    )
+    author = models.CharField(
+        max_length=255,
+        verbose_name='автор',
+    )
 
     storage = models.ForeignKey(Storage, related_name='items')
     category = models.ForeignKey(ItemCategory, related_name='items')
@@ -77,6 +87,10 @@ class Item(models.Model):
 
     def get_update_url_title(self):
         return 'Редактировать элемент'
+
+    class Meta:
+        verbose_name = 'элемент'
+        verbose_name_plural = 'элементы'
 
 
 class ItemFolder(models.Model):
