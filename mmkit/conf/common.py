@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'efsw.archive',
+    'efsw.common',
 )
 
 MIDDLEWARE_CLASSES = (
