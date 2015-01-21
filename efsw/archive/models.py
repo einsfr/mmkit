@@ -10,6 +10,10 @@ from efsw.archive import default_settings
 class Storage(models.Model):
     """ Модель, описывающая архивное онлайн хранилище """
 
+    class Meta:
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
+
     name = models.CharField(max_length=255)
     # это URL для доступа пользователей
     base_url = models.CharField(max_length=255)
@@ -39,6 +43,10 @@ class Storage(models.Model):
 class ItemCategory(models.Model):
     """ Модель, описывающая категории файлов """
 
+    class Meta:
+        verbose_name = 'категория'
+        verbose_name_plural = 'категории'
+
     name = models.CharField(max_length=64)
 
     def __str__(self):
@@ -47,6 +55,10 @@ class ItemCategory(models.Model):
 
 class Item(models.Model):
     """ Модель, описывающая элемент архива """
+
+    class Meta:
+        verbose_name = 'элемент'
+        verbose_name_plural = 'элементы'
 
     name = models.CharField(
         max_length=255,
@@ -88,17 +100,20 @@ class Item(models.Model):
     def get_update_url_title(self):
         return 'Редактировать элемент'
 
-    class Meta:
-        verbose_name = 'элемент'
-        verbose_name_plural = 'элементы'
-
 
 class ItemFolder(models.Model):
     """ Модель, описывающая дочерние папки, принадлежащие элементу архива """
 
+    class Meta:
+        verbose_name = 'папка'
+        verbose_name_plural = 'папки'
+
     DEFAULT_FOLDER_NAME = 'default'
 
-    name = models.CharField(max_length=32)
+    name = models.CharField(
+        max_length=32,
+        verbose_name='Имя'
+    )
 
     item = models.ForeignKey(Item, related_name='folders')
 
@@ -115,6 +130,10 @@ class ItemFolder(models.Model):
 class ItemFile(models.Model):
     """ Модель, описывающая файлы, принадлежащие элементу архива """
 
+    class Meta:
+        verbose_name = 'файл'
+        verbose_name_plural = 'файлы'
+
     name = models.CharField(max_length=255)
 
     folder = models.ForeignKey(ItemFolder, related_name='files')
@@ -125,6 +144,10 @@ class ItemFile(models.Model):
 
 class ItemLog(models.Model):
     """ Модель, описывающая журнал элемента """
+
+    class Meta:
+        verbose_name = 'запись'
+        verbose_name_plural = 'записи'
 
     ACTION_ADD = 'ADD'
     ACTION_UPDATE = 'UPD'
