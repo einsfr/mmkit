@@ -1,0 +1,14 @@
+{% extends 'archive/app_base.html' %}
+
+{% block title %}{{ block.super }} - Изменение размещения элемента в хранилище{% endblock %}
+
+{% block content %}
+    <h1>Изменение размещения элемента в хранилище</h1>
+    <form action="" method="post">
+        <table class="table">
+            {% csrf_token %}
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Сохранить">
+    </form>
+{% endblock %}

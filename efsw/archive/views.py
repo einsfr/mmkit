@@ -12,19 +12,23 @@ class DetailView(generic.DetailView):
     model = models.Item
 
 
-class CreateView(generic.FormView):
-    template_name = 'archive/item_form.html'
+class ItemCreateView(generic.CreateView):
+    model = models.Item
+    template_name = 'archive/item_form_create.html'
     form_class = forms.ItemCreateForm
 
 
-class UpdateView(generic.FormView):
-    template_name = 'archive/item_form.html'
+class ItemUpdateView(generic.UpdateView):
+    model = models.Item
+    template_name = 'archive/item_form_update.html'
     form_class = forms.ItemUpdateForm
 
 
-class UpdateStorageView(generic.UpdateView):
-    pass
+class ItemUpdateStorageView(generic.UpdateView):
+    model = models.Item
+    template_name = 'archive/item_form_update_storage.html'
+    form_class = forms.ItemUpdateStorageForm
 
 
-class UpdateLinkView(generic.UpdateView):
+class ItemUpdateLinkView(generic.UpdateView):
     pass

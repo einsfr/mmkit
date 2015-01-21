@@ -12,3 +12,9 @@ class ItemCreateForm(ModelForm):
 class ItemUpdateForm(ItemCreateForm):
     class Meta(ItemCreateForm.Meta):
         exclude = ('storage', )
+
+
+class ItemUpdateStorageForm(ModelForm):
+    class Meta:
+        model = models.Item
+        fields = ('storage', )
