@@ -17,7 +17,7 @@ def _prepare_instance(instance):
 
 
 @register.simple_tag()
-def verbose_name(instance, plural=False):
+def verbose_name(instance, plural=False, capitalize=True):
     obj = _prepare_instance(instance)
     if obj is not None:
         if plural:
@@ -32,11 +32,13 @@ def verbose_name(instance, plural=False):
                 result = ''
     else:
         result = ''
+    if result and capitalize:
+        result = result.capitalize()
     return result
 
 
 @register.simple_tag()
-def field_verbose_name(instance, field_name):
+def field_verbose_name(instance, field_name, capitalize=True):
     obj = _prepare_instance(instance)
     if obj is not None:
         try:
@@ -45,4 +47,6 @@ def field_verbose_name(instance, field_name):
             result = ''
     else:
         result = ''
+    if result and capitalize:
+        result = result.capitalize()
     return result
