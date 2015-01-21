@@ -14,11 +14,20 @@ class Storage(models.Model):
         verbose_name = 'хранилище'
         verbose_name_plural = 'хранилищи'
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        verbose_name='имя'
+    )
     # это URL для доступа пользователей
-    base_url = models.CharField(max_length=255)
+    base_url = models.CharField(
+        max_length=255,
+        verbose_name='базовая ссылка'
+    )
     # а это путь внутри папки EFSW_ARCH_STORAGE_ROOT для операций с файловой системой, его нужно проверять на присутствие только букв и цифр
-    mount_dir = models.CharField(max_length=32)
+    mount_dir = models.CharField(
+        max_length=32,
+        verbose_name='точка монтирования'
+    )
 
     def __str__(self):
         return self.name
@@ -47,7 +56,10 @@ class ItemCategory(models.Model):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
 
-    name = models.CharField(max_length=64)
+    name = models.CharField(
+        max_length=64,
+        verbose_name='название'
+    )
 
     def __str__(self):
         return self.name
@@ -62,22 +74,34 @@ class Item(models.Model):
 
     name = models.CharField(
         max_length=255,
-        verbose_name='название',
+        verbose_name='название'
     )
     description = models.TextField(
-        verbose_name='описание',
+        verbose_name='описание'
     )
     created = models.DateField(
-        verbose_name='дата создания',
+        verbose_name='дата создания'
     )
     author = models.CharField(
         max_length=255,
-        verbose_name='автор',
+        verbose_name='автор'
     )
 
-    storage = models.ForeignKey(Storage, related_name='items')
-    category = models.ForeignKey(ItemCategory, related_name='items')
-    includes = models.ManyToManyField('self', symmetrical=False, related_name='included_in')
+    storage = models.ForeignKey(
+        Storage,
+        related_name='items',
+        verbose_name='хранилище'
+    )
+    category = models.ForeignKey(
+        ItemCategory,
+        related_name='items',
+        verbose_name='категория'
+    )
+    includes = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='included_in'
+    )
 
     def __str__(self):
         return self.name
@@ -115,7 +139,11 @@ class ItemFolder(models.Model):
         verbose_name='Имя'
     )
 
-    item = models.ForeignKey(Item, related_name='folders')
+    item = models.ForeignKey(
+        Item,
+        related_name='folders',
+        verbose_name='элемент'
+    )
 
     def __str__(self):
         return self.name
