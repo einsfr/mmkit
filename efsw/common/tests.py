@@ -49,4 +49,12 @@ class TemplateTagsTestCase(TestCase):
         self.assertEqual(model.verbose_name(instance_wo, True), 'test model without verboses')
 
     def test_field_verbose_name(self):
-        pass  # TODO: закончить
+        not_instance = self.NotModel()
+        self.assertEqual(model.field_verbose_name(not_instance, 'name'), '')
+        self.assertEqual(model.field_verbose_name(not_instance, 'non-exist'), '')
+        instance = self.TestModel()
+        self.assertEqual(model.field_verbose_name(instance, 'name'), 'тестовое имя')
+        self.assertEqual(model.field_verbose_name(instance, 'non-exist'), '')
+        instance_wo = self.TestModelWithoutVerbose()
+        self.assertEqual(model.field_verbose_name(instance_wo, 'name'), 'name')
+        self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist'), '')
