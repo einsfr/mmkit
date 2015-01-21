@@ -33,6 +33,7 @@ class TemplateTagsTestCase(TestCase):
         self.assertEqual(model._prepare_instance([instance]), instance)
         self.assertIsNone(model._prepare_instance(not_instance))
         self.assertIsNone(model._prepare_instance([not_instance]))
+        self.assertIsNone(model._prepare_instance([]))
 
     def test_verbose_name(self):
         not_instance = self.NotModel()

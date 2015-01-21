@@ -9,8 +9,14 @@ register = template.Library()
 def _prepare_instance(instance):
     if isinstance(instance, models.Model):
         obj = instance
-    elif hasattr(instance, '__iter__') and len(instance) > 0 and isinstance(instance[0], models.Model):
-        obj = instance[0]
+    elif hasattr(instance, '__iter__'):
+        try:
+            if isinstance(instance[0], models.Model):
+                obj = instance[0]
+            else:
+                obj = None
+        except:
+            obj = None
     else:
         obj = None
     return obj
@@ -36,7 +42,7 @@ def verbose_name(instance, plural=False, capitalize=True):
         result = result.capitalize()
     return result
 
-
+# TODO: доделать работу с внешними ключами
 @register.simple_tag()
 def field_verbose_name(instance, field_name, capitalize=True):
     obj = _prepare_instance(instance)
