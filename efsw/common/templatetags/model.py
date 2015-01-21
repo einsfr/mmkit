@@ -27,22 +27,16 @@ def verbose_name(instance, plural=False, capitalize=True):
     obj = _prepare_instance(instance)
     if obj is not None:
         if plural:
-            try:
-                result = obj._meta.verbose_name_plural
-            except:
-                result = ''
+            result = getattr(obj._meta, 'verbose_name_plural', '')
         else:
-            try:
-                result = obj._meta.verbose_name
-            except:
-                result = ''
+            result = getattr(obj._meta, 'verbose_name', '')
     else:
         result = ''
     if result and capitalize:
         result = result.capitalize()
     return result
 
-# TODO: доделать работу с внешними ключами
+
 @register.simple_tag()
 def field_verbose_name(instance, field_name, capitalize=True):
     obj = _prepare_instance(instance)
