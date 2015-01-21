@@ -1,5 +1,7 @@
 {% extends 'archive/app_base.html' %}
 
+{% load field_verbose_name from model %}
+
 {% block title %}{{ block.super }} - Детали элемента {{ object.id }}{% endblock %}
 
 {% block content %}
@@ -12,23 +14,23 @@
                 <td>{{ object.id }}</td>
             </tr>
             <tr>
-                <th>Дата создания</th>
+                <th>{% field_verbose_name object 'created' %}</th>
                 <td>{{ object.created }}</td>
             </tr>
             <tr>
-                <th>Категория</th>
+                <th>{% field_verbose_name object 'category' %}</th>
                 <td>{{ object.category.name }}</td>
             </tr>
             <tr>
-                <th>Название</th>
+                <th>{% field_verbose_name object 'name' %}</th>
                 <td>{{ object.name }}</td>
             </tr>
             <tr>
-                <th>Описание</th>
+                <th>{% field_verbose_name object 'description' %}</th>
                 <td>{{ object.description }}</td>
             </tr>
             <tr>
-                <th>Автор</th>
+                <th>{% field_verbose_name object 'author' %}</th>
                 <td>{{ object.author }}</td>
             </tr>
         </tbody>
@@ -37,7 +39,7 @@
     <table class="table">
         <tbody>
             <tr>
-                <th>Хранилище</th>
+                <th>{% field_verbose_name object 'storage' %}</th>
                 <td>{{ object.storage.name }}</td>
             </tr>
             <tr>
