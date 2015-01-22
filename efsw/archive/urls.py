@@ -35,4 +35,10 @@ urlpatterns = patterns(
         views.ItemUpdateStorageView.as_view(),
         name='item_update_storage'
     ),
+    # items/12/update/remove-link/17/
+    url(
+        r'^items/(?P<item_id>\d+)/update/remove-link/(?P<remove_id>\d+)/$',
+        views.item_update_remove_link,
+        name='item_update_remove_link'
+    ),
 )
