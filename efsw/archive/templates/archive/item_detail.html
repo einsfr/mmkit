@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1>Детали элемента</h1>
-    <h2>Свойства элемента <small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Свойства <small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
     <table class="table">
         <tbody>
             <tr>
@@ -35,7 +35,7 @@
             </tr>
         </tbody>
     </table>
-    <h2>Расположение в хранилище <small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Расположение <small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
     <table class="table">
         <tbody>
             <tr>
@@ -46,25 +46,9 @@
                 <th>Путь к элементу</th>
                 <td>{{ object.get_storage_url }}</td>
             </tr>
-            <tr>
-                <th>Файлы</th>
-                <td>
-                    <ul>
-                        {% for folder in object.folders.all %}
-                            <li><strong>{{ folder.name }}</strong><br>
-                                <ul>
-                                    {% for f in folder.files.all %}
-                                        <li>{{ f.name }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
         </tbody>
     </table>
-    <h2>Связи с другими элементами <small><a href="{{ object.get_update_url }}link/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Связи <small><a href="{{ object.get_update_url }}link/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
     <table class="table">
         <tbody>
             <tr>

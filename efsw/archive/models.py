@@ -136,7 +136,7 @@ class ItemFolder(models.Model):
 
     name = models.CharField(
         max_length=32,
-        verbose_name='Имя'
+        verbose_name='имя'
     )
 
     item = models.ForeignKey(
