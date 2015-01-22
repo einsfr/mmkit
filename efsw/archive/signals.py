@@ -29,7 +29,7 @@ def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
 def fs_ops_on_folder_create(sender, instance, created, raw, *args, **kwargs):
     """ Операции с файловой системой после создания элемента """
 
-    if not getattr(settings, 'EFSW_ARCH_SKIP_FS_OPS', default_settings.EFSW_ARCH_SKIP_FS_OPS):
+    if created and not getattr(settings, 'EFSW_ARCH_SKIP_FS_OPS', default_settings.EFSW_ARCH_SKIP_FS_OPS):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
         if not os.path.isdir(storage_root):
             raise exceptions.StorageRootNotFound()
