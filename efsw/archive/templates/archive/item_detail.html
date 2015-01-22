@@ -48,16 +48,16 @@
             </tr>
         </tbody>
     </table>
-    <h2>Связи <small><a href="{{ object.get_update_url }}link/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Связи</h2>
     <table class="table">
         <tbody>
             <tr>
                 <th>Входит в</th>
                 <td>
                     {% if object.included_in.all %}
-                        <ul>
+                        <ul class="list-group">
                             {% for item in object.included_in.all %}
-                                <li><a href="{{ item.get_absolute_url }}"
+                                <li class="list-group-item"><a href="{{ item.get_absolute_url }}"
                                        title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></li>
                             {% endfor %}
                         </ul>
@@ -70,10 +70,12 @@
                 <th>Включает</th>
                 <td>
                     {% if object.includes.all %}
-                        <ul>
+                        <ul class="list-group">
                             {% for item in object.includes.all %}
-                                <li><a href="{{ item.get_absolute_url }}"
-                                       title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></li>
+                                <li class="list-group-item">
+                                    <a href="{{ item.get_absolute_url }}"
+                                       title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
+                                </li>
                             {% endfor %}
                         </ul>
                     {% else %}
