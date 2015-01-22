@@ -35,10 +35,4 @@ urlpatterns = patterns(
         views.ItemUpdateStorageView.as_view(),
         name='item_update_storage'
     ),
-    # items/12/update/links/
-    url(
-        r'^items/(?P<pk>\d+)/update/link/$',
-        views.ItemUpdateLinkView.as_view(),
-        name='item_update_link'
-    ),
 )

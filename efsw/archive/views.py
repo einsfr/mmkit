@@ -28,7 +28,3 @@ class ItemUpdateStorageView(generic.UpdateView):
     model = models.Item
     template_name = 'archive/item_form_update_storage.html'
     form_class = forms.ItemUpdateStorageForm
-
-
-class ItemUpdateLinkView(generic.UpdateView):
-    pass
