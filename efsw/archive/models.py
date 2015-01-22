@@ -125,51 +125,6 @@ class Item(models.Model):
         return 'Редактировать элемент'
 
 
-class ItemFolder(models.Model):
-    """ Модель, описывающая дочерние папки, принадлежащие элементу архива """
-
-    class Meta:
-        verbose_name = 'папка'
-        verbose_name_plural = 'папки'
-
-    DEFAULT_FOLDER_NAME = 'default'
-
-    name = models.CharField(
-        max_length=32,
-        verbose_name='имя'
-    )
-
-    item = models.ForeignKey(
-        Item,
-        related_name='folders',
-        verbose_name='элемент'
-    )
-
-    def __str__(self):
-        return self.name
-
-    def get_storage_url(self):
-        return os.path.join(self.item.get_storage_url(), self.name)
-
-    def get_storage_path(self):
-        return os.path.join(self.item.get_storage_path(), self.name)
-
-
-class ItemFile(models.Model):
-    """ Модель, описывающая файлы, принадлежащие элементу архива """
-
-    class Meta:
-        verbose_name = 'файл'
-        verbose_name_plural = 'файлы'
-
-    name = models.CharField(max_length=255)
-
-    folder = models.ForeignKey(ItemFolder, related_name='files')
-
-    def __str__(self):
-        return self.name
-
-
 class ItemLog(models.Model):
     """ Модель, описывающая журнал элемента """
 

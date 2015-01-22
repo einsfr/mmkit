@@ -26,19 +26,8 @@ def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
 
 
 @receiver(signals.post_save, sender=models.Item)
-def create_default_dir_on_item_create(sender, instance, created, raw, *args, **kwargs):
-    """ Добавление папки по-умолчанию элементу при создании """
-
-    if created and not raw:
-        fo = models.ItemFolder()
-        fo.item = instance
-        fo.name = fo.DEFAULT_FOLDER_NAME
-        fo.save()
-
-
-@receiver(signals.post_save, sender=models.ItemFolder)
 def fs_ops_on_folder_create(sender, instance, created, raw, *args, **kwargs):
-    """ Операции с файловой системой после создания папки """
+    """ Операции с файловой системой после создания элемента """
 
     if not getattr(settings, 'EFSW_ARCH_SKIP_FS_OPS', default_settings.EFSW_ARCH_SKIP_FS_OPS):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
