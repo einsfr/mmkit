@@ -68,22 +68,22 @@
             </tr>
             <tr>
                 <th>Включает</th>
-                <td id="item-remove-link-container">
-                    {% if object.includes.all %}
-                        <ul class="list-group">
-                            {% for item in object.includes.all %}
-                                <li class="list-group-item" id="item-remove-link-{{ object.id }}-{{ item.id }}">
-                                    <a href="{% url 'efsw.archive:item_update_remove_link' object.id item.id %}"
-                                       title="Удалить связь"
-                                       class="fa fa-close"></a>&nbsp;
-                                    <a href="{{ item.get_absolute_url }}"
-                                       title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        -
-                    {% endif %}
+                <td>
+                    <ul class="list-group" id="item-links-container">
+                        {% for item in object.includes.all %}
+                            <li class="list-group-item">
+                                <a href="{% url 'efsw.archive:item_update_remove_link' object.id item.id %}"
+                                   title="Удалить связь"
+                                   class="fa fa-close"
+                                   id="item-remove-link-{{ object.id }}-{{ item.id }}"></a>&nbsp;
+                                <a href="{{ item.get_absolute_url }}"
+                                   title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="list-group-item">
+                            <a href="#" title="Добавить связь"><span class="fa fa-plus">&nbsp;&nbsp;</span>Добавить</a>
+                        </li>
+                    </ul>
                 </td>
             </tr>
         </tbody>
@@ -113,7 +113,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $('#item-remove-link-container a').click(function(event) {
+            $("#item-links-container a[id^='item-remove-link-']").click(function(event) {
                 event.preventDefault();
                 if (false === confirm('Удалить связь?')) {
                     return;
@@ -121,11 +121,7 @@
                 var url = this.href;
                 $.get(url, function(data, status) {
                     if (status == 'success') {
-                        var rm = $('#item-remove-link-' + data);
-                        if (rm.siblings().length == 0) {
-                            rm.parent().append('-');
-                        }
-                        rm.remove();
+                        $('#item-remove-link-' + data).parent().remove();
                     } else {
                         alert('Ошибка удаления связи');
                     }
