@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
@@ -61,8 +62,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'mmkit', 'templates')]
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'mmkit', 'static')]
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'mmkit', 'static'),
+    os.path.join(BASE_DIR, 'efsw', 'archive', 'static')
+]
 
 EFSW_ARCH_DIR_MODE = 0o775
 
