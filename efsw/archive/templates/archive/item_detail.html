@@ -113,7 +113,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $("#item-links-container a[id^='item-remove-link-']").click(function(event) {
+            $("#item-links-container").find("a[id^='item-remove-link-']").click(function(event) {
                 event.preventDefault();
                 if (false === confirm('Удалить связь?')) {
                     return;
