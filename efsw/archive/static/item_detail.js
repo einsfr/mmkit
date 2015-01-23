@@ -6,11 +6,32 @@ $(document).ready(function() {
             return;
         }
         var url = this.href;
-        $.get(url, function(data, status) {
-            if (status == 'success') {
-                $('#item-remove-link-' + data).parent().remove();
-            } else {
-                alert('Ошибка удаления связи');
+        $.ajax({
+            type: 'GET',
+            url: url,
+            statusCode: {
+                200: function(data) {
+                    $('#item-remove-link-' + data).parent().remove();
+                }
+            }
+        });
+    });
+
+    $("#item-add-link-form").on('submit', function(event) {
+        event.preventDefault();
+        var form = $(this);
+        var url = form.attr('action');
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: form.serialize(),
+            statusCode: {
+                200: function(data) {
+                    $('#item-links-container').find('li:last-child').before(data);
+                },
+                400: function() {
+                    alert('Ошибка добавления связи')
+                }
             }
         });
     });

@@ -41,4 +41,10 @@ urlpatterns = patterns(
         views.item_update_remove_link,
         name='item_update_remove_link'
     ),
+    # items/12/update/add-link
+    url(
+        r'^items/(?P<item_id>\d+)/update/add-link$',
+        views.item_update_add_link,
+        name='item_update_add_link'
+    )
 )

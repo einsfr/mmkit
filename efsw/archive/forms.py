@@ -1,9 +1,9 @@
-from django.forms import ModelForm
+from django import forms
 
 from efsw.archive import models
 
 
-class ItemCreateForm(ModelForm):
+class ItemCreateForm(forms.ModelForm):
     class Meta:
         model = models.Item
         fields = ('name', 'description', 'created', 'author', 'storage', 'category')
@@ -14,7 +14,11 @@ class ItemUpdateForm(ItemCreateForm):
         exclude = ('storage', )
 
 
-class ItemUpdateStorageForm(ModelForm):
+class ItemUpdateStorageForm(forms.ModelForm):
     class Meta:
         model = models.Item
         fields = ('storage', )
+
+
+class ItemUpdateAddLinkForm(forms.Form):
+    linked_id = forms.IntegerField(min_value=1, label='Связанный ID')
