@@ -38,6 +38,6 @@ def item_update_remove_link(request, item_id, remove_id):
     item_remove = get_object_or_404(models.Item, pk=remove_id)
     item.includes.remove(item_remove)
     if request.is_ajax():
-        return HttpResponse()
+        return HttpResponse('{0}-{1}'.format(item_id, remove_id))
     else:
         return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))

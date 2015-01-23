@@ -68,12 +68,14 @@
             </tr>
             <tr>
                 <th>Включает</th>
-                <td>
+                <td id="item-remove-link-container">
                     {% if object.includes.all %}
                         <ul class="list-group">
                             {% for item in object.includes.all %}
-                                <li class="list-group-item">
-                                    <a href="{% url 'efsw.archive:item_update_remove_link' object.id item.id %}" title="Удалить связь" class="fa fa-close" id="item-remove-link"></a>&nbsp;
+                                <li class="list-group-item" id="item-remove-link-{{ object.id }}-{{ item.id }}">
+                                    <a href="{% url 'efsw.archive:item_update_remove_link' object.id item.id %}"
+                                       title="Удалить связь"
+                                       class="fa fa-close"></a>&nbsp;
                                     <a href="{{ item.get_absolute_url }}"
                                        title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
                                 </li>
@@ -111,13 +113,23 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $('#item-remove-link').click(function(event) {
-                event.preventDefault()
-                if (false === confirm('Удалить ссылку?')) {
+            $('#item-remove-link-container a').click(function(event) {
+                event.preventDefault();
+                if (false === confirm('Удалить связь?')) {
                     return;
                 }
-                var url = this.href
-
+                var url = this.href;
+                $.get(url, function(data, status) {
+                    if (status == 'success') {
+                        var rm = $('#item-remove-link-' + data);
+                        if (rm.siblings().length == 0) {
+                            rm.parent().append('-');
+                        }
+                        rm.remove();
+                    } else {
+                        alert('Ошибка удаления связи');
+                    }
+                });
             });
 
         });
