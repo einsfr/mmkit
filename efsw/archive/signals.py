@@ -14,7 +14,7 @@ from efsw.archive import exceptions
 def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
     """ Добавление записи в журнал после сохранения модели Item """
 
-    if not raw:
+    if not raw:  # TODO: При обновлении связей это тоже должно срабатывать
         il = models.ItemLog()
         il.item = instance
         il.dt = timezone.now()
