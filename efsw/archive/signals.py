@@ -17,7 +17,6 @@ def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
     if not raw:
         il = models.ItemLog()
         il.item = instance
-        il.dt = timezone.now()
         if created:
             il.action = il.ACTION_ADD
         else:
@@ -33,7 +32,6 @@ def log_on_item_includes_change(sender, instance, action, pk_set, *args, **kwarg
         return
     il = models.ItemLog()
     il.item = instance
-    il.dt = timezone.now()
     il.action = il.ACTION_INCLUDE_UPDATE
     il.save()
     for pk in pk_set:
@@ -43,7 +41,6 @@ def log_on_item_includes_change(sender, instance, action, pk_set, *args, **kwarg
             continue
         il_rev = models.ItemLog()
         il_rev.item = item
-        il_rev.dt = timezone.now()
         il_rev.action = il_rev.ACTION_INCLUDE_UPDATE
         il_rev.save()
 
