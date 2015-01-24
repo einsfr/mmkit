@@ -134,10 +134,12 @@ class ItemLog(models.Model):
 
     ACTION_ADD = 'ADD'
     ACTION_UPDATE = 'UPD'
+    ACTION_INCLUDE_UPDATE = 'IUP'
 
     ACTION_DICT = {
         ACTION_ADD: 'Добавление',
         ACTION_UPDATE: 'Обновление',
+        ACTION_INCLUDE_UPDATE: 'Обновление связей',
     }
 
     item = models.ForeignKey(Item, related_name='log')

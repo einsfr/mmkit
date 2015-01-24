@@ -87,6 +87,15 @@ class ArchiveTestCase(TestCase):
         i.category = c
         i.save()
 
+        include = models.Item()
+        include.name = 'Включённый элемент'
+        include.description = 'ОПисание включённого элемента'
+        include.created = timezone.now()
+        include.author = 'Автор включённого элемента'
+        include.storage = s
+        include.category = c
+        include.save()
+
         # проверка внесения записей в лог
         self.assertEqual(len(i.log.all()), 1)
         self.assertEqual(i.log.all()[0].action, models.ItemLog.ACTION_ADD)
@@ -94,6 +103,11 @@ class ArchiveTestCase(TestCase):
         i.save()
         self.assertEqual(len(i.log.all()), 2)
         self.assertEqual(i.log.all()[1].action, models.ItemLog.ACTION_UPDATE)
+        i.includes.add(include)
+        self.assertEqual(len(i.log.all()), 3)
+        self.assertEqual(i.log.all()[2].action, models.ItemLog.ACTION_INCLUDE_UPDATE)
+        self.assertEqual(len(include.log.all()), 2)
+        self.assertEqual(include.log.all()[1].action, models.ItemLog.ACTION_INCLUDE_UPDATE)
 
     def test_item_fs_signals(self):
         test_storage_root = os.path.join(settings.BASE_DIR, getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', '_storage_test'))
