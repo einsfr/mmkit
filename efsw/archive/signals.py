@@ -2,7 +2,6 @@ import os
 
 from django.dispatch import receiver
 from django.db.models import signals
-from django.utils import timezone
 from django.conf import settings
 
 from efsw.archive import models
