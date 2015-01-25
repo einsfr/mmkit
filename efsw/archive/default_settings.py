@@ -1,5 +1,8 @@
 import os
 
+# Количество элементов на одной странице индекса
+EFSW_ARCH_INDEX_ITEM_PER_PAGE = 20
+
 # Путь к корневой папке для всех хранилищ
 EFSW_ARCH_STORAGE_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'storage')
 
