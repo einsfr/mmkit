@@ -1,15 +1,32 @@
 from django.views import generic
-from django.shortcuts import get_object_or_404, render
+from django import shortcuts
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.core import urlresolvers
+from django.core import paginator
 from django.views.decorators import http
+from django.conf import settings
 
 from efsw.archive import models
 from efsw.archive import forms
+from efsw.archive import default_settings
 
 
-class ItemIndexView(generic.ListView):
-    queryset = models.Item.objects.order_by('-pk')
+def item_index(request, page='1'):
+    items_all = models.Item.objects.all().order_by('-pk')
+    pagin = paginator.Paginator(
+        items_all,
+        getattr(settings, 'EFSW_ARCH_INDEX_ITEM_PER_PAGE', default_settings.EFSW_ARCH_INDEX_ITEM_PER_PAGE)
+    )
+    try:
+        items = pagin.page(page)
+    except paginator.PageNotAnInteger:
+        # Если параметр page не является целым числом - показать первую страницу
+        items = pagin.page(1)
+    except paginator.EmptyPage:
+        # Если указанная страница - пустая (т.е. находится вне диапазона страниц) - показать последнюю страницу
+        items = pagin.page(pagin.num_pages)
+
+    return shortcuts.render(request, 'archive/item_list.html', {'items': items})
 
 
 class ItemDetailView(generic.DetailView):
@@ -18,6 +35,7 @@ class ItemDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(ItemDetailView, self).get_context_data(**kwargs)
         context['link_add_form'] = forms.ItemUpdateAddLinkForm()
+
         return context
 
 
@@ -40,8 +58,8 @@ class ItemUpdateStorageView(generic.UpdateView):
 
 
 def item_update_remove_link(request, item_id, remove_id):
-    item = get_object_or_404(models.Item, pk=item_id)
-    item_remove = get_object_or_404(models.Item, pk=remove_id)
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    item_remove = shortcuts.get_object_or_404(models.Item, pk=remove_id)
     item.includes.remove(item_remove)
     if request.is_ajax():
         return HttpResponse('{0}-{1}'.format(item_id, remove_id))
@@ -51,7 +69,7 @@ def item_update_remove_link(request, item_id, remove_id):
 
 @http.require_http_methods(["POST"])
 def item_update_add_link(request, item_id):
-    item = get_object_or_404(models.Item, pk=item_id)
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
     form = forms.ItemUpdateAddLinkForm(request.POST)
     if form.is_valid():
         linked_id = form.cleaned_data['linked_id']
@@ -66,7 +84,7 @@ def item_update_add_link(request, item_id):
                 return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
         item.includes.add(linked_item)
         if request.is_ajax():
-            return render(request, 'archive/item_detail_link.html', {'object': item, 'item': linked_item})
+            return shortcuts.render(request, 'archive/item_detail_link.html', {'object': item, 'item': linked_item})
         else:
             return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
     else:

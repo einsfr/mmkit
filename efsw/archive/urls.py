@@ -8,8 +8,14 @@ urlpatterns = patterns(
     # items/
     url(
         r'^items/$',
-        views.ItemIndexView.as_view(),
+        views.item_index,
         name='item_index'
+    ),
+    # items/page/2/
+    url(
+        r'^items/page/(?P<page>\d+)/$',
+        views.item_index,
+        name='item_index_page'
     ),
     # items/12/
     url(

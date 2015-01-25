@@ -15,7 +15,7 @@ DATABASES = {
 
 INSTALLED_APPS += ('debug_toolbar', )
 
-EFSW_ARCH_INDEX_ITEM_PER_PAGE = 5
+EFSW_ARCH_INDEX_ITEM_PER_PAGE = 1
 
 EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_dev')
 

@@ -1,8 +1,9 @@
 {% extends 'archive/app_base.html' %}
 
 {% load field_verbose_name from model %}
+{% load pagination from pagination %}
 
-{% block title %}{{ block.super }} - Индекс элементов {{ object.id }}{% endblock %}
+{% block title %}{{ block.super }} - Индекс элементов{% endblock %}
 
 {% block content %}
     <h1>Индекс элементов</h1>
@@ -10,14 +11,14 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>{% field_verbose_name object_list 'created' %}</th>
-                <th>{% field_verbose_name object_list 'category' %}</th>
-                <th>{% field_verbose_name object_list 'name' %}</th>
+                <th>{% field_verbose_name items 'created' %}</th>
+                <th>{% field_verbose_name items 'category' %}</th>
+                <th>{% field_verbose_name items 'name' %}</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in object_list %}
+            {% for item in items %}
                 <tr>
                     <td>{{ item.id }}</td>
                     <td>{{ item.created }}</td>
@@ -33,5 +34,10 @@
                 </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"  class="text-center">{% pagination items 'efsw.archive:item_index_page' %}</td>
+            </tr>
+        </tfoot>
     </table>
 {% endblock %}
