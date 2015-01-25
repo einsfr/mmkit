@@ -94,23 +94,24 @@ class TemplateTagsTestCase(TestCase):
         1: <1>
         """
         tl1 = [1, ]
+        pagin1 = paginator.Paginator(tl1, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page1_1_1 = pagin1.page(1)
 
         """
         --- Всего страниц: 1, показывать соседей: 2 ---
         1: <1>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page1_2_1 = pagin1.page(1)
 
         """
         --- Всего страниц: 1, показывать соседей: 20 ---
         1: <1>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page1_20_1 = pagin1.page(1)
 
         """
         ------ Всего страниц: 2, показывать соседей: 1 ------
@@ -118,9 +119,11 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2>
         """
         tl2 = [1, 2, ]
+        pagin2 = paginator.Paginator(tl2, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page2_1_1 = pagin2.page(1)
+            page2_1_2 = pagin2.page(2)
 
         """
         --- Всего страниц: 2, показывать соседей: 2 ---
@@ -128,7 +131,8 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page2_2_1 = pagin2.page(1)
+            page2_2_2 = pagin2.page(2)
 
         """
         --- Всего страниц: 2, показывать соседей: 20 ---
@@ -136,7 +140,8 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page2_20_1 = pagin2.page(1)
+            page2_20_2 = pagin2.page(2)
 
         """
         ------ Всего страниц: 3, показывать соседей: 1 ------
@@ -145,9 +150,12 @@ class TemplateTagsTestCase(TestCase):
         3: 1 << 2 <3>
         """
         tl3 = [1, 2, 3, ]
+        pagin3 = paginator.Paginator(tl3, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page3_1_1 = pagin3.page(1)
+            page3_1_2 = pagin3.page(2)
+            page3_1_3 = pagin3.page(3)
 
         """
         --- Всего страниц: 3, показывать соседей: 2 ---
@@ -156,7 +164,9 @@ class TemplateTagsTestCase(TestCase):
         3: << 1 2 <3>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page3_2_1 = pagin3.page(1)
+            page3_2_2 = pagin3.page(2)
+            page3_2_3 = pagin3.page(3)
 
         """
         --- Всего страниц: 3, показывать соседей: 20 ---
@@ -165,7 +175,9 @@ class TemplateTagsTestCase(TestCase):
         3: << 1 2 <3>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page3_20_1 = pagin3.page(1)
+            page3_20_2 = pagin3.page(2)
+            page3_20_3 = pagin3.page(3)
 
         """
         ------ Всего страниц: 4, показывать соседей: 1 ------
@@ -175,9 +187,13 @@ class TemplateTagsTestCase(TestCase):
         4: 1 << 3 <4>
         """
         tl4 = [1, 2, 3, 4, ]
+        pagin4 = paginator.Paginator(tl4, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page4_1_1 = pagin4.page(1)
+            page4_1_2 = pagin4.page(2)
+            page4_1_3 = pagin4.page(3)
+            page4_1_4 = pagin4.page(4)
 
         """
         --- Всего страниц: 4, показывать соседей: 2 ---
@@ -187,7 +203,10 @@ class TemplateTagsTestCase(TestCase):
         4: 1 << 2 3 <4>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page4_2_1 = pagin4.page(1)
+            page4_2_2 = pagin4.page(2)
+            page4_2_3 = pagin4.page(3)
+            page4_2_4 = pagin4.page(4)
 
         """
         --- Всего страниц: 4, показывать соседей: 20 ---
@@ -197,7 +216,10 @@ class TemplateTagsTestCase(TestCase):
         4: << 1 2 3 <4>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page4_20_1 = pagin4.page(1)
+            page4_20_2 = pagin4.page(2)
+            page4_20_3 = pagin4.page(3)
+            page4_20_4 = pagin4.page(4)
 
         """
         ------ Всего страниц: 5, показывать соседей: 1 ------
@@ -208,9 +230,14 @@ class TemplateTagsTestCase(TestCase):
         5: 1 << 4 <5>
         """
         tl5 = [1, 2, 3, 4, 5, ]
+        pagin5 = paginator.Paginator(tl5, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page5_1_1 = pagin5.page(1)
+            page5_1_2 = pagin5.page(2)
+            page5_1_3 = pagin5.page(3)
+            page5_1_4 = pagin5.page(4)
+            page5_1_5 = pagin5.page(5)
 
         """
         --- Всего страниц: 5, показывать соседей: 2 ---
@@ -221,7 +248,11 @@ class TemplateTagsTestCase(TestCase):
         5: 1 << 3 4 <5>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page5_2_1 = pagin5.page(1)
+            page5_2_2 = pagin5.page(2)
+            page5_2_3 = pagin5.page(3)
+            page5_2_4 = pagin5.page(4)
+            page5_2_5 = pagin5.page(5)
 
         """
         --- Всего страниц: 5, показывать соседей: 20 ---
@@ -232,7 +263,11 @@ class TemplateTagsTestCase(TestCase):
         5: << 1 2 3 3 4 <5>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page5_20_1 = pagin5.page(1)
+            page5_20_2 = pagin5.page(2)
+            page5_20_3 = pagin5.page(3)
+            page5_20_4 = pagin5.page(4)
+            page5_20_5 = pagin5.page(5)
 
         """
         ------ Всего страниц: 10, показывать соседей: 1 ------
@@ -248,9 +283,19 @@ class TemplateTagsTestCase(TestCase):
         10: 1 << 9 <10>
         """
         tl10 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ]
+        pagin10 = paginator.Paginator(tl10, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            pass
+            page10_1_1 = pagin10.page(1)
+            page10_1_2 = pagin10.page(2)
+            page10_1_3 = pagin10.page(3)
+            page10_1_4 = pagin10.page(4)
+            page10_1_5 = pagin10.page(5)
+            page10_1_6 = pagin10.page(6)
+            page10_1_7 = pagin10.page(7)
+            page10_1_8 = pagin10.page(8)
+            page10_1_9 = pagin10.page(9)
+            page10_1_10 = pagin10.page(10)
 
         """
         --- Всего страниц: 10, показывать соседей: 2 ---
@@ -266,7 +311,16 @@ class TemplateTagsTestCase(TestCase):
         10: 1 << 8 9 <10>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            pass
+            page10_2_1 = pagin10.page(1)
+            page10_2_2 = pagin10.page(2)
+            page10_2_3 = pagin10.page(3)
+            page10_2_4 = pagin10.page(4)
+            page10_2_5 = pagin10.page(5)
+            page10_2_6 = pagin10.page(6)
+            page10_2_7 = pagin10.page(7)
+            page10_2_8 = pagin10.page(8)
+            page10_2_9 = pagin10.page(9)
+            page10_2_10 = pagin10.page(10)
 
         """
         --- Всего страниц: 10, показывать соседей: 20 ---
@@ -282,4 +336,13 @@ class TemplateTagsTestCase(TestCase):
         10: << 1 2 3 4 5 6 7 8 9 <10>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            pass
+            page10_20_1 = pagin10.page(1)
+            page10_20_2 = pagin10.page(2)
+            page10_20_3 = pagin10.page(3)
+            page10_20_4 = pagin10.page(4)
+            page10_20_5 = pagin10.page(5)
+            page10_20_6 = pagin10.page(6)
+            page10_20_7 = pagin10.page(7)
+            page10_20_8 = pagin10.page(8)
+            page10_20_9 = pagin10.page(9)
+            page10_20_10 = pagin10.page(10)
