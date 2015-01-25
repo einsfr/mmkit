@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.db import models
+from django.core import paginator
 
 from efsw.common.templatetags import model
+from efsw.common.templatetags import pagination
 
 
 class TemplateTagsTestCase(TestCase):
@@ -83,3 +85,201 @@ class TemplateTagsTestCase(TestCase):
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist'), '')
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist', False), '')
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist', True), '')
+
+    def test_pagination(self):
+        """ Тесты для листалки """
+
+        """
+        ------ Всего страниц: 1, показывать соседей: 1 ------
+        1: <1>
+        """
+        tl1 = [1, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 1, показывать соседей: 2 ---
+        1: <1>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 1, показывать соседей: 20 ---
+        1: <1>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
+
+        """
+        ------ Всего страниц: 2, показывать соседей: 1 ------
+        1: <1> 2 >>
+        2: << 1 <2>
+        """
+        tl2 = [1, 2, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 2, показывать соседей: 2 ---
+        1: <1> 2 >>
+        2: << 1 <2>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 2, показывать соседей: 20 ---
+        1: <1> 2 >>
+        2: << 1 <2>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
+
+        """
+        ------ Всего страниц: 3, показывать соседей: 1 ------
+        1: <1> 2 >> 3
+        2: << 1 <2> 3 >>
+        3: 1 << 2 <3>
+        """
+        tl3 = [1, 2, 3, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 3, показывать соседей: 2 ---
+        1: <1> 2 3 >>
+        2: << 1 <2> 3 >>
+        3: << 1 2 <3>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 3, показывать соседей: 20 ---
+        1: <1> 2 3 >>
+        2: << 1 <2> 3 >>
+        3: << 1 2 <3>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
+
+        """
+        ------ Всего страниц: 4, показывать соседей: 1 ------
+        1: <1> 2 >> 4
+        2: << 1 <2> 3 >> 4
+        3: 1 << 2 <3> 4 >>
+        4: 1 << 3 <4>
+        """
+        tl4 = [1, 2, 3, 4, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 4, показывать соседей: 2 ---
+        1: <1> 2 3 >> 4
+        2: << 1 <2> 3 4 >>
+        3: << 1 2 <3> 4 >>
+        4: 1 << 2 3 <4>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 4, показывать соседей: 20 ---
+        1: <1> 2 3 4 >>
+        2: << 1 <2> 3 4 >>
+        3: << 1 2 <3> 4 >>
+        4: << 1 2 3 <4>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
+
+        """
+        ------ Всего страниц: 5, показывать соседей: 1 ------
+        1: <1> 2 >> 5
+        2: << 1 <2> 3 >> 5
+        3: 1 << 2 <3> 4 >> 5
+        4: 1 << 3 <4> 5 >>
+        5: 1 << 4 <5>
+        """
+        tl5 = [1, 2, 3, 4, 5, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 5, показывать соседей: 2 ---
+        1: <1> 2 3 >> 5
+        2: << 1 <2> 3 4 >> 5
+        3: << 1 2 <3> 4 5 >>
+        4: 1 << 2 3 <4> 5 >>
+        5: 1 << 3 4 <5>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 5, показывать соседей: 20 ---
+        1: <1> 2 3 4 5 >>
+        2: << 1 <2> 3 4 5 >>
+        3: << 1 2 <3> 4 5 >>
+        4: << 1 2 3 <4> 5 >>
+        5: << 1 2 3 3 4 <5>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
+
+        """
+        ------ Всего страниц: 10, показывать соседей: 1 ------
+        1:  <1> 2 >> 10
+        2:  << 1 <2> 3 >> 10
+        3:  1 << 2 <3> 4 >> 10
+        4:  1 << 3 <4> 5 >> 10
+        5:  1 << 4 <5> 6 >> 10
+        6:  1 << 5 <6> 7 >> 10
+        7:  1 << 6 <7> 8 >> 10
+        8:  1 << 7 <8> 9 >> 10
+        9:  1 << 8 <9> 10 >>
+        10: 1 << 9 <10>
+        """
+        tl10 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ]
+
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
+            pass
+
+        """
+        --- Всего страниц: 10, показывать соседей: 2 ---
+        1:  <1> 2 3 >> 10
+        2:  << 1 <2> 3 4 >> 10
+        3:  << 1 2 <3> 4 5 >> 10
+        4:  1 << 2 3 <4> 5 6 >> 10
+        5:  1 << 3 4 <5> 6 7 >> 10
+        6:  1 << 4 5 <6> 7 8 >> 10
+        7:  1 << 5 6 <7> 8 9 >> 10
+        8:  1 << 6 7 <8> 9 10 >>
+        9:  1 << 7 8 <9> 10 >>
+        10: 1 << 8 9 <10>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
+            pass
+
+        """
+        --- Всего страниц: 10, показывать соседей: 20 ---
+        1:  <1> 2 3 4 5 6 7 8 9 10 >>
+        2:  << 1 <2> 3 4 5 6 7 8 9 10 >>
+        3:  << 1 2 <3> 4 5 6 7 8 9 10 >>
+        4:  << 1 2 3 <4> 5 6 7 8 9 10 >>
+        5:  << 1 2 3 4 <5> 6 7 8 9 10 >>
+        6:  << 1 2 3 4 5 <6> 7 8 9 10 >>
+        7:  << 1 2 3 4 5 6 <7> 8 9 10 >>
+        8:  << 1 2 3 4 5 6 7 <8> 9 10 >>
+        9:  << 1 2 3 4 5 6 7 8 <9> 10 >>
+        10: << 1 2 3 4 5 6 7 8 9 <10>
+        """
+        with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
+            pass
