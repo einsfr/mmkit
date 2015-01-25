@@ -8,20 +8,20 @@ from efsw.archive import models
 from efsw.archive import forms
 
 
-class IndexView(generic.ListView):
+class ItemIndexView(generic.ListView):
     queryset = models.Item.objects.order_by('-pk')
 
 
-class DetailView(generic.DetailView):
+class ItemDetailView(generic.DetailView):
     model = models.Item
 
     def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
+        context = super(ItemDetailView, self).get_context_data(**kwargs)
         context['link_add_form'] = forms.ItemUpdateAddLinkForm()
         return context
 
 
-class ItemCreateView(generic.CreateView):
+class ItemAddView(generic.CreateView):
     model = models.Item
     template_name = 'archive/item_form_create.html'
     form_class = forms.ItemCreateForm
@@ -74,3 +74,11 @@ def item_update_add_link(request, item_id):
             return HttpResponseBadRequest()
         else:
             return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
+
+
+class CategoryIndexView(generic.ListView):
+    pass
+
+
+class CategoryAddView(generic.CreateView):
+    pass

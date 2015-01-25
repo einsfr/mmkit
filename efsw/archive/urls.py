@@ -8,19 +8,19 @@ urlpatterns = patterns(
     # items/
     url(
         r'^items/$',
-        views.IndexView.as_view(),
+        views.ItemIndexView.as_view(),
         name='item_index'
     ),
     # items/12/
     url(
         r'^items/(?P<pk>\d+)/$',
-        views.DetailView.as_view(),
+        views.ItemDetailView.as_view(),
         name='item_detail'
     ),
     # items/add/
     url(
         r'^items/add/$',
-        views.ItemCreateView.as_view(),
+        views.ItemAddView.as_view(),
         name='item_add'
     ),
     # items/12/update/
@@ -46,5 +46,17 @@ urlpatterns = patterns(
         r'^items/(?P<item_id>\d+)/update/add-link$',
         views.item_update_add_link,
         name='item_update_add_link'
-    )
+    ),
+    # categories/
+    url(
+        r'^categories/$',
+        views.CategoryIndexView.as_view(),
+        name='category_index'
+    ),
+    # categories/add/
+    url(
+        r'^categories/add/$',
+        views.CategoryAddView.as_view(),
+        name='category_add'
+    ),
 )
