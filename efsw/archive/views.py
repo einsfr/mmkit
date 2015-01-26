@@ -95,7 +95,8 @@ def item_update_add_link(request, item_id):
 
 
 class CategoryIndexView(generic.ListView):
-    pass
+    queryset = models.ItemCategory.objects.all()
+    template_name = 'archive/category_list.html'
 
 
 class CategoryAddView(generic.CreateView):
