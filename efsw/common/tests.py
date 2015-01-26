@@ -137,10 +137,9 @@ class PaginationTagTestCase(TestCase):
                 elif p == self._next_page_text:
                     self._test_next_at(prep, num, active_page_number + 1)
                 elif p[0] != '<' and p[-1] != '>':
-                    pos_num[num] = p[1:-1]
+                    pos_num[num] = int(p)
             self._test_num_at(prep, pos_num)
             page_num += 1
-
 
     def test_pagination(self):
         """ Тесты для листалки """
@@ -172,20 +171,9 @@ class PaginationTagTestCase(TestCase):
         1: <1> 2 >>
         2: << 1 <2>
         """
-        tl = [1, 2, ]
-        pagin = paginator.Paginator(tl, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
             self._process_test_list(2, ['<1> 2 >>', '<< 1 <2>'])
-
-            page = pagin.page(2)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 3)
-            self._test_active_num_at(prep, 2, 2)
-            self._test_num_at(prep, {1: 1})
-            self._test_prev_at(prep, 0, 1)
-
-            del page, prep
 
         """
         --- Всего страниц: 2, показывать соседей: 2 ---
@@ -193,23 +181,7 @@ class PaginationTagTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page = pagin.page(1)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 3)
-            self._test_active_num_at(prep, 0, 1)
-            self._test_num_at(prep, {1: 2})
-            self._test_next_at(prep, 2, 2)
-
-            del page, prep
-
-            page = pagin.page(2)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 3)
-            self._test_active_num_at(prep, 2, 2)
-            self._test_num_at(prep, {1: 1})
-            self._test_prev_at(prep, 0, 1)
-
-            del page, prep
+            self._process_test_list(2, ['<1> 2 >>', '<< 1 <2>'])
 
         """
         --- Всего страниц: 2, показывать соседей: 20 ---
@@ -217,23 +189,7 @@ class PaginationTagTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page = pagin.page(1)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 3)
-            self._test_active_num_at(prep, 0, 1)
-            self._test_num_at(prep, {1: 2})
-            self._test_next_at(prep, 2, 2)
-
-            del page, prep
-
-            page = pagin.page(2)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 3)
-            self._test_active_num_at(prep, 2, 2)
-            self._test_num_at(prep, {1: 1})
-            self._test_prev_at(prep, 0, 1)
-
-            del page, prep, pagin, tl
+            self._process_test_list(2, ['<1> 2 >>', '<< 1 <2>'])
 
         """
         ------ Всего страниц: 3, показывать соседей: 1 ------
@@ -241,38 +197,8 @@ class PaginationTagTestCase(TestCase):
         2: << 1 <2> 3 >>
         3: 1 << 2 <3>
         """
-
-        tl = [1, 2, 3, ]
-        pagin = paginator.Paginator(tl, 1)
-
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page = pagin.page(1)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 4)
-            self._test_active_num_at(prep, 0, 1)
-            self._test_num_at(prep, {1: 2, 3: 3})
-            self._test_next_at(prep, 2, 2)
-
-            del page, prep
-
-            page = pagin.page(2)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 5)
-            self._test_active_num_at(prep, 2, 2)
-            self._test_num_at(prep, {1: 1, 3: 3})
-            self._test_prev_at(prep, 0, 1)
-            self._test_next_at(prep, 4, 3)
-
-            del page, prep
-
-            page = pagin.page(3)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 4)
-            self._test_active_num_at(prep, 3, 3)
-            self._test_num_at(prep, {0: 1, 2: 2})
-            self._test_prev_at(prep, 1, 2)
-
-            del page, prep
+            self._process_test_list(3, ['<1> 2 >> 3', '<< 1 <2> 3 >>', '1 << 2 <3>'])
 
         """
         --- Всего страниц: 3, показывать соседей: 2 ---
@@ -280,59 +206,9 @@ class PaginationTagTestCase(TestCase):
         2: << 1 <2> 3 >>
         3: << 1 2 <3>
         """
-        """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page = pagin.page(1)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 4)
-            self.assertEqual(prep[0]['text'], '1')
-            self.assertEqual(prep[0]['url'], '#')
-            self.assertTrue(prep[0]['active'])
-            for i in range(1, 3):
-                self.assertEqual(prep[i]['text'], str(i + 1))
-                self.assertEqual(prep[i]['url'], '/page/{0}/'.format(i + 1))
-                self.assertFalse(prep[i]['active'])
-            self.assertEqual(prep[3]['text'], next_page_text)
-            self.assertEqual(prep[3]['url'], '/page/2/')
-            self.assertFalse(prep[3]['active'])
+            self._process_test_list(3, ['<1> 2 3 >>', '<< 1 <2> 3 >>', '<< 1 2 <3>'])
 
-            del page, prep
-
-            page = pagin.page(2)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 5)
-            self.assertEqual(prep[0]['text'], prev_page_text)
-            self.assertEqual(prep[0]['url'], '/page/1/')
-            self.assertFalse(prep[0]['active'])
-            self.assertEqual(prep[1]['text'], '1')
-            self.assertEqual(prep[1]['url'], '/page/1/')
-            self.assertFalse(prep[1]['active'])
-            self.assertEqual(prep[2]['text'], '2')
-            self.assertEqual(prep[2]['url'], '#')
-            self.assertTrue(prep[2]['active'])
-            self.assertEqual(prep[3]['text'], '3')
-            self.assertEqual(prep[3]['url'], '/page/3/')
-            self.assertFalse(prep[3]['active'])
-            self.assertEqual(prep[4]['text'], next_page_text)
-            self.assertEqual(prep[4]['url'], '/page/3/')
-            self.assertFalse(prep[4]['active'])
-
-            del page, prep
-
-            page = pagin.page(3)
-            prep = pagination._prepare(page, 'page')
-            self.assertEqual(len(prep), 4)
-            self.assertEqual(prep[0]['text'], prev_page_text)
-            self.assertEqual(prep[0]['url'], '/page/2/')
-            self.assertFalse(prep[0]['active'])
-            for i in range(1, 3):
-                self.assertEqual(prep[i]['text'], str(i + 1))
-                self.assertEqual(prep[i]['url'], '/page/{0}/'.format(i + 1))
-                self.assertFalse(prep[i]['active'])
-
-            del page, prep
-
-        """
         """
         --- Всего страниц: 3, показывать соседей: 20 ---
         1: <1> 2 3 >>
@@ -340,9 +216,7 @@ class PaginationTagTestCase(TestCase):
         3: << 1 2 <3>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page3_20_1 = pagin.page(1)
-            page3_20_2 = pagin.page(2)
-            page3_20_3 = pagin.page(3)
+            self._process_test_list(3, ['<1> 2 3 >>', '<< 1 <2> 3 >>', '<< 1 2 <3>'])
 
         """
         ------ Всего страниц: 4, показывать соседей: 1 ------
@@ -351,14 +225,8 @@ class PaginationTagTestCase(TestCase):
         3: 1 << 2 <3> 4 >>
         4: 1 << 3 <4>
         """
-        tl4 = [1, 2, 3, 4, ]
-        pagin4 = paginator.Paginator(tl4, 1)
-
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page4_1_1 = pagin4.page(1)
-            page4_1_2 = pagin4.page(2)
-            page4_1_3 = pagin4.page(3)
-            page4_1_4 = pagin4.page(4)
+            self._process_test_list(4, ['<1> 2 >> 4', '<< 1 <2> 3 >> 4', '1 << 2 <3> 4 >>', '1 << 3 <4>'])
 
         """
         --- Всего страниц: 4, показывать соседей: 2 ---
@@ -368,10 +236,7 @@ class PaginationTagTestCase(TestCase):
         4: 1 << 2 3 <4>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page4_2_1 = pagin4.page(1)
-            page4_2_2 = pagin4.page(2)
-            page4_2_3 = pagin4.page(3)
-            page4_2_4 = pagin4.page(4)
+            self._process_test_list(4, ['<1> 2 3 >> 4', '<< 1 <2> 3 4 >>', '<< 1 2 <3> 4 >>', '1 << 2 3 <4>'])
 
         """
         --- Всего страниц: 4, показывать соседей: 20 ---
@@ -381,10 +246,7 @@ class PaginationTagTestCase(TestCase):
         4: << 1 2 3 <4>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page4_20_1 = pagin4.page(1)
-            page4_20_2 = pagin4.page(2)
-            page4_20_3 = pagin4.page(3)
-            page4_20_4 = pagin4.page(4)
+            self._process_test_list(4, ['<1> 2 3 4 >>', '<< 1 <2> 3 4 >>', '<< 1 2 <3> 4 >>', '<< 1 2 3 <4>'])
 
         """
         ------ Всего страниц: 5, показывать соседей: 1 ------
@@ -394,15 +256,9 @@ class PaginationTagTestCase(TestCase):
         4: 1 << 3 <4> 5 >>
         5: 1 << 4 <5>
         """
-        tl5 = [1, 2, 3, 4, 5, ]
-        pagin5 = paginator.Paginator(tl5, 1)
-
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page5_1_1 = pagin5.page(1)
-            page5_1_2 = pagin5.page(2)
-            page5_1_3 = pagin5.page(3)
-            page5_1_4 = pagin5.page(4)
-            page5_1_5 = pagin5.page(5)
+            self._process_test_list(5, ['<1> 2 >> 5', '<< 1 <2> 3 >> 5', '1 << 2 <3> 4 >> 5', '1 << 3 <4> 5 >>',
+                                    '1 << 4 <5>'])
 
         """
         --- Всего страниц: 5, показывать соседей: 2 ---
@@ -413,11 +269,8 @@ class PaginationTagTestCase(TestCase):
         5: 1 << 3 4 <5>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page5_2_1 = pagin5.page(1)
-            page5_2_2 = pagin5.page(2)
-            page5_2_3 = pagin5.page(3)
-            page5_2_4 = pagin5.page(4)
-            page5_2_5 = pagin5.page(5)
+            self._process_test_list(5, ['<1> 2 3 >> 5', '<< 1 <2> 3 4 >> 5', '<< 1 2 <3> 4 5 >>', '1 << 2 3 <4> 5 >>',
+                                    '1 << 3 4 <5>'])
 
         """
         --- Всего страниц: 5, показывать соседей: 20 ---
@@ -425,14 +278,11 @@ class PaginationTagTestCase(TestCase):
         2: << 1 <2> 3 4 5 >>
         3: << 1 2 <3> 4 5 >>
         4: << 1 2 3 <4> 5 >>
-        5: << 1 2 3 3 4 <5>
+        5: << 1 2 3 4 <5>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page5_20_1 = pagin5.page(1)
-            page5_20_2 = pagin5.page(2)
-            page5_20_3 = pagin5.page(3)
-            page5_20_4 = pagin5.page(4)
-            page5_20_5 = pagin5.page(5)
+            self._process_test_list(5, ['<1> 2 3 4 5 >>', '<< 1 <2> 3 4 5 >>', '<< 1 2 <3> 4 5 >>', '<< 1 2 3 <4> 5 >>',
+                                    '<< 1 2 3 4 <5>'])
 
         """
         ------ Всего страниц: 10, показывать соседей: 1 ------
@@ -447,20 +297,10 @@ class PaginationTagTestCase(TestCase):
         9:  1 << 8 <9> 10 >>
         10: 1 << 9 <10>
         """
-        tl10 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ]
-        pagin10 = paginator.Paginator(tl10, 1)
-
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page10_1_1 = pagin10.page(1)
-            page10_1_2 = pagin10.page(2)
-            page10_1_3 = pagin10.page(3)
-            page10_1_4 = pagin10.page(4)
-            page10_1_5 = pagin10.page(5)
-            page10_1_6 = pagin10.page(6)
-            page10_1_7 = pagin10.page(7)
-            page10_1_8 = pagin10.page(8)
-            page10_1_9 = pagin10.page(9)
-            page10_1_10 = pagin10.page(10)
+            self._process_test_list(10, ['<1> 2 >> 10', '<< 1 <2> 3 >> 10', '1 << 2 <3> 4 >> 10', '1 << 3 <4> 5 >> 10',
+                                         '1 << 4 <5> 6 >> 10', '1 << 5 <6> 7 >> 10', '1 << 6 <7> 8 >> 10',
+                                         '1 << 7 <8> 9 >> 10', '1 << 8 <9> 10 >>', '1 << 9 <10>'])
 
         """
         --- Всего страниц: 10, показывать соседей: 2 ---
@@ -476,16 +316,10 @@ class PaginationTagTestCase(TestCase):
         10: 1 << 8 9 <10>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page10_2_1 = pagin10.page(1)
-            page10_2_2 = pagin10.page(2)
-            page10_2_3 = pagin10.page(3)
-            page10_2_4 = pagin10.page(4)
-            page10_2_5 = pagin10.page(5)
-            page10_2_6 = pagin10.page(6)
-            page10_2_7 = pagin10.page(7)
-            page10_2_8 = pagin10.page(8)
-            page10_2_9 = pagin10.page(9)
-            page10_2_10 = pagin10.page(10)
+            self._process_test_list(10, ['<1> 2 3 >> 10', '<< 1 <2> 3 4 >> 10', '<< 1 2 <3> 4 5 >> 10',
+                                         '1 << 2 3 <4> 5 6 >> 10', '1 << 3 4 <5> 6 7 >> 10', '1 << 4 5 <6> 7 8 >> 10',
+                                         '1 << 5 6 <7> 8 9 >> 10', '1 << 6 7 <8> 9 10 >>', '1 << 7 8 <9> 10 >>',
+                                         '1 << 8 9 <10>'])
 
         """
         --- Всего страниц: 10, показывать соседей: 20 ---
@@ -501,13 +335,8 @@ class PaginationTagTestCase(TestCase):
         10: << 1 2 3 4 5 6 7 8 9 <10>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page10_20_1 = pagin10.page(1)
-            page10_20_2 = pagin10.page(2)
-            page10_20_3 = pagin10.page(3)
-            page10_20_4 = pagin10.page(4)
-            page10_20_5 = pagin10.page(5)
-            page10_20_6 = pagin10.page(6)
-            page10_20_7 = pagin10.page(7)
-            page10_20_8 = pagin10.page(8)
-            page10_20_9 = pagin10.page(9)
-            page10_20_10 = pagin10.page(10)
+            self._process_test_list(10, ['<1> 2 3 4 5 6 7 8 9 10 >>', '<< 1 <2> 3 4 5 6 7 8 9 10 >>',
+                                         '<< 1 2 <3> 4 5 6 7 8 9 10 >>', '<< 1 2 3 <4> 5 6 7 8 9 10 >>',
+                                         '<< 1 2 3 4 <5> 6 7 8 9 10 >>', '<< 1 2 3 4 5 <6> 7 8 9 10 >>',
+                                         '<< 1 2 3 4 5 6 <7> 8 9 10 >>', '<< 1 2 3 4 5 6 7 <8> 9 10 >>',
+                                         '<< 1 2 3 4 5 6 7 8 <9> 10 >>', '<< 1 2 3 4 5 6 7 8 9 <10>'])
