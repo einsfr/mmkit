@@ -1,17 +1,19 @@
 from django.test import TestCase
 from django.db import models
 from django.core import paginator
+from django.conf import settings
 
 from efsw.common.templatetags import model
 from efsw.common.templatetags import pagination
+from efsw.common import default_settings
 
 
-class TemplateTagsTestCase(TestCase):
+class ModelTagTestCase(TestCase):
 
     class TestModel(models.Model):
 
         class Meta:
-            verbose_name='тестомодель'
+            verbose_name = 'тестомодель'
             verbose_name_plural = 'тестомодели'
 
         name = models.CharField(
@@ -86,6 +88,60 @@ class TemplateTagsTestCase(TestCase):
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist', False), '')
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist', True), '')
 
+
+class PaginationTagTestCase(TestCase):
+
+    urls = 'efsw.common.tests_urls'
+
+    _next_page_text = getattr(settings, 'EFSW_COMM_PAGIN_NEXT_TEXT', default_settings.EFSW_COMM_PAGIN_NEXT_TEXT)
+
+    _prev_page_text = getattr(settings, 'EFSW_COMM_PAGIN_PREV_TEXT', default_settings.EFSW_COMM_PAGIN_PREV_TEXT)
+
+    def _test_prev_at(self, prep, pos, num):
+        self.assertEqual(prep[pos]['text'], self._prev_page_text)
+        self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+        self.assertFalse(prep[pos]['active'])
+
+    def _test_next_at(self, prep, pos, num):
+        self.assertEqual(prep[pos]['text'], self._next_page_text)
+        self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+        self.assertFalse(prep[pos]['active'])
+
+    def _test_active_num_at(self, prep, pos, num):
+        self.assertEqual(prep[pos]['text'], str(num))
+        self.assertEqual(prep[pos]['url'], '#')
+        self.assertTrue(prep[pos]['active'])
+
+    def _test_num_at(self, prep, pos_num_dict):
+        for pos, num in pos_num_dict.items():
+            self.assertEqual(prep[pos]['text'], str(num))
+            self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+            self.assertFalse(prep[pos]['active'])
+
+    def _process_test_list(self, page_count, test_list):
+        pagin = paginator.Paginator([x for x in range(1, page_count + 1)], 1)
+        page_num = 1
+        for test_string in test_list:
+            page = pagin.page(page_num)
+            prep = pagination._prepare(page, 'page')
+            parts = test_string.split(' ')
+            self.assertEqual(len(prep), len(parts))
+            for num, p in enumerate(parts):
+                if p[0] == '<' and p[-1] == '>':
+                    self._test_active_num_at(prep, num, int(p[1:-1]))
+                    active_page_number = int(p[1:-1])
+            pos_num = {}
+            for num, p in enumerate(parts):
+                if p == self._prev_page_text:
+                    self._test_prev_at(prep, num, active_page_number - 1)
+                elif p == self._next_page_text:
+                    self._test_next_at(prep, num, active_page_number + 1)
+                elif p[0] != '<' and p[-1] != '>':
+                    pos_num[num] = p[1:-1]
+            self._test_num_at(prep, pos_num)
+            page_num += 1
+
+
     def test_pagination(self):
         """ Тесты для листалки """
 
@@ -93,37 +149,43 @@ class TemplateTagsTestCase(TestCase):
         ------ Всего страниц: 1, показывать соседей: 1 ------
         1: <1>
         """
-        tl1 = [1, ]
-        pagin1 = paginator.Paginator(tl1, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page1_1_1 = pagin1.page(1)
+            self._process_test_list(1, ['<1>'])
 
         """
         --- Всего страниц: 1, показывать соседей: 2 ---
         1: <1>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page1_2_1 = pagin1.page(1)
+            self._process_test_list(1, ['<1>'])
 
         """
         --- Всего страниц: 1, показывать соседей: 20 ---
         1: <1>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page1_20_1 = pagin1.page(1)
+            self._process_test_list(1, ['<1>'])
 
         """
         ------ Всего страниц: 2, показывать соседей: 1 ------
         1: <1> 2 >>
         2: << 1 <2>
         """
-        tl2 = [1, 2, ]
-        pagin2 = paginator.Paginator(tl2, 1)
+        tl = [1, 2, ]
+        pagin = paginator.Paginator(tl, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page2_1_1 = pagin2.page(1)
-            page2_1_2 = pagin2.page(2)
+            self._process_test_list(2, ['<1> 2 >>', '<< 1 <2>'])
+
+            page = pagin.page(2)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 3)
+            self._test_active_num_at(prep, 2, 2)
+            self._test_num_at(prep, {1: 1})
+            self._test_prev_at(prep, 0, 1)
+
+            del page, prep
 
         """
         --- Всего страниц: 2, показывать соседей: 2 ---
@@ -131,8 +193,23 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page2_2_1 = pagin2.page(1)
-            page2_2_2 = pagin2.page(2)
+            page = pagin.page(1)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 3)
+            self._test_active_num_at(prep, 0, 1)
+            self._test_num_at(prep, {1: 2})
+            self._test_next_at(prep, 2, 2)
+
+            del page, prep
+
+            page = pagin.page(2)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 3)
+            self._test_active_num_at(prep, 2, 2)
+            self._test_num_at(prep, {1: 1})
+            self._test_prev_at(prep, 0, 1)
+
+            del page, prep
 
         """
         --- Всего страниц: 2, показывать соседей: 20 ---
@@ -140,8 +217,23 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page2_20_1 = pagin2.page(1)
-            page2_20_2 = pagin2.page(2)
+            page = pagin.page(1)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 3)
+            self._test_active_num_at(prep, 0, 1)
+            self._test_num_at(prep, {1: 2})
+            self._test_next_at(prep, 2, 2)
+
+            del page, prep
+
+            page = pagin.page(2)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 3)
+            self._test_active_num_at(prep, 2, 2)
+            self._test_num_at(prep, {1: 1})
+            self._test_prev_at(prep, 0, 1)
+
+            del page, prep, pagin, tl
 
         """
         ------ Всего страниц: 3, показывать соседей: 1 ------
@@ -149,13 +241,38 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2> 3 >>
         3: 1 << 2 <3>
         """
-        tl3 = [1, 2, 3, ]
-        pagin3 = paginator.Paginator(tl3, 1)
+
+        tl = [1, 2, 3, ]
+        pagin = paginator.Paginator(tl, 1)
 
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=1):
-            page3_1_1 = pagin3.page(1)
-            page3_1_2 = pagin3.page(2)
-            page3_1_3 = pagin3.page(3)
+            page = pagin.page(1)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 4)
+            self._test_active_num_at(prep, 0, 1)
+            self._test_num_at(prep, {1: 2, 3: 3})
+            self._test_next_at(prep, 2, 2)
+
+            del page, prep
+
+            page = pagin.page(2)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 5)
+            self._test_active_num_at(prep, 2, 2)
+            self._test_num_at(prep, {1: 1, 3: 3})
+            self._test_prev_at(prep, 0, 1)
+            self._test_next_at(prep, 4, 3)
+
+            del page, prep
+
+            page = pagin.page(3)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 4)
+            self._test_active_num_at(prep, 3, 3)
+            self._test_num_at(prep, {0: 1, 2: 2})
+            self._test_prev_at(prep, 1, 2)
+
+            del page, prep
 
         """
         --- Всего страниц: 3, показывать соседей: 2 ---
@@ -163,11 +280,59 @@ class TemplateTagsTestCase(TestCase):
         2: << 1 <2> 3 >>
         3: << 1 2 <3>
         """
+        """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=2):
-            page3_2_1 = pagin3.page(1)
-            page3_2_2 = pagin3.page(2)
-            page3_2_3 = pagin3.page(3)
+            page = pagin.page(1)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 4)
+            self.assertEqual(prep[0]['text'], '1')
+            self.assertEqual(prep[0]['url'], '#')
+            self.assertTrue(prep[0]['active'])
+            for i in range(1, 3):
+                self.assertEqual(prep[i]['text'], str(i + 1))
+                self.assertEqual(prep[i]['url'], '/page/{0}/'.format(i + 1))
+                self.assertFalse(prep[i]['active'])
+            self.assertEqual(prep[3]['text'], next_page_text)
+            self.assertEqual(prep[3]['url'], '/page/2/')
+            self.assertFalse(prep[3]['active'])
 
+            del page, prep
+
+            page = pagin.page(2)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 5)
+            self.assertEqual(prep[0]['text'], prev_page_text)
+            self.assertEqual(prep[0]['url'], '/page/1/')
+            self.assertFalse(prep[0]['active'])
+            self.assertEqual(prep[1]['text'], '1')
+            self.assertEqual(prep[1]['url'], '/page/1/')
+            self.assertFalse(prep[1]['active'])
+            self.assertEqual(prep[2]['text'], '2')
+            self.assertEqual(prep[2]['url'], '#')
+            self.assertTrue(prep[2]['active'])
+            self.assertEqual(prep[3]['text'], '3')
+            self.assertEqual(prep[3]['url'], '/page/3/')
+            self.assertFalse(prep[3]['active'])
+            self.assertEqual(prep[4]['text'], next_page_text)
+            self.assertEqual(prep[4]['url'], '/page/3/')
+            self.assertFalse(prep[4]['active'])
+
+            del page, prep
+
+            page = pagin.page(3)
+            prep = pagination._prepare(page, 'page')
+            self.assertEqual(len(prep), 4)
+            self.assertEqual(prep[0]['text'], prev_page_text)
+            self.assertEqual(prep[0]['url'], '/page/2/')
+            self.assertFalse(prep[0]['active'])
+            for i in range(1, 3):
+                self.assertEqual(prep[i]['text'], str(i + 1))
+                self.assertEqual(prep[i]['url'], '/page/{0}/'.format(i + 1))
+                self.assertFalse(prep[i]['active'])
+
+            del page, prep
+
+        """
         """
         --- Всего страниц: 3, показывать соседей: 20 ---
         1: <1> 2 3 >>
@@ -175,9 +340,9 @@ class TemplateTagsTestCase(TestCase):
         3: << 1 2 <3>
         """
         with self.settings(EFSW_COMM_PAGIN_NEIGHBOURS_COUNT=20):
-            page3_20_1 = pagin3.page(1)
-            page3_20_2 = pagin3.page(2)
-            page3_20_3 = pagin3.page(3)
+            page3_20_1 = pagin.page(1)
+            page3_20_2 = pagin.page(2)
+            page3_20_3 = pagin.page(3)
 
         """
         ------ Всего страниц: 4, показывать соседей: 1 ------
