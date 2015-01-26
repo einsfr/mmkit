@@ -11,8 +11,15 @@ from efsw.archive import forms
 from efsw.archive import default_settings
 
 
-def item_index(request, page='1'):
-    items_all = models.Item.objects.all().order_by('-pk')
+def item_index(request, page='1', category_id='0'):
+    try:
+        cat_id = int(category_id)
+    except ValueError:
+        cat_id = 0
+    if cat_id == 0:
+        items_all = models.Item.objects.all().order_by('-pk')
+    else:
+        items_all = models.Item.objects.filter(category_id=cat_id).order_by('-pk')
     pagin = paginator.Paginator(
         items_all,
         getattr(settings, 'EFSW_ARCH_INDEX_ITEM_PER_PAGE', default_settings.EFSW_ARCH_INDEX_ITEM_PER_PAGE)
