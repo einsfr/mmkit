@@ -1,5 +1,9 @@
 {% if items %}
     <ul class="pagination">
-
+        {% for item in items %}
+            <li {% if item.active %}class="active"{% endif %}>
+                <a href="{{ item.url }}" title="{{ item.title }}">{{ item.text }}</a>
+            </li>
+        {% endfor %}
     </ul>
 {% endif %}
