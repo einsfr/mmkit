@@ -2,10 +2,10 @@
 
 {% load pagination from pagination %}
 
-{% block title %}{{ block.super }} - Индекс элементов{% endblock %}
+{% block title %}{{ block.super }} - Список элементов{% endblock %}
 
 {% block content %}
-    <h1>Индекс элементов</h1>
+    <h1>Список элементов</h1>
     {% include 'archive/item_list_table.html' %}
-    <nav class="text-center">{% pagination items 'efsw.archive:item_index_page' %}</nav>
+    <nav class="text-center">{% pagination items 'efsw.archive:item_list_page' %}</nav>
 {% endblock %}

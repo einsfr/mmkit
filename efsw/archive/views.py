@@ -11,10 +11,10 @@ from efsw.archive import forms
 from efsw.archive import default_settings
 
 
-def _get_item_index_page(items, page):
+def _get_item_list_page(items, page):
     pagin = paginator.Paginator(
         items,
-        getattr(settings, 'EFSW_ARCH_INDEX_ITEM_PER_PAGE', default_settings.EFSW_ARCH_INDEX_ITEM_PER_PAGE)
+        getattr(settings, 'EFSW_ARCH_ITEM_LIST_PER_PAGE', default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
     )
     try:
         items_page = pagin.page(page)
@@ -28,23 +28,23 @@ def _get_item_index_page(items, page):
     return items_page
 
 
-def item_index(request, page='1'):
+def item_list(request, page='1'):
     items_all = models.Item.objects.all().order_by('-pk')
-    items_page = _get_item_index_page(items_all, page)
+    items_page = _get_item_list_page(items_all, page)
 
     return shortcuts.render(request, 'archive/item_list.html', {'items': items_page})
 
 
-def item_index_category(request, category='0', page='1'):
+def item_list_category(request, category='0', page='1'):
     try:
         category_id = int(category)
     except ValueError:
         category_id = 0
     if category_id == 0:
-        return item_index(request, page)
+        return item_list(request, page)
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     items_all = models.Item.objects.filter(category_id=category_id).order_by('-pk')
-    items_page = _get_item_index_page(items_all, page)
+    items_page = _get_item_list_page(items_all, page)
 
     return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
@@ -114,7 +114,7 @@ def item_update_add_link(request, item_id):
             return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
 
 
-class CategoryIndexView(generic.ListView):
+class CategoryListView(generic.ListView):
     queryset = models.ItemCategory.objects.all().order_by('name')
     template_name = 'archive/category_list.html'
 

@@ -5,29 +5,29 @@ from efsw.archive import views
 
 urlpatterns = patterns(
     '',
-    # items/ Основной индекс элементов
+    # items/ Основной список элементов
     url(
         r'^items/$',
-        views.item_index,
-        name='item_index'
+        views.item_list,
+        name='item_list'
     ),
-    # items/page/2/ Основной индекс элементов постранично
+    # items/page/2/ Основной список элементов постранично
     url(
         r'^items/page/(?P<page>\d+)/$',
-        views.item_index,
-        name='item_index_page'
+        views.item_list,
+        name='item_list_page'
     ),
-    # items/category/3/ Индекс элементов, входящих в категорию
+    # items/category/3/ Список элементов, входящих в категорию
     url(
         r'^items/category/(?P<category>\d+)/$',
-        views.item_index_category,
-        name='item_index_category'
+        views.item_list_category,
+        name='item_list_category'
     ),
-    # items/category/3/page/2 Индекс элементов, входящих в категорию, постранично
+    # items/category/3/page/2 Список элементов, входящих в категорию, постранично
     url(
         r'^items/category/(?P<category>\d+)/page/(?P<page>\d+)/$',
-        views.item_index_category,
-        name='item_index_category_page'
+        views.item_list_category,
+        name='item_list_category_page'
     ),
     # items/12/ Детальное описаное одного элемента
     url(
@@ -66,11 +66,11 @@ urlpatterns = patterns(
         views.item_update_add_link,
         name='item_update_add_link'
     ),
-    # categories/ Индекс категорий
+    # categories/ Список категорий
     url(
         r'^categories/$',
-        views.CategoryIndexView.as_view(),
-        name='category_index'
+        views.CategoryListView.as_view(),
+        name='category_list'
     ),
     # categories/add/ Добавление новой категории
     url(

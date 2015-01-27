@@ -9,8 +9,12 @@
                 Элементы <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
-                <li role="presentation"><a href="{% url 'efsw.archive:item_index' %}" title="Индекс элементов">Индекс</a></li>
-                <li role="presentation"><a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a></li>
+                <li role="presentation">
+                    <a href="{% url 'efsw.archive:item_list' %}" title="Список элементов">Список</a>
+                </li>
+                <li role="presentation">
+                    <a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a>
+                </li>
             </ul>
         </li>
         <li role="presentation" class="dropdown">
@@ -18,8 +22,12 @@
                 Категории <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
-                <li role="presentation"><a href="{% url 'efsw.archive:category_index' %}" title="Индекс элементов">Индекс</a></li>
-                <li role="presentation"><a href="{% url 'efsw.archive:category_add' %}" title="Добавить элемент">Добавить</a></li>
+                <li role="presentation">
+                    <a href="{% url 'efsw.archive:category_list' %}" title="Список категорий">Список</a>
+                </li>
+                <li role="presentation">
+                    <a href="{% url 'efsw.archive:category_add' %}" title="Добавить категорию">Добавить</a>
+                </li>
             </ul>
         </li>
     </ul>
