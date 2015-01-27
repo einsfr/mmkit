@@ -10,6 +10,7 @@
                 <span class="badge">{{ object.items.count }}</span>
                 <a href="{% url 'efsw.archive:item_list_category' object.id %}"
                    title="Список элементов в этой категории">{{ object.name }}</a>
+                <a href="{{ object.get_update_url }}" title="{{ object.get_update_title }}" class="fa fa-edit"></a>
             </li>
         {% empty %}
             Категории не найдены

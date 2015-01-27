@@ -78,4 +78,10 @@ urlpatterns = patterns(
         views.CategoryAddView.as_view(),
         name='category_add'
     ),
+    # categories/3/update/ Редактирование существующей категории
+    url(
+        r'^categories/(?P<category>\d+)/update$',
+        views.CategoryAddView.as_view(),
+        name='category_update'
+    ),
 )

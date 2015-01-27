@@ -64,6 +64,12 @@ class ItemCategory(models.Model):
     def __str__(self):
         return self.name
 
+    def get_update_url(self):
+        return urlresolvers.reverse('efsw.archive:category_update', args=(self.id, ))
+
+    def get_update_url_title(self):
+        return 'Редактировать категорию'
+
 
 class Item(models.Model):
     """ Модель, описывающая элемент архива """
