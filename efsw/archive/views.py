@@ -11,29 +11,42 @@ from efsw.archive import forms
 from efsw.archive import default_settings
 
 
-def item_index(request, page='1', category_id='0'):
-    try:
-        cat_id = int(category_id)
-    except ValueError:
-        cat_id = 0
-    if cat_id == 0:
-        items_all = models.Item.objects.all().order_by('-pk')
-    else:
-        items_all = models.Item.objects.filter(category_id=cat_id).order_by('-pk')
+def _get_item_index_page(items, page):
     pagin = paginator.Paginator(
-        items_all,
+        items,
         getattr(settings, 'EFSW_ARCH_INDEX_ITEM_PER_PAGE', default_settings.EFSW_ARCH_INDEX_ITEM_PER_PAGE)
     )
     try:
-        items = pagin.page(page)
+        items_page = pagin.page(page)
     except paginator.PageNotAnInteger:
         # Если параметр page не является целым числом - показать первую страницу
-        items = pagin.page(1)
+        items_page = pagin.page(1)
     except paginator.EmptyPage:
         # Если указанная страница - пустая (т.е. находится вне диапазона страниц) - показать последнюю страницу
-        items = pagin.page(pagin.num_pages)
+        items_page = pagin.page(pagin.num_pages)
 
-    return shortcuts.render(request, 'archive/item_list.html', {'items': items})
+    return items_page
+
+
+def item_index(request, page='1'):
+    items_all = models.Item.objects.all().order_by('-pk')
+    items_page = _get_item_index_page(items_all, page)
+
+    return shortcuts.render(request, 'archive/item_list.html', {'items': items_page})
+
+
+def item_index_category(request, category='0', page='1'):
+    try:
+        category_id = int(category)
+    except ValueError:
+        category_id = 0
+    if category_id == 0:
+        return item_index(request, page)
+    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
+    items_all = models.Item.objects.filter(category_id=category_id).order_by('-pk')
+    items_page = _get_item_index_page(items_all, page)
+
+    return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
 
 class ItemDetailView(generic.DetailView):
@@ -102,7 +115,7 @@ def item_update_add_link(request, item_id):
 
 
 class CategoryIndexView(generic.ListView):
-    queryset = models.ItemCategory.objects.all()
+    queryset = models.ItemCategory.objects.all().order_by('name')
     template_name = 'archive/category_list.html'
 
 

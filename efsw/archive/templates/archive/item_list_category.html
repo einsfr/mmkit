@@ -1,0 +1,11 @@
+{% extends 'archive/app_base.html' %}
+
+{% load pagination from pagination %}
+
+{% block title %}{{ block.super }} - Список элементов в категории {{ category.name }}{% endblock %}
+
+{% block content %}
+    <h1>Список элементов в категории &laquo;{{ category.name }}&raquo;</h1>
+    {% include 'archive/item_list_table.html' %}
+    <nav class="text-center">{% pagination items 'efsw.archive:item_index_category_page' %}</nav>
+{% endblock %}

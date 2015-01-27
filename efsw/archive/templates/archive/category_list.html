@@ -3,4 +3,12 @@
 {% block title %}{{ block.super }} - Индекс категорий{% endblock %}
 
 {% block content %}
+    <h1>Индекс категорий</h1>
+    <ul class="list-group">
+        {% for object in object_list %}
+            <li class="list-group-item"><span class="badge">{{ object.items.count }}</span>{{ object.name }}</li>
+        {% empty %}
+            Категории не найдены
+        {% endfor %}
+    </ul>
 {% endblock %}

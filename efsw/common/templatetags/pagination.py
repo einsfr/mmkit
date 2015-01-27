@@ -87,6 +87,7 @@ def _prepare(page_instance: paginator.Page, page_url_name: str) -> list:
 
 @register.inclusion_tag('common/pagination.html')
 def pagination(page_instance, page_url_name):
+    # @TODO: Добавить передачу дополнительных параметров для формирования ссылки
     if not isinstance(page_instance, paginator.Page):
         msg = "Тэг 'pagination' требует экземпляр класса django.core.paginator.Page, предоставлено: {0}".format(
             type(page_instance)

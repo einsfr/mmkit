@@ -19,14 +19,14 @@ urlpatterns = patterns(
     ),
     # items/category/3/ Индекс элементов, входящих в категорию
     url(
-        r'^items/category/(?P<category_id>\d+)/$',
-        views.item_index,
+        r'^items/category/(?P<category>\d+)/$',
+        views.item_index_category,
         name='item_index_category'
     ),
     # items/category/3/page/2 Индекс элементов, входящих в категорию, постранично
     url(
-        r'^items/category/(?P<category_id>\d+)/page/(?P<page>\d+)/$',
-        views.item_index,
+        r'^items/category/(?P<category>\d+)/page/(?P<page>\d+)/$',
+        views.item_index_category,
         name='item_index_category_page'
     ),
     # items/12/ Детальное описаное одного элемента
