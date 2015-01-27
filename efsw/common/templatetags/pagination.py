@@ -8,7 +8,7 @@ from efsw.common import default_settings
 register = template.Library()
 
 
-def _prepare(page_instance: paginator.Page, page_url_name: str) -> list:
+def _prepare(page_instance: paginator.Page, page_url_name: str, **kwargs) -> list:
     """
     Формирует список элементов для отображения в листалке.
 
@@ -32,23 +32,26 @@ def _prepare(page_instance: paginator.Page, page_url_name: str) -> list:
         if range_start <= 0:
             range_start = 1
         if range_start > 1:
+            kwargs['page'] = 1
             items.append({
                 'text': '1',
                 'title': 'Первая страница',
-                'url': urlresolvers.reverse(page_url_name, args=(1, )),
+                'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
                 'active': False,
             })
+        kwargs['page'] = current_page - 1
         items.append({
             'text': getattr(settings, 'EFSW_COMM_PAGIN_PREV_TEXT', default_settings.EFSW_COMM_PAGIN_PREV_TEXT),
             'title': 'Предыдущая страница',
-            'url': urlresolvers.reverse(page_url_name, args=(current_page - 1, )),
+            'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
             'active': False,
         })
         for i in range(range_start, current_page):
+            kwargs['page'] = i
             items.append({
                 'text': str(i),
                 'title': 'Страница {0}'.format(i),
-                'url': urlresolvers.reverse(page_url_name, args=(i, )),
+                'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
                 'active': False,
             })
     items.append({
@@ -62,23 +65,26 @@ def _prepare(page_instance: paginator.Page, page_url_name: str) -> list:
         if range_end > page_count:
             range_end = page_count
         for i in range(current_page + 1, range_end + 1):
+            kwargs['page'] = i
             items.append({
                 'text': str(i),
                 'title': 'Страница {0}'.format(i),
-                'url': urlresolvers.reverse(page_url_name, args=(i, )),
+                'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
                 'active': False,
             })
+        kwargs['page'] = current_page + 1
         items.append({
             'text': getattr(settings, 'EFSW_COMM_PAGIN_NEXT_TEXT', default_settings.EFSW_COMM_PAGIN_NEXT_TEXT),
             'title': 'Следующая страница',
-            'url': urlresolvers.reverse(page_url_name, args=(current_page + 1, )),
+            'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
             'active': False,
         })
         if range_end < page_count:
+            kwargs['page'] = page_count
             items.append({
                 'text': str(page_count),
                 'title': 'Последняя страница',
-                'url': urlresolvers.reverse(page_url_name, args=(page_count, )),
+                'url': urlresolvers.reverse(page_url_name, kwargs=kwargs),
                 'active': False,
             })
 
@@ -86,12 +92,11 @@ def _prepare(page_instance: paginator.Page, page_url_name: str) -> list:
 
 
 @register.inclusion_tag('common/pagination.html')
-def pagination(page_instance, page_url_name):
-    # @TODO: Добавить передачу дополнительных параметров для формирования ссылки
+def pagination(page_instance, page_url_name, **kwargs):
     if not isinstance(page_instance, paginator.Page):
         msg = "Тэг 'pagination' требует экземпляр класса django.core.paginator.Page, предоставлено: {0}".format(
             type(page_instance)
         )
         raise TypeError(msg)
 
-    return {'items': _prepare(page_instance, page_url_name)}
+    return {'items': _prepare(page_instance, page_url_name, **kwargs)}
