@@ -1,8 +1,9 @@
 <li class="list-group-item">
-    <a href="{% url 'efsw.archive:item_update_remove_link' object.id item.id %}"
-       title="Удалить связь"
-       class="fa fa-close"
-       id="item-remove-link-{{ object.id }}-{{ item.id }}"></a>&nbsp;
+    <form action="{% url 'efsw.archive:item_update_remove_link' object.id %}" method="post" style="display: inline">
+        {% csrf_token %}
+        <input type="hidden" name="removed_id" value="{{ item.id }}">
+        <a href="#" title="Удалить связь" class="fa fa-close" id="item-remove-link-{{ object.id }}-{{ item.id }}"></a>
+    </form>
     <a href="{{ item.get_absolute_url }}"
        title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
 </li>

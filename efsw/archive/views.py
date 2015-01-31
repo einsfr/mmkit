@@ -1,7 +1,6 @@
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
-from django.core import urlresolvers
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
@@ -77,14 +76,20 @@ class ItemUpdateStorageView(generic.UpdateView):
     form_class = forms.ItemUpdateStorageForm
 
 
-def item_update_remove_link(request, item_id, remove_id):
+@http.require_http_methods(["POST"])
+def item_update_remove_link(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    item_remove = shortcuts.get_object_or_404(models.Item, pk=remove_id)
-    item.includes.remove(item_remove)
-    if request.is_ajax():
-        return HttpResponse('{0}-{1}'.format(item_id, remove_id))
+    form = forms.ItemUpdateRemoveLinkForm(request.POST)
+    if form.is_valid():
+        removed_id = form.cleaned_data['removed_id']
+        try:
+            removed_item = models.Item.objects.get(pk=removed_id)
+            item.includes.remove(removed_item)
+        except models.Item.DoesNotExist:
+            pass
+        return HttpResponse('{0}-{1}'.format(item_id, removed_id))
     else:
-        return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
+        return HttpResponseBadRequest()
 
 
 @http.require_http_methods(["POST"])
@@ -96,22 +101,11 @@ def item_update_add_link(request, item_id):
         try:
             linked_item = models.Item.objects.get(pk=linked_id)
         except models.Item.DoesNotExist:
-            linked_item = None
-        if linked_item is None:
-            if request.is_ajax():
-                return HttpResponseBadRequest()
-            else:
-                return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
-        item.includes.add(linked_item)
-        if request.is_ajax():
-            return shortcuts.render(request, 'archive/item_detail_link.html', {'object': item, 'item': linked_item})
-        else:
-            return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
-    else:
-        if request.is_ajax():
             return HttpResponseBadRequest()
-        else:
-            return HttpResponseRedirect(urlresolvers.reverse('efsw.archive:item_detail', args=(item_id, )))
+        item.includes.add(linked_item)
+        return shortcuts.render(request, 'archive/item_detail_link.html', {'object': item, 'item': linked_item})
+    else:
+        return HttpResponseBadRequest()
 
 
 class CategoryListView(generic.ListView):
@@ -120,4 +114,8 @@ class CategoryListView(generic.ListView):
 
 
 class CategoryAddView(generic.CreateView):
+    pass
+
+
+class CategoryUpdateView(generic.UpdateView):
     pass

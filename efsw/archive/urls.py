@@ -53,16 +53,15 @@ urlpatterns = patterns(
         views.ItemUpdateStorageView.as_view(),
         name='item_update_storage'
     ),
-    # items/12/update/remove-link/17/ Удаление связи между элементами 12 (главный) и 17 (включённый)
-    # @TODO: Это придётся переделать, потому что такой запрос изменяет состояние системы и должен быть POST
+    # items/12/update/remove-link/ Удаление связи между элементами
     url(
-        r'^items/(?P<item_id>\d+)/update/remove-link/(?P<remove_id>\d+)/$',
+        r'^items/(?P<item_id>\d+)/update/remove-link/$',
         views.item_update_remove_link,
         name='item_update_remove_link'
     ),
     # items/12/update/add-link Добавление связи элементу
     url(
-        r'^items/(?P<item_id>\d+)/update/add-link$',
+        r'^items/(?P<item_id>\d+)/update/add-link/$',
         views.item_update_add_link,
         name='item_update_add_link'
     ),

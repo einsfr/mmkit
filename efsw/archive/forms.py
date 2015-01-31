@@ -22,3 +22,7 @@ class ItemUpdateStorageForm(forms.ModelForm):
 
 class ItemUpdateAddLinkForm(forms.Form):
     linked_id = forms.IntegerField(min_value=1, label='Связанный ID')
+
+
+class ItemUpdateRemoveLinkForm(forms.Form):
+    removed_id = forms.IntegerField(min_value=1)
