@@ -26,3 +26,9 @@ class ItemUpdateAddLinkForm(forms.Form):
 
 class ItemUpdateRemoveLinkForm(forms.Form):
     removed_id = forms.IntegerField(min_value=1)
+
+
+class ItemCategoryForm(forms.ModelForm):
+    class Meta:
+        model = models.ItemCategory
+        fields = ('name', )

@@ -58,7 +58,8 @@ class ItemCategory(models.Model):
 
     name = models.CharField(
         max_length=64,
-        verbose_name='название'
+        verbose_name='название',
+        unique=True
     )
 
     def __str__(self):

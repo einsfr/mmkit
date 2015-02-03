@@ -8,8 +8,12 @@
         {% for object in object_list %}
             <li class="list-group-item">
                 <span class="badge">{{ object.items.count }}</span>
-                <a href="{% url 'efsw.archive:item_list_category' object.id %}"
-                   title="Список элементов в этой категории">{{ object.name }}</a>
+                {% if object.items.count %}
+                    <a href="{% url 'efsw.archive:item_list_category' object.id %}"
+                       title="Список элементов в этой категории">{{ object.name }}</a>
+                {% else %}
+                    {{ object.name }}
+                {% endif %}
                 <a href="{{ object.get_update_url }}" title="{{ object.get_update_title }}" class="fa fa-edit"></a>
             </li>
         {% empty %}

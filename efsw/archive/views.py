@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
+from django.core import urlresolvers
 
 from efsw.archive import models
 from efsw.archive import forms
@@ -114,8 +115,14 @@ class CategoryListView(generic.ListView):
 
 
 class CategoryAddView(generic.CreateView):
-    pass
+    model = models.ItemCategory
+    template_name = 'archive/category_form_create.html'
+    form_class = forms.ItemCategoryForm
+    success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
 
 
 class CategoryUpdateView(generic.UpdateView):
-    pass
+    model = models.ItemCategory
+    template_name = 'archive/category_form_update.html'
+    form_class = forms.ItemCategoryForm
+    success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')

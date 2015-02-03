@@ -1,0 +1,30 @@
+{% load field_verbose_name from model %}
+
+{% if items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>{% field_verbose_name items 'created' %}</th>
+                <th>{% field_verbose_name items 'category' %}</th>
+                <th>{% field_verbose_name items 'name' %}</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.created }}</td>
+                    <td>{{ item.category.name }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>
+                        <a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>&nbsp;
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    Элементы не найдены
+{% endif %}

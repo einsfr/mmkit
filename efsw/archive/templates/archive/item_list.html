@@ -6,6 +6,6 @@
 
 {% block content %}
     <h1>Список элементов</h1>
-    {% include 'archive/item_list_table.html' %}
-    <nav class="text-center">{% pagination items 'efsw.archive:item_list_page' %}</nav>
+    {% include 'archive/_item_list_table.html' %}
+    {% if items %}<nav class="text-center">{% pagination items 'efsw.archive:item_list_page' %}</nav>{% endif %}
 {% endblock %}

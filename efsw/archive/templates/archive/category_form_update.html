@@ -1,0 +1,14 @@
+{% extends 'archive/app_base.html' %}
+
+{% block title %}{{ block.super }} - Редактирование категории{% endblock %}
+
+{% block content %}
+    <h1>Редактирование категории</h1>
+    <form action="" method="post">
+        <table class="table">
+            {% csrf_token %}
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Сохранить">
+    </form>
+{% endblock %}
