@@ -15,7 +15,7 @@ def _prepare_instance(instance):
                 obj = instance[0]
             else:
                 obj = None
-        except:
+        except IndexError:
             obj = None
     else:
         obj = None
@@ -43,7 +43,7 @@ def field_verbose_name(instance, field_name, capitalize=True):
     if obj is not None:
         try:
             result = obj._meta.get_field(field_name).verbose_name
-        except:
+        except models.fields.FieldDoesNotExist:
             result = ''
     else:
         result = ''
