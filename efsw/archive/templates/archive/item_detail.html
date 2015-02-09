@@ -72,7 +72,7 @@
                 <td>
                     <ul class="list-group" id="item-links-container">
                         {% for item in object.includes.all %}
-                            {% include 'archive/item_detail_link.html' %}
+                            {% include 'archive/_item_detail_link.html' %}
                         {% endfor %}
                         <li class="list-group-item">
                             <form action="{% url 'efsw.archive:item_update_add_link' object.id %}" method="post" id="item-add-link-form">

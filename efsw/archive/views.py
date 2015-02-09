@@ -87,7 +87,7 @@ def item_update_remove_link(request, item_id):
             removed_item = models.Item.objects.get(pk=removed_id)
             item.includes.remove(removed_item)
         except models.Item.DoesNotExist:
-            pass
+            pass  # @TODO Здесь по-хорошему надо вносить в лог попытку удалить несуществующий элемент
         return HttpResponse('{0}-{1}'.format(item_id, removed_id))
     else:
         return HttpResponseBadRequest()
@@ -104,7 +104,7 @@ def item_update_add_link(request, item_id):
         except models.Item.DoesNotExist:
             return HttpResponseBadRequest()
         item.includes.add(linked_item)
-        return shortcuts.render(request, 'archive/item_detail_link.html', {'object': item, 'item': linked_item})
+        return shortcuts.render(request, 'archive/_item_detail_link.html', {'object': item, 'item': linked_item})
     else:
         return HttpResponseBadRequest()
 

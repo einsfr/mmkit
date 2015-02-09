@@ -80,7 +80,7 @@ class ArchiveTestCase(TestCase):
 
         include = models.Item()
         include.name = 'Включённый элемент'
-        include.description = 'ОПисание включённого элемента'
+        include.description = 'Описание включённого элемента'
         include.created = timezone.now()
         include.author = 'Автор включённого элемента'
         include.storage = s
@@ -198,7 +198,8 @@ class ArchiveViewsTestCase(TestCase):
             self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
             self.assertContains(
                 response,
-                '<a href="/archive/items/category/2/page/1/" title="Предыдущая страница">«</a>')
+                '<a href="/archive/items/category/2/page/1/" title="Предыдущая страница">«</a>'
+            )
 
     def test_item_detail(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_detail', args=(1000000, )))
@@ -207,3 +208,208 @@ class ArchiveViewsTestCase(TestCase):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_detail', args=(4, )))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<h1>Детали элемента</h1>')
+        self.assertEqual(len(response.context['object'].includes.all()), 3)
+        self.assertEqual(len(response.context['object'].log.all()), 1)
+
+    def test_item_add(self):
+        request_path = urlresolvers.reverse('efsw.archive:item_add')
+
+        response = self.client.get(request_path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Добавление элемента</h1>')
+        self.assertContains(response, '<form action="" method="post">')
+
+        post_data = {
+            'name': 'Новый элемент',
+            'description': 'Описание нового элемента',
+            'created': '2015-02-09',
+            'author': 'Автор нового элемента',
+            'storage': '1',
+            'category': '3',
+        }
+        response = self.client.post(request_path, post_data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.redirect_chain), 1)
+        self.assertContains(response, '<h1>Детали элемента</h1>')
+
+        response = self.client.post(request_path)
+        self.assertEqual(response.status_code, 200)
+        for field in ['name', 'description', 'created', 'author', 'storage', 'category']:
+            self.assertFormError(response, 'form', field, 'Обязательное поле.')
+
+        post_data = {
+            'name': 'a' * 256,
+        }
+        response = self.client.post(request_path, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'name',
+            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
+        )
+
+        post_data = {
+            'created': 'this-is-not-a-date',
+        }
+        response = self.client.post(request_path, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'created',
+            'Введите правильную дату.'
+        )
+
+        post_data = {
+            'author': 'a' * 256,
+        }
+        response = self.client.post(request_path, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'author',
+            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
+        )
+
+        post_data = {
+            'storage': 'non-existent-storage',
+        }
+        response = self.client.post(request_path, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'storage',
+            'Выберите корректный вариант. Вашего варианта нет среди допустимых значений.'
+        )
+
+        post_data = {
+            'category': 'non-existent-category',
+        }
+        response = self.client.post(request_path, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'category',
+            'Выберите корректный вариант. Вашего варианта нет среди допустимых значений.'
+        )
+
+    def test_item_update(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update', args=(4, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Редактирование элемента</h1>')
+        self.assertContains(response, '<form action="" method="post">')
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        post_data = {
+            'name': 'Отредактированное название',
+            'description': 'Отредактированное описание',
+            'created': '2015-02-09',
+            'author': 'Автор отредактированного элемента',
+            'category': '1',
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update', args=(4, )),
+            post_data,
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.redirect_chain), 1)
+        self.assertContains(response, '<h1>Детали элемента</h1>')
+
+    def test_item_update_storage(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_storage', args=(4, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Изменение размещения элемента</h1>')
+        self.assertContains(response, '<form action="" method="post">')
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_storage', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        post_data = {
+            'storage': '2',
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_storage', args=(4, )),
+            post_data,
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.redirect_chain), 1)
+        self.assertContains(response, '<h1>Детали элемента</h1>')
+
+    def test_item_update_remove_link(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )))
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )))
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        post_data = {
+            'removed_id': '5',
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )),
+            post_data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '4-5')
+        i = models.Item.objects.get(pk=4)
+        inc = i.includes.all()
+        self.assertEqual(len(inc), 2)
+        ids = map(lambda o: o.id, inc)
+        self.assertIn(6, ids)
+        self.assertIn(7, ids)
+
+        post_data = {
+            'removed_id': '1000000'
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )),
+            post_data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '4-1000000')
+
+    def test_item_update_add_link(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )))
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )))
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        post_data = {
+            'linked_id': '5',
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
+            post_data
+        )
+        self.assertEqual(response.status_code, 200)
+        i = models.Item.objects.get(pk=4)
+        inc = i.includes.all()
+        self.assertEqual(len(inc), 3)
+        ids = map(lambda o: o.id, inc)
+        self.assertIn(5, ids)
+        self.assertIn(6, ids)
+        self.assertIn(7, ids)
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
+            post_data
+        )
+        self.assertEqual(response.status_code, 200)
+
+        post_data = {
+            'linked_id': '1000000'
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
+            post_data
+        )
+        self.assertEqual(response.status_code, 400)
