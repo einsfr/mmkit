@@ -13,8 +13,6 @@ from efsw.archive import models
 class ArchiveTestCase(TestCase):
     """ Набор тестов для efsw.archive """
 
-    fixtures = []
-
     def test_storage_build_path(self):
         storage = models.Storage()
         storage.base_url = "\\\\192.168.1.1"
@@ -50,13 +48,6 @@ class ArchiveTestCase(TestCase):
             item1z9.get_storage_path(),
             os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00')
         )
-
-    def test_object_not_found(self):
-
-        non_exist_object_id = 1000000
-
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_detail', args=(non_exist_object_id, )))
-        self.assertEqual(response.status_code, 404)
 
     def test_itemlog_get_action_name(self):
         il = models.ItemLog()
@@ -138,3 +129,81 @@ class ArchiveTestCase(TestCase):
             finally:
                 if os.path.isdir(test_storage_root):
                     shutil.rmtree(test_storage_root)
+
+
+class ArchiveViewsTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_item_list(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Список элементов</h1>')
+        self.assertEqual(len(response.context['items']), 7)
+        self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+    def test_item_list_page(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(1, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Список элементов</h1>')
+        self.assertEqual(len(response.context['items']), 7)
+        self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(2, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Список элементов</h1>')
+        self.assertEqual(len(response.context['items']), 7)
+        self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
+
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(1, )))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, '<h1>Список элементов</h1>')
+            self.assertEqual(len(response.context['items']), 2)
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+            self.assertContains(response, '<a href="/archive/items/page/2/" title="Следующая страница">»</a>')
+            self.assertContains(response, '<a href="/archive/items/page/4/" title="Последняя страница">4</a>')
+
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(2, )))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, '<h1>Список элементов</h1>')
+            self.assertEqual(len(response.context['items']), 2)
+            self.assertContains(response, '<a href="/archive/items/page/1/" title="Предыдущая страница">«</a>')
+            self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
+            self.assertContains(response, '<a href="/archive/items/page/3/" title="Следующая страница">»</a>')
+
+    def test_item_list_category(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_category', args=(2, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>')
+        self.assertEqual(len(response.context['items']), 3)
+        self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
+
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_category', args=(2, )))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>')
+            self.assertEqual(len(response.context['items']), 2)
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+            self.assertContains(
+                response,
+                '<a href="/archive/items/category/2/page/2/" title="Следующая страница">»</a>')
+
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_category_page', args=(2, 2, )))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>')
+            self.assertEqual(len(response.context['items']), 1)
+            self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
+            self.assertContains(
+                response,
+                '<a href="/archive/items/category/2/page/1/" title="Предыдущая страница">«</a>')
+
+    def test_item_detail(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_detail', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_detail', args=(4, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Детали элемента</h1>')
