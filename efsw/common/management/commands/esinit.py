@@ -19,7 +19,7 @@ class Command(base.BaseCommand):
     )
 
     def handle(self, *args, **options):
-        verbosity = options['verbosity']
+        verbosity = int(options['verbosity'])
         es = elastic.get_es()
         init_indices = getattr(settings, 'EFSW_ELASTIC_INIT_INDICES', ())
         if not init_indices:
@@ -27,7 +27,7 @@ class Command(base.BaseCommand):
                 print('Список индексов для инициализации пустой - пропускаем')
             return
         if verbosity:
-            print('Обработка списка индексов:')
+            print('Обработка списка индексов...')
         count = 0
         for ind in init_indices:
             if not os.path.exists(ind):
@@ -35,16 +35,16 @@ class Command(base.BaseCommand):
                     'Файл (папка) с индексом для инициализации поиска не существует: {0}'.format(ind)
                 )
             if os.path.isfile(ind) and self._compatible(ind):
-                self._create_index(es, ind, options['replace'], verbosity)
-                count += 1
+                if self._create_index(es, ind, options['replace'], verbosity):
+                    count += 1
             elif os.path.isdir(ind):
                 if verbosity >= 2:
                     print('  {0}'.format(ind))
                 for p in os.listdir(ind):
                     full_path = os.path.join(ind, p)
                     if os.path.isfile(full_path) and self._compatible(full_path):
-                        self._create_index(es, full_path, options['replace'], verbosity)
-                        count += 1
+                        if self._create_index(es, full_path, options['replace'], verbosity):
+                            count += 1
         if verbosity:
             print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
 
@@ -61,9 +61,10 @@ class Command(base.BaseCommand):
             else:
                 if verbosity >= 2:
                     print('    Индекс существует - пропускаю')
-                return
+                return False
         with open(path, 'r') as f:
             es.indices.create(index=index_name, body=f.read())
+        return True
 
     def _compatible(self, path):
         return os.path.splitext(os.path.basename(path))[1] == '.json'

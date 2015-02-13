@@ -68,5 +68,5 @@ STATICFILES_DIRS = [
 ]
 
 EFSW_ELASTIC_INIT_INDICES = (
-
+    os.path.join(BASE_DIR, 'efsw', 'archive', 'search', 'indices'),
 )
