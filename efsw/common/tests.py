@@ -351,4 +351,6 @@ class SearchTestCase(TestCase):
         another_es = elastic.get_es()
         self.assertTrue(es is another_es)
         cmd = esinit.Command()
-        cmd.handle()
+        cmd.handle(replace=True)
+        with self.assertRaises(elastic.exceptions.EsIndexExistsException):
+            cmd.handle(replace=False)
