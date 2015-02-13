@@ -355,7 +355,6 @@ class SearchTestCase(TestCase):
 
     def testInitialization(self):
         es = elastic.get_es()
-        es.indices.delete('_all')
         cmd = esinit.Command()
         base_dir = getattr(settings, 'BASE_DIR')
         init_indices = (
