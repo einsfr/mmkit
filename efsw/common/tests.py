@@ -1,3 +1,6 @@
+import os
+import json
+
 from django.test import TestCase
 from django.db import models
 from django.core import paginator
@@ -350,7 +353,28 @@ class SearchTestCase(TestCase):
         es = elastic.get_es()
         another_es = elastic.get_es()
         self.assertTrue(es is another_es)
+
+    def testInitialization(self):
+        es = elastic.get_es()
+        index_name = getattr(settings, 'EFSW_ELASTIC_INDEX')
         cmd = esinit.Command()
-        cmd.handle(replace=True)
+        cmd.handle(replace=True, verbosity=0)
         with self.assertRaises(elastic.exceptions.EsIndexExistsException):
-            cmd.handle(replace=False)
+            cmd.handle(replace=False, verbosity=0)
+        base_dir = getattr(settings, 'BASE_DIR')
+        init_mappings = (
+            os.path.join(base_dir, 'non-existent-file.json'),
+        )
+        with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
+            with self.assertRaises(FileNotFoundError):
+                cmd.handle(replace=True, verbosity=0)
+
+        init_mappings = (
+            os.path.join(base_dir, 'efsw', 'common', 'testmapping.json'),
+        )
+        with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
+            cmd.handle(replace=True, verbosity=0)
+            reply = es.indices.get_mapping(index=index_name, doc_type='testmapping')
+            self.assertEqual(reply, {
+                'testmmkit': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            })

@@ -1,0 +1,7 @@
+{
+  "testmapping": {
+    "properties": {
+      "testproperty": {"type": "string"}
+    }
+  }
+}
