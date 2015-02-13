@@ -355,36 +355,33 @@ class SearchTestCase(TestCase):
 
     def testInitialization(self):
         es = elastic.get_es()
-        index_name = getattr(settings, 'EFSW_ELASTIC_INDEX')
+        es.indices.delete('_all')
         cmd = esinit.Command()
-        cmd.handle(replace=True, verbosity=0)
-        with self.assertRaises(elastic.exceptions.EsIndexExistsException):
-            cmd.handle(replace=False, verbosity=0)
         base_dir = getattr(settings, 'BASE_DIR')
-        init_mappings = (
+        init_indices = (
             os.path.join(base_dir, 'non-existent-file.json'),
         )
-        with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
+        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             with self.assertRaises(FileNotFoundError):
                 cmd.handle(replace=True, verbosity=0)
 
-        init_mappings = (
-            os.path.join(base_dir, 'efsw', 'common', 'tests', 'testmapping.json'),
-            os.path.join(base_dir, 'efsw', 'common', 'tests', 'mappings'),
+        init_indices = (
+            os.path.join(base_dir, 'efsw', 'common', 'tests', 'testindex.json'),
+            os.path.join(base_dir, 'efsw', 'common', 'tests', 'indices'),
         )
-        with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
+        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             cmd.handle(replace=True, verbosity=0)
-            reply = es.indices.get_mapping(index=index_name, doc_type='testmapping')
+            reply = es.indices.get(index='testindex', feature='_mappings')
             self.assertEqual(reply, {
-                'testmmkit': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+                'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
             })
 
-            reply = es.indices.get_mapping(index=index_name, doc_type='anothermapping')
+            reply = es.indices.get(index='andanotherone', feature='_mappings')
             self.assertEqual(reply, {
-                'testmmkit': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+                'andanotherone': {'mappings': {'andanothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
             })
 
-            reply = es.indices.get_mapping(index=index_name, doc_type='andanotherone')
+            reply = es.indices.get(index='anotherindex', feature='_mappings')
             self.assertEqual(reply, {
-                'testmmkit': {'mappings': {'andanotherone': {'properties': {'testproperty': {'type': 'string'}}}}}
+                'anotherindex': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
             })

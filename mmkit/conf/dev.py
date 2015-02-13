@@ -25,6 +25,4 @@ EFSW_ELASTIC_HOSTS = [
 
 EFSW_ELASTIC_OPTIONS = {}
 
-EFSW_ELASTIC_INDEX = 'mmkit'
-
 from mmkit.conf.dev_local import *

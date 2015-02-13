@@ -1,0 +1,9 @@
+{
+  "mappings": {
+    "testmapping": {
+      "properties": {
+        "testproperty": {"type": "string"}
+      }
+    }
+  }
+}

@@ -19,48 +19,51 @@ class Command(base.BaseCommand):
     )
 
     def handle(self, *args, **options):
-
         verbosity = options['verbosity']
         es = elastic.get_es()
-        index_name = getattr(settings, 'EFSW_ELASTIC_INDEX')
-        if es.indices.exists(index_name):
-            if options['replace']:
-                es.indices.delete(index_name)
-            else:
-                raise elastic.exceptions.EsIndexExistsException(index_name)
-        es.indices.create(index_name)
-        init_mappings = getattr(settings, 'EFSW_ELASTIC_INIT_MAPPINGS', ())
-        if not init_mappings:
+        init_indices = getattr(settings, 'EFSW_ELASTIC_INIT_INDICES', ())
+        if not init_indices:
             if verbosity:
-                print('Список типов для инициализации пустой - пропускаем.')
+                print('Список индексов для инициализации пустой - пропускаем')
             return
         if verbosity:
-            print('Обработка списка типов:')
+            print('Обработка списка индексов:')
         count = 0
-        for im in init_mappings:
-            if not os.path.exists(im):
-                raise FileNotFoundError('Файл (папка) с типами для инициализации поиска не существует: {0}'.format(im))
-            if os.path.isfile(im) and self._compatible(im):
-                self._load_mappings(es, index_name, im, verbosity)
+        for ind in init_indices:
+            if not os.path.exists(ind):
+                raise FileNotFoundError(
+                    'Файл (папка) с индексом для инициализации поиска не существует: {0}'.format(ind)
+                )
+            if os.path.isfile(ind) and self._compatible(ind):
+                self._create_index(es, ind, options['replace'], verbosity)
                 count += 1
-            elif os.path.isdir(im):
+            elif os.path.isdir(ind):
                 if verbosity >= 2:
-                    print('  {0}'.format(im))
-                for p in os.listdir(im):
-                    full_path = os.path.join(im, p)
+                    print('  {0}'.format(ind))
+                for p in os.listdir(ind):
+                    full_path = os.path.join(ind, p)
                     if os.path.isfile(full_path) and self._compatible(full_path):
-                        self._load_mappings(es, index_name, full_path, verbosity)
+                        self._create_index(es, full_path, options['replace'], verbosity)
                         count += 1
-
         if verbosity:
-            print('Загрузка типов для инициализации завершена. Всего загружено: {0}'.format(count))
+            print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
 
-    def _load_mappings(self, es, index_name, path, verbosity):
-        type_name = os.path.splitext(os.path.basename(path))[0]
+
+    def _create_index(self, es, path, replace, verbosity):
+        index_name = os.path.splitext(os.path.basename(path))[0]
         if verbosity >= 2:
-            print('    {0} - {1}'.format(type_name, path))
+            print('    {0} - {1}'.format(index_name, path))
+        if es.indices.exists(index_name):
+            if replace:
+                if verbosity >= 2:
+                    print('    Индекс существует - заменяю')
+                es.indices.delete(index_name)
+            else:
+                if verbosity >= 2:
+                    print('    Индекс существует - пропускаю')
+                return
         with open(path, 'r') as f:
-            es.indices.put_mapping(index=index_name, doc_type=type_name, body=f.read())
+            es.indices.create(index=index_name, body=f.read())
 
     def _compatible(self, path):
         return os.path.splitext(os.path.basename(path))[1] == '.json'

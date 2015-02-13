@@ -1,0 +1,9 @@
+{
+  "mappings": {
+    "anothermapping": {
+      "properties": {
+        "testproperty": {"type": "string"}
+      }
+    }
+  }
+}
