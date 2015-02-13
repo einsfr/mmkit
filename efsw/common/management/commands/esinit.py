@@ -48,7 +48,6 @@ class Command(base.BaseCommand):
         if verbosity:
             print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
 
-
     def _create_index(self, es, path, replace, verbosity):
         index_name = os.path.splitext(os.path.basename(path))[0]
         if verbosity >= 2:
