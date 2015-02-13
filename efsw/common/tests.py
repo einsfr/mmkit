@@ -7,6 +7,7 @@ from efsw.common.templatetags import model
 from efsw.common.templatetags import pagination
 from efsw.common import default_settings
 from efsw.common.search import elastic
+from efsw.common.management.commands import esinit
 
 
 class ModelTagTestCase(TestCase):
@@ -349,3 +350,5 @@ class SearchTestCase(TestCase):
         es = elastic.get_es()
         another_es = elastic.get_es()
         self.assertTrue(es is another_es)
+        cmd = esinit.Command()
+        cmd.handle()
