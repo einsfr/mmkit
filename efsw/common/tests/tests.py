@@ -1,5 +1,4 @@
 import os
-import json
 
 from django.test import TestCase
 from django.db import models
@@ -96,7 +95,7 @@ class ModelTagTestCase(TestCase):
 
 class PaginationTagTestCase(TestCase):
 
-    urls = 'efsw.common.tests_urls'
+    urls = 'efsw.common.tests.tests_urls'
 
     _next_page_text = getattr(settings, 'EFSW_COMM_PAGIN_NEXT_TEXT', default_settings.EFSW_COMM_PAGIN_NEXT_TEXT)
 
@@ -370,11 +369,22 @@ class SearchTestCase(TestCase):
                 cmd.handle(replace=True, verbosity=0)
 
         init_mappings = (
-            os.path.join(base_dir, 'efsw', 'common', 'testmapping.json'),
+            os.path.join(base_dir, 'efsw', 'common', 'tests', 'testmapping.json'),
+            os.path.join(base_dir, 'efsw', 'common', 'tests', 'mappings'),
         )
         with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
-            cmd.handle(replace=True, verbosity=0)
+            cmd.handle(replace=True, verbosity=2)
             reply = es.indices.get_mapping(index=index_name, doc_type='testmapping')
             self.assertEqual(reply, {
                 'testmmkit': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            })
+
+            reply = es.indices.get_mapping(index=index_name, doc_type='anothermapping')
+            self.assertEqual(reply, {
+                'testmmkit': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            })
+
+            reply = es.indices.get_mapping(index=index_name, doc_type='andanotherone')
+            self.assertEqual(reply, {
+                'testmmkit': {'mappings': {'andanotherone': {'properties': {'testproperty': {'type': 'string'}}}}}
             })

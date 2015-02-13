@@ -1,0 +1,7 @@
+{
+  "anothermapping": {
+    "properties": {
+      "testproperty": {"type": "string"}
+    }
+  }
+}

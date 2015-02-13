@@ -1,0 +1,7 @@
+{
+  "andanotherone": {
+    "properties": {
+      "testproperty": {"type": "string"}
+    }
+  }
+}

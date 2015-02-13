@@ -19,6 +19,7 @@ class Command(base.BaseCommand):
     )
 
     def handle(self, *args, **options):
+
         verbosity = options['verbosity']
         es = elastic.get_es()
         index_name = getattr(settings, 'EFSW_ELASTIC_INDEX')
@@ -38,12 +39,28 @@ class Command(base.BaseCommand):
         count = 0
         for im in init_mappings:
             if not os.path.exists(im):
-                raise FileNotFoundError('Файл с типами для инициализации поиска не существует: {0}'.format(im))
-            type_name = os.path.splitext(os.path.basename(im))[0]
-            if verbosity >= 2:
-                print('  {0} - {1}'.format(type_name, im))
-            with open(im, 'r') as f:
-                es.indices.put_mapping(index=index_name, doc_type=type_name, body=f.read())
-            count += 1
+                raise FileNotFoundError('Файл (папка) с типами для инициализации поиска не существует: {0}'.format(im))
+            if os.path.isfile(im) and self._compatible(im):
+                self._load_mappings(es, index_name, im, verbosity)
+                count += 1
+            elif os.path.isdir(im):
+                if verbosity >= 2:
+                    print('  {0}'.format(im))
+                for p in os.listdir(im):
+                    full_path = os.path.join(im, p)
+                    if os.path.isfile(full_path) and self._compatible(full_path):
+                        self._load_mappings(es, index_name, full_path, verbosity)
+                        count += 1
+
         if verbosity:
             print('Загрузка типов для инициализации завершена. Всего загружено: {0}'.format(count))
+
+    def _load_mappings(self, es, index_name, path, verbosity):
+        type_name = os.path.splitext(os.path.basename(path))[0]
+        if verbosity >= 2:
+            print('    {0} - {1}'.format(type_name, path))
+        with open(path, 'r') as f:
+            es.indices.put_mapping(index=index_name, doc_type=type_name, body=f.read())
+
+    def _compatible(self, path):
+        return os.path.splitext(os.path.basename(path))[1] == '.json'

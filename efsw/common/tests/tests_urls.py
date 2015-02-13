@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from efsw.common import tests_views
+from efsw.common.tests import tests_views
 
 urlpatterns = patterns(
     '',
