@@ -19,4 +19,12 @@ EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_dev')
 
 EFSW_ARCH_SKIP_FS_OPS = False
 
+EFSW_ELASTIC_HOSTS = [
+    {'host': '127.0.0.1'},
+]
+
+EFSW_ELASTIC_OPTIONS = {}
+
+EFSW_ELASTIC_INDEX = 'mmkit'
+
 from mmkit.conf.dev_local import *

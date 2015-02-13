@@ -6,6 +6,7 @@ from django.conf import settings
 from efsw.common.templatetags import model
 from efsw.common.templatetags import pagination
 from efsw.common import default_settings
+from efsw.common.search import elastic
 
 
 class ModelTagTestCase(TestCase):
@@ -340,3 +341,11 @@ class PaginationTagTestCase(TestCase):
                                          '<< 1 2 3 4 <5> 6 7 8 9 10 >>', '<< 1 2 3 4 5 <6> 7 8 9 10 >>',
                                          '<< 1 2 3 4 5 6 <7> 8 9 10 >>', '<< 1 2 3 4 5 6 7 <8> 9 10 >>',
                                          '<< 1 2 3 4 5 6 7 8 <9> 10 >>', '<< 1 2 3 4 5 6 7 8 9 <10>'])
+
+
+class SearchTestCase(TestCase):
+
+    def testConnection(self):
+        es = elastic.get_es()
+        another_es = elastic.get_es()
+        self.assertTrue(es is another_es)
