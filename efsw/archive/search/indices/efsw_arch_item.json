@@ -1,0 +1,28 @@
+{
+  "mappings": {
+    "item": {
+      "dynamic": "strict",
+      "properties": {
+        "name": {
+          "type": "string",
+          "analyzer": "russian"
+        },
+        "description": {
+          "type": "string",
+          "analyzer": "russian"
+        },
+        "created": {
+          "type": "date",
+          "format": "date"
+        },
+        "author": {
+          "type": "string",
+          "analyzer": "russian"
+        },
+        "category": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
