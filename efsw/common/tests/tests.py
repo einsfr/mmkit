@@ -373,7 +373,7 @@ class SearchTestCase(TestCase):
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'mappings'),
         )
         with self.settings(EFSW_ELASTIC_INIT_MAPPINGS=init_mappings):
-            cmd.handle(replace=True, verbosity=2)
+            cmd.handle(replace=True, verbosity=0)
             reply = es.indices.get_mapping(index=index_name, doc_type='testmapping')
             self.assertEqual(reply, {
                 'testmmkit': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
