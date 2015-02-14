@@ -1,12 +1,20 @@
 from django.dispatch import receiver
 from django.db.models import signals
 
+from efsw.common.search.models import IndexableModel
+from efsw.common.search import elastic
+
 
 @receiver(signals.post_save)
 def model_saved(sender, instance, created, raw, *args, **kwargs):
-    pass  #  Здесь должна быть передача управления конкретной функции в elastic.py после проверки на то, что класс является потомком индексируемой модели и определения что это - создание или изменение модели
+    if isinstance(IndexableModel, IndexableModel):
+        if created:
+            elastic.create_document(instance)
+        else:
+            elastic.update_document(instance)
 
 
 @receiver(signals.post_delete)
 def model_deleted(sender, instance, *args, **kwargs):
-    pass  #  Здесь тоже передача управления в elastic.py
+    if isinstance(IndexableModel, IndexableModel):
+        elastic.delete_document(instance)
