@@ -5,6 +5,7 @@ from django.core.management import base
 from django.conf import settings
 
 from efsw.common.search import elastic
+from efsw.common import default_settings
 
 
 class Command(base.BaseCommand):
@@ -16,6 +17,12 @@ class Command(base.BaseCommand):
             dest='replace',
             default=False
         ),
+        optparse.make_option(
+            '--nowait',
+            action='store_true',
+            dest='nowait',
+            default=False
+        )
     )
 
     def handle(self, *args, **options):
@@ -47,6 +54,12 @@ class Command(base.BaseCommand):
                             count += 1
         if verbosity:
             print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
+        if not options['nowait']:
+            timeout = getattr(settings, 'EFSW_ELASTIC_TIMEOUT', default_settings.EFSW_ELASTIC_TIMEOUT)
+            if verbosity:
+                print('Ожидание готовности поискового кластера...')
+                es.cluster.health(wait_for_status='yellow', timeout=int(timeout))
+
 
     def _create_index(self, es, path, replace, verbosity):
         index_name = os.path.splitext(os.path.basename(path))[0]
