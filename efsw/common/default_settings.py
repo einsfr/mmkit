@@ -7,3 +7,6 @@ EFSW_COMM_PAGIN_PREV_TEXT = '«'
 
 # Текст для ссылки "следующая страница"
 EFSW_COMM_PAGIN_NEXT_TEXT = '»'
+
+# Интервал ожидания завершения операций ES
+EFSW_ELASTIC_TIMEOUT = 5
