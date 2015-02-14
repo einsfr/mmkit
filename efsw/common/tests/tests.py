@@ -366,14 +366,14 @@ class SearchTestCase(TestCase):
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             with self.assertRaises(FileNotFoundError):
-                cmd.handle(replace=True, verbosity=0)
+                cmd.handle(replace=True, verbosity=0, nowait=True)
 
         init_indices = (
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'testindex.json'),
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'indices'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
-            cmd.handle(replace=True, verbosity=0)
+            cmd.handle(replace=True, verbosity=0, nowait=True)
         reply = es.indices.get(index='testindex', feature='_mappings')
         self.assertEqual(reply, {
             'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
@@ -398,8 +398,7 @@ class ModelIndexTestCase(TestCase):
             os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
-            esinit.Command().handle(replace=True, verbosity=0)
-        es.cluster.health(wait_for_status='yellow')
+            esinit.Command().handle(replace=True, verbosity=0, nowait=False)
         m = test_models.IndexableTestModel()
         m.name = 'Test Model 1'
         m.created = datetime.date.today()
@@ -407,6 +406,11 @@ class ModelIndexTestCase(TestCase):
             schema_editor.create_model(m)
         m.save()
         reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
-        print(reply)
+        self.assertEqual(reply['_index'], 'testmodelindex')
+        self.assertEqual(reply['_source']['created'], m.created.isoformat())
+        self.assertEqual(reply['_source']['name'], m.name)
+        self.assertEqual(reply['_type'], 'indexabletestmodel')
+        self.assertEqual(reply['_id'], str(m.id))
+        self.assertTrue(reply['found'])
         with connection.schema_editor() as schema_editor:
             schema_editor.delete_model(m)
