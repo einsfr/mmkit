@@ -1,5 +1,3 @@
-import json
-
 from django.db import models
 
 from efsw.common.search.models import IndexableModel
@@ -20,7 +18,7 @@ class IndexableTestModel(IndexableModel, models.Model):
         return 'testmodelindex'
 
     def get_doc_body(self):
-        return json.dumps({
+        return {
             'name': self.name,
             'created': self.created.isoformat()
-        })
+        }

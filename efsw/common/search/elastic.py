@@ -1,4 +1,5 @@
 import elasticsearch
+import json
 
 from django.conf import settings
 
@@ -30,12 +31,13 @@ def get_es():
 
 def create_document(model: IndexableModel):
     es = get_es()
-    es.create(model.get_index_name(), model.get_doc_type(), model.get_doc_body(), id=model.id)
+    es.create(model.get_index_name(), model.get_doc_type(), json.dumps(model.get_doc_body()), id=model.id)
 
 
 def update_document(model: IndexableModel):
     es = get_es()
-    es.update(model.get_index_name(), model.get_doc_type(), model.id, model.get_doc_body())
+    doc_body = {'doc': model.get_doc_body()}
+    es.update(model.get_index_name(), model.get_doc_type(), model.id, json.dumps(doc_body))
 
 
 def delete_document(model: IndexableModel):

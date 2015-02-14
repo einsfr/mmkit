@@ -412,5 +412,14 @@ class ModelIndexTestCase(TestCase):
         self.assertEqual(reply['_type'], 'indexabletestmodel')
         self.assertEqual(reply['_id'], str(m.id))
         self.assertTrue(reply['found'])
+        m.name = 'Edited Test Model 1'
+        m.save()
+        reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
+        self.assertEqual(reply['_index'], 'testmodelindex')
+        self.assertEqual(reply['_source']['created'], m.created.isoformat())
+        self.assertEqual(reply['_source']['name'], m.name)
+        self.assertEqual(reply['_type'], 'indexabletestmodel')
+        self.assertEqual(reply['_id'], str(m.id))
+        self.assertTrue(reply['found'])
         with connection.schema_editor() as schema_editor:
             schema_editor.delete_model(m)
