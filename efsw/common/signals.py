@@ -7,7 +7,7 @@ from efsw.common.search import elastic
 
 @receiver(signals.post_save)
 def model_saved(sender, instance, created, raw, *args, **kwargs):
-    if isinstance(IndexableModel, IndexableModel):
+    if isinstance(instance, IndexableModel):
         if created:
             elastic.create_document(instance)
         else:
@@ -16,5 +16,5 @@ def model_saved(sender, instance, created, raw, *args, **kwargs):
 
 @receiver(signals.post_delete)
 def model_deleted(sender, instance, *args, **kwargs):
-    if isinstance(IndexableModel, IndexableModel):
+    if isinstance(instance, IndexableModel):
         elastic.delete_document(instance)

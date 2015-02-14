@@ -1,15 +1,19 @@
 import os
+import datetime
+import time
 
 from django.test import TestCase
 from django.db import models
 from django.core import paginator
 from django.conf import settings
+from django.db import connection
 
 from efsw.common.templatetags import model
 from efsw.common.templatetags import pagination
 from efsw.common import default_settings
 from efsw.common.search import elastic
 from efsw.common.management.commands import esinit
+from efsw.common.tests import models as test_models
 
 
 class ModelTagTestCase(TestCase):
@@ -370,17 +374,39 @@ class SearchTestCase(TestCase):
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             cmd.handle(replace=True, verbosity=0)
-            reply = es.indices.get(index='testindex', feature='_mappings')
-            self.assertEqual(reply, {
-                'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
-            })
+        reply = es.indices.get(index='testindex', feature='_mappings')
+        self.assertEqual(reply, {
+            'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+        })
 
-            reply = es.indices.get(index='andanotherone', feature='_mappings')
-            self.assertEqual(reply, {
-                'andanotherone': {'mappings': {'andanothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
-            })
+        reply = es.indices.get(index='andanotherone', feature='_mappings')
+        self.assertEqual(reply, {
+            'andanotherone': {'mappings': {'andanothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+        })
 
-            reply = es.indices.get(index='anotherindex', feature='_mappings')
-            self.assertEqual(reply, {
-                'anotherindex': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
-            })
+        reply = es.indices.get(index='anotherindex', feature='_mappings')
+        self.assertEqual(reply, {
+            'anotherindex': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+        })
+
+
+class ModelIndexTestCase(TestCase):
+
+    def testModelCreation(self):
+        es = elastic.get_es()
+        init_indices = (
+            os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
+        )
+        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
+            esinit.Command().handle(replace=True, verbosity=0)
+        es.cluster.health(wait_for_status='yellow')
+        m = test_models.IndexableTestModel()
+        m.name = 'Test Model 1'
+        m.created = datetime.date.today()
+        with connection.schema_editor() as schema_editor:
+            schema_editor.create_model(m)
+        m.save()
+        reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
+        print(reply)
+        with connection.schema_editor() as schema_editor:
+            schema_editor.delete_model(m)

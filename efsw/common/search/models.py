@@ -1,7 +1,6 @@
-from django.db import models
 
 
-class IndexableModel(models.Model):
+class IndexableModel():
 
     def get_index_name(self):
         raise NotImplementedError('Метод get_index_name должен быть переопределён моделью перед использованием.')

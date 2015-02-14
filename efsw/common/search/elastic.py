@@ -30,7 +30,7 @@ def get_es():
 
 def create_document(model: IndexableModel):
     es = get_es()
-    es.create(model.get_index_name(), model.get_doc_type(), model.get_doc_body())
+    es.create(model.get_index_name(), model.get_doc_type(), model.get_doc_body(), id=model.id)
 
 
 def update_document(model: IndexableModel):

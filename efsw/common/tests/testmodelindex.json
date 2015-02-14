@@ -1,0 +1,17 @@
+{
+  "mappings": {
+    "indexabletestmodel": {
+      "dynamic": "strict",
+      "properties": {
+        "name": {
+          "type": "string",
+          "analyzer": "russian"
+        },
+        "created": {
+          "type": "date",
+          "format": "date"
+        }
+      }
+    }
+  }
+}
