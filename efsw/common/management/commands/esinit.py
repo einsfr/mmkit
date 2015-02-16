@@ -58,7 +58,7 @@ class Command(base.BaseCommand):
             timeout = getattr(settings, 'EFSW_ELASTIC_TIMEOUT', default_settings.EFSW_ELASTIC_TIMEOUT)
             if verbosity:
                 print('Ожидание готовности поискового кластера...')
-                es.cluster.health(wait_for_status='yellow', timeout=int(timeout))
+            es.cluster.health(wait_for_status='yellow', timeout=int(timeout))
 
 
     def _create_index(self, es, path, replace, verbosity):
