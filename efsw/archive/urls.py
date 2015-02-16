@@ -5,6 +5,12 @@ from efsw.archive import views
 
 urlpatterns = patterns(
     '',
+    # search/ Поиск по архиву
+    url(
+        r'^search/',
+        views.search,
+        name='search'
+    ),
     # items/ Основной список элементов
     url(
         r'^items/$',

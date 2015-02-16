@@ -126,3 +126,7 @@ class CategoryUpdateView(generic.UpdateView):
     template_name = 'archive/category_form_update.html'
     form_class = forms.ItemCategoryForm
     success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
+
+
+def search(request):
+    pass
