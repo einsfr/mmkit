@@ -1,10 +1,11 @@
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
+from django.template import loader
 
 from efsw.archive import models
 from efsw.archive import forms
@@ -129,4 +130,11 @@ class CategoryUpdateView(generic.UpdateView):
 
 
 def search(request):
-    pass
+    if not _check_search_ready():
+        return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
+    if not request.GET.get('q'):
+        return shortcuts.render(request, 'archive/search.html')
+
+
+def _check_search_ready():
+    return True
