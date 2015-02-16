@@ -1,0 +1,45 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "ru": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "russian_morphology", "ru_stop"]
+        }
+      },
+      "filter": {
+        "ru_stop": {
+          "type": "stop",
+          "stopwords": "_russian_"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "item": {
+      "dynamic": "strict",
+      "properties": {
+        "name": {
+          "type": "string",
+          "analyzer": "ru"
+        },
+        "description": {
+          "type": "string",
+          "analyzer": "ru"
+        },
+        "created": {
+          "type": "date",
+          "format": "date"
+        },
+        "author": {
+          "type": "string",
+          "analyzer": "ru"
+        },
+        "category": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
