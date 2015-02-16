@@ -1,3 +1,5 @@
+import json
+
 from django.views import generic
 from django import shortcuts
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
@@ -6,6 +8,9 @@ from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
 from django.template import loader
+from django.views.decorators import csrf
+
+from elasticsearch import exceptions as elastic_exceptions
 
 from efsw.archive import models
 from efsw.archive import forms
@@ -131,6 +136,7 @@ class CategoryUpdateView(generic.UpdateView):
     success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
 
 
+@csrf.csrf_exempt
 def search(request):
     if not _check_search_ready():
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
@@ -140,7 +146,18 @@ def search(request):
 
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
-        query = form.q
+        query = form.cleaned_data['q']
+        query_body = {
+            'query': {
+                'multi_match': {
+                    'query': str(query),
+                    'fields': ['name', 'description', 'author']
+                }
+            }
+        }
+        es = elastic.get_es()
+        result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body))
+        return shortcuts.render(request, 'archive/search.html', {'form': form, 'result': result})
     else:
         return shortcuts.render(request, 'archive/search.html', {'form': form, })
 
@@ -150,7 +167,10 @@ def _check_search_ready():
         return False
 
     es = elastic.get_es()
-    status = str(es.cluster.health()['status']).lower()
+    try:
+        status = str(es.cluster.health()['status']).lower()
+    except elastic_exceptions.ConnectionError:
+        return False
     if status != 'yellow' and status != 'green':
         return False
 
