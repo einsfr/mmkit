@@ -10,3 +10,6 @@ EFSW_COMM_PAGIN_NEXT_TEXT = '»'
 
 # Интервал ожидания завершения операций ES
 EFSW_ELASTIC_TIMEOUT = 5
+
+# Полностью отключает поисковый движок Elasticsearch
+EFSW_ELASTIC_DISABLE = False

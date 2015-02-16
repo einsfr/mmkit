@@ -404,7 +404,8 @@ class ModelIndexTestCase(TestCase):
         m.created = datetime.date.today()
         with connection.schema_editor() as schema_editor:
             schema_editor.create_model(m)
-        m.save()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            m.save()
         reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
         self.assertEqual(reply['_index'], 'testmodelindex')
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
@@ -413,7 +414,8 @@ class ModelIndexTestCase(TestCase):
         self.assertEqual(reply['_id'], str(m.id))
         self.assertTrue(reply['found'])
         m.name = 'Edited Test Model 1'
-        m.save()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            m.save()
         reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
         self.assertEqual(reply['_index'], 'testmodelindex')
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
@@ -422,7 +424,8 @@ class ModelIndexTestCase(TestCase):
         self.assertEqual(reply['_id'], str(m.id))
         self.assertTrue(reply['found'])
         model_id = m.id
-        m.delete()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            m.delete()
         reply = es.get('testmodelindex', model_id, 'indexabletestmodel', ignore=404)
         self.assertFalse(reply['found'])
         with connection.schema_editor() as schema_editor:
