@@ -19,6 +19,9 @@
   "mappings": {
     "item": {
       "dynamic": "strict",
+      "_source": {
+        "enabled": false
+      },
       "properties": {
         "name": {
           "type": "string",
