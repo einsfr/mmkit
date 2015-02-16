@@ -9,13 +9,15 @@ from django.template import loader
 
 from efsw.archive import models
 from efsw.archive import forms
-from efsw.archive import default_settings
+from efsw.archive import default_settings as archive_default_settings
+from efsw.common import default_settings as common_default_settings
+from efsw.common.search import elastic
 
 
 def _get_item_list_page(items, page):
     pagin = paginator.Paginator(
         items,
-        getattr(settings, 'EFSW_ARCH_ITEM_LIST_PER_PAGE', default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
+        getattr(settings, 'EFSW_ARCH_ITEM_LIST_PER_PAGE', archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
     )
     try:
         items_page = pagin.page(page)
@@ -132,9 +134,24 @@ class CategoryUpdateView(generic.UpdateView):
 def search(request):
     if not _check_search_ready():
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
+
     if not request.GET.get('q'):
-        return shortcuts.render(request, 'archive/search.html')
+        return shortcuts.render(request, 'archive/search.html', {'form': forms.ArchiveSearchForm})
+
+    form = forms.ArchiveSearchForm(request.GET)
+    if form.is_valid():
+        query = form.q
+    else:
+        return shortcuts.render(request, 'archive/search.html', {'form': form, })
 
 
 def _check_search_ready():
+    if getattr(settings, 'EFSW_ELASTIC_DISABLE', common_default_settings.EFSW_ELASTIC_DISABLE):
+        return False
+
+    es = elastic.get_es()
+    status = str(es.cluster.health()['status']).lower()
+    if status != 'yellow' and status != 'green':
+        return False
+
     return True
