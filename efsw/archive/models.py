@@ -5,6 +5,7 @@ from django.core import urlresolvers
 from django.conf import settings
 
 from efsw.archive import default_settings
+from efsw.common.search.models import IndexableModel
 
 
 class Storage(models.Model):
@@ -72,7 +73,7 @@ class ItemCategory(models.Model):
         return 'Редактировать категорию'
 
 
-class Item(models.Model):
+class Item(IndexableModel, models.Model):
     """ Модель, описывающая элемент архива """
 
     class Meta:
@@ -130,6 +131,21 @@ class Item(models.Model):
 
     def get_update_url_title(self):
         return 'Редактировать элемент'
+
+    def get_index_name(self):
+        return 'efswarchitem'
+
+    def get_doc_type(self):
+        return 'item'
+
+    def get_doc_body(self):
+        return {
+            'name': self.name,
+            'description': self.description,
+            'created': self.created.isoformat(),
+            'author': self.author,
+            'category': self.category.id,
+        }
 
 
 class ItemLog(models.Model):
