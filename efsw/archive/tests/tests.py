@@ -465,3 +465,13 @@ class ArchiveViewsTestCase(TestCase):
         self.assertEqual(len(response.redirect_chain), 1)
         self.assertEqual(models.ItemCategory.objects.count(), cat_count)
         self.assertEqual(models.ItemCategory.objects.get(pk=1).name, 'Отредактированное название')
+
+    def test_search_page(self):
+        request_url = urlresolvers.reverse('efsw.archive:search')
+
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(request_url)
+        self.assertContains(response, '<h1>Поиск в архиве</h1>', status_code=200)
+
+        response = self.client.get(request_url)
+        self.assertContains(response, '<h1>Поиск не работает</h1>', status_code=500)
