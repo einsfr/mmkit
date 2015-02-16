@@ -32,3 +32,11 @@ class ItemCategoryForm(forms.ModelForm):
     class Meta:
         model = models.ItemCategory
         fields = ('name', )
+
+
+class ArchiveSearchForm(forms.Form):
+    q = forms.CharField(
+        min_length=3,
+        max_length=255,
+        label='Текст запроса'
+    )
