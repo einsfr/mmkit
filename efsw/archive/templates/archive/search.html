@@ -5,10 +5,12 @@
 {% block content %}
     <h1>Поиск в архиве</h1>
     <form action="" method="get">
-        {% csrf_token %}
         <table class="table">
             {{ form.as_table }}
         </table>
         <input type="submit" value="Искать">
     </form>
+    {% if result %}
+        {{ result }}
+    {% endif %}
 {% endblock %}
