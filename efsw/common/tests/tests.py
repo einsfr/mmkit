@@ -366,14 +366,14 @@ class SearchTestCase(TestCase):
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             with self.assertRaises(FileNotFoundError):
-                cmd.handle(replace=True, verbosity=2, nowait=True)
+                cmd.handle(replace=True, verbosity=2, nowait=False)
 
         init_indices = (
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'testindex.json'),
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'indices'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
-            cmd.handle(replace=True, verbosity=2, nowait=True)
+            cmd.handle(replace=True, verbosity=2, nowait=False)
         reply = es.indices.get(index='testindex', feature='_mappings')
         self.assertEqual(reply, {
             'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
