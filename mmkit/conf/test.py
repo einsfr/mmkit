@@ -10,4 +10,6 @@ EFSW_ARCH_SKIP_FS_OPS = True  # Не надо это трогать, иначе 
 
 EFSW_ELASTIC_DISABLE = True  # ES !!!ДЛЯ ТЕСТИРОВАНИЯ!!! надо включать только в тех местах, где тестируется именно он, иначе - начинаются проблемы
 
+EFSW_ELASTIC_CHECK_INTERVAL = -1
+
 from mmkit.conf.test_local import *
