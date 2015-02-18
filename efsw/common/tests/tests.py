@@ -366,14 +366,14 @@ class SearchTestCase(TestCase):
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             with self.assertRaises(FileNotFoundError):
-                cmd.handle(replace=True, verbosity=0, nowait=True)
+                cmd.handle(replace=True, verbosity=2, nowait=True)
 
         init_indices = (
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'testindex.json'),
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'indices'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
-            cmd.handle(replace=True, verbosity=0, nowait=True)
+            cmd.handle(replace=True, verbosity=2, nowait=True)
         reply = es.indices.get(index='testindex', feature='_mappings')
         self.assertEqual(reply, {
             'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
@@ -398,7 +398,7 @@ class ModelIndexTestCase(TestCase):
             os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
-            esinit.Command().handle(replace=True, verbosity=0, nowait=False)
+            esinit.Command().handle(replace=True, verbosity=2, nowait=False)
         m = test_models.IndexableTestModel()
         m.name = 'Test Model 1'
         m.created = datetime.date.today()
