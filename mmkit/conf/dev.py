@@ -10,4 +10,6 @@ INSTALLED_APPS += ('debug_toolbar', )
 
 EFSW_ARCH_SKIP_FS_OPS = False
 
+EFSW_ARCH_ITEM_LIST_PER_PAGE = 2
+
 from mmkit.conf.dev_local import *
