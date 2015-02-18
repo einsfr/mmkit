@@ -5,17 +5,17 @@ from efsw.archive import views
 
 urlpatterns = patterns(
     '',
-    # search/ Поиск по архиву
-    url(
-        r'^search/',
-        views.search,
-        name='search'
-    ),
     # search/page/2/ Поиск по архиву постранично
     url(
         r'^search/page/(?P<page>\d+)/',
         views.search,
         name='search_page'
+    ),
+    # search/ Поиск по архиву
+    url(
+        r'^search/',
+        views.search,
+        name='search'
     ),
     # items/ Основной список элементов
     url(

@@ -137,7 +137,7 @@ class CategoryUpdateView(generic.UpdateView):
 
 
 @csrf.csrf_exempt
-def search(request):
+def search(request, page=1):
     if not _check_search_ready():
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
 
@@ -164,7 +164,6 @@ def search(request):
             # TODO: А здесь ещё нужно будет разобраться с сортировкой - ведь мне результат нужен именно в той последовательности, что и ID
         else:
             items = []
-        page = request.GET.get('p', 1)
         items_pagination = _get_item_list_page(items, page)
         return shortcuts.render(
             request,
