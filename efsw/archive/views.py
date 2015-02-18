@@ -166,7 +166,11 @@ def search(request):
             items = []
         page = request.GET.get('p', 1)
         items_pagination = _get_item_list_page(items, page)
-        return shortcuts.render(request, 'archive/search.html', {'form': form, 'items': items_pagination})
+        return shortcuts.render(
+            request,
+            'archive/search.html',
+            {'form': form, 'items': items_pagination, 'search_qs': request.META.get('QUERY_STRING')}
+        )
     else:
         return shortcuts.render(request, 'archive/search.html', {'form': form, })
 
