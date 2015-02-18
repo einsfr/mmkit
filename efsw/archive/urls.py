@@ -11,6 +11,12 @@ urlpatterns = patterns(
         views.search,
         name='search'
     ),
+    # search/page/2/ Поиск по архиву постранично
+    url(
+        r'^search/page/(?P<page>\d+)/',
+        views.search,
+        name='search_page'
+    ),
     # items/ Основной список элементов
     url(
         r'^items/$',
