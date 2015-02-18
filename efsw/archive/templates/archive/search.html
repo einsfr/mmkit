@@ -10,7 +10,10 @@
         </table>
         <input type="submit" value="Искать">
     </form>
-    {% if result %}
-        {{ result }}
+    {% if items %}
+        {% for item in items %}
+            <h2>{{ item.name }}</h2>
+            <p>{{ item.description }}</p>
+        {% endfor %}
     {% endif %}
 {% endblock %}

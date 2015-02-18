@@ -158,7 +158,12 @@ def search(request):
         es = elastic.get_es()
         result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body))
         # TODO: Нужно добавить разный вес у разных полей. Например, строка автора короткая, а значит - даёт хороший вес, но такие результаты как раз и надо сдвинуть ниже
-        return shortcuts.render(request, 'archive/search.html', {'form': form, 'result': result})
+        hits = result['hits']
+        if hits['total']:
+            items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
+        else:
+            items = []
+        return shortcuts.render(request, 'archive/search.html', {'form': form, 'items': items})
     else:
         return shortcuts.render(request, 'archive/search.html', {'form': form, })
 
