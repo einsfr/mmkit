@@ -17,6 +17,6 @@
             <h2>{{ item.name }}</h2>
             <p>{{ item.description }}</p>
         {% endfor %}
-        <nav class="text-center">{% pagination items 'efsw.archive:search_page' %}</nav><!-- TODO: Для этого тэга понадобится ещё один параметр - остаток строки запроса -->
+        <nav class="text-center">{% pagination items 'efsw.archive:search_page' search_qs %}</nav>
     {% endif %}
 {% endblock %}
