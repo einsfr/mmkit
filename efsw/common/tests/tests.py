@@ -105,14 +105,14 @@ class PaginationTagTestCase(TestCase):
 
     _prev_page_text = getattr(settings, 'EFSW_COMM_PAGIN_PREV_TEXT', default_settings.EFSW_COMM_PAGIN_PREV_TEXT)
 
-    def _test_prev_at(self, prep, pos, num):
+    def _test_prev_at(self, prep, pos, num, query_string):
         self.assertEqual(prep[pos]['text'], self._prev_page_text)
-        self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+        self.assertEqual(prep[pos]['url'], '/page/{0}/{1}'.format(num, query_string))
         self.assertFalse(prep[pos]['active'])
 
-    def _test_next_at(self, prep, pos, num):
+    def _test_next_at(self, prep, pos, num, query_string):
         self.assertEqual(prep[pos]['text'], self._next_page_text)
-        self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+        self.assertEqual(prep[pos]['url'], '/page/{0}/{1}'.format(num, query_string))
         self.assertFalse(prep[pos]['active'])
 
     def _test_active_num_at(self, prep, pos, num):
@@ -120,18 +120,20 @@ class PaginationTagTestCase(TestCase):
         self.assertEqual(prep[pos]['url'], '#')
         self.assertTrue(prep[pos]['active'])
 
-    def _test_num_at(self, prep, pos_num_dict):
+    def _test_num_at(self, prep, pos_num_dict, query_string):
         for pos, num in pos_num_dict.items():
             self.assertEqual(prep[pos]['text'], str(num))
-            self.assertEqual(prep[pos]['url'], '/page/{0}/'.format(num))
+            self.assertEqual(prep[pos]['url'], '/page/{0}/{1}'.format(num, query_string))
             self.assertFalse(prep[pos]['active'])
 
-    def _process_test_list(self, page_count, test_list):
+    def _process_test_list(self, page_count, test_list, query_string=''):
         pagin = paginator.Paginator([x for x in range(1, page_count + 1)], 1)
         page_num = 1
         for test_string in test_list:
             page = pagin.page(page_num)
-            prep = pagination._prepare(page, 'page')
+            prep = pagination._prepare(page, 'page', query_string)
+            if query_string:
+                query_string = '?{0}'.format(query_string)
             parts = test_string.split(' ')
             self.assertEqual(len(prep), len(parts))
             for num, p in enumerate(parts):
@@ -141,12 +143,12 @@ class PaginationTagTestCase(TestCase):
             pos_num = {}
             for num, p in enumerate(parts):
                 if p == self._prev_page_text:
-                    self._test_prev_at(prep, num, active_page_number - 1)
+                    self._test_prev_at(prep, num, active_page_number - 1, query_string)
                 elif p == self._next_page_text:
-                    self._test_next_at(prep, num, active_page_number + 1)
+                    self._test_next_at(prep, num, active_page_number + 1, query_string)
                 elif p[0] != '<' and p[-1] != '>':
                     pos_num[num] = int(p)
-            self._test_num_at(prep, pos_num)
+            self._test_num_at(prep, pos_num, query_string)
             page_num += 1
 
     def test_pagination(self):
@@ -348,6 +350,12 @@ class PaginationTagTestCase(TestCase):
                                          '<< 1 2 3 4 <5> 6 7 8 9 10 >>', '<< 1 2 3 4 5 <6> 7 8 9 10 >>',
                                          '<< 1 2 3 4 5 6 <7> 8 9 10 >>', '<< 1 2 3 4 5 6 7 <8> 9 10 >>',
                                          '<< 1 2 3 4 5 6 7 8 <9> 10 >>', '<< 1 2 3 4 5 6 7 8 9 <10>'])
+            # И ещё раз - с query_string
+            self._process_test_list(10, ['<1> 2 3 4 5 6 7 8 9 10 >>', '<< 1 <2> 3 4 5 6 7 8 9 10 >>',
+                                         '<< 1 2 <3> 4 5 6 7 8 9 10 >>', '<< 1 2 3 <4> 5 6 7 8 9 10 >>',
+                                         '<< 1 2 3 4 <5> 6 7 8 9 10 >>', '<< 1 2 3 4 5 <6> 7 8 9 10 >>',
+                                         '<< 1 2 3 4 5 6 <7> 8 9 10 >>', '<< 1 2 3 4 5 6 7 <8> 9 10 >>',
+                                         '<< 1 2 3 4 5 6 7 8 <9> 10 >>', '<< 1 2 3 4 5 6 7 8 9 <10>'], 'param=2')
 
 
 class SearchTestCase(TestCase):
