@@ -1,13 +1,17 @@
 import elasticsearch
 import json
+import time
 
 from django.conf import settings
 
 from efsw.common.search import exceptions
 from efsw.common.search.models import IndexableModel
+from efsw.common import default_settings as common_default_settings
 
 
 es_instance = None
+
+es_instance_timestamp = None
 
 
 def _get_es_instance():
@@ -18,13 +22,24 @@ def _get_es_instance():
                                            'хостов, используемых ES)')
 
     es_options = getattr(settings, 'EFSW_ELASTIC_OPTIONS', {})
+    global es_instance_timestamp
+    es_instance_timestamp = time.time()
     return elasticsearch.Elasticsearch(es_hosts, **es_options)
 
 
 def get_es():
     global es_instance
+    global es_instance_timestamp
     if es_instance is None:
         es_instance = _get_es_instance()
+    else:
+        max_time_delta = getattr(
+            settings,
+            'EFSW_ELASTIC_CHECK_INTERVAL',
+            common_default_settings.EFSW_ELASTIC_CHECK_INTERVAL
+        )
+        if time.time() - es_instance_timestamp >= max_time_delta:
+            es_instance = _get_es_instance()
 
     return es_instance
 

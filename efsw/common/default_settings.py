@@ -13,3 +13,6 @@ EFSW_ELASTIC_TIMEOUT = 5
 
 # Полностью отключает поисковый движок Elasticsearch
 EFSW_ELASTIC_DISABLE = False
+
+# Интервал проверки состояния подключения к поисковому движку (в секундах)
+EFSW_ELASTIC_CHECK_INTERVAL = 30
