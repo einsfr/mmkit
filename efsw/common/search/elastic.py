@@ -38,7 +38,7 @@ def get_es():
             'EFSW_ELASTIC_CHECK_INTERVAL',
             common_default_settings.EFSW_ELASTIC_CHECK_INTERVAL
         )
-        if time.time() - es_instance_timestamp >= max_time_delta:
+        if time.time() - es_instance_timestamp >= max_time_delta >= 0:
             es_instance = _get_es_instance()
 
     return es_instance
