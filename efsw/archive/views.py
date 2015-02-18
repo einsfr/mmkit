@@ -161,6 +161,7 @@ def search(request):
         hits = result['hits']
         if hits['total']:
             items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
+            # TODO: А здесь ещё нужно будет разобраться с сортировкой - ведь мне результат нужен именно в той последовательности, что и ID
         else:
             items = []
         return shortcuts.render(request, 'archive/search.html', {'form': form, 'items': items})
