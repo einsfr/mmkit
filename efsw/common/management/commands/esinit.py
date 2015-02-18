@@ -38,9 +38,10 @@ class Command(base.BaseCommand):
         count = 0
         for ind in init_indices:
             if not os.path.exists(ind):
-                raise FileNotFoundError(
-                    'Файл (папка) с индексом для инициализации поиска не существует: {0}'.format(ind)
-                )
+                msg = 'Файл (папка) с индексом для инициализации поиска не существует: {0}'.format(ind)
+                if verbosity:
+                    print('ОШИБКА: {0}'.format(msg))
+                raise FileNotFoundError(msg)
             if os.path.isfile(ind) and self._compatible(ind):
                 if self._create_index(es, ind, options['replace'], verbosity):
                     count += 1
@@ -59,6 +60,8 @@ class Command(base.BaseCommand):
             if verbosity:
                 print('Ожидание готовности поискового кластера...')
             es.cluster.health(wait_for_status='yellow', timeout=int(timeout))
+            if verbosity:
+                print('Готово!')
 
 
     def _create_index(self, es, path, replace, verbosity):
