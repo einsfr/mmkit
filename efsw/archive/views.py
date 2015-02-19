@@ -156,7 +156,7 @@ def search(request, page=1):
             'query': {
                 'multi_match': {
                     'query': str(query),
-                    'fields': ['name', 'description', 'author']
+                    'fields': ['name^4', 'description^2', 'author']
                 }
             }
         }
@@ -166,7 +166,6 @@ def search(request, page=1):
             common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
         )
         result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body), size=search_size)
-        # TODO: Нужно добавить разный вес у разных полей. Например, строка автора короткая, а значит - даёт хороший вес, но такие результаты как раз и надо сдвинуть ниже
         hits = result['hits']
         if hits['total']:
             items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
