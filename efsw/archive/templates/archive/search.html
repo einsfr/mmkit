@@ -19,7 +19,7 @@
         {% if items %}
             {% if hits > search_size %}
                 <div class="text-center">
-                    Сликшом много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
+                    Слишком много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
                     условия поиска: например, использовать более конкретный текстовый запрос.
                 </div>
             {% endif %}
@@ -30,6 +30,10 @@
                         <tbody>
                             <tr>
                                 <td colspan="2">{{ item.description }}</td>
+                            </tr>
+                            <tr>
+                                <th>{% field_verbose_name item 'category' %}</th>
+                                <td>{{ item.category.name }}</td>
                             </tr>
                             <tr>
                                 <th>{% field_verbose_name item 'created' %}</th>

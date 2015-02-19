@@ -192,7 +192,6 @@ def search(request, page=1):
                 'items': items,
                 'hits': hits['total'],
                 'search_size': search_size,
-                'result': result,
                 'search_performed': True
             }
         )
