@@ -13,6 +13,8 @@ _es_instance_timestamp = None
 
 _es_instance_status = None
 
+_es_index_prefix = None
+
 
 def _set_es_instance():
     try:
@@ -80,3 +82,14 @@ def get_es():
 def get_es_status():
     global _es_instance_status
     return _es_instance_status
+
+
+def get_es_index_prefix():
+    global _es_index_prefix
+    if _es_index_prefix is None:
+        _es_index_prefix = getattr(
+            settings,
+            'EFSW_ELASTIC_INDEX_PREFIX',
+            common_default_settings.EFSW_ELASTIC_INDEX_PREFIX
+        )
+    return _es_index_prefix
