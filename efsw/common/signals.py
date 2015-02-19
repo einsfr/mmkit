@@ -16,9 +16,10 @@ def model_saved(sender, instance, created, raw, *args, **kwargs):
     if isinstance(instance, IndexableModel)\
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
         es = elastic.get_es()
+        index_name = '{0}{1}'.format(elastic.get_es_index_prefix(), instance.get_index_name())
         if created:
             es.create(
-                instance.get_index_name(),
+                index_name,
                 instance.get_doc_type(),
                 json.dumps(
                     instance.get_doc_body()
@@ -28,7 +29,7 @@ def model_saved(sender, instance, created, raw, *args, **kwargs):
         else:
             try:
                 es.update(
-                    instance.get_index_name(),
+                    index_name,
                     instance.get_doc_type(),
                     instance.id,
                     json.dumps({'doc': instance.get_doc_body()})
@@ -36,7 +37,7 @@ def model_saved(sender, instance, created, raw, *args, **kwargs):
             except EsNotFoundError:
                 # TODO: Добавить запись в лог в debug-режиме
                 es.create(
-                    instance.get_index_name(),
+                    index_name,
                     instance.get_doc_type(),
                     json.dumps(
                         instance.get_doc_body()
@@ -51,7 +52,7 @@ def model_deleted(sender, instance, *args, **kwargs):
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
         es = elastic.get_es()
         es.delete(
-            instance.get_index_name(),
+            '{0}{1}'.format(elastic.get_es_index_prefix(), instance.get_index_name()),
             instance.get_doc_type(),
             instance.id
         )

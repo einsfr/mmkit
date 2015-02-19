@@ -1,6 +1,5 @@
 import os
 import datetime
-import time
 
 from django.test import TestCase
 from django.db import models
@@ -385,21 +384,31 @@ class SearchTestCase(TestCase):
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'testindex.json'),
             os.path.join(base_dir, 'efsw', 'common', 'tests', 'indices'),
         )
-        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
+        with self.settings(
+                EFSW_ELASTIC_INIT_INDICES=init_indices,
+                EFSW_ELASTIC_DISABLE=False
+        ):
             cmd.handle(replace=True, verbosity=2, nowait=False)
-        reply = es.indices.get(index='testindex', feature='_mappings')
+        index_prefix = elastic.get_es_index_prefix()
+        reply = es.indices.get(index='{0}testindex'.format(index_prefix), feature='_mappings')
         self.assertEqual(reply, {
-            'testindex': {'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            '{0}testindex'.format(index_prefix): {
+                'mappings': {'testmapping': {'properties': {'testproperty': {'type': 'string'}}}}
+            }
         })
 
-        reply = es.indices.get(index='andanotherone', feature='_mappings')
+        reply = es.indices.get(index='{0}andanotherone'.format(index_prefix), feature='_mappings')
         self.assertEqual(reply, {
-            'andanotherone': {'mappings': {'andanothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            '{0}andanotherone'.format(index_prefix): {
+                'mappings': {'andanothermapping': {'properties': {'testproperty': {'type': 'string'}}}}
+            }
         })
 
-        reply = es.indices.get(index='anotherindex', feature='_mappings')
+        reply = es.indices.get(index='{0}anotherindex'.format(index_prefix), feature='_mappings')
         self.assertEqual(reply, {
-            'anotherindex': {'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}}
+            '{0}anotherindex'.format(index_prefix): {
+                'mappings': {'anothermapping': {'properties': {'testproperty': {'type': 'string'}}}}
+            }
         })
 
 
@@ -423,8 +432,9 @@ class ModelIndexTestCase(TestCase):
             schema_editor.create_model(m)
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.save()
-        reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
-        self.assertEqual(reply['_index'], 'testmodelindex')
+        index_prefix = elastic.get_es_index_prefix()
+        reply = es.get('{0}testmodelindex'.format(index_prefix), m.id, 'indexabletestmodel')
+        self.assertEqual(reply['_index'], '{0}testmodelindex'.format(index_prefix))
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
         self.assertEqual(reply['_source']['name'], m.name)
         self.assertEqual(reply['_type'], 'indexabletestmodel')
@@ -433,8 +443,8 @@ class ModelIndexTestCase(TestCase):
         m.name = 'Edited Test Model 1'
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.save()
-        reply = es.get('testmodelindex', m.id, 'indexabletestmodel')
-        self.assertEqual(reply['_index'], 'testmodelindex')
+        reply = es.get('{0}testmodelindex'.format(index_prefix), m.id, 'indexabletestmodel')
+        self.assertEqual(reply['_index'], '{0}testmodelindex'.format(index_prefix))
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
         self.assertEqual(reply['_source']['name'], m.name)
         self.assertEqual(reply['_type'], 'indexabletestmodel')
@@ -443,7 +453,7 @@ class ModelIndexTestCase(TestCase):
         model_id = m.id
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.delete()
-        reply = es.get('testmodelindex', model_id, 'indexabletestmodel', ignore=404)
+        reply = es.get('{0}testmodelindex'.format(index_prefix), model_id, 'indexabletestmodel', ignore=404)
         self.assertFalse(reply['found'])
         with connection.schema_editor() as schema_editor:
             schema_editor.delete_model(m)
