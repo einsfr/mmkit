@@ -16,6 +16,12 @@
     </form>
     <h2>Результаты поиска</h2>
     {% if items %}
+        {% if hits > search_size %}
+            <div class="text-center">
+                Сликшом много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
+                условия поиска: например, использовать более конкретный текстовый запрос.
+            </div>
+        {% endif %}
         {% for item in items %}
             <div class="search-result">
                 <h4><a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></h4>
@@ -36,7 +42,6 @@
                 </table>
             </div>
         {% endfor %}
-        <nav class="text-center">{% pagination items 'efsw.archive:search_page' search_qs %}</nav>
     {% else %}
         Ничего не найдено
     {% endif %}

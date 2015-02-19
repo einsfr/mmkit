@@ -10,8 +10,6 @@ from django.core import urlresolvers
 from django.template import loader
 from django.views.decorators import csrf
 
-from elasticsearch import exceptions as elastic_exceptions
-
 from efsw.archive import models
 from efsw.archive import forms
 from efsw.archive import default_settings as archive_default_settings
@@ -19,11 +17,8 @@ from efsw.common import default_settings as common_default_settings
 from efsw.common.search import elastic
 
 
-def _get_item_list_page(items, page):
-    pagin = paginator.Paginator(
-        items,
-        getattr(settings, 'EFSW_ARCH_ITEM_LIST_PER_PAGE', archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
-    )
+def _get_item_page(items, page, per_page):
+    pagin = paginator.Paginator(items, per_page)
     try:
         items_page = pagin.page(page)
     except paginator.PageNotAnInteger:
@@ -32,8 +27,16 @@ def _get_item_list_page(items, page):
     except paginator.EmptyPage:
         # Если указанная страница - пустая (т.е. находится вне диапазона страниц) - показать последнюю страницу
         items_page = pagin.page(pagin.num_pages)
-
     return items_page
+
+
+def _get_item_list_page(items, page):
+    per_page = getattr(
+        settings,
+        'EFSW_ARCH_ITEM_LIST_PER_PAGE',
+        archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE
+    )
+    return _get_item_page(items, page, per_page)
 
 
 def item_list(request, page='1'):
@@ -157,19 +160,23 @@ def search(request, page=1):
                 }
             }
         }
-        result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body))
+        search_size = getattr(
+            settings,
+            'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
+            common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
+        )
+        result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body), size=search_size)
         # TODO: Нужно добавить разный вес у разных полей. Например, строка автора короткая, а значит - даёт хороший вес, но такие результаты как раз и надо сдвинуть ниже
         hits = result['hits']
         if hits['total']:
             items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
             # TODO: А здесь ещё нужно будет разобраться с сортировкой - ведь мне результат нужен именно в той последовательности, что и ID
         else:
-            items = []
-        items_pagination = _get_item_list_page(items, page)
+            items = None
         return shortcuts.render(
             request,
             'archive/search.html',
-            {'form': form, 'items': items_pagination, 'search_qs': request.META.get('QUERY_STRING')}
+            {'form': form, 'items': items, 'hits': hits['total'], 'search_size': search_size}
         )
     else:
         return shortcuts.render(request, 'archive/search.html', {'form': form, })
