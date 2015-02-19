@@ -12,4 +12,6 @@ EFSW_ELASTIC_DISABLE = True  # ES !!!ДЛЯ ТЕСТИРОВАНИЯ!!! надо
 
 EFSW_ELASTIC_CHECK_INTERVAL = -1
 
+EFSW_ELASTIC_ERROR_CHECK_INTERVAL = 0
+
 from mmkit.conf.test_local import *

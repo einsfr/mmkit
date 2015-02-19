@@ -138,7 +138,9 @@ class CategoryUpdateView(generic.UpdateView):
 
 @csrf.csrf_exempt
 def search(request, page=1):
-    if not _check_search_ready():
+    es = elastic.get_es()
+    es_status = elastic.get_es_status()
+    if es is None or (es_status != 'yellow' and es_status != 'green'):
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
 
     if not request.GET.get('q'):
@@ -155,7 +157,6 @@ def search(request, page=1):
                 }
             }
         }
-        es = elastic.get_es()
         result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body))
         # TODO: Нужно добавить разный вес у разных полей. Например, строка автора короткая, а значит - даёт хороший вес, но такие результаты как раз и надо сдвинуть ниже
         hits = result['hits']
@@ -172,18 +173,3 @@ def search(request, page=1):
         )
     else:
         return shortcuts.render(request, 'archive/search.html', {'form': form, })
-
-
-def _check_search_ready():
-    if getattr(settings, 'EFSW_ELASTIC_DISABLE', common_default_settings.EFSW_ELASTIC_DISABLE):
-        return False
-
-    es = elastic.get_es()
-    try:
-        status = str(es.cluster.health()['status']).lower()
-    except elastic_exceptions.ConnectionError:
-        return False
-    if status != 'yellow' and status != 'green':
-        return False
-
-    return True

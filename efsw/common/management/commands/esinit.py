@@ -28,6 +28,9 @@ class Command(base.BaseCommand):
     def handle(self, *args, **options):
         verbosity = int(options['verbosity'])
         es = elastic.get_es()
+        if es is None:
+            print('Ошибка соединения с кластером - выполнение прекращено')
+            return
         init_indices = getattr(settings, 'EFSW_ELASTIC_INIT_INDICES', ())
         if not init_indices:
             if verbosity:

@@ -1,3 +1,5 @@
+import json
+
 from django.dispatch import receiver
 from django.db.models import signals
 from django.conf import settings
@@ -13,17 +15,43 @@ from efsw.common import default_settings
 def model_saved(sender, instance, created, raw, *args, **kwargs):
     if isinstance(instance, IndexableModel)\
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
+        es = elastic.get_es()
         if created:
-            elastic.create_document(instance)
+            es.create(
+                instance.get_index_name(),
+                instance.get_doc_type(),
+                json.dumps(
+                    instance.get_doc_body()
+                ),
+                id=instance.id
+            )
         else:
             try:
-                elastic.update_document(instance)
+                es.update(
+                    instance.get_index_name(),
+                    instance.get_doc_type(),
+                    instance.id,
+                    json.dumps({'doc': instance.get_doc_body()})
+                )
             except EsNotFoundError:
-                elastic.create_document(instance)  # TODO: Добавить запись в лог в debug-режиме
+                # TODO: Добавить запись в лог в debug-режиме
+                es.create(
+                    instance.get_index_name(),
+                    instance.get_doc_type(),
+                    json.dumps(
+                        instance.get_doc_body()
+                    ),
+                    id=instance.id
+                )
 
 
 @receiver(signals.post_delete)
 def model_deleted(sender, instance, *args, **kwargs):
     if isinstance(instance, IndexableModel)\
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
-        elastic.delete_document(instance)
+        es = elastic.get_es()
+        es.delete(
+            instance.get_index_name(),
+            instance.get_doc_type(),
+            instance.id
+        )

@@ -361,18 +361,23 @@ class PaginationTagTestCase(TestCase):
 class SearchTestCase(TestCase):
 
     def testConnection(self):
-        es = elastic.get_es()
-        another_es = elastic.get_es()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            es = elastic.get_es()
+            another_es = elastic.get_es()
         self.assertTrue(es is another_es)
 
     def testInitialization(self):
-        es = elastic.get_es()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            es = elastic.get_es()
         cmd = esinit.Command()
         base_dir = getattr(settings, 'BASE_DIR')
         init_indices = (
             os.path.join(base_dir, 'non-existent-file.json'),
         )
-        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
+        with self.settings(
+                EFSW_ELASTIC_INIT_INDICES=init_indices,
+                EFSW_ELASTIC_DISABLE=False
+        ):
             with self.assertRaises(FileNotFoundError):
                 cmd.handle(replace=True, verbosity=2, nowait=False)
 
@@ -401,11 +406,15 @@ class SearchTestCase(TestCase):
 class ModelIndexTestCase(TestCase):
 
     def testModelCreation(self):
-        es = elastic.get_es()
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            es = elastic.get_es()
         init_indices = (
             os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
         )
-        with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
+        with self.settings(
+                EFSW_ELASTIC_INIT_INDICES=init_indices,
+                EFSW_ELASTIC_DISABLE=False
+        ):
             esinit.Command().handle(replace=True, verbosity=2, nowait=False)
         m = test_models.IndexableTestModel()
         m.name = 'Test Model 1'
