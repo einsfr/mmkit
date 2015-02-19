@@ -154,9 +154,13 @@ def search(request, page=1):
         query = form.cleaned_data['q']
         query_body = {
             'query': {
-                'multi_match': {
-                    'query': str(query),
-                    'fields': ['name', 'description', 'author']
+                'filtered': {
+                    'query': {
+                        'multi_match': {
+                            'query': str(query),
+                            'fields': ['name', 'description', 'author']
+                        }
+                    }
                 }
             }
         }
@@ -168,7 +172,15 @@ def search(request, page=1):
         else:
             query_body['sort'] = []
         query_body['sort'].append('_score')
-
+        categories = form.cleaned_data['c']
+        if categories:
+            query_body['query']['filtered']['filter'] = {
+                'terms': {'category': [x.id for x in categories]}
+            }
+        else:
+            query_body['query']['filtered']['filter'] = {
+                'match_all': {}
+            }
         search_size = getattr(
             settings,
             'EFSW_ELASTIC_MAX_SEARCH_RESULTS',

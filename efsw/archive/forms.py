@@ -48,6 +48,11 @@ class ArchiveSearchForm(forms.Form):
         max_length=255,
         label='Текст запроса'
     )
+    c = forms.ModelMultipleChoiceField(
+        queryset=models.ItemCategory.objects.all().order_by('name'),
+        label='Категория',
+        required=False,
+    )
     o = forms.ChoiceField(
         choices=[('', 'По релевантности')] + list(ORDER_CHOICES.items()),
         label='Порядок сортировки',
