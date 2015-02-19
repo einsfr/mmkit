@@ -23,3 +23,6 @@ EFSW_ELASTIC_ERROR_CHECK_INTERVAL = 10
 
 # Максимальное количество элементов в результатах поиска
 EFSW_ELASTIC_MAX_SEARCH_RESULTS = 50
+
+# Префикс ко всем названиям индексов
+EFSW_ELASTIC_INDEX_PREFIX = ''

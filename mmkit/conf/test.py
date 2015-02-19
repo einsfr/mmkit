@@ -14,4 +14,6 @@ EFSW_ELASTIC_CHECK_INTERVAL = -1
 
 EFSW_ELASTIC_ERROR_CHECK_INTERVAL = 0
 
+EFSW_ELASTIC_INDEX_PREFIX = '_test_'
+
 from mmkit.conf.test_local import *
