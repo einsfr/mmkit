@@ -1,3 +1,6 @@
 a.fa:hover, a.fa:active, a.fa:focus {
     text-decoration: none;
 }
+div.search-result h4 {
+    margin-top: 2em;
+}

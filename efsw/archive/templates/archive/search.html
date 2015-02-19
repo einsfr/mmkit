@@ -1,22 +1,43 @@
 {% extends 'archive/_app_base.html' %}
 
 {% load pagination from pagination %}
+{% load field_verbose_name from model %}
 
 {% block title %}{{ block.super }} - Поиск в архиве{% endblock %}
 
 {% block content %}
     <h1>Поиск в архиве</h1>
+    <h2>Запрос</h2>
     <form action="" method="get">
         <table class="table">
             {{ form.as_table }}
         </table>
         <input type="submit" value="Искать">
     </form>
+    <h2>Результаты поиска</h2>
     {% if items %}
         {% for item in items %}
-            <h2>{{ item.name }}</h2>
-            <p>{{ item.description }}</p>
+            <div class="search-result">
+                <h4><a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></h4>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td colspan="2">{{ item.description }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% field_verbose_name item 'created' %}</th>
+                            <td>{{ item.created }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% field_verbose_name item 'author' %}</th>
+                            <td>{{ item.author }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         {% endfor %}
         <nav class="text-center">{% pagination items 'efsw.archive:search_page' search_qs %}</nav>
+    {% else %}
+        Ничего не найдено
     {% endif %}
 {% endblock %}
