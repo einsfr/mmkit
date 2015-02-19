@@ -14,35 +14,37 @@
         </table>
         <input type="submit" value="Искать">
     </form>
-    <h2>Результаты поиска</h2>
-    {% if items %}
-        {% if hits > search_size %}
-            <div class="text-center">
-                Сликшом много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
-                условия поиска: например, использовать более конкретный текстовый запрос.
-            </div>
+    {% if search_performed %}
+        <h2>Результаты поиска</h2>
+        {% if items %}
+            {% if hits > search_size %}
+                <div class="text-center">
+                    Сликшом много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
+                    условия поиска: например, использовать более конкретный текстовый запрос.
+                </div>
+            {% endif %}
+            {% for item in items %}
+                <div class="search-result">
+                    <h4><a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></h4>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td colspan="2">{{ item.description }}</td>
+                            </tr>
+                            <tr>
+                                <th>{% field_verbose_name item 'created' %}</th>
+                                <td>{{ item.created }}</td>
+                            </tr>
+                            <tr>
+                                <th>{% field_verbose_name item 'author' %}</th>
+                                <td>{{ item.author }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            Ничего не найдено
         {% endif %}
-        {% for item in items %}
-            <div class="search-result">
-                <h4><a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></h4>
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <td colspan="2">{{ item.description }}</td>
-                        </tr>
-                        <tr>
-                            <th>{% field_verbose_name item 'created' %}</th>
-                            <td>{{ item.created }}</td>
-                        </tr>
-                        <tr>
-                            <th>{% field_verbose_name item 'author' %}</th>
-                            <td>{{ item.author }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        {% endfor %}
-    {% else %}
-        Ничего не найдено
     {% endif %}
 {% endblock %}

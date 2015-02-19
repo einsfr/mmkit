@@ -35,8 +35,21 @@ class ItemCategoryForm(forms.ModelForm):
 
 
 class ArchiveSearchForm(forms.Form):
+    ORDER_BY_CREATED_ASC = 'cra'
+    ORDER_BY_CREATED_DESC = 'crd'
+
+    ORDER_CHOICES = {
+        ORDER_BY_CREATED_ASC: 'По дате создания (по возрастанию)',
+        ORDER_BY_CREATED_DESC: 'По дате создания (по убыванию)',
+    }
+
     q = forms.CharField(
         min_length=3,
         max_length=255,
         label='Текст запроса'
+    )
+    o = forms.ChoiceField(
+        choices=[('', 'По релевантности')] + list(ORDER_CHOICES.items()),
+        label='Порядок сортировки',
+        required=False,
     )

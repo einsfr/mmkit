@@ -160,6 +160,15 @@ def search(request, page=1):
                 }
             }
         }
+        order = form.cleaned_data['o']
+        if order == forms.ArchiveSearchForm.ORDER_BY_CREATED_ASC:
+            query_body['sort'] = [{'created': 'asc'}]
+        elif order == forms.ArchiveSearchForm.ORDER_BY_CREATED_DESC:
+            query_body['sort'] = [{'created': 'desc'}]
+        else:
+            query_body['sort'] = []
+        query_body['sort'].append('_score')
+
         search_size = getattr(
             settings,
             'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
@@ -168,13 +177,24 @@ def search(request, page=1):
         result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body), size=search_size)
         hits = result['hits']
         if hits['total']:
-            items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
+            hits_ids = [h['_id'] for h in hits['hits']]
+            items_dict = dict(
+                map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids))
+            )
+            items = filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids])
         else:
             items = None
         return shortcuts.render(
             request,
             'archive/search.html',
-            {'form': form, 'items': items, 'hits': hits['total'], 'search_size': search_size}
+            {
+                'form': form,
+                'items': items,
+                'hits': hits['total'],
+                'search_size': search_size,
+                'result': result,
+                'search_performed': True
+            }
         )
     else:
-        return shortcuts.render(request, 'archive/search.html', {'form': form, })
+        return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
