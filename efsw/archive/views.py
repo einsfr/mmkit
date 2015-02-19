@@ -156,7 +156,7 @@ def search(request, page=1):
             'query': {
                 'multi_match': {
                     'query': str(query),
-                    'fields': ['name^4', 'description^2', 'author']
+                    'fields': ['name', 'description', 'author']
                 }
             }
         }
@@ -169,7 +169,6 @@ def search(request, page=1):
         hits = result['hits']
         if hits['total']:
             items = models.Item.objects.filter(id__in=[h['_id'] for h in hits['hits']])
-            # TODO: А здесь ещё нужно будет разобраться с сортировкой - ведь мне результат нужен именно в той последовательности, что и ID
         else:
             items = None
         return shortcuts.render(
