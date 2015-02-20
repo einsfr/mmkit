@@ -26,8 +26,14 @@ class Command(base.BaseCommand):
         if verbosity >= 2:
             print('Существующие индексы:')
             print(exist_index_names)
+        exist_index_count = len(exist_index_names)
+        if not exist_index_count:
+            if verbosity:
+                print('Не существует ни одного индекса для моделей - возможно, необходимо запустить команду esinit '
+                      'перед запуском индексации?')
+            return
         if verbosity and (len(index_names) != len(exist_index_names)):
-            print('Не все модели имеют существующие индексы - возможно, необходимо запустить команду esinit перед'
+            print('Не все модели имеют существующие индексы - возможно, необходимо запустить команду esinit перед '
                   'запуском индексации?')
         if verbosity:
             print('Очищаю индексы...')
@@ -58,7 +64,7 @@ class Command(base.BaseCommand):
                 }
                 for x in model_objects
             ]
-            result = helpers.bulk(es, bulk_actions)
+            result = helpers.bulk(es, bulk_actions, refresh=True)
             if verbosity >= 2:
                 print('    Из них проиндексировано: {0}'.format(result[0]))
             if verbosity and result[0] != len(model_objects):
