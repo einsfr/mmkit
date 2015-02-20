@@ -11,10 +11,12 @@ class IndexableTestModel(IndexableModel, models.Model):
 
     created = models.DateField()
 
-    def get_doc_type(self):
+    @staticmethod
+    def get_doc_type():
         return 'indexabletestmodel'
 
-    def get_index_name(self):
+    @staticmethod
+    def get_index_name():
         return 'testmodelindex'
 
     def get_doc_body(self):
