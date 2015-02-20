@@ -1,14 +1,17 @@
 import os
 import shutil
+import json
 
 from django.test import TestCase
 from django.core import urlresolvers
 from django.utils import timezone
 from django.conf import settings
+from django.core.management import call_command
 
 from efsw.archive import default_settings
 from efsw.archive import models
 
+from efsw.common.search import elastic
 
 class ArchiveTestCase(TestCase):
     """ Набор тестов для efsw.archive """
@@ -476,13 +479,41 @@ class ArchiveViewsTestCase(TestCase):
         response = self.client.get(request_url)
         self.assertContains(response, '<h1>Поиск не работает</h1>', status_code=500)
 
+        with self.settings(
+                EFSW_ELASTIC_DISABLE=False,
+        ):
+            call_command('esinit', replace=True, verbosity=2)
+            call_command('esindex', verbosity=2)
         get_data = {
             'q': 'новость',
         }
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             response = self.client.get(request_url, get_data)
         self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
-        self.assertEqual(len(list(response.context['items'])), 2)
+        self.assertEqual(len(response.context['items']), 2)
         ids = [x.id for x in response.context['items']]
         self.assertIn(4, ids)
         self.assertIn(8, ids)
+
+        get_data = {
+            'q': 'новость',
+            'o': 'cra',
+        }
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(request_url, get_data)
+        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
+        items = response.context['items']
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0].id, 4)
+        self.assertEqual(items[1].id, 8)
+
+        get_data = {
+            'q': 'новость',
+            'c': 1,
+        }
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(request_url, get_data)
+        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
+        items = response.context['items']
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].id, 4)
