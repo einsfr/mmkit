@@ -16,6 +16,12 @@ class Command(base.BaseCommand):
             if verbosity:
                 print('Список классов не передан - использую все доступные приложению модели')
             models_classes_list = [x for x in apps.get_models() if issubclass(x, models.IndexableModel)]
+        else:
+            models_classes_list = [x for x in models_classes_list if issubclass(x, models.IndexableModel)]
+        if not models_classes_list:
+            if verbosity:
+                print('В списке классов нет ни одного, доступного для индексации - выполнение прекращено.')
+            return
         es_cm = elastic.get_connection_manager()
         index_names = [es_cm.prefix_index_name(x.get_index_name()) for x in models_classes_list]
         if verbosity >= 2:
