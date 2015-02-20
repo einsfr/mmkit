@@ -15,8 +15,9 @@ from efsw.common import default_settings
 def model_saved(sender, instance, created, raw, *args, **kwargs):
     if isinstance(instance, IndexableModel)\
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
-        es = elastic.get_es()
-        index_name = '{0}{1}'.format(elastic.get_es_index_prefix(), instance.get_index_name())
+        es_cm = elastic.get_connection_manager()
+        es = es_cm.get_es()
+        index_name = '{0}{1}'.format(es_cm.get_es_index_prefix(), instance.get_index_name())
         if created:
             es.create(
                 index_name,
@@ -50,9 +51,10 @@ def model_saved(sender, instance, created, raw, *args, **kwargs):
 def model_deleted(sender, instance, *args, **kwargs):
     if isinstance(instance, IndexableModel)\
             and not getattr(settings, "EFSW_ELASTIC_DISABLE", default_settings.EFSW_ELASTIC_DISABLE):
-        es = elastic.get_es()
+        es_cm = elastic.get_connection_manager()
+        es = es_cm.get_es()
         es.delete(
-            '{0}{1}'.format(elastic.get_es_index_prefix(), instance.get_index_name()),
+            '{0}{1}'.format(es_cm.get_es_index_prefix(), instance.get_index_name()),
             instance.get_doc_type(),
             instance.id
         )

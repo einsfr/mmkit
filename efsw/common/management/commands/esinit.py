@@ -27,7 +27,8 @@ class Command(base.BaseCommand):
 
     def handle(self, *args, **options):
         verbosity = int(options['verbosity'])
-        es = elastic.get_es()
+        es_cm = elastic.get_connection_manager()
+        es = es_cm.get_es()
         if es is None:
             print('Ошибка соединения с кластером - выполнение прекращено')
             return
@@ -39,7 +40,6 @@ class Command(base.BaseCommand):
         if verbosity:
             print('Обработка списка индексов...')
         count = 0
-        index_name_prefix = elastic.get_es_index_prefix()
         for ind in init_indices:
             if not os.path.exists(ind):
                 msg = 'Файл (папка) с индексом для инициализации поиска не существует: {0}'.format(ind)
@@ -47,7 +47,7 @@ class Command(base.BaseCommand):
                     print('ОШИБКА: {0}'.format(msg))
                 raise FileNotFoundError(msg)
             if os.path.isfile(ind) and self._compatible(ind):
-                if self._create_index(es, ind, options['replace'], verbosity, index_name_prefix):
+                if self._create_index(es_cm, ind, options['replace'], verbosity):
                     count += 1
             elif os.path.isdir(ind):
                 if verbosity >= 2:
@@ -55,7 +55,7 @@ class Command(base.BaseCommand):
                 for p in os.listdir(ind):
                     full_path = os.path.join(ind, p)
                     if os.path.isfile(full_path) and self._compatible(full_path):
-                        if self._create_index(es, full_path, options['replace'], verbosity, index_name_prefix):
+                        if self._create_index(es_cm, full_path, options['replace'], verbosity):
                             count += 1
         if verbosity:
             print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
@@ -68,8 +68,9 @@ class Command(base.BaseCommand):
                 print('Готово!')
 
 
-    def _create_index(self, es, path, replace, verbosity, index_name_prefix):
-        index_name = '{0}{1}'.format(index_name_prefix, os.path.splitext(os.path.basename(path))[0])
+    def _create_index(self, es_cm, path, replace, verbosity):
+        es = es_cm.get_es()
+        index_name = '{0}{1}'.format(es_cm.get_es_index_prefix(), os.path.splitext(os.path.basename(path))[0])
         if verbosity >= 2:
             print('    {0} - {1}'.format(index_name, path))
         if es.indices.exists(index_name):

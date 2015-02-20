@@ -141,8 +141,9 @@ class CategoryUpdateView(generic.UpdateView):
 
 @csrf.csrf_exempt
 def search(request, page=1):
-    es = elastic.get_es()
-    es_status = elastic.get_es_status()
+    es_cm = elastic.get_connection_manager()
+    es = es_cm.get_es()
+    es_status = es_cm.get_es_status()
     if es is None or (es_status != 'yellow' and es_status != 'green'):
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
 

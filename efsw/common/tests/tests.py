@@ -361,13 +361,13 @@ class SearchTestCase(TestCase):
 
     def testConnection(self):
         with self.settings(EFSW_ELASTIC_DISABLE=False):
-            es = elastic.get_es()
-            another_es = elastic.get_es()
+            es = elastic.get_connection_manager().get_es()
+            another_es = elastic.get_connection_manager().get_es()
         self.assertTrue(es is another_es)
 
     def testInitialization(self):
         with self.settings(EFSW_ELASTIC_DISABLE=False):
-            es = elastic.get_es()
+            es = elastic.get_connection_manager().get_es()
         cmd = esinit.Command()
         base_dir = getattr(settings, 'BASE_DIR')
         init_indices = (
@@ -389,7 +389,7 @@ class SearchTestCase(TestCase):
                 EFSW_ELASTIC_DISABLE=False
         ):
             cmd.handle(replace=True, verbosity=2, nowait=False)
-        index_prefix = elastic.get_es_index_prefix()
+        index_prefix = elastic.get_connection_manager().get_es_index_prefix()
         reply = es.indices.get(index='{0}testindex'.format(index_prefix), feature='_mappings')
         self.assertEqual(reply, {
             '{0}testindex'.format(index_prefix): {
@@ -416,7 +416,7 @@ class ModelIndexTestCase(TestCase):
 
     def testModelCreation(self):
         with self.settings(EFSW_ELASTIC_DISABLE=False):
-            es = elastic.get_es()
+            es = elastic.get_connection_manager().get_es()
         init_indices = (
             os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
         )
@@ -432,7 +432,7 @@ class ModelIndexTestCase(TestCase):
             schema_editor.create_model(m)
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.save()
-        index_prefix = elastic.get_es_index_prefix()
+        index_prefix = elastic.get_connection_manager().get_es_index_prefix()
         reply = es.get('{0}testmodelindex'.format(index_prefix), m.id, 'indexabletestmodel')
         self.assertEqual(reply['_index'], '{0}testmodelindex'.format(index_prefix))
         self.assertEqual(reply['_source']['created'], m.created.isoformat())

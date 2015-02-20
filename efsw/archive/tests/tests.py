@@ -475,3 +475,15 @@ class ArchiveViewsTestCase(TestCase):
 
         response = self.client.get(request_url)
         self.assertContains(response, '<h1>Поиск не работает</h1>', status_code=500)
+
+        get_data = {
+            'q': 'новость',
+        }
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(request_url, get_data)
+        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
+        self.assertEqual(len(list(response.context['items'])), 2)
+        ids = [x.id for x in response.context['items']]
+        self.assertIn(4, ids)
+        self.assertIn(8, ids)
+
