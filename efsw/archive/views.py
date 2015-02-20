@@ -188,14 +188,19 @@ def search(request, page=1):
             'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
             common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
         )
-        result = es.search(index='efswarchitem', doc_type='item', body=json.dumps(query_body), size=search_size)
+        result = es.search(
+            index=es_cm.prefix_index_name('efswarchitem'),
+            doc_type='item',
+            body=json.dumps(query_body),
+            size=search_size
+        )
         hits = result['hits']
         if hits['total']:
             hits_ids = [h['_id'] for h in hits['hits']]
             items_dict = dict(
                 map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids))
             )
-            items = filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids])
+            items = list(filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids]))
         else:
             items = None
         return shortcuts.render(
