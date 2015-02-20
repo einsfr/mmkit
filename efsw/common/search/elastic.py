@@ -39,7 +39,7 @@ def _set_es_status():
     else:
         try:
             _es_instance_status = str(_es_instance.cluster.health()['status']).lower()
-        except exceptions.ConnectionError:
+        except elasticsearch.ConnectionError:
             _es_instance_status = None
 
 
