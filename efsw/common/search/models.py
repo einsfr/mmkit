@@ -2,10 +2,12 @@
 
 class IndexableModel():
 
-    def get_index_name(self):
+    @staticmethod
+    def get_index_name():
         raise NotImplementedError('Метод get_index_name должен быть переопределён моделью перед использованием.')
 
-    def get_doc_type(self):
+    @staticmethod
+    def get_doc_type():
         raise NotImplementedError('Метод get_doc_type должен быть переопределён моделью перед использованием.')
 
     def get_doc_body(self):

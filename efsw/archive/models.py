@@ -132,10 +132,12 @@ class Item(IndexableModel, models.Model):
     def get_update_url_title(self):
         return 'Редактировать элемент'
 
-    def get_index_name(self):
+    @staticmethod
+    def get_index_name():
         return 'efswarchitem'
 
-    def get_doc_type(self):
+    @staticmethod
+    def get_doc_type():
         return 'item'
 
     def get_doc_body(self):
