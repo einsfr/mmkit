@@ -70,7 +70,7 @@ class Command(base.BaseCommand):
 
     def _create_index(self, es_cm, path, replace, verbosity):
         es = es_cm.get_es()
-        index_name = '{0}{1}'.format(es_cm.get_es_index_prefix(), os.path.splitext(os.path.basename(path))[0])
+        index_name = es_cm.prefix_index_name(os.path.splitext(os.path.basename(path))[0])
         if verbosity >= 2:
             print('    {0} - {1}'.format(index_name, path))
         if es.indices.exists(index_name):
