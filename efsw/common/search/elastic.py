@@ -17,6 +17,10 @@ def get_connection_manager():
     return _es_cm_instance
 
 
+def es_enabled():
+    return not getattr(settings, 'EFSW_ELASTIC_DISABLE', common_default_settings.EFSW_ELASTIC_DISABLE)
+
+
 class EsConnectionManager():
 
     def __init__(self):
@@ -47,7 +51,7 @@ class EsConnectionManager():
                 self._es_instance_status = None
 
     def get_es(self):
-        if getattr(settings, 'EFSW_ELASTIC_DISABLE', common_default_settings.EFSW_ELASTIC_DISABLE):
+        if not es_enabled():
             self._es_instance = None
             self._es_instance_status = None
             self._es_instance_timestamp = None

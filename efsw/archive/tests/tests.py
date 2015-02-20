@@ -486,4 +486,3 @@ class ArchiveViewsTestCase(TestCase):
         ids = [x.id for x in response.context['items']]
         self.assertIn(4, ids)
         self.assertIn(8, ids)
-
