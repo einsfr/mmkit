@@ -50,7 +50,7 @@ class EsConnectionManager():
             except elasticsearch.ConnectionError:
                 self._es_instance_status = None
 
-    def get_es(self):
+    def get_es(self) -> elasticsearch.Elasticsearch:
         if not es_enabled():
             self._es_instance = None
             self._es_instance_status = None
