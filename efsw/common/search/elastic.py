@@ -93,3 +93,6 @@ class EsConnectionManager():
                 common_default_settings.EFSW_ELASTIC_INDEX_PREFIX
             )
         return self._es_index_prefix
+
+    def prefix_index_name(self, index_name):
+        return '{0}{1}'.format(self.get_es_index_prefix(), index_name)
