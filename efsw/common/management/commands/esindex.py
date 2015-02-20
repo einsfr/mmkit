@@ -2,6 +2,7 @@ import json
 
 from django.core.management import base
 from django.apps import apps
+from django.db.utils import OperationalError
 
 from elasticsearch import helpers
 
@@ -47,14 +48,20 @@ class Command(base.BaseCommand):
         if verbosity:
             print('Завершено')
             print('Начинаю индексацию...')
-        count = 0
+        obj_count = 0
+        mod_count = 0
         for mc in models_classes_list:
             index_name = es_cm.prefix_index_name(mc.get_index_name())
             if index_name not in exist_index_names:
                 if verbosity:
                     print('  {0} {1}: Индекс не существует - пропускаю'.format(index_name, mc))
                 continue
-            model_objects = list(mc.objects.all())
+            try:
+                model_objects = list(mc.objects.all())
+            except OperationalError:
+                if verbosity:
+                    print('  {0}: Ошибка получения объектов - возможно, таблица не существует?'.format(mc))
+                continue
             if verbosity >= 2:
                 print('  {0}: Найдено {1} объектов'.format(mc, len(model_objects)))
             if not model_objects:
@@ -75,9 +82,10 @@ class Command(base.BaseCommand):
                 print('    Из них проиндексировано: {0}'.format(result[0]))
             if verbosity and result[0] != len(model_objects):
                 print('    При индексировании объектов модели произошли ошибки: {0}'.format(result[1]))
-            count += result[0]
+            obj_count += result[0]
+            mod_count += 1
         if verbosity:
             print('Завершено')
-            print('Всего проиндексировано моделей: {0}; в них объектов: {1}'.format(
-                len(models_classes_list), count
+            print('Всего успешно проиндексировано моделей: {0}; в них объектов: {1}'.format(
+                mod_count, obj_count
             ))
