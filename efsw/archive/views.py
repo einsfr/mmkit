@@ -152,6 +152,7 @@ def search(request, page=1):
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data['q']
+        # TODO: Всё это должно происходить в отдельном классе - каком-нибудь QueryBuilder'е
         query_body = {
             'query': {
                 'filtered': {
