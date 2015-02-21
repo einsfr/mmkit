@@ -61,10 +61,7 @@ class DatePeriod():
             msg = 'Метод DatePeriod.get() принимает в качестве аргумента date только экземпляр класса datetime.date'
             raise TypeError(msg)
         if period == cls.PERIOD_TODAY:
-            return (
-                date,
-                date,
-            )
+            return date, date
         elif period == cls.PERIOD_YESTERDAY:
             start = end = date - datetime.timedelta(1)
             return start, end
