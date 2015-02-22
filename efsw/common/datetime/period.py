@@ -24,6 +24,11 @@ class DatePeriod():
     PERIOD_LAST_YEAR = 11
     PERIOD_NEXT_YEAR = 12
 
+    MODE_PAST_ONLY = 1
+    MODE_PAST_ONLY_WITH_TODAY = 2
+    MODE_FUTURE_ONLY = 3
+    MODE_FUTURE_ONLY_WITH_TODAY = 4
+
     @classmethod
     def _get_period_titles(cls):
         return {
@@ -54,12 +59,58 @@ class DatePeriod():
         return result
 
     @classmethod
-    def get(cls, period, date=None, strict=False):
+    def get_periods_past_only(cls, include_today=True):
+        if include_today:
+            periods = [cls.PERIOD_TODAY]
+        else:
+            periods = []
+        return cls.get_periods(
+            periods + [
+                cls.PERIOD_YESTERDAY,
+                cls.PERIOD_THIS_WEEK,
+                cls.PERIOD_LAST_WEEK,
+                cls.PERIOD_THIS_MONTH,
+                cls.PERIOD_LAST_MONTH,
+                cls.PERIOD_THIS_YEAR,
+                cls.PERIOD_LAST_YEAR
+            ]
+        )
+
+    @classmethod
+    def get_periods_future_only(cls, include_today=True):
+        if include_today:
+            periods = [cls.PERIOD_TODAY]
+        else:
+            periods = []
+        return cls.get_periods(
+            periods + [
+                cls.PERIOD_TOMORROW,
+                cls.PERIOD_THIS_WEEK,
+                cls.PERIOD_NEXT_WEEK,
+                cls.PERIOD_THIS_MONTH,
+                cls.PERIOD_NEXT_MONTH,
+                cls.PERIOD_THIS_YEAR,
+                cls.PERIOD_NEXT_YEAR
+            ]
+        )
+
+    @classmethod
+    def get(cls, period, date=None, strict=False, mode=0):
         if date is None:
             date = datetime.date.today()
         elif not isinstance(date, datetime.date):
             msg = 'Метод DatePeriod.get() принимает в качестве аргумента date только экземпляр класса datetime.date'
             raise TypeError(msg)
+        start = None
+        end = None
+        if mode == cls.MODE_PAST_ONLY:
+            end = date - datetime.timedelta(1)
+        elif mode == cls.MODE_PAST_ONLY_WITH_TODAY:
+            end = date
+        elif mode == cls.MODE_FUTURE_ONLY:
+            start = date + datetime.timedelta(1)
+        elif mode == cls.MODE_FUTURE_ONLY_WITH_TODAY:
+            start = date
         if period == cls.PERIOD_TODAY:
             return date, date
         elif period == cls.PERIOD_YESTERDAY:
@@ -69,9 +120,14 @@ class DatePeriod():
             start = end = date + datetime.timedelta(1)
             return start, end
         elif period == cls.PERIOD_THIS_WEEK:
-            start = date - datetime.timedelta(date.weekday())
-            end = date + datetime.timedelta(6 - date.weekday())
-            return start, end
+            if start is None:
+                start = date - datetime.timedelta(date.weekday())
+            if end is None:
+                end = date + datetime.timedelta(6 - date.weekday())
+            if start > end:
+                return None
+            else:
+                return start, end
         elif period == cls.PERIOD_LAST_WEEK:
             start = date - datetime.timedelta(7 + date.weekday())
             end = date - datetime.timedelta(13 - date.weekday())
@@ -81,9 +137,14 @@ class DatePeriod():
             end = date + datetime.timedelta(13 - date.weekday())
             return start, end
         elif period == cls.PERIOD_THIS_MONTH:
-            start = date.replace(day=1)
-            end = date.replace(day=calendar.monthrange(date.year, date.month)[1])
-            return start, end
+            if start is None:
+                start = date.replace(day=1)
+            if end is None:
+                end = date.replace(day=calendar.monthrange(date.year, date.month)[1])
+            if start > end:
+                return None
+            else:
+                return start, end
         elif period == cls.PERIOD_LAST_MONTH:
             last_day_of_previous_month = date.replace(day=1) - datetime.timedelta(1)
             start = last_day_of_previous_month.replace(day=1)
@@ -96,9 +157,14 @@ class DatePeriod():
             end = start.replace(day=calendar.monthrange(start.year, start.month)[1])
             return start, end
         elif period == cls.PERIOD_THIS_YEAR:
-            start = date.replace(month=1, day=1)
-            end = date.replace(month=12, day=31)
-            return start, end
+            if start is None:
+                start = date.replace(month=1, day=1)
+            if end is None:
+                end = date.replace(month=12, day=31)
+            if start > end:
+                return None
+            else:
+                return start, end
         elif period == cls.PERIOD_LAST_YEAR:
             prev_year = date.year - 1
             start = date.replace(year=prev_year, month=1, day=1)
