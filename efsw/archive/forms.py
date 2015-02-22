@@ -64,7 +64,7 @@ class ArchiveSearchForm(forms.Form):
         required=False,
     )
     p = forms.ChoiceField(
-        choices=[(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()],
+        choices=[('', '---------')] + [(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()],
         label='Дата записи',
         required=False,
     )

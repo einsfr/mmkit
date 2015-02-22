@@ -15,6 +15,7 @@ from efsw.archive import forms
 from efsw.archive import default_settings as archive_default_settings
 from efsw.common import default_settings as common_default_settings
 from efsw.common.search import elastic
+from efsw.common.datetime import period
 
 
 def _get_item_page(items, page, per_page):
@@ -162,7 +163,8 @@ def search(request, page=1):
                             'query': str(query),
                             'fields': ['name', 'description', 'author']
                         }
-                    }
+                    },
+                    'filter': {}
                 }
             }
         }
@@ -175,13 +177,32 @@ def search(request, page=1):
             query_body['sort'] = []
         query_body['sort'].append('_score')
         categories = form.cleaned_data['c']
-        if categories:
-            query_body['query']['filtered']['filter'] = {
-                'terms': {'category': [x.id for x in categories]}
-            }
-        else:
+        try:
+            date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
+        except (period.PeriodDoesNotExist, ValueError):
+            date_period = None
+        if not categories and not date_period:
             query_body['query']['filtered']['filter'] = {
                 'match_all': {}
+            }
+        elif categories and not date_period:
+            query_body['query']['filtered']['filter']['terms'] = {'category': [x.id for x in categories]}
+        elif not categories and date_period:
+            query_body['query']['filtered']['filter']['range'] = {
+                'created': {
+                    'gte': date_period[0].isoformat(),
+                    'lte': date_period[1].isoformat()
+                }
+            }
+        elif categories and date_period:
+            query_body['query']['filtered']['filter']['bool'] = {
+                'must': [
+                    {'terms': {'category': [x.id for x in categories]}},
+                    {'range': {'created': {
+                        'gte': date_period[0].isoformat(),
+                        'lte': date_period[1].isoformat()
+                    }}}
+                ]
             }
         search_size = getattr(
             settings,
