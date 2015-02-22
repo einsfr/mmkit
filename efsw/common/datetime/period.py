@@ -29,6 +29,30 @@ class DatePeriod():
     MODE_FUTURE_ONLY = 3
     MODE_FUTURE_ONLY_WITH_TODAY = 4
 
+    PERIODS_PAST_ONLY = [
+        PERIOD_YESTERDAY,
+        PERIOD_THIS_WEEK,
+        PERIOD_LAST_WEEK,
+        PERIOD_THIS_MONTH,
+        PERIOD_LAST_MONTH,
+        PERIOD_THIS_YEAR,
+        PERIOD_LAST_YEAR
+    ]
+
+    PERIODS_PAST_ONLY_WITH_TODAY = [PERIOD_TODAY] + PERIODS_PAST_ONLY
+
+    PERIODS_FUTURE_ONLY = [
+        PERIOD_TOMORROW,
+        PERIOD_THIS_WEEK,
+        PERIOD_NEXT_WEEK,
+        PERIOD_THIS_MONTH,
+        PERIOD_NEXT_MONTH,
+        PERIOD_THIS_YEAR,
+        PERIOD_NEXT_YEAR
+    ]
+
+    PERIODS_FUTURE_ONLY_WITH_TODAY = [PERIOD_TODAY] + PERIODS_FUTURE_ONLY
+
     @classmethod
     def _get_period_titles(cls):
         return {
@@ -61,38 +85,16 @@ class DatePeriod():
     @classmethod
     def get_periods_past_only(cls, include_today=True):
         if include_today:
-            periods = [cls.PERIOD_TODAY]
+            return cls.get_periods(cls.PERIODS_PAST_ONLY_WITH_TODAY)
         else:
-            periods = []
-        return cls.get_periods(
-            periods + [
-                cls.PERIOD_YESTERDAY,
-                cls.PERIOD_THIS_WEEK,
-                cls.PERIOD_LAST_WEEK,
-                cls.PERIOD_THIS_MONTH,
-                cls.PERIOD_LAST_MONTH,
-                cls.PERIOD_THIS_YEAR,
-                cls.PERIOD_LAST_YEAR
-            ]
-        )
+            return cls.get_periods(cls.PERIODS_PAST_ONLY)
 
     @classmethod
     def get_periods_future_only(cls, include_today=True):
         if include_today:
-            periods = [cls.PERIOD_TODAY]
+            return cls.get_periods(cls.PERIODS_FUTURE_ONLY_WITH_TODAY)
         else:
-            periods = []
-        return cls.get_periods(
-            periods + [
-                cls.PERIOD_TOMORROW,
-                cls.PERIOD_THIS_WEEK,
-                cls.PERIOD_NEXT_WEEK,
-                cls.PERIOD_THIS_MONTH,
-                cls.PERIOD_NEXT_MONTH,
-                cls.PERIOD_THIS_YEAR,
-                cls.PERIOD_NEXT_YEAR
-            ]
-        )
+            return cls.get_periods(cls.PERIODS_FUTURE_ONLY)
 
     @classmethod
     def get(cls, period, date=None, strict=False, mode=0):
