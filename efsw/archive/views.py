@@ -148,22 +148,23 @@ def search(request, page=1):
     if es is None or (es_status != 'yellow' and es_status != 'green'):
         return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
 
-    if not request.GET.get('q'):
-        return shortcuts.render(request, 'archive/search.html', {'form': forms.ArchiveSearchForm})
-
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data['q']
         # TODO: Всё это должно происходить в отдельном классе - каком-нибудь QueryBuilder'е
+        if query:
+            inner_query = {
+                'multi_match': {
+                    'query': str(query),
+                    'fields': ['name', 'description', 'author']
+                }
+            }
+        else:
+            inner_query = {'match_all': {}}
         query_body = {
             'query': {
                 'filtered': {
-                    'query': {
-                        'multi_match': {
-                            'query': str(query),
-                            'fields': ['name', 'description', 'author']
-                        }
-                    },
+                    'query': inner_query,
                     'filter': {}
                 }
             }

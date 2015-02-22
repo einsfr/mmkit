@@ -51,7 +51,8 @@ class ArchiveSearchForm(forms.Form):
     q = forms.CharField(
         min_length=3,
         max_length=255,
-        label='Текст запроса'
+        label='Текст запроса',
+        required=False,
     )
     c = forms.ModelMultipleChoiceField(
         queryset=models.ItemCategory.objects.all().order_by('name'),

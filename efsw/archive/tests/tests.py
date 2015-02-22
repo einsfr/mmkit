@@ -497,7 +497,7 @@ class ArchiveViewsTestCase(TestCase):
 
         get_data = {
             'q': 'новость',
-            'o': 'cra',
+            'o': '1',
         }
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             response = self.client.get(request_url, get_data)
