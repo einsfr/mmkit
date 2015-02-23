@@ -1,5 +1,3 @@
-import json
-
 from efsw.common.search.exceptions import WrongFilterParametersException
 from efsw.common.search.elastic import EsConnectionManager
 
@@ -92,7 +90,7 @@ class EsSearchQuery():
         return self._es_cm.get_es().search(
             index=self._es_cm.prefix_index_name(self._index_name),
             doc_type=self._doc_type,
-            body=json.dumps(self._get_query_body())
+            body=self._get_query_body()
         )
 
     def get_result(self) -> dict:
