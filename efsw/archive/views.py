@@ -150,6 +150,8 @@ def search(request, page=1):
 
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
+        if not form.cleaned_data['q'] and not form.cleaned_data['c'] and not form.cleaned_data['p']:
+            return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
         query = form.cleaned_data['q']
         # TODO: Всё это должно происходить в отдельном классе - каком-нибудь QueryBuilder'е
         if query:
