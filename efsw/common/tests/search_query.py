@@ -108,14 +108,24 @@ class SearchQueryExecTestCase(TestCase):
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('1', ids_list)
         self.assertIn('2', ids_list)
-        self.assertEqual(len(ids_list), 2)
+        self.assertEqual(2, q.get_hits_count())
+        self.assertEqual(1, q._executed)
+
+        q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
+        q.query_match_all()
+        ids_list = [x['_id'] for x in q]
+        self.assertIn('1', ids_list)
+        self.assertIn('2', ids_list)
+        self.assertEqual(2, q.get_hits_count())
+        self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
         q.query_match_all()
         q.filter_terms('field_int', [63])
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('1', ids_list)
-        self.assertEqual(len(ids_list), 1)
+        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME,self.DOC_TYPE)
         q.query_match_all()
@@ -123,10 +133,12 @@ class SearchQueryExecTestCase(TestCase):
         q.filter_range('field_date', lte='2015-02-21')
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('2', ids_list)
-        self.assertEqual(len(ids_list), 1)
+        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
         q.query_multi_match('two', ['field_str', 'field_str_two'])
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('2', ids_list)
-        self.assertEqual(len(ids_list), 1)
+        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(1, q._executed)

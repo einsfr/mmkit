@@ -32,6 +32,9 @@ class EsSearchQuery():
         self._from = None
         self._query_body = None
         self._result = None
+        self._hits_iter_position = 0
+        self._hits_count = 0
+        self._executed = 0
 
     def __str__(self):
         try:
@@ -39,6 +42,17 @@ class EsSearchQuery():
         except EmptyQueryException:
             r = ''
         return r
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._hits_iter_position < self.get_hits_count():
+            result = self.get_result()['hits']['hits'][self._hits_iter_position]
+            self._hits_iter_position += 1
+            return result
+        else:
+            raise StopIteration
 
     def query_match_all(self):
         self._queries.append(
@@ -201,10 +215,13 @@ class EsSearchQuery():
         if self._size:
             query['size'] = self._size
 
+        # СОХРАНЕНИЕ СОБРАННОГО ТЕЛА ЗАПРОСА
+
         self._query_body = query
         return self._query_body
 
     def _execute_query(self):
+        self._executed += 1  # Для нужд тестирования, чтобы удостовериться, что ни один запрос не выполняется дважды
         return self._es_cm.get_es().search(
             index=self._es_cm.prefix_index_name(self._index_name),
             doc_type=self._doc_type,
@@ -215,3 +232,8 @@ class EsSearchQuery():
         if self._result is None:
             self._result = self._execute_query()
         return self._result
+
+    def get_hits_count(self):
+        if not self._hits_count:
+            self._hits_count = int(self.get_result()['hits']['total'])
+        return self._hits_count
