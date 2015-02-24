@@ -109,6 +109,7 @@ class SearchQueryExecTestCase(TestCase):
         self.assertIn('1', ids_list)
         self.assertIn('2', ids_list)
         self.assertEqual(2, q.get_hits_count())
+        self.assertEqual(len(q), 2)
         self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)

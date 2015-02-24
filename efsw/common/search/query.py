@@ -54,6 +54,9 @@ class EsSearchQuery():
         else:
             raise StopIteration
 
+    def __len__(self):
+        return self.get_hits_count()
+
     def query_match_all(self):
         self._queries.append(
             (
@@ -234,6 +237,7 @@ class EsSearchQuery():
         return self._result
 
     def get_hits_count(self):
+        # TODO: по-хорошему, если запрос ещё не выполнялся, то его можно выполнить как count, а не как search
         if not self._hits_count:
             self._hits_count = int(self.get_result()['hits']['total'])
         return self._hits_count
