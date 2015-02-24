@@ -1,0 +1,24 @@
+[
+  {
+    "_index": "testsqindex",
+    "_type": "testmapping",
+    "_id": 1,
+    "_source": {
+      "field_str": "Object number one",
+      "field_str_two": "Something about object number one",
+      "field_date": "2015-02-24",
+      "field_int": 63
+    }
+  },
+  {
+    "_index": "testsqindex",
+    "_type": "testmapping",
+    "_id": 2,
+    "_source": {
+      "field_str": "Object number two (it's not one, you know)",
+      "field_str_two": "Object two is special!",
+      "field_date": "2015-02-21",
+      "field_int": 91
+    }
+  }
+]

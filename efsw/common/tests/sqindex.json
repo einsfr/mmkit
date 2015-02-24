@@ -1,0 +1,15 @@
+{
+  "mappings": {
+    "testmapping": {
+      "_source": {
+        "enabled": false
+      },
+      "properties": {
+        "field_str": {"type": "string"},
+        "field_str_two": {"type": "string"},
+        "field_date": {"type": "date"},
+        "field_int": {"type": "integer"}
+      }
+    }
+  }
+}
