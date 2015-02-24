@@ -1,6 +1,5 @@
 import os
 import shutil
-import json
 
 from django.test import TestCase
 from django.core import urlresolvers
@@ -11,7 +10,6 @@ from django.core.management import call_command
 from efsw.archive import default_settings
 from efsw.archive import models
 
-from efsw.common.search import elastic
 
 class ArchiveTestCase(TestCase):
     """ Набор тестов для efsw.archive """
