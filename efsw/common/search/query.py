@@ -30,9 +30,6 @@ class EsSearchQuery():
         self._query_body = None
         self._result = None
 
-    def __iter__(self):
-        return self.get_result()['hits']['hits']
-
     def __str__(self):
         try:
             r = self.get_query_body()
@@ -45,7 +42,7 @@ class EsSearchQuery():
             (
                 {
                     'match_all': {}
-                }
+                },
             )
         )
         return self
@@ -77,7 +74,7 @@ class EsSearchQuery():
                     field: {
                         'order': order_str
                     }
-                }
+                },
             )
         )
         return self
@@ -106,7 +103,7 @@ class EsSearchQuery():
         if kwargs.get('lte') and kwargs.get('lt'):
             msg = 'Одно поле в фильтре range не может одновремнено иметь ограничения <= и <'
             raise WrongParametersException(msg)
-        range_dict = dict((k, v) for k, v in kwargs if k in ['gte', 'gt', 'lte', 'lt'])
+        range_dict = dict((k, v) for k, v in kwargs.items() if k in ['gte', 'gt', 'lte', 'lt'])
         self._filters.append(
             (
                 {
@@ -148,7 +145,7 @@ class EsSearchQuery():
                 'query': self._queries[0][0]
             }
         else:
-            query = None
+            query = {}
 
         # ФИЛЬТРЫ
 
