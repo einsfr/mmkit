@@ -1,5 +1,5 @@
-from efsw.common.search.exceptions import WrongQueryFilterParametersException,\
-    EmptyQueryException, WrongQueryInitParametersException
+from efsw.common.search.exceptions import WrongParametersException,\
+    EmptyQueryException
 
 
 class EsSearchQuery():
@@ -21,7 +21,7 @@ class EsSearchQuery():
             self._bool_default = bool_default
         else:
             msg = 'Параметр bool_default должен иметь значение из следующих: BOOL_MUST, BOOL_SHOULD, BOOL_MUST_NOT'
-            raise WrongQueryInitParametersException(msg)
+            raise WrongParametersException(msg)
         self._queries = []
         self._sort = []
         self._filters = []
@@ -102,10 +102,10 @@ class EsSearchQuery():
             bool_type = self._bool_default
         if kwargs.get('gte') and kwargs.get('gt'):
             msg = 'Одно поле в фильтре range не может одновремнено иметь ограничения >= и >'
-            raise WrongQueryFilterParametersException(msg)
+            raise WrongParametersException(msg)
         if kwargs.get('lte') and kwargs.get('lt'):
             msg = 'Одно поле в фильтре range не может одновремнено иметь ограничения <= и <'
-            raise WrongQueryFilterParametersException(msg)
+            raise WrongParametersException(msg)
         range_dict = dict((k, v) for k, v in kwargs if k in ['gte', 'gt', 'lte', 'lt'])
         self._filters.append(
             (
