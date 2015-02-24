@@ -237,3 +237,6 @@ class EsSearchQuery():
         if not self._hits_count:
             self._hits_count = int(self.get_result()['hits']['total'])
         return self._hits_count
+
+    def executed(self):
+        return bool(self._executed)
