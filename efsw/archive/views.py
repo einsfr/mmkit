@@ -16,6 +16,7 @@ from efsw.archive import default_settings as archive_default_settings
 from efsw.common import default_settings as common_default_settings
 from efsw.common.search import elastic
 from efsw.common.datetime import period
+from efsw.common.search.query import EsSearchQuery
 
 
 def _get_item_page(items, page, per_page):
@@ -150,74 +151,32 @@ def search(request, page=1):
 
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
+        sq = EsSearchQuery(es_cm, 'efswarchitem', 'item')
         if not form.cleaned_data['q'] and not form.cleaned_data['c'] and not form.cleaned_data['p']:
             return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
         query = form.cleaned_data['q']
-        # TODO: Всё это должно происходить в отдельном классе - каком-нибудь QueryBuilder'е
         if query:
-            inner_query = {
-                'multi_match': {
-                    'query': str(query),
-                    'fields': ['name', 'description', 'author']
-                }
-            }
-        else:
-            inner_query = {'match_all': {}}
-        query_body = {
-            'query': {
-                'filtered': {
-                    'query': inner_query,
-                    'filter': {}
-                }
-            }
-        }
+            sq.query_multi_match(str(query), ['name', 'description', 'author'])
         order = form.cleaned_data['o']
         if order == forms.ArchiveSearchForm.ORDER_BY_CREATED_ASC:
-            query_body['sort'] = [{'created': 'asc'}]
+            sq.sort_field('created')
         elif order == forms.ArchiveSearchForm.ORDER_BY_CREATED_DESC:
-            query_body['sort'] = [{'created': 'desc'}]
-        else:
-            query_body['sort'] = []
-        query_body['sort'].append('_score')
+            sq.sort_field('created', sq.ORDER_DESC)
         categories = form.cleaned_data['c']
         try:
             date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
         except (period.PeriodDoesNotExist, ValueError):
             date_period = None
-        if not categories and not date_period:
-            query_body['query']['filtered']['filter'] = {
-                'match_all': {}
-            }
-        elif categories and not date_period:
-            query_body['query']['filtered']['filter']['terms'] = {'category': [x.id for x in categories]}
-        elif not categories and date_period:
-            query_body['query']['filtered']['filter']['range'] = {
-                'created': {
-                    'gte': date_period[0].isoformat(),
-                    'lte': date_period[1].isoformat()
-                }
-            }
-        elif categories and date_period:
-            query_body['query']['filtered']['filter']['bool'] = {
-                'must': [
-                    {'terms': {'category': [x.id for x in categories]}},
-                    {'range': {'created': {
-                        'gte': date_period[0].isoformat(),
-                        'lte': date_period[1].isoformat()
-                    }}}
-                ]
-            }
+        if categories:
+            sq.filter_terms('category', [x.id for x in categories])
+        if date_period:
+            sq.filter_range('created', gte=date_period[0].isoformat(), lte=date_period[1].isoformat())
         search_size = getattr(
             settings,
             'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
             common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
         )
-        result = es.search(
-            index=es_cm.prefix_index_name('efswarchitem'),
-            doc_type='item',
-            body=json.dumps(query_body),
-            size=search_size
-        )
+        result = sq.get_result()
         hits = result['hits']
         if hits['total']:
             hits_ids = [h['_id'] for h in hits['hits']]
