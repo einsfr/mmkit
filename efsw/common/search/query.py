@@ -11,6 +11,9 @@ class EsSearchQuery():
     ORDER_ASC = 1
     ORDER_DESC = 2
 
+    DEFAULT_FROM = 0
+    DEFAULT_SIZE = 10
+
     def __init__(self, es_cm, index_name=None, doc_type=None, bool_default=None):
         self._es_cm = es_cm
         self._index_name = index_name
@@ -116,6 +119,10 @@ class EsSearchQuery():
         )
         return self
 
+    def from_size(self, from_param=DEFAULT_FROM, size_param=DEFAULT_SIZE):
+        self._from = from_param
+        self._size = size_param
+
     def get_query_body(self):
         if self._query_body is not None:
             return self._query_body
@@ -186,6 +193,13 @@ class EsSearchQuery():
         if len(self._sort):
             query['sort'] = [x[0] for x in self._sort]
             query['sort'].append('_score')
+
+        # ОГРАНИЧЕНИЕ НА РАЗМЕР ВЫБОРКИ (FROM/SIZE)
+
+        if self._from:
+            query['from'] = self._from
+        if self._size:
+            query['size'] = self._size
 
         self._query_body = query
         return self._query_body

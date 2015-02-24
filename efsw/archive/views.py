@@ -176,6 +176,7 @@ def search(request, page=1):
             'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
             common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
         )
+        sq.from_size(size_param=search_size)
         result = sq.get_result()
         hits = result['hits']
         if hits['total']:

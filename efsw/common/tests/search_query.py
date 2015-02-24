@@ -68,6 +68,21 @@ class SearchQueryTestCase(TestCase):
             }
         )
 
+    def test_from_size(self):
+        q = EsSearchQuery(None)
+        q.query_match_all()
+        q.from_size(10, 10)
+        self.assertEqual(
+            q.get_query_body(),
+            {
+                'query': {
+                    'match_all': {}
+                },
+                'from': 10,
+                'size': 10
+            }
+        )
+
 
 class SearchQueryExecTestCase(TestCase):
 
