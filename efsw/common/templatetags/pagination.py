@@ -93,7 +93,7 @@ def _prepare(page_instance: paginator.Page, page_url_name: str, query_string: st
     return items
 
 
-@register.inclusion_tag('common/pagination.html')
+@register.inclusion_tag('common/templatetags/pagination.html')
 def pagination(page_instance, page_url_name, query_string='', **kwargs):
     if not isinstance(page_instance, paginator.Page):
         msg = "Тэг 'pagination' требует экземпляр класса django.core.paginator.Page, предоставлено: {0}".format(
