@@ -1,6 +1,9 @@
 {% extends '_base.html' %}
 
 {% block content_wrapper %}
+    {% if login_error %}
+        <div class="alert alert-danger">{{ login_error }}</div>
+    {% endif %}
     <form action="" method="post">
         {% csrf_token %}
         <table class="table">

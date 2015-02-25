@@ -24,9 +24,23 @@ def login(request):
                         # TODO: Здесь надо будет придумать для пользователей какую-нибудь домашнюю страницу, куда они и будут отправляться, если сами зашли на страничку входа
                         return HttpResponseRedirect('/')
                 else:
-                    pass # TODO: Исправить
+                    return shortcuts.render(
+                        request,
+                        'common/user/login.html',
+                        {
+                            'form': form,
+                            'login_error': 'Пользователь с таким именем заблокирован - обратитесь к администратору.'
+                        }
+                    )
             else:
-                pass # TODO: Исправить
+                return shortcuts.render(
+                        request,
+                        'common/user/login.html',
+                        {
+                            'form': form,
+                            'login_error': 'Ошибка входа в систему - неправильные имя пользователя или пароль.'
+                        }
+                    )
         else:
             return shortcuts.render(request, 'common/user/login.html', {'form': form})
 
