@@ -2,12 +2,12 @@ from django import shortcuts
 from django.contrib import auth
 from django.http import HttpResponseRedirect
 
-from efsw.common.auth import forms
+from efsw.common.user import forms
 
 
 def login(request):
     if request.method == 'GET':
-        return shortcuts.render(request, 'common/auth/login.html', {'form': forms.LoginForm()})
+        return shortcuts.render(request, 'common/user/login.html', {'form': forms.LoginForm()})
     elif request.method == 'POST':
         form = forms.LoginForm(request.POST)
         if form.is_valid():
@@ -21,13 +21,14 @@ def login(request):
                     if redirect_url:
                         return HttpResponseRedirect(redirect_url)
                     else:
+                        # TODO: Здесь надо будет придумать для пользователей какую-нибудь домашнюю страницу, куда они и будут отправляться, если сами зашли на страничку входа
                         return HttpResponseRedirect('/')
                 else:
-                    pass
+                    pass # TODO: Исправить
             else:
-                pass
+                pass # TODO: Исправить
         else:
-            return shortcuts.render(request, 'common/auth/login.html', {'form': form})
+            return shortcuts.render(request, 'common/user/login.html', {'form': form})
 
 
 def logout(request):

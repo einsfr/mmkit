@@ -11,12 +11,12 @@
                     </li>
                     <li class="divider"></li>
                     <li>
-                        <a href="{% url 'efsw.common.auth:logout' %}" title="Выйти из системы">Выход</a>
+                        <a href="{% url 'efsw.common.user:logout' %}" title="Выйти из системы">Выход</a>
                     </li>
                 </ul>
             </li>
         {% else %}
-            <li><a href="{% url 'efsw.common.auth:login' %}" title="Войти в систему">Вход</a></li>
+            <li><a href="{% url 'efsw.common.user:login' %}" title="Войти в систему">Вход</a></li>
         {% endif %}
     </ul>
 {% endif %}
