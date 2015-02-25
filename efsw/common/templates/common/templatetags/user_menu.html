@@ -1,0 +1,22 @@
+{% if not tag_not_supported %}
+    <ul class="nav navbar-nav navbar-right">
+        {% if user.is_authenticated %}
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+                    {{ user.get_username }} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" title="Редактировать профиль">Профиль</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="{% url 'efsw.common.auth:logout' %}" title="Выйти из системы">Выход</a>
+                    </li>
+                </ul>
+            </li>
+        {% else %}
+            <li><a href="{% url 'efsw.common.auth:login' %}" title="Войти в систему">Вход</a></li>
+        {% endif %}
+    </ul>
+{% endif %}

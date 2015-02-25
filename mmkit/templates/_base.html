@@ -1,3 +1,5 @@
+{% load usermenu from auth %}
+
 <!DOCTYPE html>
 <html>
 <head lang="ru">
@@ -17,6 +19,7 @@
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'efsw.archive:item_list' %}" title="Главная страница архива">Архив</a></li>
             </ul>
+            {% usermenu %}
         </div>
     </nav>
     <div class="container">
