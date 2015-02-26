@@ -10,7 +10,7 @@ from elasticsearch import helpers
 
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.search import elastic
-from efsw.common.search.exceptions import WrongParametersException
+from efsw.common.search.exceptions import WrongParametersException, ExecutedQueryChangeException
 
 
 class SearchQueryTestCase(TestCase):
@@ -108,8 +108,9 @@ class SearchQueryExecTestCase(TestCase):
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('1', ids_list)
         self.assertIn('2', ids_list)
-        self.assertEqual(2, q.get_hits_count())
-        self.assertEqual(len(q), 2)
+        self.assertIn('3', ids_list)
+        self.assertEqual(3, q.get_total_hits_count())
+        self.assertEqual(len(q), 3)
         self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
@@ -117,7 +118,7 @@ class SearchQueryExecTestCase(TestCase):
         ids_list = [x['_id'] for x in q]
         self.assertIn('1', ids_list)
         self.assertIn('2', ids_list)
-        self.assertEqual(2, q.get_hits_count())
+        self.assertEqual(3, q.get_total_hits_count())
         self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
@@ -125,7 +126,7 @@ class SearchQueryExecTestCase(TestCase):
         q.filter_terms('field_int', [63])
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('1', ids_list)
-        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(1, q.get_total_hits_count())
         self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME,self.DOC_TYPE)
@@ -134,12 +135,28 @@ class SearchQueryExecTestCase(TestCase):
         q.filter_range('field_date', lte='2015-02-21')
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('2', ids_list)
-        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(1, q.get_total_hits_count())
         self.assertEqual(1, q._executed)
 
         q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
         q.query_multi_match('two', ['field_str', 'field_str_two'])
         ids_list = [x['_id'] for x in q.get_result()['hits']['hits']]
         self.assertIn('2', ids_list)
-        self.assertEqual(1, q.get_hits_count())
+        self.assertEqual(2, q.get_total_hits_count())
         self.assertEqual(1, q._executed)
+
+        q = EsSearchQuery(es_cm, self.INDEX_NAME, self.DOC_TYPE)
+        q.query_match_all()
+        ids_list = [x['_id'] for x in q[0:3]]
+        self.assertEqual(len(ids_list), 3)
+        ids_list = [x['_id'] for x in q[0:2]]
+        self.assertEqual(len(ids_list), 2)
+        ids_list = [x['_id'] for x in q[1:3]]
+        self.assertEqual(len(ids_list), 2)
+        self.assertEqual(int(q[1][0]['_id']), 2)
+        self.assertEqual(q._executed, 0)
+        q.from_size(1, 2).get_result()
+        ids_list = [x['_id'] for x in q[1:3]]  # Повторяем точно такой же срез
+        self.assertEqual(len(ids_list), 2)
+        with self.assertRaises(ExecutedQueryChangeException):
+            q.query_match_all()

@@ -20,5 +20,16 @@
       "field_date": "2015-02-21",
       "field_int": 91
     }
+  },
+  {
+    "_index": "testsqindex",
+    "_type": "testmapping",
+    "_id": 3,
+    "_source": {
+      "field_str": "Object number three",
+      "field_str_two": "Object three is newer than two!",
+      "field_date": "2015-02-26",
+      "field_int": 46
+    }
   }
 ]
