@@ -1,5 +1,8 @@
+from django.conf import settings
+
 from efsw.common.search.exceptions import WrongParametersException,\
-    EmptyQueryException
+    EmptyQueryException, ExecutedQueryChangeException
+from efsw.common import default_settings
 
 
 class EsSearchQuery():
@@ -33,13 +36,13 @@ class EsSearchQuery():
         self._query_body = None
         self._result = None
         self._hits_iter_position = 0
-        self._total_hits_count = 0
+        self._total_hits_count = None
         self._executed = 0
-        self._hits_count = 0
+        self._hits_count = None
 
     def __str__(self):
         try:
-            r = self.get_query_body()
+            r = str(self.get_query_body())
         except EmptyQueryException:
             r = ''
         return r
@@ -49,18 +52,81 @@ class EsSearchQuery():
 
     def __next__(self):
         if self._hits_iter_position < len(self):
-            result = self.get_result()['hits']['hits'][self._hits_iter_position]
+            result = self.get_hits_list()[self._hits_iter_position]
             self._hits_iter_position += 1
             return result
         else:
             raise StopIteration
 
     def __len__(self):
-        if not self._executed:
-            self._hits_count = len(self.get_result()['hits']['hits'])
+        if self._hits_count is None:
+            self._hits_count = len(self.get_hits_list())
         return self._hits_count
 
+    @staticmethod
+    def _convert_slice_to_from_size(k):
+        if isinstance(k, slice):
+            if k.start is not None:
+                from_ = int(k.start)
+            else:
+                from_ = 0
+            max_size = getattr(
+                settings,
+                'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
+                default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
+            )
+            if k.stop is not None:
+                size = int(k.stop) - from_
+                if size > max_size:
+                    raise ValueError('Количетсво результатов поиска не может быть больше {0}'.format(max_size))
+            else:
+                size = max_size
+            if k.step is not None:
+                step = int(k.step)
+            else:
+                step = None
+        elif isinstance(k, int):
+            from_ = k
+            size = 1
+            step = None
+        return from_, size, step
+
+    def __getitem__(self, k):
+        if not isinstance(k, (slice, int)):
+            raise TypeError
+
+        (from_, size, step) = self._convert_slice_to_from_size(k)
+        if self._executed:
+            # Если срез применяется к уже выполненному запросу - создаём копию с теми же параметрами и выполняем запрос
+            # снова, но уже с другим срезом
+            if from_ == self._from and size == self._size:
+                # если только этот срез не такой же, как предыдущий
+                if step is not None:
+                    return self.get_hits_list()[::step]
+                else:
+                    return self.get_hits_list()
+            else:
+                return self.copy()[k]
+
+        sliced_obj = self.copy()
+        result = sliced_obj.from_size(from_, size).get_hits_list()
+        if step is not None:
+            return result[::step]
+        else:
+            return result
+
+    def copy(self):
+        c = self.__class__(self._es_cm, self._index_name, self._doc_type, self._bool_default)
+        c._queries = self._queries
+        c._sort = self._sort
+        c._filters = self._filters
+        c._size = self._size
+        c._from = self._from
+        return c
+
     def query_match_all(self):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         self._queries.append(
             (
                 {
@@ -71,6 +137,8 @@ class EsSearchQuery():
         return self
 
     def query_multi_match(self, query, fields, bool_type=None):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         if not bool_type:
             bool_type = self._bool_default
         self._queries.append(
@@ -87,6 +155,8 @@ class EsSearchQuery():
         return self
 
     def sort_field(self, field, order=ORDER_ASC):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         if order == self.ORDER_ASC:
             order_str = 'asc'
         else:
@@ -103,6 +173,8 @@ class EsSearchQuery():
         return self
 
     def filter_terms(self, field, values_list, bool_type=None):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         if not bool_type:
             bool_type = self._bool_default
         self._filters.append(
@@ -118,6 +190,8 @@ class EsSearchQuery():
         return self
 
     def filter_range(self, field, bool_type=None, **kwargs):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         if not bool_type:
             bool_type = self._bool_default
         if kwargs.get('gte') and kwargs.get('gt'):
@@ -140,8 +214,11 @@ class EsSearchQuery():
         return self
 
     def from_size(self, from_param=DEFAULT_FROM, size_param=DEFAULT_SIZE):
+        if self._executed:
+            raise ExecutedQueryChangeException()
         self._from = from_param
         self._size = size_param
+        return self
 
     def get_query_body(self):
         if self._query_body is not None:
@@ -241,9 +318,12 @@ class EsSearchQuery():
 
     def get_total_hits_count(self):
         # TODO: по-хорошему, если запрос ещё не выполнялся, то его можно выполнить как count, а не как search
-        if not self._executed:
+        if self._total_hits_count is None:
             self._total_hits_count = int(self.get_result()['hits']['total'])
         return self._total_hits_count
 
     def executed(self):
         return bool(self._executed)
+
+    def get_hits_list(self):
+        return self.get_result()['hits']['hits']

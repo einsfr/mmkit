@@ -8,3 +8,7 @@ class WrongParametersException(Exception):
 
 class EmptyQueryException(Exception):
     pass
+
+
+class ExecutedQueryChangeException(Exception):
+    pass
