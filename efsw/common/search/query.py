@@ -33,8 +33,9 @@ class EsSearchQuery():
         self._query_body = None
         self._result = None
         self._hits_iter_position = 0
-        self._hits_count = 0
+        self._total_hits_count = 0
         self._executed = 0
+        self._hits_count = 0
 
     def __str__(self):
         try:
@@ -47,7 +48,7 @@ class EsSearchQuery():
         return self
 
     def __next__(self):
-        if self._hits_iter_position < self.get_hits_count():
+        if self._hits_iter_position < len(self):
             result = self.get_result()['hits']['hits'][self._hits_iter_position]
             self._hits_iter_position += 1
             return result
@@ -55,7 +56,9 @@ class EsSearchQuery():
             raise StopIteration
 
     def __len__(self):
-        return self.get_hits_count()
+        if not self._executed:
+            self._hits_count = len(self.get_result()['hits']['hits'])
+        return self._hits_count
 
     def query_match_all(self):
         self._queries.append(
@@ -236,11 +239,11 @@ class EsSearchQuery():
             self._result = self._execute_query()
         return self._result
 
-    def get_hits_count(self):
+    def get_total_hits_count(self):
         # TODO: по-хорошему, если запрос ещё не выполнялся, то его можно выполнить как count, а не как search
-        if not self._hits_count:
-            self._hits_count = int(self.get_result()['hits']['total'])
-        return self._hits_count
+        if not self._executed:
+            self._total_hits_count = int(self.get_result()['hits']['total'])
+        return self._total_hits_count
 
     def executed(self):
         return bool(self._executed)
