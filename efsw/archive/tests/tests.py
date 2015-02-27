@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.management import call_command
 from django.contrib.auth.models import User, Permission
+from django.http import HttpResponse, HttpResponseRedirect
 
 from efsw.archive import default_settings
 from efsw.archive import models
@@ -552,17 +553,61 @@ class ArchiveSecurityTestCase(TestCase):
         (urlresolvers.reverse('efsw.archive:item_list_category', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_list_category_page', args=(1, 1)), True),
         (urlresolvers.reverse('efsw.archive:item_detail', args=(1, )), True),
-        (urlresolvers.reverse('efsw.archive:item_add'), False),
-        (urlresolvers.reverse('efsw.archive:item_update', args=(1, )), False),
-        (urlresolvers.reverse('efsw.archive:item_update_storage', args=(1, )), False),
-        (urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1, )), False),
-        (urlresolvers.reverse('efsw.archive:item_update_add_link', args=(1, )), False),
+        (
+            urlresolvers.reverse('efsw.archive:item_add'),
+            False,
+            'add_item',
+            '<h1>Добавление элемента</h1>',
+            200
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_update', args=(1, )),
+            False,
+            'change_item',
+            '<h1>Редактирование элемента</h1>',
+            200
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_update_storage', args=(1, )),
+            False,
+            'change_item',
+            '<h1>Изменение размещения элемента</h1>',
+            200
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1, )),
+            False,
+            'change_item',
+            None,
+            405
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(1, )),
+            False,
+            'change_item',
+            None,
+            405
+        ),
         (urlresolvers.reverse('efsw.archive:category_list'), True),
-        (urlresolvers.reverse('efsw.archive:category_add'), False),
-        (urlresolvers.reverse('efsw.archive:category_update', args=(1, )), False),
+        (
+            urlresolvers.reverse('efsw.archive:category_add'),
+            False,
+            'add_itemcategory',
+            '<h1>Добавление категории</h1>',
+            200
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:category_update', args=(1, )),
+            False,
+            'change_itemcategory',
+            '<h1>Редактирование категории</h1>',
+            200
+        ),
     )
 
     LOGIN_PATH = 'http://testserver/accounts/login/?next={0}'
+
+    _created_users = []
 
     # За удаление пользователей, созданных во время тестов, спасибо сюда:
     # https://vilimpoc.org/blog/2013/07/04/django-testing-creating-and-removing-test-users/
@@ -580,8 +625,11 @@ class ArchiveSecurityTestCase(TestCase):
             self.assertNotContains(response, '<h1>Вход в систему</h1>')
 
     def assertLoginRequired(self, response, url_tuple):
-        self.assertEqual(self.LOGIN_PATH.format(url_tuple[0]), response.redirect_chain[0][0])
-        self.assertContains(response, '<h1>Вход в систему</h1>')
+        if isinstance(response, HttpResponseRedirect):
+            self.assertEqual(self.LOGIN_PATH.format(url_tuple[0]), response.url)
+        elif isinstance(response, HttpResponse) and len(response.redirect_chain):
+            self.assertEqual(self.LOGIN_PATH.format(url_tuple[0]), response.redirect_chain[0][0])
+            self.assertContains(response, '<h1>Вход в систему</h1>')
 
     def _get_permission_instance(self, codename):
         # Спасибо за идею сюда:
@@ -594,7 +642,7 @@ class ArchiveSecurityTestCase(TestCase):
     def test_anonymous_access(self):
         self.client.logout()
         for u in self.REQUEST_URLS:
-            response = self.client.get(u[0], follow=True)
+            response = self.client.get(u[0])
             if u[1]:
                 self.assertNotLoginRequired(response, u)
             else:
@@ -608,11 +656,18 @@ class ArchiveSecurityTestCase(TestCase):
             response = self.client.get(u[0], follow=True)
             self.assertNotLoginRequired(response, u)
 
-    def test_perm_add_item(self):
-        user = User.objects.create_user('_perm_add_item', password='_perm_add_item')
-        user.user_permissions.add(self._get_permission_instance('add_item'))
-        user.save()
-        self.client.login(username='_perm_add_item', password='_perm_add_item')
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_add'))
-        self.assertContains(response, '<h1>Добавление элемента</h1>', status_code=200)
-        # ЭТО МОЖНО ПОСТАВИТЬ НА ПОТОК И ПРОВЕРЯТЬ В ЦИКЛЕ
+    def test_concrete_permissions(self):
+        for u in [x for x in self.REQUEST_URLS if not x[1]]:
+            codename = u[2]
+            username = '_perm_{0}'.format(codename)
+            if username not in self._created_users:
+                user = User.objects.create_user(username, password='password')
+                user.user_permissions.add(self._get_permission_instance(codename))
+                user.save()
+                self._created_users.append(username)
+            self.client.login(username=username, password='password')
+            response = self.client.get(u[0])
+            if u[3] is not None:
+                self.assertContains(response, u[3], status_code=u[4])
+            else:
+                self.assertEqual(response.status_code, u[4])
