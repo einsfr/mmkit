@@ -26,7 +26,6 @@ class EsConnectionManager():
     def __init__(self):
         self._es_instance = None
         self._es_instance_timestamp = None
-        self._es_instance_status = None
         self._es_index_prefix = None
 
     def _set_es_instance(self):
@@ -39,21 +38,10 @@ class EsConnectionManager():
         es_options = getattr(settings, 'EFSW_ELASTIC_OPTIONS', {})
         self._es_instance_timestamp = time.time()
         self._es_instance = elasticsearch.Elasticsearch(es_hosts, **es_options)
-        self._set_es_status()
-
-    def _set_es_status(self):
-        if self._es_instance is None:
-            self._es_instance_status = None
-        else:
-            try:
-                self._es_instance_status = str(self._es_instance.cluster.health()['status']).lower()
-            except elasticsearch.ConnectionError:
-                self._es_instance_status = None
 
     def get_es(self) -> elasticsearch.Elasticsearch:
         if not es_enabled():
             self._es_instance = None
-            self._es_instance_status = None
             self._es_instance_timestamp = None
             return None
         if self._es_instance is None:
@@ -83,7 +71,14 @@ class EsConnectionManager():
         return self._es_instance
 
     def get_es_status(self):
-        return self._es_instance_status
+        es = self.get_es()
+        if es is None:
+            return None
+        else:
+            try:
+                return str(self._es_instance.cluster.health()['status']).lower()
+            except elasticsearch.ConnectionError:
+                return None
 
     def get_es_index_prefix(self):
         if self._es_index_prefix is None:
