@@ -8,5 +8,5 @@ urlpatterns = patterns(
     url(r'^$', views.home_page),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^archive/', include('efsw.archive.urls', namespace='efsw.archive')),
-    url(r'^user/', include('efsw.common.user.urls', namespace='efsw.common.user')),
+    url(r'^accounts/', include('efsw.common.accounts.urls', namespace='efsw.common.accounts')),
 )

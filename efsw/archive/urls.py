@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url
+from django.contrib.auth.decorators import login_required
 
 from efsw.archive import views
 
@@ -50,31 +51,31 @@ urlpatterns = patterns(
     # items/add/ Добавление нового элемента
     url(
         r'^items/add/$',
-        views.ItemAddView.as_view(),
+        login_required(views.ItemAddView.as_view()),
         name='item_add'
     ),
     # items/12/update/ Редактирование существующего элемента
     url(
         r'^items/(?P<pk>\d+)/update/$',
-        views.ItemUpdateView.as_view(),
+        login_required(views.ItemUpdateView.as_view()),
         name='item_update'
     ),
     # items/12/update/storage/ Редактирование существующего элемента - раздел хранилища
     url(
         r'^items/(?P<pk>\d+)/update/storage/$',
-        views.ItemUpdateStorageView.as_view(),
+        login_required(views.ItemUpdateStorageView.as_view()),
         name='item_update_storage'
     ),
     # items/12/update/remove-link/ Удаление связи между элементами
     url(
         r'^items/(?P<item_id>\d+)/update/remove-link/$',
-        views.item_update_remove_link,
+        login_required(views.item_update_remove_link),
         name='item_update_remove_link'
     ),
     # items/12/update/add-link Добавление связи элементу
     url(
         r'^items/(?P<item_id>\d+)/update/add-link/$',
-        views.item_update_add_link,
+        login_required(views.item_update_add_link),
         name='item_update_add_link'
     ),
     # categories/ Список категорий
@@ -86,13 +87,13 @@ urlpatterns = patterns(
     # categories/add/ Добавление новой категории
     url(
         r'^categories/add/$',
-        views.CategoryAddView.as_view(),
+        login_required(views.CategoryAddView.as_view()),
         name='category_add'
     ),
     # categories/3/update/ Редактирование существующей категории
     url(
         r'^categories/(?P<pk>\d+)/update$',
-        views.CategoryUpdateView.as_view(),
+        login_required(views.CategoryUpdateView.as_view()),
         name='category_update'
     ),
 )

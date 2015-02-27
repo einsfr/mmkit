@@ -2,7 +2,7 @@ from django import shortcuts
 from django.contrib import auth
 from django.http import HttpResponseRedirect
 
-from efsw.common.user import forms
+from efsw.common.accounts import forms
 
 
 def login(request):
@@ -17,7 +17,7 @@ def login(request):
             if user:
                 if user.is_active:
                     auth.login(request, user)
-                    redirect_url = request.GET.get('r')
+                    redirect_url = request.GET.get('next')
                     if redirect_url:
                         return HttpResponseRedirect(redirect_url)
                     else:

@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from efsw.common.user import views
+from efsw.common.accounts import views
 
 urlpatterns = patterns(
     '',
