@@ -6,6 +6,7 @@ from django.core import urlresolvers
 from django.utils import timezone
 from django.conf import settings
 from django.core.management import call_command
+from django.contrib.auth.models import User
 
 from efsw.archive import default_settings
 from efsw.archive import models
@@ -136,6 +137,17 @@ class ArchiveViewsTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
+    def _create_superuser(self):
+        try:
+            user = User.objects.create_superuser('test', 'test@example.com', 'test')
+            user.save()
+        except:
+            pass
+
+    def _login_user(self):
+        self._create_superuser()
+        self.client.login(username='test', password='test')
+
     def test_item_list(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_list'))
         self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
@@ -218,6 +230,7 @@ class ArchiveViewsTestCase(TestCase):
     def test_item_add(self):
         request_path = urlresolvers.reverse('efsw.archive:item_add')
 
+        self._login_user()
         response = self.client.get(request_path)
         self.assertContains(response, '<h1>Добавление элемента</h1>', status_code=200)
         self.assertContains(response, '<form action="" method="post">')
@@ -295,6 +308,7 @@ class ArchiveViewsTestCase(TestCase):
         )
 
     def test_item_update(self):
+        self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_update', args=(4, )))
         self.assertContains(response, '<h1>Редактирование элемента</h1>', status_code=200)
         self.assertContains(response, '<form action="" method="post">')
@@ -318,6 +332,7 @@ class ArchiveViewsTestCase(TestCase):
         self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
 
     def test_item_update_storage(self):
+        self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_storage', args=(4, )))
         self.assertContains(response, '<h1>Изменение размещения элемента</h1>', status_code=200)
         self.assertContains(response, '<form action="" method="post">')
@@ -337,6 +352,7 @@ class ArchiveViewsTestCase(TestCase):
         self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
 
     def test_item_update_remove_link(self):
+        self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )))
         self.assertEqual(response.status_code, 405)
 
@@ -373,6 +389,7 @@ class ArchiveViewsTestCase(TestCase):
         self.assertContains(response, '4-1000000', status_code=200)
 
     def test_item_update_add_link(self):
+        self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )))
         self.assertEqual(response.status_code, 405)
 
@@ -418,6 +435,7 @@ class ArchiveViewsTestCase(TestCase):
     def test_category_add(self):
         request_url = urlresolvers.reverse('efsw.archive:category_add')
 
+        self._login_user()
         response = self.client.get(request_url)
         self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
         self.assertContains(response, '<form action="" method="post">')
@@ -453,6 +471,7 @@ class ArchiveViewsTestCase(TestCase):
     def test_category_update(self):
         request_url = urlresolvers.reverse('efsw.archive:category_update', args=(1, ))
 
+        self._login_user()
         response = self.client.get(request_url)
         self.assertContains(response, '<h1>Редактирование категории</h1>', status_code=200)
         self.assertContains(response, '<form action="" method="post">')

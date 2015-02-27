@@ -9,7 +9,6 @@ from django.conf import settings
 from django.core import urlresolvers
 from django.template import loader
 from django.views.decorators import csrf
-from django.contrib.auth.decorators import login_required
 
 from efsw.archive import models
 from efsw.archive import forms
