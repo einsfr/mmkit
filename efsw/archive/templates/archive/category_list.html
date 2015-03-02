@@ -14,7 +14,7 @@
                 {% else %}
                     {{ object.name }}
                 {% endif %}
-                <a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a>
+                {% if perms.archive.change_itemcategory %}<a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a>{% endif %}
             </li>
         {% empty %}
             Категории не найдены

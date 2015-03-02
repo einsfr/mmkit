@@ -12,9 +12,11 @@
                 <li role="presentation">
                     <a href="{% url 'efsw.archive:item_list' %}" title="Список элементов">Список</a>
                 </li>
-                <li role="presentation">
-                    <a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a>
-                </li>
+                {% if perms.archive.add_item %}
+                    <li role="presentation">
+                        <a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
         <li role="presentation" class="dropdown">
@@ -25,9 +27,11 @@
                 <li role="presentation">
                     <a href="{% url 'efsw.archive:category_list' %}" title="Список категорий">Список</a>
                 </li>
-                <li role="presentation">
-                    <a href="{% url 'efsw.archive:category_add' %}" title="Добавить категорию">Добавить</a>
-                </li>
+                {% if perms.archive.add_itemcategory %}
+                    <li role="presentation">
+                        <a href="{% url 'efsw.archive:category_add' %}" title="Добавить категорию">Добавить</a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
         <li role="presentation">

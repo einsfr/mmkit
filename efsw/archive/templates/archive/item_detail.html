@@ -7,7 +7,7 @@
 
 {% block content %}
     <h1>Детали элемента</h1>
-    <h2>Свойства <small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Свойства {% if perms.archive.change_item %}<small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small>{% endif %}</h2>
     <table class="table">
         <tbody>
             <tr>
@@ -36,7 +36,7 @@
             </tr>
         </tbody>
     </table>
-    <h2>Расположение <small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small></h2>
+    <h2>Расположение {% if perms.archive.change_item %}<small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small>{% endif %}</h2>
     <table class="table">
         <tbody>
             <tr>
@@ -70,20 +70,26 @@
             <tr>
                 <th>Включает</th>
                 <td>
-                    <ul class="list-group" id="item-links-container">
-                        {% for item in object.includes.all %}
-                            {% include 'archive/_item_detail_link.html' %}
-                        {% endfor %}
-                        <li class="list-group-item">
-                            <form action="{% url 'efsw.archive:item_update_add_link' object.id %}" method="post" id="item-add-link-form">
-                                {% csrf_token %}
-                                {{ link_add_form.linked_id.errors }}
-                                <label for="{{ link_add_form.linked_id.id_for_label }}">ID элемента</label>
-                                {{ link_add_form.linked_id }}
-                                <input type="submit" value="Включить">
-                            </form>
-                        </li>
-                    </ul>
+                    {% if object.includes.all or perms.archive.change_item %}
+                        <ul class="list-group" id="item-links-container">
+                            {% for item in object.includes.all %}
+                                {% include 'archive/_item_detail_link.html' %}
+                            {% endfor %}
+                            {% if perms.archive.change_item %}
+                                <li class="list-group-item">
+                                    <form action="{% url 'efsw.archive:item_update_add_link' object.id %}" method="post" id="item-add-link-form">
+                                        {% csrf_token %}
+                                        {{ link_add_form.linked_id.errors }}
+                                        <label for="{{ link_add_form.linked_id.id_for_label }}">ID элемента</label>
+                                        {{ link_add_form.linked_id }}
+                                        <input type="submit" value="Включить">
+                                    </form>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    {% else %}
+                        -
+                    {% endif %}
                 </td>
             </tr>
         </tbody>
