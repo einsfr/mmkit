@@ -1,0 +1,20 @@
+{
+  "mappings": {
+    "sourcelessindexabletestmodel": {
+      "dynamic": "strict",
+      "_source": {
+        "enabled": false
+      },
+      "properties": {
+        "name": {
+          "type": "string",
+          "analyzer": "russian"
+        },
+        "created": {
+          "type": "date",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

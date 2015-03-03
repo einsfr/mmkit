@@ -419,6 +419,7 @@ class ModelIndexTestCase(TestCase):
             es = elastic.get_connection_manager().get_es()
         init_indices = (
             os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'testmodelindex.json'),
+            os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'sourcelessindex.json'),
         )
         with self.settings(
                 EFSW_ELASTIC_INIT_INDICES=init_indices,
@@ -426,34 +427,48 @@ class ModelIndexTestCase(TestCase):
         ):
             esinit.Command().handle(replace=True, verbosity=2, nowait=False)
         m = test_models.IndexableTestModel()
-        m.name = 'Test Model 1'
-        m.created = datetime.date.today()
+        sm = test_models.SourcelessIndexableTestModel()
+        m.name = sm.name = 'Test Model 1'
+        m.created = sm.created = datetime.date.today()
         with connection.schema_editor() as schema_editor:
             schema_editor.create_model(m)
+            schema_editor.create_model(sm)
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.save()
-        index_prefix = elastic.get_connection_manager().get_es_index_prefix()
-        reply = es.get('{0}testmodelindex'.format(index_prefix), m.id, 'indexabletestmodel')
-        self.assertEqual(reply['_index'], '{0}testmodelindex'.format(index_prefix))
+            sm.save()
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('testmodelindex'), m.id, 'indexabletestmodel')
+        self.assertEqual(reply['_index'], elastic.get_connection_manager().prefix_index_name('testmodelindex'))
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
         self.assertEqual(reply['_source']['name'], m.name)
         self.assertEqual(reply['_type'], 'indexabletestmodel')
         self.assertEqual(reply['_id'], str(m.id))
         self.assertTrue(reply['found'])
-        m.name = 'Edited Test Model 1'
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('sourcelessindex'), sm.id, 'sourcelessindexabletestmodel')
+        self.assertTrue(reply['found'])
+        self.assertNotIn('_source', reply)
+        m.name = sm.name = 'Edited Test Model 1'
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.save()
-        reply = es.get('{0}testmodelindex'.format(index_prefix), m.id, 'indexabletestmodel')
-        self.assertEqual(reply['_index'], '{0}testmodelindex'.format(index_prefix))
+            sm.save()
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('testmodelindex'), m.id, 'indexabletestmodel')
+        self.assertEqual(reply['_index'], elastic.get_connection_manager().prefix_index_name('testmodelindex'))
         self.assertEqual(reply['_source']['created'], m.created.isoformat())
         self.assertEqual(reply['_source']['name'], m.name)
         self.assertEqual(reply['_type'], 'indexabletestmodel')
         self.assertEqual(reply['_id'], str(m.id))
         self.assertTrue(reply['found'])
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('sourcelessindex'), sm.id, 'sourcelessindexabletestmodel')
+        self.assertTrue(reply['found'])
+        self.assertNotIn('_source', reply)
         model_id = m.id
+        smodel_id = sm.id
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             m.delete()
-        reply = es.get('{0}testmodelindex'.format(index_prefix), model_id, 'indexabletestmodel', ignore=404)
+            sm.delete()
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('testmodelindex'), model_id, 'indexabletestmodel', ignore=404)
+        self.assertFalse(reply['found'])
+        reply = es.get(elastic.get_connection_manager().prefix_index_name('sourcelessindex'), smodel_id, 'sourcelessindexabletestmodel', ignore=404)
         self.assertFalse(reply['found'])
         with connection.schema_editor() as schema_editor:
             schema_editor.delete_model(m)
+            schema_editor.delete_model(sm)
