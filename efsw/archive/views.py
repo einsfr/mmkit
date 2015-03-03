@@ -77,10 +77,10 @@ def item_add(request):
             item = form.save()
             il = models.ItemLog()
             il.action = il.ACTION_ADD
-            if request.user.is_anonymous():
-                user = None
-            else:
+            if request.user.is_authenticated():
                 user = request.user
+            else:
+                user = None
             il.user = user
             il.item = item
             il.save()
@@ -99,10 +99,10 @@ def item_update(request, item_id):
             item = form.save()
             il = models.ItemLog()
             il.action = il.ACTION_UPDATE
-            if request.user.is_anonymous():
-                user = None
-            else:
+            if request.user.is_authenticated():
                 user = request.user
+            else:
+                user = None
             il.user = user
             il.item = item
             il.save()
