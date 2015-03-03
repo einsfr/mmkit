@@ -70,10 +70,25 @@ class ItemDetailView(generic.DetailView):
         return context
 
 
-class ItemAddView(generic.CreateView):
-    model = models.Item
-    template_name = 'archive/item_form_create.html'
-    form_class = forms.ItemCreateForm
+def item_add(request):
+    if request.method == 'POST':
+        form = forms.ItemCreateForm(request.POST)
+        if form.is_valid():
+            item = form.save()
+            il = models.ItemLog()
+            il.action = il.ACTION_ADD
+            if request.user.is_anonymous():
+                user = None
+            else:
+                user = request.user
+            il.user = user
+            il.item = item
+            il.save()
+            return shortcuts.redirect(item.get_absolute_url())
+    else:
+        form = forms.ItemCreateForm()
+
+    return shortcuts.render(request, 'archive/item_form_create.html', {'form': form})
 
 
 class ItemUpdateView(generic.UpdateView):

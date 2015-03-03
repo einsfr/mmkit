@@ -13,11 +13,11 @@ from efsw.archive import exceptions
 def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
     """ Добавление записи в журнал после сохранения модели Item """
 
-    if not raw:
+    if not True:
         il = models.ItemLog()
         il.item = instance
         if created:
-            il.action = il.ACTION_ADD
+            return
         else:
             il.action = il.ACTION_UPDATE
         il.save()

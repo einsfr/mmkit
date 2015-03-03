@@ -51,7 +51,7 @@ urlpatterns = patterns(
     # items/add/ Добавление нового элемента
     url(
         r'^items/add/$',
-        permission_required('archive.add_item')(views.ItemAddView.as_view()),
+        permission_required('archive.add_item')(views.item_add),
         name='item_add'
     ),
     # items/12/update/ Редактирование существующего элемента
