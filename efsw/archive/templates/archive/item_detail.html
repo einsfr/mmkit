@@ -99,6 +99,7 @@
         <thead>
             <tr>
                 <th>Дата и время</th>
+                <th>Пользователь</th>
                 <th>Действие</th>
             </tr>
         </thead>
@@ -106,6 +107,7 @@
             {% for log_item in object.log.all %}
                 <tr>
                     <td>{{ log_item.dt }}</td>
+                    <td>{% if log_item.user %}{{ log_item.user.username }}{% else %}-{% endif %}</td>
                     <td>{{ log_item.get_action_name }}</td>
                 </tr>
             {% empty %}

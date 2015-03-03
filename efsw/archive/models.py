@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.core import urlresolvers
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from efsw.archive import default_settings
 from efsw.common.search.models import IndexableModel
@@ -171,10 +172,17 @@ class ItemLog(models.Model):
     item = models.ForeignKey(Item, related_name='log')
 
     dt = models.DateTimeField(auto_now=True)
+
     action = models.CharField(max_length=3, choices=ACTION_DICT.items())
 
+    user = models.ForeignKey(User, null=True)
+
     def __str__(self):
-        return "{0}: {1}".format(self.dt, self.action)
+        if self.user:
+            username = self.user.username
+        else:
+            username = '-'
+        return "{0} ({1}): {2}".format(self.dt, username, self.action)
 
     def get_action_name(self):
         return self.ACTION_DICT.get(str(self.action), '')

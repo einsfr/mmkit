@@ -1,5 +1,3 @@
-import json
-
 from django.views import generic
 from django import shortcuts
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
