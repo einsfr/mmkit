@@ -56,8 +56,8 @@ urlpatterns = patterns(
     ),
     # items/12/update/ Редактирование существующего элемента
     url(
-        r'^items/(?P<pk>\d+)/update/$',
-        permission_required('archive.change_item')(views.ItemUpdateView.as_view()),
+        r'^items/(?P<item_id>\d+)/update/$',
+        permission_required('archive.change_item')(views.item_update),
         name='item_update'
     ),
     # items/12/update/storage/ Редактирование существующего элемента - раздел хранилища

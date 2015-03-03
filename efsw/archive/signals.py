@@ -9,20 +9,6 @@ from efsw.archive import default_settings
 from efsw.archive import exceptions
 
 
-@receiver(signals.post_save, sender=models.Item)
-def log_on_item_save(sender, instance, created, raw, *args, **kwargs):
-    """ Добавление записи в журнал после сохранения модели Item """
-
-    if not True:
-        il = models.ItemLog()
-        il.item = instance
-        if created:
-            return
-        else:
-            il.action = il.ACTION_UPDATE
-        il.save()
-
-
 @receiver(signals.m2m_changed, sender=models.Item.includes.through)
 def log_on_item_includes_change(sender, instance, action, pk_set, *args, **kwargs):
     """ Добавление записи в журнал после изменения связей между моделями Item """

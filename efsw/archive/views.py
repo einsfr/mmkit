@@ -91,10 +91,26 @@ def item_add(request):
     return shortcuts.render(request, 'archive/item_form_create.html', {'form': form})
 
 
-class ItemUpdateView(generic.UpdateView):
-    model = models.Item
-    template_name = 'archive/item_form_update.html'
-    form_class = forms.ItemUpdateForm
+def item_update(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    if request.method == 'POST':
+        form = forms.ItemUpdateForm(request.POST, instance=item)
+        if form.is_valid():
+            item = form.save()
+            il = models.ItemLog()
+            il.action = il.ACTION_UPDATE
+            if request.user.is_anonymous():
+                user = None
+            else:
+                user = request.user
+            il.user = user
+            il.item = item
+            il.save()
+            return shortcuts.redirect(item.get_absolute_url())
+    else:
+        form = forms.ItemUpdateForm(instance=item)
+
+    return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
 
 
 class ItemUpdateStorageView(generic.UpdateView):
