@@ -13,6 +13,7 @@ from efsw.archive import exceptions
 def log_on_item_includes_change(sender, instance, action, pk_set, *args, **kwargs):
     """ Добавление записи в журнал после изменения связей между моделями Item """
 
+    # TODO: Это тоже нужно убрать
     if action not in ['post_add', 'post_remove']:
         return
     il = models.ItemLog()
