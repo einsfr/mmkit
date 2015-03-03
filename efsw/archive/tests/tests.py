@@ -62,47 +62,6 @@ class ArchiveTestCase(TestCase):
         il.action = 'fake-action'
         self.assertEqual(il.get_action_name(), '')
 
-    def test_item_signals(self):
-        s = models.Storage()
-        s.name = 'Тестовое хранилище'
-        s.base_url = ''
-        s.save()
-
-        c = models.ItemCategory()
-        c.name = 'Тестовая категория'
-        c.save()
-
-        i = models.Item()
-        i.name = 'Тестовый элемент'
-        i.description = 'Описание тестового элемента'
-        i.created = timezone.now()
-        i.author = 'Автор тестового элемента'
-        i.storage = s
-        i.category = c
-        i.save()
-
-        include = models.Item()
-        include.name = 'Включённый элемент'
-        include.description = 'Описание включённого элемента'
-        include.created = timezone.now()
-        include.author = 'Автор включённого элемента'
-        include.storage = s
-        include.category = c
-        include.save()
-
-        # проверка внесения записей в лог
-        self.assertEqual(len(i.log.all()), 1)
-        self.assertEqual(i.log.all()[0].action, models.ItemLog.ACTION_ADD)
-        i.name = 'Изменённый тестовый элемент'
-        i.save()
-        self.assertEqual(len(i.log.all()), 2)
-        self.assertEqual(i.log.all()[1].action, models.ItemLog.ACTION_UPDATE)
-        i.includes.add(include)
-        self.assertEqual(len(i.log.all()), 3)
-        self.assertEqual(i.log.all()[2].action, models.ItemLog.ACTION_INCLUDE_UPDATE)
-        self.assertEqual(len(include.log.all()), 2)
-        self.assertEqual(include.log.all()[1].action, models.ItemLog.ACTION_INCLUDE_UPDATE)
-
     def test_item_fs_signals(self):
         test_storage_root = os.path.join(settings.BASE_DIR, getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', '_storage_test'))
         with self.settings(EFSW_ARCH_SKIP_FS_OPS=False):
@@ -251,6 +210,9 @@ class ArchiveViewsTestCase(TestCase):
         response = self.client.post(request_path, post_data, follow=True)
         self.assertEqual(len(response.redirect_chain), 1)
         self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
+        log = response.context['object'].log.all()
+        self.assertEqual(len(log), 1)
+        self.assertEqual(log[0].action, log[0].ACTION_ADD)
 
         response = self.client.post(request_path)
         self.assertEqual(response.status_code, 200)
@@ -335,6 +297,10 @@ class ArchiveViewsTestCase(TestCase):
         )
         self.assertEqual(len(response.redirect_chain), 1)
         self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
+        log = response.context['object'].log.all()
+        self.assertEqual(len(log), 2)
+        self.assertEqual(log[0].action, log[0].ACTION_ADD)
+        self.assertEqual(log[1].action, log[1].ACTION_UPDATE)
 
     def test_item_update_storage(self):
         self._login_user()
