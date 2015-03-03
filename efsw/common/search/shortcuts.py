@@ -1,5 +1,7 @@
 import json
 
+from elasticsearch import NotFoundError, RequestError
+
 from efsw.common.search import models, elastic
 
 
@@ -17,12 +19,23 @@ def create_model_index_doc(instance: models.IndexableModel):
 
 def update_model_index_doc(instance: models.IndexableModel):
     es_cm = elastic.get_connection_manager()
-    es_cm.get_es().update(
-        es_cm.prefix_index_name(instance.get_index_name()),
-        instance.get_doc_type(),
-        instance.id,
-        json.dumps({'doc': instance.get_doc_body()})
-    )
+    try:
+        es_cm.get_es().update(
+            es_cm.prefix_index_name(instance.get_index_name()),
+            instance.get_doc_type(),
+            instance.id,
+            json.dumps({'doc': instance.get_doc_body()})
+        )
+    except NotFoundError:
+        # Если модель обновилась, но индекса для неё не было - такое возможно, правда?
+        create_model_index_doc(instance)
+    except RequestError as exc:
+        # Если индекс не хранить _source - внести в него частичные изменения не получится (по крайней мере в версии 1.4)
+        if str(exc.error).startswith('DocumentSourceMissingException'):
+            delete_model_index_doc(instance)
+            create_model_index_doc(instance)
+        else:
+            raise
 
 
 def delete_model_index_doc(instance: models.IndexableModel):
