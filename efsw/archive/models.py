@@ -206,3 +206,7 @@ class ItemLog(models.Model):
     @classmethod
     def log_item_update(cls, item, request):
         cls._log_item_action(item, cls.ACTION_UPDATE, request)
+
+    @classmethod
+    def log_item_include_update(cls, item, request):
+        cls._log_item_action(item, cls.ACTION_INCLUDE_UPDATE, request)

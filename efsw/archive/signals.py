@@ -9,28 +9,6 @@ from efsw.archive import default_settings
 from efsw.archive import exceptions
 
 
-@receiver(signals.m2m_changed, sender=models.Item.includes.through)
-def log_on_item_includes_change(sender, instance, action, pk_set, *args, **kwargs):
-    """ Добавление записи в журнал после изменения связей между моделями Item """
-
-    # TODO: Это тоже нужно убрать
-    if action not in ['post_add', 'post_remove']:
-        return
-    il = models.ItemLog()
-    il.item = instance
-    il.action = il.ACTION_INCLUDE_UPDATE
-    il.save()
-    for pk in pk_set:
-        try:
-            item = models.Item.objects.get(pk=pk)
-        except models.Item.DoesNotExist:
-            continue
-        il_rev = models.ItemLog()
-        il_rev.item = item
-        il_rev.action = il_rev.ACTION_INCLUDE_UPDATE
-        il_rev.save()
-
-
 @receiver(signals.post_save, sender=models.Item)
 def fs_ops_on_folder_create(sender, instance, created, raw, *args, **kwargs):
     """ Операции с файловой системой после создания элемента """
