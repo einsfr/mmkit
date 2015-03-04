@@ -75,15 +75,7 @@ def item_add(request):
         form = forms.ItemCreateForm(request.POST)
         if form.is_valid():
             item = form.save()
-            il = models.ItemLog()
-            il.action = il.ACTION_ADD
-            if request.user.is_authenticated():
-                user = request.user
-            else:
-                user = None
-            il.user = user
-            il.item = item
-            il.save()
+            models.ItemLog.log_item_add(item, request)
             return shortcuts.redirect(item.get_absolute_url())
     else:
         form = forms.ItemCreateForm()
@@ -97,15 +89,7 @@ def item_update(request, item_id):
         form = forms.ItemUpdateForm(request.POST, instance=item)
         if form.is_valid():
             item = form.save()
-            il = models.ItemLog()
-            il.action = il.ACTION_UPDATE
-            if request.user.is_authenticated():
-                user = request.user
-            else:
-                user = None
-            il.user = user
-            il.item = item
-            il.save()
+            models.ItemLog.log_item_update(item, request)
             return shortcuts.redirect(item.get_absolute_url())
     else:
         form = forms.ItemUpdateForm(instance=item)

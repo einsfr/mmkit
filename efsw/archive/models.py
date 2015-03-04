@@ -186,3 +186,23 @@ class ItemLog(models.Model):
 
     def get_action_name(self):
         return self.ACTION_DICT.get(str(self.action), '')
+
+    @classmethod
+    def _log_item_action(cls, item, action, request):
+        il = cls()
+        il.action = action
+        if request.user.is_authenticated():
+            user = request.user
+        else:
+            user = None
+        il.user = user
+        il.item = item
+        il.save()
+
+    @classmethod
+    def log_item_add(cls, item, request):
+        cls._log_item_action(item, cls.ACTION_ADD, request)
+
+    @classmethod
+    def log_item_update(cls, item, request):
+        cls._log_item_action(item, cls.ACTION_UPDATE, request)
