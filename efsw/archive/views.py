@@ -60,14 +60,12 @@ def item_list_category(request, category='0', page='1'):
     return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
 
-class ItemDetailView(generic.DetailView):
-    model = models.Item
-
-    def get_context_data(self, **kwargs):
-        context = super(ItemDetailView, self).get_context_data(**kwargs)
-        context['link_add_form'] = forms.ItemUpdateAddLinkForm()
-
-        return context
+def item_detail(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    return shortcuts.render(request, 'archive/item_detail.html', {
+        'object': item,
+        'link_add_form': forms.ItemUpdateAddLinkForm()
+    })
 
 
 def item_add(request):
