@@ -104,15 +104,22 @@
             </tr>
         </thead>
         <tbody>
-            {% for log_item in object.log.all %}
-                <tr>
-                    <td>{{ log_item.dt }}</td>
-                    <td>{% if log_item.user %}{{ log_item.user.username }}{% else %}-{% endif %}</td>
-                    <td>{{ log_item.get_action_name }}</td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="2">Записи не найдены</td></tr>
-            {% endfor %}
+            {% if log_msgs %}
+                {% for log_item in log_msgs %}
+                    <tr>
+                        <td>{{ log_item.dt }}</td>
+                        <td>{% if log_item.user %}{{ log_item.user.username }}{% else %}-{% endif %}</td>
+                        <td>{{ log_item.get_action_name }}</td>
+                    </tr>
+                {% endfor %}
+                {% if has_more_log_msgs %}
+                    <tr><td colspan="3" class="text-center">
+                        <a href="#" title="Посмотреть все записи">Посмотреть все записи</a>
+                    </td></tr>
+                {% endif %}
+            {% else %}
+                <tr><td colspan="3">Записи не найдены</td></tr>
+            {% endif %}
         </tbody>
     </table>
 {% endblock %}

@@ -62,9 +62,23 @@ def item_list_category(request, category='0', page='1'):
 
 def item_detail(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    log_msg_count = item.log.count()
+    max_count = getattr(
+        settings,
+        'EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT',
+        archive_default_settings.EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT
+    )
+    if log_msg_count <= max_count:
+        log_msgs = item.log.order_by('-pk').all()
+        has_more_log_msgs = False
+    else:
+        log_msgs = item.log.order_by('-pk').all()[0:3]
+        has_more_log_msgs = True
     return shortcuts.render(request, 'archive/item_detail.html', {
         'object': item,
-        'link_add_form': forms.ItemUpdateAddLinkForm()
+        'link_add_form': forms.ItemUpdateAddLinkForm(),
+        'log_msgs': log_msgs,
+        'has_more_log_msgs': has_more_log_msgs,
     })
 
 
