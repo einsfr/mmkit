@@ -3,7 +3,7 @@
 {% load field_verbose_name from model %}
 {% load staticfiles %}
 
-{% block title %}{{ block.super }} - Детали элемента {{ object.id }}{% endblock %}
+{% block title %}{{ block.super }} - Детали элемента{% endblock %}
 
 {% block content %}
     <h1>Детали элемента</h1>
@@ -94,7 +94,7 @@
             </tr>
         </tbody>
     </table>
-    <h2>Журнал</h2><!-- @TODO: Сортировка по убыванию даты, по-умолчанию записи скрыты, показываются только три-пять последних, остальные просматриваются на отдельной странице -->
+    <h2>Журнал изменений</h2>
     <table class="table">
         <thead>
             <tr>
@@ -114,7 +114,7 @@
                 {% endfor %}
                 {% if has_more_log_msgs %}
                     <tr><td colspan="3" class="text-center">
-                        <a href="#" title="Посмотреть все записи">Посмотреть все записи</a>
+                        <a href="{% url 'efsw.archive:item_log' object.id %}" title="Посмотреть все записи">Посмотреть все записи</a>
                     </td></tr>
                 {% endif %}
             {% else %}

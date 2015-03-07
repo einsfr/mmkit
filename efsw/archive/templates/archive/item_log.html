@@ -1,0 +1,41 @@
+{% extends 'archive/_app_base.html' %}
+
+{% load field_verbose_name from model %}
+
+{% block title %}{{ block.super }} - Журнал изменений элемента{% endblock %}
+
+{% block content %}
+    <h1>Журнал изменений элемента</h1>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>ID</th>
+                <td>{{ item.id }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name item 'name' %}</th>
+                <td>{{ item.name }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Дата и время</th>
+                <th>Пользователь</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in log_msgs %}
+                <tr>
+                    <td>{{ msg.dt }}</td>
+                    <td>{% if msg.user %}{{ msg.user.username }}{% else %}-{% endif %}</td>
+                    <td>{{ msg.get_action_name }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3">Записи не найдены</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

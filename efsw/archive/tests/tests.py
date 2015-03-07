@@ -191,6 +191,13 @@ class ArchiveViewsTestCase(TestCase):
         self.assertEqual(len(response.context['object'].includes.all()), 3)
         self.assertEqual(len(response.context['object'].log.all()), 1)
 
+    def test_item_log(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_log', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_log', args=(1, )))
+        self.assertContains(response, '<h1>Журнал изменений элемента</h1>', status_code=200)
+
     def test_item_add(self):
         request_path = urlresolvers.reverse('efsw.archive:item_add')
 
@@ -519,6 +526,7 @@ class ArchiveSecurityTestCase(TestCase):
         (urlresolvers.reverse('efsw.archive:item_list_category', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_list_category_page', args=(1, 1)), True),
         (urlresolvers.reverse('efsw.archive:item_detail', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:item_log', args=(1, )), True),
         (
             urlresolvers.reverse('efsw.archive:item_add'),
             False,

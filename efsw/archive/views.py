@@ -82,6 +82,18 @@ def item_detail(request, item_id):
     })
 
 
+def item_log(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    log_msgs = item.log.order_by('-pk').all()
+    return shortcuts.render(
+        request,
+        'archive/item_log.html',
+        {
+            'item': item,
+            'log_msgs': log_msgs,
+        }
+    )
+
 def item_add(request):
     if request.method == 'POST':
         form = forms.ItemCreateForm(request.POST)
