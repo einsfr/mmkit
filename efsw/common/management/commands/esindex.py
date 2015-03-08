@@ -12,7 +12,7 @@ from efsw.common.search import elastic, models
 class Command(base.BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('models_list', nargs='*')
+        parser.add_argument('models_list', nargs='*')  # Список моделей, подлежащих индексации в формате <app_label>.<model_name>
 
     def handle(self, *args, **options):
         verbosity = int(options['verbosity'])
