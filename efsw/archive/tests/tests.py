@@ -480,7 +480,7 @@ class ArchiveViewsTestCase(TestCase):
                 EFSW_ELASTIC_DISABLE=False,
         ):
             call_command('esinit', replace=True, verbosity=2)
-            call_command('esindex', verbosity=2)
+            call_command('esindex', 'archive.Item', verbosity=2)
         get_data = {
             'q': 'новость',
         }
