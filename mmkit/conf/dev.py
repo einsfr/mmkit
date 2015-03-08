@@ -6,7 +6,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-INSTALLED_APPS += ('debug_toolbar', )
+#INSTALLED_APPS += ('debug_toolbar', ) Несовместимо с 1.8
 
 EFSW_ARCH_SKIP_FS_OPS = False
 

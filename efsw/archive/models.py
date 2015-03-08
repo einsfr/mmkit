@@ -15,6 +15,7 @@ class Storage(models.Model):
     class Meta:
         verbose_name = 'хранилище'
         verbose_name_plural = 'хранилищи'
+        app_label = 'archive'
 
     name = models.CharField(
         max_length=255,
@@ -57,6 +58,7 @@ class ItemCategory(models.Model):
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
+        app_label = 'archive'
 
     name = models.CharField(
         max_length=64,
@@ -80,6 +82,7 @@ class Item(IndexableModel, models.Model):
     class Meta:
         verbose_name = 'элемент'
         verbose_name_plural = 'элементы'
+        app_label = 'archive'
 
     name = models.CharField(
         max_length=255,
@@ -158,6 +161,7 @@ class ItemLog(models.Model):
         verbose_name = 'запись'
         verbose_name_plural = 'записи'
         default_permissions = ()
+        app_label = 'archive'
 
     ACTION_ADD = 'ADD'
     ACTION_UPDATE = 'UPD'

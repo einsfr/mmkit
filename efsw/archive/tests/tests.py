@@ -30,6 +30,8 @@ class ArchiveTestCase(TestCase):
         self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc'))
         self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00'))
 
+        storage.save()
+
         item1 = models.Item()
         item1.id = 1
         item1.storage = storage
