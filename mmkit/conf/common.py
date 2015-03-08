@@ -61,7 +61,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'mmkit', 'templates')]
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mmkit', 'static'),
     os.path.join(BASE_DIR, 'efsw', 'archive', 'static')
@@ -70,3 +69,24 @@ STATICFILES_DIRS = [
 EFSW_ELASTIC_INIT_INDICES = (
     os.path.join(BASE_DIR, 'efsw', 'archive', 'search', 'indices'),
 )
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'mmkit', 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        }
+    }
+]
