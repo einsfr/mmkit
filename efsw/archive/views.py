@@ -1,6 +1,6 @@
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, Http404
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
@@ -40,7 +40,7 @@ def _get_item_list_page(items, page):
 
 
 def item_list(request, page='1'):
-    items_all = models.Item.objects.all().order_by('-pk')
+    items_all = models.Item.objects.all().order_by('-pk').select_related('category')
     items_page = _get_item_list_page(items_all, page)
 
     return shortcuts.render(request, 'archive/item_list.html', {'items': items_page})
@@ -54,14 +54,17 @@ def item_list_category(request, category='0', page='1'):
     if category_id == 0:
         return item_list(request, page)
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
-    items_all = models.Item.objects.filter(category_id=category_id).order_by('-pk')
+    items_all = cat.items.all().order_by('-pk')
     items_page = _get_item_list_page(items_all, page)
 
     return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
 
 def item_detail(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    item = shortcuts.get_object_or_404(
+        models.Item.objects.select_related('category', 'storage').prefetch_related('includes', 'included_in'),
+        pk=item_id
+    )
     log_msg_count = item.log.count()
     max_count = getattr(
         settings,
@@ -69,10 +72,10 @@ def item_detail(request, item_id):
         archive_default_settings.EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT
     )
     if log_msg_count <= max_count:
-        log_msgs = item.log.order_by('-pk').all()
+        log_msgs = item.log.order_by('-pk').all().select_related('user')
         has_more_log_msgs = False
     else:
-        log_msgs = item.log.order_by('-pk').all()[0:3]
+        log_msgs = item.log.order_by('-pk').all().select_related('user')[0:3]
         has_more_log_msgs = True
     return shortcuts.render(request, 'archive/item_detail.html', {
         'object': item,
@@ -93,6 +96,7 @@ def item_log(request, item_id):
             'log_msgs': log_msgs,
         }
     )
+
 
 def item_add(request):
     if request.method == 'POST':
@@ -223,7 +227,7 @@ def search(request, page=1):
         if hits['total']:
             hits_ids = [h['_id'] for h in hits['hits']]
             items_dict = dict(
-                map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids))
+                map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids).select_related('category'))
             )
             items = list(filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids]))
         else:
