@@ -11,7 +11,7 @@ from efsw.common.search import elastic, models
 
 class Command(base.BaseCommand):
 
-    def handle(self, *models_classes_list, **options):
+    def handle(self, *models_classes_list, **options):  # TODO: опция models_classes_list НЕ РАБОТАЕТ!!!!!!!!
         verbosity = int(options['verbosity'])
         if not models_classes_list:
             if verbosity:

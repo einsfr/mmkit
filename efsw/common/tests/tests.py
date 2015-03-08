@@ -469,6 +469,3 @@ class ModelIndexTestCase(TestCase):
         self.assertFalse(reply['found'])
         reply = es.get(elastic.get_connection_manager().prefix_index_name('sourcelessindex'), smodel_id, 'sourcelessindexabletestmodel', ignore=404)
         self.assertFalse(reply['found'])
-        with connection.schema_editor() as schema_editor:
-            schema_editor.delete_model(m)
-            schema_editor.delete_model(sm)
