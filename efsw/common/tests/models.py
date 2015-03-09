@@ -1,9 +1,14 @@
 from django.db import models
 
 from efsw.common.search.models import IndexableModel
+from efsw.common.db.models import AbstractExtraDataModel
+from efsw.common.db.extramap import BaseExtraFieldsMapper
 
 
 class IndexableTestModel(IndexableModel, models.Model):
+
+    class Meta:
+        app_label = 'tests'
 
     name = models.CharField(
         max_length=255
@@ -28,6 +33,9 @@ class IndexableTestModel(IndexableModel, models.Model):
 
 class SourcelessIndexableTestModel(IndexableModel, models.Model):
 
+    class Meta:
+        app_label = 'tests'
+
     name = models.CharField(
         max_length=255
     )
@@ -47,3 +55,16 @@ class SourcelessIndexableTestModel(IndexableModel, models.Model):
             'name': self.name,
             'created': self.created.isoformat()
         }
+
+
+class SimpleExtraDataModel(AbstractExtraDataModel):
+
+    class Meta:
+        app_label = 'tests'
+
+    def get_extra_fields_mapper(self):
+        mapper = BaseExtraFieldsMapper()
+        mapper.add('ch', models.CharField(
+            max_length=32
+        ))
+        return mapper
