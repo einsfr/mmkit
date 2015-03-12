@@ -23,7 +23,19 @@ class AbstractExtraDataModel(models.Model):
         editable=False,
     )
 
+    def save(self, *args, **kwargs):
+        # Если поле не определено mapper'ом - его при сохранении надо просто выкинуть, а валидации не будет всё равно
+        if type(self.extra_data) == dict:
+            cleaned_extra_data = dict([(k, v) for k, v in self.extra_data.items() if self.extra_field_exists(k)])
+            self.extra_data = cleaned_extra_data
+        else:
+            self.extra_data = None
+        super().save(*args, **kwargs)
+
     def get_extra_fields_mapper(self):
         raise NotImplementedError(
             'Метод get_extra_fields_mapper должен быть переопределён моделью перед использованием.'
         )
+
+    def extra_field_exists(self, field_name):
+        return self.get_extra_fields_mapper().field_exists(field_name)

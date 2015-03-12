@@ -17,10 +17,10 @@ class ExtraDataModelTestCase(TestCase):
         m = SimpleExtraDataModel()
         m.extra_data = {
             'name': 'test_name',
-            'age': '25'
+            'ch': 'some-char-data'
         }
         m.save()
         m_id = m.id
         m = SimpleExtraDataModel.objects.get(pk=m_id)
-        self.assertEqual(m.extra_data['name'], 'test_name')
-        self.assertEqual(m.extra_data['age'], '25')
+        self.assertEqual(m.extra_data['ch'], 'some-char-data')
+        self.assertNotIn('name', m.extra_data)
