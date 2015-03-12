@@ -27,7 +27,7 @@ class AbstractExtraDataModel(models.Model):
         # Если поле не определено mapper'ом - его при сохранении надо просто выкинуть, а валидации не будет всё равно
         if type(self.extra_data) == dict:
             cleaned_extra_data = dict([(k, v) for k, v in self.extra_data.items() if self.extra_field_exists(k)])
-            self.extra_data = cleaned_extra_data
+            self.extra_data = cleaned_extra_data  # TODO: надо ещё пройтись по всем полям и привести их к пригодному для сохранения в БД виду https://docs.djangoproject.com/en/1.8/ref/models/instances/#what-happens-when-you-save
         else:
             self.extra_data = None
         super().save(*args, **kwargs)
