@@ -2,6 +2,13 @@ from django.db import models
 from django.contrib.postgres import fields
 
 
+class ExtraDataWrapper():
+    def __init__(self, extra_data_dict):
+        if not isinstance(extra_data_dict, dict):
+            raise TypeError('Параметр extra_data_dict должен быть словарём.')
+        self.__dict__ = extra_data_dict
+
+
 class AbstractExtraDataModel(models.Model):
     """
     Общий смысл получается примерно такой: extra_data хранит значения дополнительных полей данных и работает как обычное
@@ -25,15 +32,17 @@ class AbstractExtraDataModel(models.Model):
 
     def save(self, *args, **kwargs):
         # Если поле не определено mapper'ом - его при сохранении надо просто выкинуть, а валидации не будет всё равно
-        if type(self.extra_data) == dict:
-            cleaned_extra_data = {}
-            field_mapping = self.get_extra_fields_mapping()
-            for f_name, f_obj in self.extra_data.items():
-                if f_name in field_mapping:
-                    cleaned_extra_data[f_name] = field_mapping[f_name].value_to_string(self.extra_data)
-            self.extra_data = cleaned_extra_data
-        else:
+        try:
+            ed_wrapper = ExtraDataWrapper(self.extra_data)
+        except TypeError:
             self.extra_data = None
+            super().save(*args, **kwargs)
+        cleaned_extra_data = {}
+        field_mapping = self.get_extra_fields_mapping()
+        for f_name, f_obj in self.extra_data.items():
+            if f_name in field_mapping:
+                cleaned_extra_data[f_name] = field_mapping[f_name].value_to_string(ed_wrapper)
+        self.extra_data = cleaned_extra_data
         super().save(*args, **kwargs)
 
     def get_extra_fields_mapper(self):
