@@ -192,7 +192,7 @@ def search(request, page=1):
     es = es_cm.get_es()
     es_status = es_cm.get_es_status()
     if es is None or (es_status != 'yellow' and es_status != 'green'):
-        return HttpResponseServerError(loader.render_to_string('archive/search_offline.html'))
+        return shortcuts.render(request, 'archive/search_offline.html', status=500)
 
     form = forms.ArchiveSearchForm(request.GET)
     if form.is_valid():
