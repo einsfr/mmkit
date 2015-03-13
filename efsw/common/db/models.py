@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.postgres import fields
 
 
+class ExtraDataField(fields.HStoreField):
+
+    def __init__(self, **kwargs):
+        kwargs['null'] = True
+        kwargs['editable'] = False
+        super().__init__(**kwargs)
+
+
 class AbstractExtraDataModel(models.Model):
     """
     Общий смысл получается примерно такой: extra_data хранит значения дополнительных полей данных и работает как обычное
@@ -13,15 +21,14 @@ class AbstractExtraDataModel(models.Model):
     отдельных полей в составное поле extra_data и за их отображение в виде виджетов формы. Ну и, конечно, за валидацию
     каждого отдельного поля, т.к. они все являются стандартными Django-полями - проблем с этим быть не должно вообще
     никаких.
+
+    МНЕ НИЧЕГО НЕ МЕШАЕТ СДЕЛАТЬ ЭТО ПОЛЕ В ВИДЕ ГОТОВОЙ МОДЕЛИ, У КОТОРОЙ ПРОСТО НЕ БУДЕТ СВОЕЙ ТАБЛИЦЫ
     """
 
     class Meta:
         abstract = True
 
-    extra_data = fields.HStoreField(
-        null=True,
-        editable=False,
-    )
+    extra_data = ExtraDataField()
 
     def save(self, *args, **kwargs):
         # Если поле не определено mapper'ом - его при сохранении надо просто выкинуть, а валидации не будет всё равно
