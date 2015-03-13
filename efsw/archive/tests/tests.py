@@ -30,6 +30,8 @@ class ArchiveTestCase(TestCase):
         self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc'))
         self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00'))
 
+        storage.save()
+
         item1 = models.Item()
         item1.id = 1
         item1.storage = storage
@@ -190,6 +192,13 @@ class ArchiveViewsTestCase(TestCase):
         self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
         self.assertEqual(len(response.context['object'].includes.all()), 3)
         self.assertEqual(len(response.context['object'].log.all()), 1)
+
+    def test_item_log(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_log', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item_log', args=(1, )))
+        self.assertContains(response, '<h1>Журнал изменений элемента</h1>', status_code=200)
 
     def test_item_add(self):
         request_path = urlresolvers.reverse('efsw.archive:item_add')
@@ -471,7 +480,7 @@ class ArchiveViewsTestCase(TestCase):
                 EFSW_ELASTIC_DISABLE=False,
         ):
             call_command('esinit', replace=True, verbosity=2)
-            call_command('esindex', verbosity=2)
+            call_command('esindex', 'archive.Item', verbosity=2)
         get_data = {
             'q': 'новость',
         }
@@ -519,6 +528,7 @@ class ArchiveSecurityTestCase(TestCase):
         (urlresolvers.reverse('efsw.archive:item_list_category', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_list_category_page', args=(1, 1)), True),
         (urlresolvers.reverse('efsw.archive:item_detail', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:item_log', args=(1, )), True),
         (
             urlresolvers.reverse('efsw.archive:item_add'),
             False,

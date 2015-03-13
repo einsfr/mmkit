@@ -1,7 +1,7 @@
 import os
 import datetime
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.db import models
 from django.core import paginator
 from django.conf import settings
@@ -96,9 +96,8 @@ class ModelTagTestCase(TestCase):
         self.assertEqual(model.field_verbose_name(instance_wo, 'non-exist', True), '')
 
 
+@override_settings(ROOT_URLCONF='efsw.common.tests.tests_urls')
 class PaginationTagTestCase(TestCase):
-
-    urls = 'efsw.common.tests.tests_urls'
 
     _next_page_text = getattr(settings, 'EFSW_COMM_PAGIN_NEXT_TEXT', default_settings.EFSW_COMM_PAGIN_NEXT_TEXT)
 
@@ -469,6 +468,3 @@ class ModelIndexTestCase(TestCase):
         self.assertFalse(reply['found'])
         reply = es.get(elastic.get_connection_manager().prefix_index_name('sourcelessindex'), smodel_id, 'sourcelessindexabletestmodel', ignore=404)
         self.assertFalse(reply['found'])
-        with connection.schema_editor() as schema_editor:
-            schema_editor.delete_model(m)
-            schema_editor.delete_model(sm)

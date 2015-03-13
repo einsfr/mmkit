@@ -11,14 +11,27 @@ from efsw.common.search import elastic, models
 
 class Command(base.BaseCommand):
 
-    def handle(self, *models_classes_list, **options):
+    def add_arguments(self, parser):
+        parser.add_argument('models_list', nargs='*')  # Список моделей, подлежащих индексации в формате <app_label>.<model_name>
+
+    def handle(self, *args, **options):
         verbosity = int(options['verbosity'])
-        if not models_classes_list:
+        models_list = options['models_list']
+        if not models_list:
             if verbosity:
                 print('Список классов не передан - использую все доступные приложению модели')
             models_classes_list = [x for x in apps.get_models() if issubclass(x, models.IndexableModel)]
         else:
-            models_classes_list = [x for x in models_classes_list if issubclass(x, models.IndexableModel)]
+            models_classes_list = []
+            for model_name in models_list:
+                try:
+                    model_class = apps.get_model(model_name)
+                except LookupError:
+                    if verbosity:
+                        print('Невозможно найти модель "{0}" - пропускаю'.format(model_name))
+                    continue
+                if issubclass(model_class, models.IndexableModel):
+                    models_classes_list.append(model_class)
         if not models_classes_list:
             if verbosity:
                 print('В списке классов нет ни одного, доступного для индексации - выполнение прекращено.')

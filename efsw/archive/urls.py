@@ -44,9 +44,15 @@ urlpatterns = patterns(
     ),
     # items/12/ Детальное описаное одного элемента
     url(
-        r'^items/(?P<pk>\d+)/$',
-        views.ItemDetailView.as_view(),
+        r'^items/(?P<item_id>\d+)/$',
+        views.item_detail,
         name='item_detail'
+    ),
+    # items/12/log/ Все сообщения о внесении изменений в элемент
+    url(
+        r'^items/(?P<item_id>\d+)/log/$',
+        views.item_log,
+        name='item_log'
     ),
     # items/add/ Добавление нового элемента
     url(

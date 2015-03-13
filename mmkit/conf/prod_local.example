@@ -11,7 +11,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'mmkit',
         'USER': 'mmkit',
-        'PASSWORD': 'password'
+        'PASSWORD': 'password',
+        'HOST': 'localhost'  # Нужно убрать, если соединение происходит через socket
     }
 }
 
