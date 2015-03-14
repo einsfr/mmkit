@@ -39,9 +39,11 @@ class AbstractExtraDataModel(models.Model):
             super().save(*args, **kwargs)
         cleaned_extra_data = {}
         field_mapping = self.get_extra_fields_mapping()
-        for f_name, f_obj in self.extra_data.items():
-            if f_name in field_mapping:
-                cleaned_extra_data[f_name] = field_mapping[f_name].value_to_string(ed_wrapper)
+        cleaned_extra_data = dict([
+            (f_name, field_mapping[f_name].value_to_string(ed_wrapper))
+            for f_name, f_obj in self.extra_data.items()
+            if f_name in field_mapping
+        ])
         self.extra_data = cleaned_extra_data
         super().save(*args, **kwargs)
 
