@@ -26,5 +26,5 @@ class ExtraDataModelTestCase(TestCase):
         m_id = m.id
         m = SimpleExtraDataModel.objects.get(pk=m_id)
         self.assertEqual(m.extra_data['ch'], 'some-char-data')
-        self.assertEqual(m.extra_data['da'], date_value)
+        self.assertEqual(m.extra_data['da'], date_value.date())
         self.assertNotIn('name', m.extra_data)

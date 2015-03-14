@@ -62,7 +62,8 @@ class SimpleExtraDataModel(AbstractExtraDataModel):
     class Meta:
         app_label = 'tests'
 
-    def get_extra_fields_mapper(self):
+    @classmethod
+    def get_extra_fields_mapper(cls):
         mapper = BaseExtraFieldsMapper()
         mapper.add('ch', models.CharField(
             max_length=32
