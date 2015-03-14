@@ -67,4 +67,5 @@ class SimpleExtraDataModel(AbstractExtraDataModel):
         mapper.add('ch', models.CharField(
             max_length=32
         ))
+        mapper.add('da', models.DateField())
         return mapper
