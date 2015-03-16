@@ -32,6 +32,11 @@ class ExtraDataModelTestCase(TestCase):
         self.assertEqual(m.extra_data['ch'], 'some-char-data')
         self.assertEqual(m.extra_data['da'], date_value)
         self.assertNotIn('name', m.extra_data)
+        m = SimpleExtraDataModel()
+        m.save()
+        m_id = m.id
+        m = SimpleExtraDataModel.objects.get(pk=m_id)
+        self.assertEqual(m.extra_data, {})
 
     def testFieldCompatibility(self):
         fields = {
