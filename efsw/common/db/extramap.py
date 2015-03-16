@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class BaseExtraFieldsMapper():  # TODO: mapping должен стать объектом, а не словарём
+class BaseExtraFieldsMapper():
 
     def __init__(self):
         self.mapping = {}
