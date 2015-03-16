@@ -13,7 +13,7 @@ class ExtraDataField(fields.HStoreField):
     def __init__(self, **kwargs):
         kwargs['null'] = True
         kwargs['editable'] = False
-        super().__init__()
+        super().__init__(**kwargs)
 
 
 class AbstractExtraDataModel(models.Model):
@@ -26,19 +26,19 @@ class AbstractExtraDataModel(models.Model):
     def save(self, *args, **kwargs):
         if not isinstance(self.extra_data, dict):
             self.extra_data = None
-            super().save(*args, **kwargs)
-        field_mapping = self.get_extra_fields_mapping()
-        cleaned_extra_data = dict([
-            (f_name, field_mapping[f_name].clean(f_value, None))
-            for f_name, f_value in self.extra_data.items()
-            if f_name in field_mapping
-        ])
-        ed_wrapper = ExtraDataWrapper(self.extra_data)
-        prepared_extra_data = dict([
-            (f_name, field_mapping[f_name].value_to_string(ed_wrapper))
-            for f_name, f_obj in cleaned_extra_data.items()
-        ])
-        self.extra_data = prepared_extra_data
+        else:
+            field_mapping = self.get_extra_fields_mapping()
+            cleaned_extra_data = dict([
+                (f_name, field_mapping[f_name].clean(f_value, None))
+                for f_name, f_value in self.extra_data.items()
+                if f_name in field_mapping
+            ])
+            ed_wrapper = ExtraDataWrapper(self.extra_data)
+            prepared_extra_data = dict([
+                (f_name, field_mapping[f_name].value_to_string(ed_wrapper))
+                for f_name, f_obj in cleaned_extra_data.items()
+            ])
+            self.extra_data = prepared_extra_data
         super().save(*args, **kwargs)
 
     @classmethod
@@ -46,11 +46,14 @@ class AbstractExtraDataModel(models.Model):
         loaded_model = super().from_db(db, field_names, values)
         field_mapping = cls.get_extra_fields_mapping()
         extra_data = values[field_names.index('extra_data')]
-        loaded_model.extra_data = dict([
-            (f_name, field_mapping[f_name].clean(f_value, None))
-            for f_name, f_value in extra_data.items()
-            if f_name in field_mapping
-        ])
+        if isinstance(extra_data, dict):
+            loaded_model.extra_data = dict([
+                (f_name, field_mapping[f_name].clean(f_value, None))
+                for f_name, f_value in extra_data.items()
+                if f_name in field_mapping
+            ])
+        else:
+            loaded_model.extra_data = {}
         return loaded_model
 
     @classmethod
