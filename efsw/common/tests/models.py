@@ -70,3 +70,72 @@ class SimpleExtraDataModel(AbstractExtraDataModel):
         ))
         mapper.add('da', models.DateField())
         return mapper
+
+
+class AllFieldsExtraDataModel(AbstractExtraDataModel):
+
+    class Meta:
+        app_label = 'tests'
+
+    @classmethod
+    def get_extra_fields_mapper(cls):
+        mapper = BaseExtraFieldsMapper()
+        mapper.add(
+            'bigint',
+            models.BigIntegerField()
+        ).add(
+            'bool',
+            models.BooleanField()
+        ).add(
+            'char',
+            models.CharField(max_length=32)
+        ).add(
+            'date',
+            models.DateField()
+        ).add(
+            'datetime',
+            models.DateTimeField()
+        ).add(
+            'decimal',
+            models.DecimalField(max_digits=5, decimal_places=2)
+        ).add(
+            'email',
+            models.EmailField()
+        ).add(
+            'float',
+            models.FloatField()
+        ).add(
+            'int',
+            models.IntegerField()
+        ).add(
+            'ipaddr',
+            models.GenericIPAddressField()
+        ).add(
+            'nullbool',
+            models.NullBooleanField()
+        ).add(
+            'posint',
+            models.PositiveIntegerField()
+        ).add(
+            'possmint',
+            models.PositiveSmallIntegerField()
+        ).add(
+            'slug',
+            models.SlugField()
+        ).add(
+            'smint',
+            models.SmallIntegerField()
+        ).add(
+            'text',
+            models.TextField()
+        ).add(
+            'time',
+            models.TimeField()
+        ).add(
+            'url',
+            models.URLField()
+        ).add(
+            'uuid',
+            models.UUIDField()
+        )
+        return mapper
