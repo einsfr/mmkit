@@ -10,15 +10,20 @@ class ExtraDataWrapper():
         self.__dict__ = extra_data_dict
 
 
+class ExtraDataField(fields.HStoreField):
+
+    def __init__(self, **kwargs):
+        kwargs['null'] = True
+        kwargs['editable'] = False
+        super().__init__()
+
+
 class AbstractExtraDataModel(models.Model):
 
     class Meta:
         abstract = True
 
-    extra_data = fields.HStoreField(
-        null=True,
-        editable=False
-    )
+    extra_data = ExtraDataField()
 
     def save(self, *args, **kwargs):
         if not isinstance(self.extra_data, dict):
