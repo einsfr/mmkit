@@ -1,5 +1,3 @@
-from django.utils import dateparse
-
 from django.db import models
 from django.contrib.postgres import fields
 
