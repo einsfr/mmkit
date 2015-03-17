@@ -72,6 +72,21 @@ class SimpleExtraDataModel(AbstractExtraDataModel):
         return mapper
 
 
+class BoolFieldExtraDataModel(AbstractExtraDataModel):
+
+    class Meta:
+        app_label = 'tests'
+
+    @classmethod
+    def set_extra_fields_mapper(cls):
+        mapper = BaseExtraFieldsMapper()
+        mapper.add(
+            'bool',
+            models.BooleanField()
+        )
+        cls.extra_fields_mapper = mapper
+
+
 class AllFieldsExtraDataModel(AbstractExtraDataModel):
 
     class Meta:
@@ -82,60 +97,57 @@ class AllFieldsExtraDataModel(AbstractExtraDataModel):
         mapper = BaseExtraFieldsMapper()
         mapper.add(
             'bigint',
-            models.BigIntegerField()
-        ).add(
-            'bool',
-            models.BooleanField()
+            models.BigIntegerField(null=True, blank=True)
         ).add(
             'char',
-            models.CharField(max_length=32)
+            models.CharField(max_length=32, null=True, blank=True)
         ).add(
             'date',
-            models.DateField()
+            models.DateField(null=True, blank=True)
         ).add(
             'datetime',
-            models.DateTimeField()
+            models.DateTimeField(null=True, blank=True)
         ).add(
             'decimal',
-            models.DecimalField(max_digits=5, decimal_places=2)
+            models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
         ).add(
             'email',
-            models.EmailField()
+            models.EmailField(null=True, blank=True)
         ).add(
             'float',
-            models.FloatField()
+            models.FloatField(null=True, blank=True)
         ).add(
             'int',
-            models.IntegerField()
+            models.IntegerField(null=True, blank=True)
         ).add(
             'ipaddr',
-            models.GenericIPAddressField()
+            models.GenericIPAddressField(null=True, blank=True)
         ).add(
             'nullbool',
-            models.NullBooleanField()
+            models.NullBooleanField(null=True, blank=True)
         ).add(
             'posint',
-            models.PositiveIntegerField()
+            models.PositiveIntegerField(null=True, blank=True)
         ).add(
             'possmint',
-            models.PositiveSmallIntegerField()
+            models.PositiveSmallIntegerField(null=True, blank=True)
         ).add(
             'slug',
-            models.SlugField()
+            models.SlugField(null=True, blank=True)
         ).add(
             'smint',
-            models.SmallIntegerField()
+            models.SmallIntegerField(null=True, blank=True)
         ).add(
             'text',
-            models.TextField()
+            models.TextField(null=True, blank=True)
         ).add(
             'time',
-            models.TimeField()
+            models.TimeField(null=True, blank=True)
         ).add(
             'url',
-            models.URLField()
+            models.URLField(null=True, blank=True)
         ).add(
             'uuid',
-            models.UUIDField()
+            models.UUIDField(null=True, blank=True)
         )
         cls.extra_fields_mapper = mapper

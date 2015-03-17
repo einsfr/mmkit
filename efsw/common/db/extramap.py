@@ -17,7 +17,6 @@ class BaseExtraFieldsMapper():
             raise TypeError('Имя дополнительного поля должно быть строкой.')
         if not isinstance(field_obj, models.Field):
             raise TypeError('Параметр field_obj должен быть подклассов класса django.db.models.Field.')
-        field_obj.null = True
         field_obj.set_attributes_from_name(name)
         self.mapping[name] = field_obj
         return self

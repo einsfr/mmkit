@@ -6,7 +6,7 @@ from django.db import connection
 from django.utils import timezone
 from django.core import exceptions
 
-from efsw.common.tests.models import SimpleExtraDataModel, AllFieldsExtraDataModel
+from efsw.common.tests.models import SimpleExtraDataModel, AllFieldsExtraDataModel, BoolFieldExtraDataModel
 
 
 class ExtraDataModelTestCase(TestCase):
@@ -17,6 +17,7 @@ class ExtraDataModelTestCase(TestCase):
         with connection.schema_editor() as se:
             se.create_model(SimpleExtraDataModel())
             se.create_model(AllFieldsExtraDataModel())
+            se.create_model(BoolFieldExtraDataModel())
 
     def testModelCreation(self):
         m = SimpleExtraDataModel()
@@ -38,6 +39,44 @@ class ExtraDataModelTestCase(TestCase):
         m = SimpleExtraDataModel.objects.get(pk=m_id)
         self.assertEqual(m.extra_data, {})
 
+    def _test_extra_fields_model(self, fields, model_class):
+        for f_name, f_dict in fields.items():
+            print('Testing {0}'.format(type(model_class.get_extra_fields_mapping()[f_name])))
+            for f_tuple in f_dict['valid']:
+                m = model_class()
+                m.extra_data = dict([(f_name, f_tuple[0])])
+                m.save()
+                m_id = m.id
+                m = model_class.objects.get(pk=m_id)
+                if len(f_tuple) == 1:
+                    self.assertEqual(m.extra_data[f_name], f_tuple[0])
+                else:
+                    self.assertEqual(m.extra_data[f_name], f_tuple[1])
+            for f_value in f_dict['invalid']:
+                m = model_class()
+                m.extra_data = dict([(f_name, f_value)])
+                with self.assertRaises(exceptions.ValidationError):
+                    m.save()
+            print('OK')
+
+    def testBoolFieldCompatibility(self):
+        """
+        Пришлось вынести в отдельный тест из-за того, что кое-кто не терпит значение null
+        """
+        fields = {
+            'bool': {
+                'valid': [
+                    (True, ),
+                    (False, ),
+                ],
+                'invalid': [
+                    'non-bool-value',
+                    None
+                ]
+            }
+        }
+        self._test_extra_fields_model(fields, BoolFieldExtraDataModel)
+
     def testFieldCompatibility(self):
         fields = {
             'bigint': {
@@ -47,15 +86,6 @@ class ExtraDataModelTestCase(TestCase):
                 ],
                 'invalid': [
                     9223372036854775808
-                ]
-            },
-            'bool': {
-                'valid': [
-                    (True, ),
-                    (False, )
-                ],
-                'invalid': [
-                    'non-bool'
                 ]
             },
             'char': {
@@ -77,7 +107,7 @@ class ExtraDataModelTestCase(TestCase):
             },
             'decimal': {
                 'valid': [
-                    (123.45, Decimal('123.45'))
+                    (123.45, Decimal(123.45))
                 ],
                 'invalid': [
                     'non-decimal-value'
@@ -192,22 +222,4 @@ class ExtraDataModelTestCase(TestCase):
                 ]
             }
         }
-
-        for f_name, f_dict in fields.items():
-            print('Testing {0}'.format(type(AllFieldsExtraDataModel.get_extra_fields_mapping()[f_name])))
-            for f_tuple in f_dict['valid']:
-                m = AllFieldsExtraDataModel()
-                m.extra_data = dict([(f_name, f_tuple[0])])
-                m.save()
-                m_id = m.id
-                m = AllFieldsExtraDataModel.objects.get(pk=m_id)
-                if len(f_tuple) == 1:
-                    self.assertEqual(m.extra_data[f_name], f_tuple[0])
-                else:
-                    self.assertEqual(m.extra_data[f_name], f_tuple[1])
-            for f_value in f_dict['invalid']:
-                m = AllFieldsExtraDataModel()
-                m.extra_data = dict([(f_name, f_value)])
-                with self.assertRaises(exceptions.ValidationError):
-                    m.save()
-            print('OK')
+        self._test_extra_fields_model(fields, AllFieldsExtraDataModel)

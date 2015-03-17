@@ -12,6 +12,7 @@ class ExtraDataField(fields.HStoreField):
 
     def __init__(self, **kwargs):
         kwargs['null'] = True
+        kwargs['blank'] = True
         kwargs['editable'] = False
         super().__init__(**kwargs)
 
@@ -30,12 +31,14 @@ class AbstractExtraDataModel(models.Model):
             self.extra_data = None
         else:
             field_mapping = self.get_extra_fields_mapping()
-            cleaned_extra_data = dict([
-                (f_name, field_mapping[f_name].clean(f_value, None))
-                for f_name, f_value in self.extra_data.items()
-                if f_name in field_mapping
-            ])
-            ed_wrapper = ExtraDataWrapper(self.extra_data)
+            # проверка идёт с учётом всех полей, потому что отсутствующие поля могут быть обязательными
+            # но сохраняться будут только те, значение которых не None - нечего тащить лишнее
+            cleaned_extra_data = dict()
+            for f_name in field_mapping:
+                cleaned_value = field_mapping[f_name].clean(self.extra_data.get(f_name, None), None)
+                if cleaned_value is not None:
+                    cleaned_extra_data[f_name] = cleaned_value
+            ed_wrapper = ExtraDataWrapper(cleaned_extra_data)
             prepared_extra_data = dict([
                 (f_name, field_mapping[f_name].value_to_string(ed_wrapper))
                 for f_name, f_obj in cleaned_extra_data.items()
@@ -49,13 +52,13 @@ class AbstractExtraDataModel(models.Model):
         field_mapping = cls.get_extra_fields_mapping()
         extra_data = values[field_names.index('extra_data')]
         if isinstance(extra_data, dict):
-            loaded_model.extra_data = dict([
-                (f_name, field_mapping[f_name].clean(f_value, None))
-                for f_name, f_value in extra_data.items()
-                if f_name in field_mapping
+            cleaned_extra_data = dict([
+                (f_name, field_mapping[f_name].clean(extra_data.get(f_name, None), None))
+                for f_name in field_mapping
             ])
         else:
-            loaded_model.extra_data = {}
+            cleaned_extra_data = {}
+        loaded_model.extra_data = cleaned_extra_data
         return loaded_model
 
     @classmethod

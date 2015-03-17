@@ -20,15 +20,12 @@ class ArchiveTestCase(TestCase):
         storage = models.Storage()
         storage.type = models.Storage.TYPE_ONLINE_MASTER
         storage.extra_data = {
-            'base_url': "\\\\192.168.1.1"
+            'base_url': "\\\\192.168.1.1",
+            'mount_dir': "test"
         }
         self.assertEqual(storage.build_url(1), os.path.join(storage.extra_data['base_url'], '00', '00', '00', '01'))
         self.assertEqual(storage.build_url(476), os.path.join(storage.extra_data['base_url'], '00', '00', '01', 'dc'))
         self.assertEqual(storage.build_url(1000000000), os.path.join(storage.extra_data['base_url'], '3b', '9a', 'ca', '00'))
-
-        storage.extra_data = {
-            'mount_dir': "test"
-        }
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
         self.assertEqual(storage.build_path(), os.path.join(storage_root, storage.extra_data['mount_dir']))
         self.assertEqual(storage.build_path(1), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01'))
@@ -76,7 +73,8 @@ class ArchiveTestCase(TestCase):
             s.name = 'storage1'
             s.type = models.Storage.TYPE_ONLINE_MASTER
             s.extra_data = {
-                'mount_dir': 'storage1'
+                'mount_dir': 'storage1',
+                'base_url': 'url'
             }
             s.save()
 
