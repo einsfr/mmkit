@@ -23,6 +23,8 @@ class AbstractExtraDataModel(models.Model):
 
     extra_data = ExtraDataField()
 
+    extra_fields_mapper = None
+
     def save(self, *args, **kwargs):
         if not isinstance(self.extra_data, dict):
             self.extra_data = None
@@ -58,6 +60,12 @@ class AbstractExtraDataModel(models.Model):
 
     @classmethod
     def get_extra_fields_mapper(cls):
+        if cls.extra_fields_mapper is None:
+            cls.set_extra_fields_mapper()
+        return cls.extra_fields_mapper
+
+    @classmethod
+    def set_extra_fields_mapper(cls):
         raise NotImplementedError(
             'Метод get_extra_fields_mapper должен быть переопределён моделью перед использованием.'
         )

@@ -78,7 +78,7 @@ class AllFieldsExtraDataModel(AbstractExtraDataModel):
         app_label = 'tests'
 
     @classmethod
-    def get_extra_fields_mapper(cls):
+    def set_extra_fields_mapper(cls):
         mapper = BaseExtraFieldsMapper()
         mapper.add(
             'bigint',
@@ -138,4 +138,4 @@ class AllFieldsExtraDataModel(AbstractExtraDataModel):
             'uuid',
             models.UUIDField()
         )
-        return mapper
+        cls.extra_fields_mapper = mapper
