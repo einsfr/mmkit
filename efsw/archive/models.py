@@ -9,26 +9,18 @@ from efsw.archive import default_settings
 from efsw.common.search.models import IndexableModel
 
 
-class AbstractStorage(models.Model):
-    """
-    Модель, описывающая абстрактное хранилище
-    """
+class Storage(models.Model):
+    """ Модель, описывающая архивное онлайн хранилище """
 
     class Meta:
         verbose_name = 'хранилище'
         verbose_name_plural = 'хранилищи'
         app_label = 'archive'
-        abstract = True
 
     name = models.CharField(
         max_length=255,
         verbose_name='имя'
     )
-
-
-class Storage(AbstractStorage):
-    """ Модель, описывающая архивное онлайн хранилище """
-
     # это URL для доступа пользователей
     base_url = models.CharField(
         max_length=255,
