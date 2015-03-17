@@ -18,17 +18,22 @@ class ArchiveTestCase(TestCase):
 
     def test_storage_build_path(self):
         storage = models.Storage()
-        storage.base_url = "\\\\192.168.1.1"
-        self.assertEqual(storage.build_url(1), os.path.join(storage.base_url, '00', '00', '00', '01'))
-        self.assertEqual(storage.build_url(476), os.path.join(storage.base_url, '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_url(1000000000), os.path.join(storage.base_url, '3b', '9a', 'ca', '00'))
+        storage.type = models.Storage.TYPE_ONLINE_MASTER
+        storage.extra_data = {
+            'base_url': "\\\\192.168.1.1"
+        }
+        self.assertEqual(storage.build_url(1), os.path.join(storage.extra_data['base_url'], '00', '00', '00', '01'))
+        self.assertEqual(storage.build_url(476), os.path.join(storage.extra_data['base_url'], '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_url(1000000000), os.path.join(storage.extra_data['base_url'], '3b', '9a', 'ca', '00'))
 
-        storage.mount_dir = "test"
+        storage.extra_data = {
+            'mount_dir': "test"
+        }
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        self.assertEqual(storage.build_path(), os.path.join(storage_root, storage.mount_dir))
-        self.assertEqual(storage.build_path(1), os.path.join(storage_root, storage.mount_dir, '00', '00', '00', '01'))
-        self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00'))
+        self.assertEqual(storage.build_path(), os.path.join(storage_root, storage.extra_data['mount_dir']))
+        self.assertEqual(storage.build_path(1), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01'))
+        self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00'))
 
         storage.save()
 
@@ -37,21 +42,21 @@ class ArchiveTestCase(TestCase):
         item1.storage = storage
         self.assertEqual(
             item1.get_storage_path(),
-            os.path.join(storage_root, storage.mount_dir, '00', '00', '00', '01')
+            os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01')
         )
         item476 = models.Item()
         item476.id = 476
         item476.storage = storage
         self.assertEqual(
             item476.get_storage_path(),
-            os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc')
+            os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc')
         )
         item1z9 = models.Item()
         item1z9.id = 1000000000
         item1z9.storage = storage
         self.assertEqual(
             item1z9.get_storage_path(),
-            os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00')
+            os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00')
         )
 
     def test_itemlog_get_action_name(self):
@@ -69,7 +74,10 @@ class ArchiveTestCase(TestCase):
         with self.settings(EFSW_ARCH_SKIP_FS_OPS=False):
             s = models.Storage()
             s.name = 'storage1'
-            s.mount_dir = 'storage1'
+            s.type = models.Storage.TYPE_ONLINE_MASTER
+            s.extra_data = {
+                'mount_dir': 'storage1'
+            }
             s.save()
 
             c = models.ItemCategory()

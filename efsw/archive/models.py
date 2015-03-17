@@ -6,10 +6,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from efsw.archive import default_settings
+from efsw.archive import exceptions
 from efsw.common.search.models import IndexableModel
+from efsw.common.db.models import AbstractExtraDataModel
+from efsw.common.db.extramap import BaseExtraFieldsMapper
 
 
-class Storage(models.Model):
+class Storage(AbstractExtraDataModel):
     """ Модель, описывающая архивное онлайн хранилище """
 
     class Meta:
@@ -17,39 +20,75 @@ class Storage(models.Model):
         verbose_name_plural = 'хранилищи'
         app_label = 'archive'
 
+    TYPE_OFFLINE = 'OFF'
+    TYPE_ONLINE_MASTER = 'ONM'
+    TYPE_ONLINE_SLAVE = 'ONS'
+
+    TYPE_DICT = {
+        TYPE_OFFLINE: 'Оффлайн',
+        TYPE_ONLINE_MASTER: 'Онлайн (с управлением ФС)',
+        TYPE_ONLINE_SLAVE: 'Онлайн (без управления ФС)',
+    }
+
     name = models.CharField(
         max_length=255,
         verbose_name='имя'
     )
-    # это URL для доступа пользователей
-    base_url = models.CharField(
-        max_length=255,
-        verbose_name='базовая ссылка'
-    )
-    # а это путь внутри папки EFSW_ARCH_STORAGE_ROOT для операций с файловой системой, его нужно проверять на присутствие только букв и цифр
-    mount_dir = models.CharField(
-        max_length=32,
-        verbose_name='точка монтирования'
+
+    type = models.CharField(
+        max_length=3,
+        choices=TYPE_DICT.items(),
+        verbose_name='тип'
     )
 
     def __str__(self):
         return self.name
 
+    @classmethod
+    def set_extra_fields_mapper(cls):
+        mapper = BaseExtraFieldsMapper()
+        mapper.add(
+            'base_url',
+            models.CharField(
+                max_length=255,
+                verbose_name='базовая ссылка'
+            )
+        ).add(
+            'mount_dir',
+            models.CharField(
+                max_length=32,
+                verbose_name='точка монтирования'
+            )
+        )
+        cls.extra_fields_mapper = mapper
+
     def _build_path_list(self, item_id):
         formatted_id = "{:0>8}".format(hex(item_id)[2:])
         return [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
 
-    def build_url(self, item_id):
-        path_list = self._build_path_list(item_id)
-        return os.path.join(self.base_url, *path_list)
-
-    def build_path(self, item_id=0):
-        if item_id:
+    def build_url(self, item_id, item_path=''):
+        if self.type == self.TYPE_ONLINE_MASTER:
             path_list = self._build_path_list(item_id)
+            return os.path.join(self.extra_data['base_url'], *path_list)
+        elif self.type == self.TYPE_ONLINE_SLAVE:
+            return os.path.join(self.extra_data['base_url'], item_path)
         else:
-            path_list = []
+            msg = 'Только хранилища онлайн типа имеют ссылки на материалы.'
+            raise exceptions.StorageTypeMismatch(msg)
+
+    def build_path(self, item_id=0, item_path=''):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        return os.path.join(storage_root, self.mount_dir, *path_list)
+        if self.type == self.TYPE_ONLINE_MASTER:
+            if item_id:
+                path_list = self._build_path_list(item_id)
+            else:
+                path_list = []
+            return os.path.join(storage_root, self.extra_data['mount_dir'], *path_list)
+        elif self.type == self.TYPE_ONLINE_SLAVE:
+            return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
+        else:
+            msg = 'Только хранилища онлайн типа имеют пути к материалам.'
+            raise exceptions.StorageTypeMismatch(msg)
 
 
 class ItemCategory(models.Model):
@@ -119,10 +158,19 @@ class Item(IndexableModel, models.Model):
         return self.name
 
     def get_storage_url(self):
-        return self.storage.build_url(self.id)
+        try:
+            return self.storage.build_url(self.id)
+        except exceptions.StorageTypeMismatch:
+            return None
 
     def get_storage_path(self):
-        return self.storage.build_path(self.id)
+        try:
+            return self.storage.build_path(self.id)
+        except exceptions.StorageTypeMismatch:
+            return None
+
+    def get_storage_type(self):
+        return self.storage.type
 
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
