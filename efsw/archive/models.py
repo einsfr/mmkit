@@ -10,6 +10,7 @@ from efsw.archive import exceptions
 from efsw.common.search.models import IndexableModel
 from efsw.common.db.models import AbstractExtraDataModel
 from efsw.common.db.extramap import BaseExtraFieldsMapper
+from efsw.common.utils import urlformatter
 
 
 class Storage(AbstractExtraDataModel):
@@ -242,9 +243,9 @@ class Item(IndexableModel, AbstractExtraDataModel):
 
     def get_storage_url(self):
         if self.storage_is_online_master_type():
-            return self.storage.build_url(item_id=self.id)
+            return urlformatter.format_url(self.storage.build_url(item_id=self.id)).format_win()
         elif self.storage_is_online_slave_type():
-            return self.storage.build_url(item_path=self.extra_data['path'])
+            return urlformatter.format_url(self.storage.build_url(item_path=self.extra_data['path'])).format_win()
         else:
             return None
 
