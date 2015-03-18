@@ -48,7 +48,7 @@ class Storage(AbstractExtraDataModel):
 
     @classmethod
     def from_db(cls, db, field_names, values):
-        if issubclass(cls, Storage):
+        if cls != Storage:
             super().from_db(db, field_names, values)
         else:
             storage_type = values[field_names.index('type')]
