@@ -185,7 +185,7 @@ class ItemCategory(models.Model):
         return 'Редактировать категорию'
 
 
-class Item(IndexableModel, models.Model):
+class Item(IndexableModel, AbstractExtraDataModel):
     """ Модель, описывающая элемент архива """
 
     class Meta:
@@ -267,6 +267,28 @@ class Item(IndexableModel, models.Model):
             'author': self.author,
             'category': self.category.id,
         }
+
+    @classmethod
+    def set_extra_fields_mapper(cls):
+        mapper = BaseExtraFieldsMapper()
+        mapper.add(
+            'path',
+            models.CharField(
+                null=True,
+                blank=True,
+                max_length=255,
+                verbose_name='путь к файлам'
+            )
+        ).add(
+            'location',
+            models.CharField(
+                null=True,
+                blank=True,
+                max_length=255,
+                verbose_name='местонахождение'
+            )
+        )
+        cls.extra_fields_mapper = mapper
 
 
 class ItemLog(models.Model):
