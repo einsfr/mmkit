@@ -243,11 +243,17 @@ class Item(IndexableModel, AbstractExtraDataModel):
 
     def get_storage_url(self):
         if self.storage_is_online_master_type():
-            return urlformatter.format_url(self.storage.build_url(item_id=self.id)).format_win()
+            return self.storage.build_url(item_id=self.id)
         elif self.storage_is_online_slave_type():
-            return urlformatter.format_url(self.storage.build_url(item_path=self.extra_data['path'])).format_win()
+            return self.storage.build_url(item_path=self.extra_data['path'])
         else:
             return None
+
+    def get_storage_url_formatted(self):
+        return urlformatter.format_url(self.get_storage_url()).format()
+
+    def get_storage_url_formatted_win(self):
+        return urlformatter.format_url(self.get_storage_url()).format_win()
 
     def get_storage_path(self):
         if self.storage_is_online_master_type():
