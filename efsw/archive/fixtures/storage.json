@@ -6,7 +6,7 @@
       "name": "Онлайн хранилище №1",
       "type": "ONM",
       "extra_data": {
-        "base_url": "\\\\192.168.1.1",
+        "base_url": "smb://192.168.1.1",
         "mount_dir": "storage1"
       }
     }
@@ -19,7 +19,7 @@
       "name": "Онлайн хранилище №2",
       "type": "ONM",
       "extra_data": {
-        "base_url": "\\\\192.168.100.1",
+        "base_url": "smb://192.168.100.1",
         "mount_dir": "storage2"
       }
     }
@@ -32,7 +32,7 @@
       "name": "Онлайн хранилище ведомого типа №1",
       "type": "ONS",
       "extra_data": {
-        "base_url": "\\\\192.168.100.1",
+        "base_url": "smb://192.168.100.1",
         "mount_dir": "storage3"
       }
     }
