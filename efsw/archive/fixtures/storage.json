@@ -23,5 +23,27 @@
         "mount_dir": "storage2"
       }
     }
+  },
+
+  {
+    "model": "archive.Storage",
+    "pk": 3,
+    "fields": {
+      "name": "Онлайн хранилище ведомого типа №1",
+      "type": "ONS",
+      "extra_data": {
+        "base_url": "\\\\192.168.100.1",
+        "mount_dir": "storage3"
+      }
+    }
+  }
+
+  {
+    "model": "archive.Storage",
+    "pk": 4,
+    "fields": {
+      "name": "Оффлайн хранилище №1",
+      "type": "OFF"
+    }
   }
 ]
