@@ -239,6 +239,22 @@ class Item(IndexableModel, AbstractExtraDataModel):
     def storage_is_offline_type(self):
         return self.storage.type == self.storage.TYPE_OFFLINE
 
+    def get_storage_url(self):
+        if self.storage_is_online_master_type():
+            return self.storage.build_url(self.id)
+        elif self.storage_is_online_slave_type():
+            return self.storage.build_url(self.id, self.extra_data['path'])
+        else:
+            return None
+
+    def get_storage_path(self):
+        if self.storage_is_online_master_type():
+            return self.storage.build_path(self.id)
+        elif self.storage_is_online_slave_type():
+            return self.storage.build_path(self.id, os.path.join(self.extra_data['path'].split('/')))
+        else:
+            return None
+
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
 
