@@ -167,18 +167,18 @@ class ArchiveViewsTestCase(TestCase):
     def test_item_list(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_list'))
         self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
-        self.assertEqual(len(response.context['items']), 8)
+        self.assertEqual(len(response.context['items']), 10)
         self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
 
     def test_item_list_page(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(1, )))
         self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
-        self.assertEqual(len(response.context['items']), 8)
+        self.assertEqual(len(response.context['items']), 10)
         self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
 
         response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(2, )))
         self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
-        self.assertEqual(len(response.context['items']), 8)
+        self.assertEqual(len(response.context['items']), 10)
         self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
 
         with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
@@ -188,7 +188,7 @@ class ArchiveViewsTestCase(TestCase):
             self.assertEqual(len(response.context['items']), 2)
             self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
             self.assertContains(response, '<a href="/archive/items/page/2/" title="Следующая страница">»</a>')
-            self.assertContains(response, '<a href="/archive/items/page/4/" title="Последняя страница">4</a>')
+            self.assertContains(response, '<a href="/archive/items/page/5/" title="Последняя страница">5</a>')
 
             response = self.client.get(urlresolvers.reverse('efsw.archive:item_list_page', args=(2, )))
             self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)

@@ -36,7 +36,7 @@
         "mount_dir": "storage3"
       }
     }
-  }
+  },
 
   {
     "model": "archive.Storage",
