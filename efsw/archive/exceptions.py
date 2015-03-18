@@ -5,8 +5,8 @@ class StorageRootNotFound(FileNotFoundError):
     pass
 
 
-class StorageTypeMismatch(TypeError):
+class UnknownStorageType(ValueError):
     """
-    Используется метод, лишённый смысла для данного вида хранилища
+    Запускается, если из базы данных возвращается харнилище с неизвестным типом
     """
     pass

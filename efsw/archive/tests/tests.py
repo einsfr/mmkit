@@ -17,8 +17,8 @@ class ArchiveTestCase(TestCase):
     """ Набор тестов для efsw.archive """
 
     def test_storage_build_path(self):
-        storage = models.Storage()
-        storage.type = models.Storage.TYPE_ONLINE_MASTER
+        storage = models.OnlineMasterStorage()
+        storage.type = models.Storage.TYPE_ONLINE_MASTER  # TODO Нужно сделать так, чтобы это писать было не нужно!!!
         storage.extra_data = {
             'base_url': "\\\\192.168.1.1",
             'mount_dir': "test"
@@ -69,9 +69,9 @@ class ArchiveTestCase(TestCase):
     def test_item_fs_signals(self):
         test_storage_root = os.path.join(settings.BASE_DIR, getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', '_storage_test'))
         with self.settings(EFSW_ARCH_SKIP_FS_OPS=False):
-            s = models.Storage()
+            s = models.OnlineMasterStorage()
             s.name = 'storage1'
-            s.type = models.Storage.TYPE_ONLINE_MASTER
+            s.type = models.Storage.TYPE_ONLINE_MASTER  # TODO Нужно сделать так, чтобы это писать было не нужно!!!
             s.extra_data = {
                 'mount_dir': 'storage1',
                 'base_url': 'url'

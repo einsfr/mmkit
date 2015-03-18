@@ -16,8 +16,6 @@ class Storage(AbstractExtraDataModel):
     """ Модель, описывающая архивное онлайн хранилище """
 
     class Meta:
-        verbose_name = 'хранилище'
-        verbose_name_plural = 'хранилищи'
         app_label = 'archive'
 
     TYPE_OFFLINE = 'OFF'
@@ -46,6 +44,34 @@ class Storage(AbstractExtraDataModel):
 
     @classmethod
     def set_extra_fields_mapper(cls):
+        raise NotImplementedError()
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        if issubclass(cls, Storage):
+            super().from_db(db, field_names, values)
+        else:
+            storage_type = values[field_names.index('type')]
+            if storage_type == cls.TYPE_ONLINE_MASTER:
+                OnlineMasterStorage.from_db(db, field_names, values)
+            elif storage_type == cls.TYPE_ONLINE_SLAVE:
+                OnlineSlaveStorage.from_db(db, field_names, values)
+            elif storage_type == cls.TYPE_OFFLINE:
+                OfflineStorage.from_db(db, field_names, values)
+            else:
+                raise exceptions.UnknownStorageType('Неизвестный тип хранилища: {0}'.format(storage_type))
+
+
+class BaseOnlineStorage(Storage):
+
+    class Meta:
+        proxy = True
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
+        app_label = 'archive'
+
+    @classmethod
+    def set_extra_fields_mapper(cls):
         mapper = BaseExtraFieldsMapper()
         mapper.add(
             'base_url',
@@ -62,33 +88,61 @@ class Storage(AbstractExtraDataModel):
         )
         cls.extra_fields_mapper = mapper
 
+    def build_url(self, item_id, **kwargs):
+        raise NotImplementedError()
+
+    def build_path(self, item_id, **kwargs):
+        raise NotImplementedError()
+
+
+class OnlineMasterStorage(BaseOnlineStorage):
+
+    class Meta:
+        proxy = True
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
+        app_label = 'archive'
+
     def _build_path_list(self, item_id):
         formatted_id = "{:0>8}".format(hex(item_id)[2:])
         return [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
 
-    def build_url(self, item_id, item_path=''):
-        if self.type == self.TYPE_ONLINE_MASTER:
-            path_list = self._build_path_list(item_id)
-            return os.path.join(self.extra_data['base_url'], *path_list)
-        elif self.type == self.TYPE_ONLINE_SLAVE:
-            return os.path.join(self.extra_data['base_url'], item_path)
-        else:
-            msg = 'Только хранилища онлайн типа имеют ссылки на материалы.'
-            raise exceptions.StorageTypeMismatch(msg)
+    def build_url(self, item_id, **kwargs):
+        path_list = self._build_path_list(item_id)
+        return os.path.join(self.extra_data['base_url'], *path_list)
 
-    def build_path(self, item_id=0, item_path=''):
+    def build_path(self, item_id=0, **kwargs):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        if self.type == self.TYPE_ONLINE_MASTER:
-            if item_id:
-                path_list = self._build_path_list(item_id)
-            else:
-                path_list = []
-            return os.path.join(storage_root, self.extra_data['mount_dir'], *path_list)
-        elif self.type == self.TYPE_ONLINE_SLAVE:
-            return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
+        if item_id:
+            path_list = self._build_path_list(item_id)
         else:
-            msg = 'Только хранилища онлайн типа имеют пути к материалам.'
-            raise exceptions.StorageTypeMismatch(msg)
+            path_list = []
+        return os.path.join(storage_root, self.extra_data['mount_dir'], *path_list)
+
+
+class OnlineSlaveStorage(BaseOnlineStorage):
+
+    class Meta:
+        proxy = True
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
+        app_label = 'archive'
+
+    def build_url(self, item_id, item_path='', **kwargs):
+        return os.path.join(self.extra_data['base_url'], item_path)
+
+    def build_path(self, item_id=0, item_path='', **kwargs):
+        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
+        return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
+
+
+class OfflineStorage():
+
+    class Meta:
+        proxy = True
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
+        app_label = 'archive'
 
 
 class ItemCategory(models.Model):
