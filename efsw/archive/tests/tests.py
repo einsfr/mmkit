@@ -22,14 +22,13 @@ class ArchiveTestCase(TestCase):
             'base_url': "\\\\192.168.1.1",
             'mount_dir': "test"
         }
-        self.assertEqual(storage.build_url(1), os.path.join(storage.extra_data['base_url'], '00', '00', '00', '01'))
-        self.assertEqual(storage.build_url(476), os.path.join(storage.extra_data['base_url'], '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_url(1000000000), os.path.join(storage.extra_data['base_url'], '3b', '9a', 'ca', '00'))
+        self.assertEqual(storage.build_url(item_id=1), os.path.join(storage.extra_data['base_url'], '00', '00', '00', '01'))
+        self.assertEqual(storage.build_url(item_id=476), os.path.join(storage.extra_data['base_url'], '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_url(item_id=1000000000), os.path.join(storage.extra_data['base_url'], '3b', '9a', 'ca', '00'))
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        self.assertEqual(storage.build_path(), os.path.join(storage_root, storage.extra_data['mount_dir']))
-        self.assertEqual(storage.build_path(1), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01'))
-        self.assertEqual(storage.build_path(476), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_path(1000000000), os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00'))
+        self.assertEqual(storage.build_path(item_id=1), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01'))
+        self.assertEqual(storage.build_path(item_id=476), os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc'))
+        self.assertEqual(storage.build_path(item_id=1000000000), os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00'))
 
         storage.save()
 
@@ -37,23 +36,38 @@ class ArchiveTestCase(TestCase):
         item1.id = 1
         item1.storage = storage
         self.assertEqual(
-            item1.storage.build_path(item1.id),
+            item1.storage.build_path(item_id=item1.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01')
         )
         item476 = models.Item()
         item476.id = 476
         item476.storage = storage
         self.assertEqual(
-            item476.storage.build_path(item476.id),
+            item476.storage.build_path(item_id=item476.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc')
         )
         item1z9 = models.Item()
         item1z9.id = 1000000000
         item1z9.storage = storage
         self.assertEqual(
-            item1z9.storage.build_path(item1z9.id),
+            item1z9.storage.build_path(item_id=item1z9.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00')
         )
+
+        slave_storage = models.OnlineSlaveStorage()
+        slave_storage.extra_data = {
+            'base_url': "\\\\192.168.1.1",
+            'mount_dir': "test"
+        }
+        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.extra_data['base_url'], 'some/path'))
+        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.extra_data['base_url'], 'some/path'))
+        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.extra_data['base_url'], 'some/path'))
+        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
+        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(storage_root, slave_storage.extra_data['mount_dir'], 'some/path'))
+        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(storage_root, slave_storage.extra_data['mount_dir'], 'some/path'))
+        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(storage_root, slave_storage.extra_data['mount_dir'], 'some/path'))
+
+        slave_storage.save()
 
     def test_itemlog_get_action_name(self):
         il = models.ItemLog()

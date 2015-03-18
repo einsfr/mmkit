@@ -115,12 +115,9 @@ class OnlineMasterStorage(BaseOnlineStorage):
         path_list = self._build_path_list(item_id)
         return os.path.join(self.extra_data['base_url'], *path_list)
 
-    def build_path(self, item_id=0, **kwargs):
+    def build_path(self, item_id, **kwargs):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        if item_id:
-            path_list = self._build_path_list(item_id)
-        else:
-            path_list = []
+        path_list = self._build_path_list(item_id)
         return os.path.join(storage_root, self.extra_data['mount_dir'], *path_list)
 
 
@@ -136,10 +133,10 @@ class OnlineSlaveStorage(BaseOnlineStorage):
         super().__init__(*args, **kwargs)
         self.type = self.TYPE_ONLINE_SLAVE
 
-    def build_url(self, item_id, item_path='', **kwargs):
+    def build_url(self, item_path, **kwargs):
         return os.path.join(self.extra_data['base_url'], item_path)
 
-    def build_path(self, item_id=0, item_path='', **kwargs):
+    def build_path(self, item_path, **kwargs):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
         return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
 
@@ -241,17 +238,17 @@ class Item(IndexableModel, AbstractExtraDataModel):
 
     def get_storage_url(self):
         if self.storage_is_online_master_type():
-            return self.storage.build_url(self.id)
+            return self.storage.build_url(item_id=self.id)
         elif self.storage_is_online_slave_type():
-            return self.storage.build_url(self.id, self.extra_data['path'])
+            return self.storage.build_url(item_path=self.extra_data['path'])
         else:
             return None
 
     def get_storage_path(self):
         if self.storage_is_online_master_type():
-            return self.storage.build_path(self.id)
+            return self.storage.build_path(item_id=self.id)
         elif self.storage_is_online_slave_type():
-            return self.storage.build_path(self.id, os.path.join(self.extra_data['path'].split('/')))
+            return self.storage.build_path(item_path=os.path.join(self.extra_data['path'].split('/')))
         else:
             return None
 
