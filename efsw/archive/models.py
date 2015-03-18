@@ -49,15 +49,15 @@ class Storage(AbstractExtraDataModel):
     @classmethod
     def from_db(cls, db, field_names, values):
         if cls != Storage:
-            super().from_db(db, field_names, values)
+            return super().from_db(db, field_names, values)
         else:
             storage_type = values[field_names.index('type')]
             if storage_type == cls.TYPE_ONLINE_MASTER:
-                OnlineMasterStorage.from_db(db, field_names, values)
+                return OnlineMasterStorage.from_db(db, field_names, values)
             elif storage_type == cls.TYPE_ONLINE_SLAVE:
-                OnlineSlaveStorage.from_db(db, field_names, values)
+                return OnlineSlaveStorage.from_db(db, field_names, values)
             elif storage_type == cls.TYPE_OFFLINE:
-                OfflineStorage.from_db(db, field_names, values)
+                return OfflineStorage.from_db(db, field_names, values)
             else:
                 raise exceptions.UnknownStorageType('Неизвестный тип хранилища: {0}'.format(storage_type))
 
@@ -103,6 +103,10 @@ class OnlineMasterStorage(BaseOnlineStorage):
         verbose_name_plural = 'хранилищи'
         app_label = 'archive'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.type = self.TYPE_ONLINE_MASTER
+
     def _build_path_list(self, item_id):
         formatted_id = "{:0>8}".format(hex(item_id)[2:])
         return [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
@@ -128,6 +132,10 @@ class OnlineSlaveStorage(BaseOnlineStorage):
         verbose_name_plural = 'хранилищи'
         app_label = 'archive'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.type = self.TYPE_ONLINE_SLAVE
+
     def build_url(self, item_id, item_path='', **kwargs):
         return os.path.join(self.extra_data['base_url'], item_path)
 
@@ -136,13 +144,21 @@ class OnlineSlaveStorage(BaseOnlineStorage):
         return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
 
 
-class OfflineStorage():
+class OfflineStorage(Storage):
 
     class Meta:
         proxy = True
         verbose_name = 'хранилище'
         verbose_name_plural = 'хранилищи'
         app_label = 'archive'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.type = self.TYPE_OFFLINE
+
+    @classmethod
+    def set_extra_fields_mapper(cls):
+        cls.extra_fields_mapper = BaseExtraFieldsMapper()
 
 
 class ItemCategory(models.Model):
@@ -211,20 +227,17 @@ class Item(IndexableModel, models.Model):
     def __str__(self):
         return self.name
 
-    def get_storage_url(self):
-        try:
-            return self.storage.build_url(self.id)
-        except exceptions.StorageTypeMismatch:
-            return None
+    def storage_is_online_type(self):
+        return self.storage_is_online_master_type() or self.storage_is_online_slave_type()
 
-    def get_storage_path(self):
-        try:
-            return self.storage.build_path(self.id)
-        except exceptions.StorageTypeMismatch:
-            return None
+    def storage_is_online_slave_type(self):
+        return self.storage.type == self.storage.TYPE_ONLINE_SLAVE
 
-    def get_storage_type(self):
-        return self.storage.type
+    def storage_is_online_master_type(self):
+        return self.storage.type == self.storage.TYPE_ONLINE_MASTER
+
+    def storage_is_offline_type(self):
+        return self.storage.type == self.storage.TYPE_OFFLINE
 
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))

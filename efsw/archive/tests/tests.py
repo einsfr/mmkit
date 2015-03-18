@@ -18,7 +18,6 @@ class ArchiveTestCase(TestCase):
 
     def test_storage_build_path(self):
         storage = models.OnlineMasterStorage()
-        storage.type = models.Storage.TYPE_ONLINE_MASTER  # TODO Нужно сделать так, чтобы это писать было не нужно!!!
         storage.extra_data = {
             'base_url': "\\\\192.168.1.1",
             'mount_dir': "test"
@@ -38,21 +37,21 @@ class ArchiveTestCase(TestCase):
         item1.id = 1
         item1.storage = storage
         self.assertEqual(
-            item1.get_storage_path(),
+            item1.storage.build_path(item1.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '00', '01')
         )
         item476 = models.Item()
         item476.id = 476
         item476.storage = storage
         self.assertEqual(
-            item476.get_storage_path(),
+            item476.storage.build_path(item476.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '00', '00', '01', 'dc')
         )
         item1z9 = models.Item()
         item1z9.id = 1000000000
         item1z9.storage = storage
         self.assertEqual(
-            item1z9.get_storage_path(),
+            item1z9.storage.build_path(item1z9.id),
             os.path.join(storage_root, storage.extra_data['mount_dir'], '3b', '9a', 'ca', '00')
         )
 
@@ -71,7 +70,6 @@ class ArchiveTestCase(TestCase):
         with self.settings(EFSW_ARCH_SKIP_FS_OPS=False):
             s = models.OnlineMasterStorage()
             s.name = 'storage1'
-            s.type = models.Storage.TYPE_ONLINE_MASTER  # TODO Нужно сделать так, чтобы это писать было не нужно!!!
             s.extra_data = {
                 'mount_dir': 'storage1',
                 'base_url': 'url'
@@ -95,7 +93,7 @@ class ArchiveTestCase(TestCase):
             os.mkdir(test_storage_root)
             try:
                 i.save()
-                self.assertTrue(os.path.isdir(i.get_storage_path()))
+                self.assertTrue(os.path.isdir(i.storage.build_path(i.id)))
             finally:
                 if os.path.isdir(test_storage_root):
                     shutil.rmtree(test_storage_root)

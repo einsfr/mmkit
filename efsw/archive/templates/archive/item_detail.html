@@ -43,10 +43,12 @@
                 <th>{% field_verbose_name object 'storage' %}</th>
                 <td>{{ object.storage.name }}</td>
             </tr>
-            <tr>
-                <th>Путь к элементу</th>
-                <td>{{ object.get_storage_url }}</td>
-            </tr>
+            {% if object.storage_is_online %}
+                <tr>
+                    <th>Путь к элементу</th>
+                    <td>{{ object.get_storage_url }}</td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
     <h2>Связи</h2>
