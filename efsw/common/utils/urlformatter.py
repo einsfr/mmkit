@@ -2,6 +2,7 @@ import re
 
 
 def format_url(url: str):
+    url = url.replace('\\', '/')
     # За идею регулярного выражения спасибо сюда:
     # http://stackoverflow.com/questions/441739/regex-for-url-validation-with-parts-capturing
     r = re.compile("^(?P<scheme>\w+)://(?:(?P<username>.*?)(?::(?P<password>.*?)|)@)?(?P<host>[^:/@\s]+)/(?P<path>.*)$")
@@ -60,7 +61,7 @@ class UrlFormatResult():
             self.scheme,
             self._prepare_up(),
             self.host,
-            self.path.replace('\\', '/')
+            self.path
         )
 
     def __str__(self):
