@@ -248,7 +248,7 @@ class Item(IndexableModel, AbstractExtraDataModel):
         if self.storage_is_online_master_type():
             return self.storage.build_path(item_id=self.id)
         elif self.storage_is_online_slave_type():
-            return self.storage.build_path(item_path=os.path.join(self.extra_data['path'].split('/')))
+            return self.storage.build_path(item_path=os.path.join(*self.extra_data['path'].split('/')))
         else:
             return None
 
