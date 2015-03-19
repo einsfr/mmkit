@@ -13,7 +13,6 @@ class ExtraDataField(fields.HStoreField):
     def __init__(self, **kwargs):
         kwargs['null'] = True
         kwargs['blank'] = True
-        kwargs['editable'] = False
         super().__init__(**kwargs)
 
 
