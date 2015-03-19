@@ -125,10 +125,17 @@ def item_update(request, item_id):
     return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
 
 
-class ItemUpdateStorageView(generic.UpdateView):
-    model = models.Item
-    template_name = 'archive/item_form_update_storage.html'
-    form_class = forms.ItemUpdateStorageForm
+def item_update_storage(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    if request.method == 'POST':
+        form = forms.ItemUpdateStorageForm(request.POST, instance=item)
+        if form.is_valid():
+            item = form.save()
+            return shortcuts.redirect(item.get_absolute_url())
+    else:
+        form = forms.ItemUpdateStorageForm(instance=item)
+
+    return shortcuts.render(request, 'archive/item_form_update_storage.html', {'form': form})
 
 
 @http.require_http_methods(["POST"])

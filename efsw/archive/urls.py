@@ -68,8 +68,8 @@ urlpatterns = patterns(
     ),
     # items/12/update/storage/ Редактирование существующего элемента - раздел хранилища
     url(
-        r'^items/(?P<pk>\d+)/update/storage/$',
-        permission_required('archive.change_item')(views.ItemUpdateStorageView.as_view()),
+        r'^items/(?P<item_id>\d+)/update/storage/$',
+        permission_required('archive.change_item')(views.item_update_storage),
         name='item_update_storage'
     ),
     # items/12/update/remove-link/ Удаление связи между элементами
