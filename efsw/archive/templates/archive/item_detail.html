@@ -45,8 +45,13 @@
             </tr>
             {% if object.storage_is_online_type %}
                 <tr>
-                    <th>Путь к элементу</th>
+                    <th>Путь</th>
                     <td>{{ object.get_storage_url_formatted_win }}</td>
+                </tr>
+            {% elif object.storage_is_offline_type %}
+                <tr>
+                    <th>Расположение</th>
+                    <td>{{ object.extra_data.location }}</td>
                 </tr>
             {% endif %}
         </tbody>
