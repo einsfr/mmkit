@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.core import exceptions
 
 from efsw.common.tests.models import SimpleExtraDataModel, AllFieldsExtraDataModel, BoolFieldExtraDataModel
+from efsw.common.db import forms
 
 
 class ExtraDataModelTestCase(TestCase):
@@ -223,3 +224,24 @@ class ExtraDataModelTestCase(TestCase):
             }
         }
         self._test_extra_fields_model(fields, AllFieldsExtraDataModel)
+
+
+class FormsTestCase(TestCase):
+
+    def test_collect_dict(self):
+        data = {
+            'extra__param1': 'value1',
+            'extra__param2': 'value2',
+            'non-extra': 'value3',
+            'another-non-extra': 'value4',
+        }
+        result = {
+            'extra_data': {
+                'param1': 'value1',
+                'param2': 'value2',
+            },
+            'non-extra': 'value3',
+            'another-non-extra': 'value4',
+        }
+        self.assertEqual(result, forms.collect_dict(data))
+        self.assertEqual(result, forms.collect_dict(data, 'extra__', 'extra_data'))
