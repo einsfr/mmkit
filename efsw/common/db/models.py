@@ -34,6 +34,8 @@ class AbstractExtraDataModel(models.Model):
             # но сохраняться будут только те, значение которых не None - нечего тащить лишнее
             cleaned_extra_data = dict()
             for f_name in field_mapping:
+                # Здесь используется clean просто потому, что без валидации и очистки система сохранит что угодно,
+                # а потом будут проблемы
                 cleaned_value = field_mapping[f_name].clean(self.extra_data.get(f_name, None), None)
                 if cleaned_value is not None:
                     cleaned_extra_data[f_name] = cleaned_value
@@ -52,7 +54,7 @@ class AbstractExtraDataModel(models.Model):
         extra_data = values[field_names.index('extra_data')]
         if isinstance(extra_data, dict):
             cleaned_extra_data = dict([
-                (f_name, field_mapping[f_name].clean(extra_data.get(f_name, None), None))
+                (f_name, field_mapping[f_name].to_python(extra_data.get(f_name, None)))
                 for f_name in field_mapping
             ])
         else:
