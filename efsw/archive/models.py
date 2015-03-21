@@ -6,18 +6,17 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from efsw.archive import default_settings
-from efsw.archive import exceptions
 from efsw.common.search.models import IndexableModel
-from efsw.common.db.models import AbstractExtraDataModel
-from efsw.common.db.extramap import BaseExtraFieldsMapper
 from efsw.common.utils import urlformatter
 
 
-class Storage(AbstractExtraDataModel):
-    """ Модель, описывающая архивное онлайн хранилище """
+class Storage(models.Model):
+    """ Модель, описывающая архивное хранилище """
 
     class Meta:
         app_label = 'archive'
+        verbose_name = 'хранилище'
+        verbose_name_plural = 'хранилищи'
 
     TYPE_OFFLINE = 'OFF'
     TYPE_ONLINE_MASTER = 'ONM'
@@ -40,127 +39,85 @@ class Storage(AbstractExtraDataModel):
         verbose_name='тип'
     )
 
+    description = models.CharField(
+        max_length=255,
+        verbose_name='описание'
+    )
+
+    base_url = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='базовая ссылка'
+    )
+
+    mount_dir = models.CharField(
+        max_length=32,
+        blank=True,
+        verbose_name='точка монтирования'
+    )
+
+    items = models.ManyToManyField(
+        Item,
+        through=ItemLocation,
+        related_name='stored_in'
+    )
+
     def __str__(self):
         return self.name
 
-    @classmethod
-    def set_extra_fields_mapper(cls):
-        raise NotImplementedError()
+    def is_online_type(self):
+        return self.type == self.TYPE_ONLINE_MASTER or self.type == self.TYPE_ONLINE_SLAVE
 
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        if cls != Storage:
-            return super().from_db(db, field_names, values)
-        else:
-            storage_type = values[field_names.index('type')]
-            if storage_type == cls.TYPE_ONLINE_MASTER:
-                return OnlineMasterStorage.from_db(db, field_names, values)
-            elif storage_type == cls.TYPE_ONLINE_SLAVE:
-                return OnlineSlaveStorage.from_db(db, field_names, values)
-            elif storage_type == cls.TYPE_OFFLINE:
-                return OfflineStorage.from_db(db, field_names, values)
-            else:
-                raise exceptions.UnknownStorageType('Неизвестный тип хранилища: {0}'.format(storage_type))
+    def is_online_master_type(self):
+        return self.type == self.TYPE_ONLINE_MASTER
 
+    def is_online_slave_type(self):
+        return self.type == self.TYPE_ONLINE_SLAVE
 
-class BaseOnlineStorage(Storage):
+    def is_offline_type(self):
+        return self.type == self.TYPE_OFFLINE
 
-    class Meta:
-        proxy = True
-        verbose_name = 'хранилище'
-        verbose_name_plural = 'хранилищи'
-        app_label = 'archive'
-
-    @classmethod
-    def set_extra_fields_mapper(cls):
-        mapper = BaseExtraFieldsMapper()
-        mapper.add(
-            'base_url',
-            models.CharField(
-                max_length=255,
-                verbose_name='базовая ссылка'
-            )
-        ).add(
-            'mount_dir',
-            models.CharField(
-                max_length=32,
-                verbose_name='точка монтирования'
-            )
-        )
-        cls.extra_fields_mapper = mapper
-
-    def build_url(self, item_id, **kwargs):
-        raise NotImplementedError()
-
-    def build_path(self, item_id, **kwargs):
-        raise NotImplementedError()
-
-
-class OnlineMasterStorage(BaseOnlineStorage):
-
-    class Meta:
-        proxy = True
-        verbose_name = 'хранилище'
-        verbose_name_plural = 'хранилищи'
-        app_label = 'archive'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.type = self.TYPE_ONLINE_MASTER
-
-    def _build_path_list(self, item_id):
+    @staticmethod
+    def build_path_list(item_id):
         formatted_id = "{:0>8}".format(hex(item_id)[2:])
         return [formatted_id[x:x+2] for x in range(0, len(formatted_id), 2)]
 
-    def build_url(self, item_id, **kwargs):
-        path_list = self._build_path_list(item_id)
-        return os.path.join(self.extra_data['base_url'], *path_list)
 
-    def build_path(self, item_id, **kwargs):
-        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        path_list = self._build_path_list(item_id)
-        return os.path.join(storage_root, self.extra_data['mount_dir'], *path_list)
-
-
-class OnlineSlaveStorage(BaseOnlineStorage):
+class ItemLocation(models.Model):
+    """
+    Модель, описывающая расположение элементов в хранилищах
+    """
 
     class Meta:
-        proxy = True
-        verbose_name = 'хранилище'
-        verbose_name_plural = 'хранилищи'
         app_label = 'archive'
+        verbose_name = 'размещение моделей в хранилищах'
+        unique_together = ('storage', 'item')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.type = self.TYPE_ONLINE_SLAVE
+    storage = models.ForeignKey(
+        Storage,
+        related_name='items_locations'
+    )
 
-    def build_url(self, item_path, **kwargs):
-        return os.path.join(self.extra_data['base_url'], item_path)
+    item = models.ForeignKey(
+        Item,
+        related_name='storages_locations'
+    )
 
-    def build_path(self, item_path, **kwargs):
+    location = models.CharField(
+        max_length=255,
+        verbose_name='размещение'
+    )
+
+    def get_url(self):
+        return urlformatter.format_url('{0}{1}'.format(self.storage.base_url, self.location))
+
+    def get_path(self):
         storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        return os.path.join(storage_root, self.extra_data['mount_dir'], item_path)
-
-
-class OfflineStorage(Storage):
-
-    class Meta:
-        proxy = True
-        verbose_name = 'хранилище'
-        verbose_name_plural = 'хранилищи'
-        app_label = 'archive'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.type = self.TYPE_OFFLINE
-
-    @classmethod
-    def set_extra_fields_mapper(cls):
-        cls.extra_fields_mapper = BaseExtraFieldsMapper()
+        return os.path.join(storage_root, self.storage.mount_dir, self.location)
 
 
 class ItemCategory(models.Model):
-    """ Модель, описывающая категории файлов """
+    """ Модель, описывающая категории элементов """
 
     class Meta:
         verbose_name = 'категория'
@@ -179,11 +136,12 @@ class ItemCategory(models.Model):
     def get_update_url(self):
         return urlresolvers.reverse('efsw.archive:category_update', args=(self.id, ))
 
-    def get_update_url_title(self):
+    @staticmethod
+    def get_update_url_title():
         return 'Редактировать категорию'
 
 
-class Item(IndexableModel, AbstractExtraDataModel):
+class Item(IndexableModel, models.Model):
     """
     Модель, описывающая элемент архива. Для упрощения исходим из того, что каждый элемент в архиве онлайн-типа - это
     папка, в которой есть некоторое количество файлов. Даже если этот файл всего один - всё равно сам элемент будет
@@ -229,50 +187,18 @@ class Item(IndexableModel, AbstractExtraDataModel):
     def __str__(self):
         return self.name
 
-    def storage_is_online_type(self):
-        return self.storage_is_online_master_type() or self.storage_is_online_slave_type()
-
-    def storage_is_online_slave_type(self):
-        return self.storage.type == self.storage.TYPE_ONLINE_SLAVE
-
-    def storage_is_online_master_type(self):
-        return self.storage.type == self.storage.TYPE_ONLINE_MASTER
-
-    def storage_is_offline_type(self):
-        return self.storage.type == self.storage.TYPE_OFFLINE
-
-    def get_storage_url(self):
-        if self.storage_is_online_master_type():
-            return self.storage.build_url(item_id=self.id)
-        elif self.storage_is_online_slave_type():
-            return self.storage.build_url(item_path=self.extra_data['path'])
-        else:
-            return None
-
-    def get_storage_url_formatted(self):
-        return urlformatter.format_url(self.get_storage_url()).format()
-
-    def get_storage_url_formatted_win(self):
-        return urlformatter.format_url(self.get_storage_url()).format_win()
-
-    def get_storage_path(self):
-        if self.storage_is_online_master_type():
-            return self.storage.build_path(item_id=self.id)
-        elif self.storage_is_online_slave_type():
-            return self.storage.build_path(item_path=os.path.join(*self.extra_data['path'].split('/')))
-        else:
-            return None
-
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
 
-    def get_absolute_url_title(self):
+    @staticmethod
+    def get_absolute_url_title():
         return 'Детали элемента'
 
     def get_update_url(self):
         return urlresolvers.reverse('efsw.archive:item_update', args=(self.id, ))
 
-    def get_update_url_title(self):
+    @staticmethod
+    def get_update_url_title():
         return 'Редактировать элемент'
 
     @staticmethod
@@ -291,28 +217,6 @@ class Item(IndexableModel, AbstractExtraDataModel):
             'author': self.author,
             'category': self.category.id,
         }
-
-    @classmethod
-    def set_extra_fields_mapper(cls):
-        mapper = BaseExtraFieldsMapper()
-        mapper.add(
-            'path',
-            models.CharField(
-                null=True,
-                blank=True,
-                max_length=255,
-                verbose_name='путь к файлам'
-            )
-        ).add(
-            'location',
-            models.CharField(
-                null=True,
-                blank=True,
-                max_length=255,
-                verbose_name='местонахождение'
-            )
-        )
-        cls.extra_fields_mapper = mapper
 
 
 class ItemLog(models.Model):
