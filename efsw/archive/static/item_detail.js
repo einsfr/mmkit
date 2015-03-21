@@ -41,4 +41,23 @@ $(document).ready(function() {
         });
     });
 
+
+    $("#item-add-storage-form").on('submit', function(event) {
+        event.preventDefault();
+        var form = $(this);
+        var url = form.attr('action');
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: form.serialize(),
+            statusCode: {
+                200: function(data) {
+                    $('#item-add-storage-form').before(data);
+                },
+                400: function() {
+                    alert('Ошибка добавления элемента в хранилище');
+                }
+            }
+        });
+    });
 });

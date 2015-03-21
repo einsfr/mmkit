@@ -440,6 +440,20 @@ class ArchiveSecurityTestCase(TestCase):
             200
         ),
         (
+            urlresolvers.reverse('efsw.archive:item_update_remove_storage', args=(1, )),
+            False,
+            'change_item',
+            None,
+            405
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_update_add_storage', args=(1, )),
+            False,
+            'change_item',
+            None,
+            405
+        ),
+        (
             urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1, )),
             False,
             'change_item',

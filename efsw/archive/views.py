@@ -77,6 +77,7 @@ def item_detail(request, item_id):
     return shortcuts.render(request, 'archive/item_detail.html', {
         'object': item,
         'link_add_form': forms.ItemUpdateAddLinkForm(),
+        'storage_add_form': forms.ItemUpdateAddStorageForm(),
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
     })
@@ -119,6 +120,14 @@ def item_update(request, item_id):
         form = forms.ItemUpdateForm(instance=item)
     return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
 
+
+@http.require_http_methods(["POST"])
+def item_update_remove_storage(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+
+@http.require_http_methods(["POST"])
+def item_update_add_storage(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
 
 @http.require_http_methods(["POST"])
 def item_update_remove_link(request, item_id):

@@ -36,7 +36,7 @@
             </tr>
         </tbody>
     </table>
-    <h2>Расположение {% if perms.archive.change_item %}<small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small>{% endif %}</h2>
+    <h2>Расположение</h2>
     <table class="table">
         <thead>
             <tr>
@@ -46,13 +46,24 @@
         </thead>
         <tbody>
             {% for location in object.storages_locations.all %}
-                <tr>
-                    <td>{{ location.storage.name }}</td>
-                    <td>{{ location.get_url.format_win }}</td>
-                </tr>
+                {% include 'archive/_item_detail_storage.html' %}
             {% empty %}
                 <tr><td colspan="2">Не найдено</td></tr>
             {% endfor %}
+            {% if perms.archive.change_item %}
+                <form action="{% url 'efsw.archive:item_update_add_storage' object.id %}" method="post" id="item-add-storage-form">
+                    <tr>
+                        <td>
+                            {% csrf_token %}
+                            {{ storage_add_form.storage }}
+                        </td>
+                        <td>
+                            {{ storage_add_form.location }}
+                            <input type="submit" value="Добавить">
+                        </td>
+                    </tr>
+                </form>
+            {% endif %}
         </tbody>
     </table>
     <h2>Связи</h2>

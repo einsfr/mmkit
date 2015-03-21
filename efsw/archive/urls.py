@@ -66,11 +66,17 @@ urlpatterns = patterns(
         permission_required('archive.change_item')(views.item_update),
         name='item_update'
     ),
-    # items/12/update/storage/ Редактирование существующего элемента - раздел хранилища
+    # items/12/update/remove-storage/ Удаление элемента из хранилища
     url(
-        r'^items/(?P<item_id>\d+)/update/storage/$',
-        permission_required('archive.change_item')(views.item_update_storage),
-        name='item_update_storage'
+        r'^items/(?P<item_id>\d+)/update/remove-storage/$',
+        permission_required('archive.change_item')(views.item_update_remove_storage),
+        name='item_update_remove_storage'
+    ),
+    # items/12/update/add-storage/ Добавление элемента в хранилище
+    url(
+        r'^items/(?P<item_id>\d+)/update/add-storage/$',
+        permission_required('archive.change_item')(views.item_update_add_storage),
+        name='item_update_add_storage'
     ),
     # items/12/update/remove-link/ Удаление связи между элементами
     url(
