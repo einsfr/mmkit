@@ -1,0 +1,110 @@
+[
+  {
+    "model": "archive.ItemLocation",
+    "pk": 1,
+    "fields": {
+      "item": 1,
+      "storage": 1,
+      "location": "00/00/00/01"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 2,
+    "fields": {
+      "item": 2,
+      "storage": 3,
+      "location": "path/to/item2"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 3,
+    "fields": {
+      "item": 3,
+      "storage": 2,
+      "location": "00/00/00/03"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 4,
+    "fields": {
+      "item": 4,
+      "storage": 1,
+      "location": "00/00/00/04"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 5,
+    "fields": {
+      "item": 5,
+      "storage": 4,
+      "location": "Высокая гора, в ней глубокая нора, там оно лежит"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 6,
+    "fields": {
+      "item": 6,
+      "storage": 2,
+      "location": "00/00/00/06"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 7,
+    "fields": {
+      "item": 6,
+      "storage": 3,
+      "location": "path/to/item6"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 8,
+    "fields": {
+      "item": 7,
+      "storage": 1,
+      "location": "00/00/00/07"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 9,
+    "fields": {
+      "item": 8,
+      "storage": 1,
+      "location": "00/00/00/08"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 10,
+    "fields": {
+      "item": 8,
+      "storage": 4,
+      "location": "Кто-то спрятал, мы нашли"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 11,
+    "fields": {
+      "item": 9,
+      "storage": 2,
+      "location": "00/00/00/09"
+    }
+  },
+  {
+    "model": "archive.ItemLocation",
+    "pk": 12,
+    "fields": {
+      "item": 10,
+      "storage": 1,
+      "location": "00/00/00/0a"
+    }
+  }
+]

@@ -1,101 +1,15 @@
-import os
-import shutil
-
 from django.test import TestCase
 from django.core import urlresolvers
 from django.utils import timezone
-from django.conf import settings
 from django.core.management import call_command
 from django.contrib.auth.models import User, Permission
 from django.http import HttpResponse, HttpResponseRedirect
 
-from efsw.archive import default_settings
 from efsw.archive import models
 
 
 class ArchiveTestCase(TestCase):
     """ Набор тестов для efsw.archive """
-
-    def test_storage_build_path(self):
-        storage = models.OnlineMasterStorage()
-        storage.base_url = "\\\\192.168.1.1"
-        storage.mount_dir = "test"
-        self.assertEqual(storage.build_url(item_id=1), os.path.join(storage.base_url, '00', '00', '00', '01'))
-        self.assertEqual(storage.build_url(item_id=476), os.path.join(storage.base_url, '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_url(item_id=1000000000), os.path.join(storage.base_url, '3b', '9a', 'ca', '00'))
-        storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        self.assertEqual(storage.build_path(item_id=1), os.path.join(storage_root, storage.mount_dir, '00', '00', '00', '01'))
-        self.assertEqual(storage.build_path(item_id=476), os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc'))
-        self.assertEqual(storage.build_path(item_id=1000000000), os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00'))
-
-        storage.save()
-
-        item1 = models.Item()
-        item1.id = 1
-        item1.storage = storage
-        self.assertEqual(
-            item1.storage.build_path(item_id=item1.id),
-            os.path.join(storage_root, storage.mount_dir, '00', '00', '00', '01')
-        )
-        item476 = models.Item()
-        item476.id = 476
-        item476.storage = storage
-        self.assertEqual(
-            item476.storage.build_path(item_id=item476.id),
-            os.path.join(storage_root, storage.mount_dir, '00', '00', '01', 'dc')
-        )
-        item1z9 = models.Item()
-        item1z9.id = 1000000000
-        item1z9.storage = storage
-        self.assertEqual(
-            item1z9.storage.build_path(item_id=item1z9.id),
-            os.path.join(storage_root, storage.mount_dir, '3b', '9a', 'ca', '00')
-        )
-
-        slave_storage = models.OnlineSlaveStorage()
-        slave_storage.base_url = "\\\\192.168.1.1"
-        slave_storage.mount_dir = "test"
-        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.base_url, 'some/path'))
-        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.base_url, 'some/path'))
-        self.assertEqual(slave_storage.build_url(item_path='some/path'), os.path.join(slave_storage.base_url, 'some/path'))
-        slave_storage_root = getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', default_settings.EFSW_ARCH_STORAGE_ROOT)
-        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(slave_storage_root, slave_storage.mount_dir, 'some/path'))
-        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(slave_storage_root, slave_storage.mount_dir, 'some/path'))
-        self.assertEqual(slave_storage.build_path(item_path='some/path'), os.path.join(slave_storage_root, slave_storage.mount_dir, 'some/path'))
-
-        slave_storage.save()
-
-        item2 = models.Item()
-        item2.storage = slave_storage
-        item2.extra_data = {
-            'path': 'item2/path/to/file'
-        }
-        self.assertTrue(item2.storage_is_online_slave_type())
-        self.assertEqual(
-            os.path.join(slave_storage.extra_data['base_url'], 'item2/path/to/file'),
-            item2.get_storage_url()
-        )
-        self.assertEqual(
-            os.path.join(slave_storage_root, slave_storage.extra_data['mount_dir'], os.path.join(*'item2/path/to/file'.split('/'))),
-            item2.get_storage_path()
-        )
-
-        item3 = models.Item()
-        item3.storage = slave_storage
-        item3.extra_data = {
-            'path': 'item3/path/to/directory/'
-        }
-        self.assertEqual(
-            os.path.join(slave_storage.extra_data['base_url'], 'item3/path/to/directory/'),
-            item3.get_storage_url()
-        )
-        self.assertEqual(
-            os.path.join(slave_storage_root, slave_storage.extra_data['mount_dir'], os.path.join(*'item3/path/to/directory/'.split('/'))),
-            item3.get_storage_path()
-        )
-
-        print(item2.get_storage_url(), item3.get_storage_url())
-        print(item2.get_storage_path(), item3.get_storage_path())
 
     def test_itemlog_get_action_name(self):
         il = models.ItemLog()
@@ -106,39 +20,6 @@ class ArchiveTestCase(TestCase):
 
         il.action = 'fake-action'
         self.assertEqual(il.get_action_name(), '')
-
-    def test_item_fs_signals(self):
-        test_storage_root = os.path.join(settings.BASE_DIR, getattr(settings, 'EFSW_ARCH_STORAGE_ROOT', '_storage_test'))
-        with self.settings(EFSW_ARCH_SKIP_FS_OPS=False):
-            s = models.OnlineMasterStorage()
-            s.name = 'storage1'
-            s.extra_data = {
-                'mount_dir': 'storage1',
-                'base_url': 'url'
-            }
-            s.save()
-
-            c = models.ItemCategory()
-            c.name = 'Тестовая категория'
-            c.save()
-
-            i = models.Item()
-            i.name = 'Тестовый элемент'
-            i.description = 'Описание тестового элемента'
-            i.created = timezone.now()
-            i.author = 'Автор тестового элемента'
-            i.storage = s
-            i.category = c
-
-            if os.path.isdir(test_storage_root):
-                shutil.rmtree(test_storage_root)
-            os.mkdir(test_storage_root)
-            try:
-                i.save()
-                self.assertTrue(os.path.isdir(i.storage.build_path(i.id)))
-            finally:
-                if os.path.isdir(test_storage_root):
-                    shutil.rmtree(test_storage_root)
 
 
 class ArchiveViewsTestCase(TestCase):
@@ -271,7 +152,7 @@ class ArchiveViewsTestCase(TestCase):
 
         response = self.client.post(request_path)
         self.assertEqual(response.status_code, 200)
-        for field in ['name', 'description', 'created', 'author', 'storage', 'category']:
+        for field in ['name', 'description', 'created', 'author', 'category']:
             self.assertFormError(response, 'form', field, 'Обязательное поле.')
 
         post_data = {
@@ -305,17 +186,6 @@ class ArchiveViewsTestCase(TestCase):
             'form',
             'author',
             'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
-        )
-
-        post_data = {
-            'storage': 'non-existent-storage',
-        }
-        response = self.client.post(request_path, post_data)
-        self.assertFormError(
-            response,
-            'form',
-            'storage',
-            'Выберите корректный вариант. Вашего варианта нет среди допустимых значений.'
         )
 
         post_data = {
@@ -356,26 +226,6 @@ class ArchiveViewsTestCase(TestCase):
         self.assertEqual(len(log), 2)
         self.assertEqual(log[0].action, log[0].ACTION_ADD)
         self.assertEqual(log[1].action, log[1].ACTION_UPDATE)
-
-    def test_item_update_storage(self):
-        self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_storage', args=(4, )))
-        self.assertContains(response, '<h1>Изменение размещения элемента</h1>', status_code=200)
-        self.assertContains(response, '<form action="" method="post">')
-
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_storage', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-        post_data = {
-            'storage': '2',
-        }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_storage', args=(4, )),
-            post_data,
-            follow=True
-        )
-        self.assertEqual(len(response.redirect_chain), 1)
-        self.assertContains(response, '<h1>Детали элемента</h1>', status_code=200)
 
     def test_item_update_remove_link(self):
         self._login_user()
@@ -587,13 +437,6 @@ class ArchiveSecurityTestCase(TestCase):
             False,
             'change_item',
             '<h1>Редактирование элемента</h1>',
-            200
-        ),
-        (
-            urlresolvers.reverse('efsw.archive:item_update_storage', args=(1, )),
-            False,
-            'change_item',
-            '<h1>Изменение размещения элемента</h1>',
             200
         ),
         (

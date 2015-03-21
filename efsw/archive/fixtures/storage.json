@@ -5,7 +5,8 @@
     "fields": {
       "name": "Онлайн хранилище №1",
       "type": "ONM",
-      "base_url": "smb://192.168.1.1",
+      "description": "Описание онлайн хранилища №1",
+      "base_url": "smb://192.168.100.1",
       "mount_dir": "/storage1"
     }
   },
@@ -16,6 +17,7 @@
     "fields": {
       "name": "Онлайн хранилище №2",
       "type": "ONM",
+      "description": "Описание онлайн хранилища №2",
       "base_url": "smb://192.168.100.1",
       "mount_dir": "/storage2"
     }
@@ -27,6 +29,7 @@
     "fields": {
       "name": "Онлайн хранилище ведомого типа №1",
       "type": "ONS",
+      "description": "Описание хранилища ведомого типа №1",
       "base_url": "smb://192.168.100.1",
       "mount_dir": "/storage3"
     }
@@ -37,7 +40,8 @@
     "pk": 4,
     "fields": {
       "name": "Оффлайн хранилище №1",
-      "type": "OFF"
+      "type": "OFF",
+      "description": "Описание оффлайн хранилища №1"
     }
   }
 ]

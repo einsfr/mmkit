@@ -8,18 +8,12 @@ from efsw.common.datetime.period import DatePeriod
 class ItemCreateForm(forms.ModelForm):
     class Meta:
         model = models.Item
-        fields = ('name', 'description', 'created', 'author', 'storage', 'category')
+        fields = ('name', 'description', 'created', 'author', 'category')
 
 
 class ItemUpdateForm(forms.ModelForm):
     class Meta(ItemCreateForm.Meta):
         fields = ('name', 'description', 'created', 'author', 'category')
-
-
-class ItemUpdateStorageForm(forms.ModelForm):
-    class Meta:
-        model = models.Item
-        fields = ('storage', )
 
 
 class ItemUpdateAddLinkForm(forms.Form):

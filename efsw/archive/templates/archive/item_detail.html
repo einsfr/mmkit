@@ -38,22 +38,21 @@
     </table>
     <h2>Расположение {% if perms.archive.change_item %}<small><a href="{{ object.get_update_url }}storage/" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small>{% endif %}</h2>
     <table class="table">
-        <tbody>
+        <thead>
             <tr>
-                <th>{% field_verbose_name object 'storage' %}</th>
-                <td>{{ object.storage.name }}</td>
+                <th>Хранилище</th>
+                <th>Размещение</th>
             </tr>
-            {% if object.storage_is_online_type %}
+        </thead>
+        <tbody>
+            {% for location in object.storages_locations.all %}
                 <tr>
-                    <th>Путь</th>
-                    <td>{{ object.get_storage_url_formatted_win }}</td>
+                    <td>{{ location.storage.name }}</td>
+                    <td>{{ location.get_url.format_win }}</td>
                 </tr>
-            {% elif object.storage_is_offline_type %}
-                <tr>
-                    <th>Расположение</th>
-                    <td></td>
-                </tr>
-            {% endif %}
+            {% empty %}
+                <tr><td colspan="2">Не найдено</td></tr>
+            {% endfor %}
         </tbody>
     </table>
     <h2>Связи</h2>
