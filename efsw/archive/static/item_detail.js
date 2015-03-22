@@ -60,4 +60,25 @@ $(document).ready(function() {
             }
         });
     });
+
+    ko.applyBindings(new IncludesListViewModel());
 });
+
+function Item(data) {
+    this.name = ko.observable(data.name);
+    this.url = ko.observable(data.url);
+    this.url_title = ko.observable(data.url_title);
+}
+
+function IncludesListViewModel() {
+    var self = this;
+    self.includes = ko.observableArray([]);
+
+    var json_url = $("#includes_container").data('url');
+    $.getJSON(json_url, function(includes_data) {
+        var mapped_includes = $.map(includes_data, function(item) {
+            return new Item(item);
+        });
+        self.includes(mapped_includes);
+    });
+}

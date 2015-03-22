@@ -414,7 +414,7 @@ class ArchiveViewsTestCase(TestCase):
 
 class ArchiveSecurityTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlog.json']
+    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlog.json', 'itemlocation.json']
 
     REQUEST_URLS = (
         (urlresolvers.reverse('efsw.archive:search_page', args=(1, )), True),
@@ -424,7 +424,23 @@ class ArchiveSecurityTestCase(TestCase):
         (urlresolvers.reverse('efsw.archive:item_list_category', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_list_category_page', args=(1, 1)), True),
         (urlresolvers.reverse('efsw.archive:item_detail', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:item_links_get', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:item_locations_get', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_log', args=(1, )), True),
+        (
+            urlresolvers.reverse('efsw.archive:item_links_post', args=(1, )),
+            False,
+            'change_item',
+            None,
+            200
+        ),
+        (
+            urlresolvers.reverse('efsw.archive:item_locations_post', args=(1, )),
+            False,
+            'change_itemlocation',
+            None,
+            200
+        ),
         (
             urlresolvers.reverse('efsw.archive:item_add'),
             False,
@@ -438,34 +454,6 @@ class ArchiveSecurityTestCase(TestCase):
             'change_item',
             '<h1>Редактирование элемента</h1>',
             200
-        ),
-        (
-            urlresolvers.reverse('efsw.archive:item_update_remove_storage', args=(1, )),
-            False,
-            'change_item',
-            None,
-            405
-        ),
-        (
-            urlresolvers.reverse('efsw.archive:item_update_add_storage', args=(1, )),
-            False,
-            'change_item',
-            None,
-            405
-        ),
-        (
-            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1, )),
-            False,
-            'change_item',
-            None,
-            405
-        ),
-        (
-            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(1, )),
-            False,
-            'change_item',
-            None,
-            405
         ),
         (urlresolvers.reverse('efsw.archive:category_list'), True),
         (

@@ -1,6 +1,6 @@
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
@@ -121,13 +121,34 @@ def item_update(request, item_id):
     return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
 
 
-@http.require_http_methods(["POST"])
-def item_update_remove_storage(request, item_id):
+@http.require_http_methods(["GET"])
+def item_includes_get(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    includes_list = [
+        {
+            'name': i.name,
+            'url': i.get_absolute_url(),
+            'url_title': i.get_absolute_url_title(),
+        }
+        for i in item.includes.all()
+    ]
+    return JsonResponse(includes_list, safe=False)
+
 
 @http.require_http_methods(["POST"])
-def item_update_add_storage(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+def item_includes_post(request, item_id):
+    pass
+
+
+@http.require_http_methods(["GET"])
+def item_locations_get(request, item_id):
+    pass
+
+
+@http.require_http_methods(["POST"])
+def item_locations_post(request, item_id):
+    pass
+
 
 @http.require_http_methods(["POST"])
 def item_update_remove_link(request, item_id):

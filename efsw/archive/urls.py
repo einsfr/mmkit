@@ -48,6 +48,30 @@ urlpatterns = patterns(
         views.item_detail,
         name='item_detail'
     ),
+    # items/12/_includes/get/ Связи с этим элементом - получение (AJAX+JSON)
+    url(
+        r'^items/(?P<item_id>\d+)/_includes/get/$',
+        views.item_includes_get,
+        name='item_includes_get'
+    ),
+    # items/12/_includes/post/ Связи с этим элементом - обновление (AJAX+JSON)
+    url(
+        r'^items/(?P<item_id>\d+)/_includes/post/$',
+        permission_required('arhive.change_item')(views.item_includes_post),
+        name='item_includes_post'
+    ),
+    # items/12/locations/get/ Положение этого элемента в хранилище - получение (AJAX+JSON)
+    url(
+        r'^items/(?P<item_id>\d+)/_locations/get/$',
+        views.item_locations_get,
+        name='item_locations_get'
+    ),
+    # items/12/locations/post/ Положение этого элемента в хранилище - получение (AJAX+JSON)
+    url(
+        r'^items/(?P<item_id>\d+)/_locations/post/$',
+        permission_required('archive.change_itemlocation')(views.item_locations_post),
+        name='item_locations_post'
+    ),
     # items/12/log/ Все сообщения о внесении изменений в элемент
     url(
         r'^items/(?P<item_id>\d+)/log/$',
@@ -65,30 +89,6 @@ urlpatterns = patterns(
         r'^items/(?P<item_id>\d+)/update/$',
         permission_required('archive.change_item')(views.item_update),
         name='item_update'
-    ),
-    # items/12/update/remove-storage/ Удаление элемента из хранилища
-    url(
-        r'^items/(?P<item_id>\d+)/update/remove-storage/$',
-        permission_required('archive.change_item')(views.item_update_remove_storage),
-        name='item_update_remove_storage'
-    ),
-    # items/12/update/add-storage/ Добавление элемента в хранилище
-    url(
-        r'^items/(?P<item_id>\d+)/update/add-storage/$',
-        permission_required('archive.change_item')(views.item_update_add_storage),
-        name='item_update_add_storage'
-    ),
-    # items/12/update/remove-link/ Удаление связи между элементами
-    url(
-        r'^items/(?P<item_id>\d+)/update/remove-link/$',
-        permission_required('archive.change_item')(views.item_update_remove_link),
-        name='item_update_remove_link'
-    ),
-    # items/12/update/add-link Добавление связи элементу
-    url(
-        r'^items/(?P<item_id>\d+)/update/add-link/$',
-        permission_required('archive.change_item')(views.item_update_add_link),
-        name='item_update_add_link'
     ),
     # categories/ Список категорий
     url(

@@ -185,6 +185,7 @@ class ItemLocation(models.Model):
         app_label = 'archive'
         verbose_name = 'размещение моделей в хранилищах'
         unique_together = ('storage', 'item')
+        default_permissions = ('change', )
 
     storage = models.ForeignKey(
         Storage,
