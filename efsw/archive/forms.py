@@ -16,10 +16,6 @@ class ItemUpdateForm(forms.ModelForm):
         fields = ('name', 'description', 'created', 'author', 'category')
 
 
-class ItemUpdateAddLinkForm(forms.Form):
-    linked_id = forms.IntegerField(min_value=1, label='Связанный ID')
-
-
 class ItemUpdateAddStorageForm(forms.ModelForm):
     class Meta:
         model = models.ItemLocation

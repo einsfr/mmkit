@@ -76,7 +76,6 @@ def item_detail(request, item_id):
         has_more_log_msgs = True
     return shortcuts.render(request, 'archive/item_detail.html', {
         'object': item,
-        'link_add_form': forms.ItemUpdateAddLinkForm(),
         'storage_add_form': forms.ItemUpdateAddStorageForm(),
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
@@ -122,18 +121,31 @@ def item_update(request, item_id):
 
 
 @http.require_http_methods(["GET"])
-def item_includes_get(request, item_id):
+def item_includes_get(request, item_id, include_id=0):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    includes_list = [
-        {
-            'name': i.name,
-            'url': i.get_absolute_url(),
-            'url_title': i.get_absolute_url_title(),
+    if not include_id:
+        includes_list = [
+            {
+                'id': i.id,
+                'name': i.name,
+                'url': i.get_absolute_url(),
+                'url_title': i.get_absolute_url_title(),
+            }
+            for i in item.includes.all()
+        ]
+        return JsonResponse(includes_list, safe=False)
+    else:
+        try:
+            include_item = models.Item.objects.get(pk=include_id)
+        except models.Item.DoesNotExist:
+            pass
+        include_dict = {
+            'id': include_item.id,
+            'name': include_item.name,
+            'url': include_item.get_absolute_url(),
+            'url_title': include_item.get_absolute_url_title(),
         }
-        for i in item.includes.all()
-    ]
-    return JsonResponse(includes_list, safe=False)
-
+        return JsonResponse(include_dict)
 
 @http.require_http_methods(["POST"])
 def item_includes_post(request, item_id):

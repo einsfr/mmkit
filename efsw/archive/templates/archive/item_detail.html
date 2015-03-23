@@ -69,9 +69,21 @@
             <tr>
                 <th>Включает</th>
                 <td>
-                    <ul class="list-group" id="includes_container" data-url="{% url 'efsw.archive:item_includes_get' object.id %}" data-bind="foreach: includes">
-                        <li class="list-group-item"><a data-bind="attr: { href: url, title: url_title }, text: name"></a></li>
+                    <ul class="list-group" id="includes_container" data-url="{% url 'efsw.archive:item_includes_get' object.id %}" data-bind="foreach: includes, visible: includes().length > 0">
+                        <li class="list-group-item">
+                            {% if perms.archive.change_item %}
+                                <a href="#" title="Удалить связь" class="fa fa-close" data-bind="click: $parent.remove_include"></a>
+                            {% endif %}
+                            <a data-bind="attr: { href: url, title: url_title, 'data-id': item_id }, text: name"></a>
+                        </li>
                     </ul>
+                    <span data-bind="visible: includes().length == 0">-<br></span>
+                    {% if perms.archive.change_item %}
+                        <form data-bind="submit: add_include">
+                            <input type="number" data-bind="value: included_item_id" placeholder="ID элемента">
+                            <input type="submit" value="Включить">
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
         </tbody>
