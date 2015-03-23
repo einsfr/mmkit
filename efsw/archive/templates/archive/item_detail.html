@@ -74,14 +74,18 @@
                             {% if perms.archive.change_item %}
                                 <a href="#" title="Удалить связь" class="fa fa-close" data-bind="click: $parent.remove_include"></a>
                             {% endif %}
-                            <a data-bind="attr: { href: url, title: url_title, 'data-id': item_id }, text: name"></a>
+                            <a data-bind="attr: { href: url, title: url_title, 'data-id': id }, text: name"></a>
                         </li>
                     </ul>
                     <span data-bind="visible: includes().length == 0">-<br></span>
                     {% if perms.archive.change_item %}
-                        <form data-bind="submit: add_include">
+                        <form id="includes_update_form"
+                              data-bind="submit: update_includes"
+                              action="{% url 'efsw.archive:item_includes_post' object.id %}">
+                            {% csrf_token %}
                             <input type="number" data-bind="value: included_item_id" placeholder="ID элемента">
-                            <input type="submit" value="Включить">
+                            <input type="button" value="Включить" data-bind="click: add_include">
+                            <input type="submit" value="Сохранить">
                         </form>
                     {% endif %}
                 </td>

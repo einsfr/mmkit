@@ -48,31 +48,31 @@ urlpatterns = patterns(
         views.item_detail,
         name='item_detail'
     ),
-    # items/12/_includes/get/ Связи с этим элементом - получение (AJAX+JSON)
+    # items/12/_includes/get/ Связи с этим элементом - получение (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/_includes/get/$',
         views.item_includes_get,
         name='item_includes_get'
     ),
-    # items/12/_includes/get/17/ Получения информации о новом включении для интерфейса (AJAX+JSON)
+    # items/12/_includes/get/17/ Получения информации о новом включении для интерфейса (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/_includes/get/(?P<include_id>\d+)/$',
         views.item_includes_get,
         name='item_includes_get_one'
     ),
-    # items/12/_includes/post/ Связи с этим элементом - обновление (AJAX+JSON)
+    # items/12/_includes/post/ Связи с этим элементом - обновление (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/_includes/post/$',
-        permission_required('arhive.change_item')(views.item_includes_post),
+        permission_required('archive.change_item')(views.item_includes_post),
         name='item_includes_post'
     ),
-    # items/12/locations/get/ Положение этого элемента в хранилище - получение (AJAX+JSON)
+    # items/12/locations/get/ Положение этого элемента в хранилище - получение (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/_locations/get/$',
         views.item_locations_get,
         name='item_locations_get'
     ),
-    # items/12/locations/post/ Положение этого элемента в хранилище - получение (AJAX+JSON)
+    # items/12/locations/post/ Положение этого элемента в хранилище - получение (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/_locations/post/$',
         permission_required('archive.change_itemlocation')(views.item_locations_post),

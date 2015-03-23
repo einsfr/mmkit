@@ -1,6 +1,8 @@
+import json
+
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
@@ -14,6 +16,7 @@ from efsw.common import default_settings as common_default_settings
 from efsw.common.search import elastic
 from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
+from efsw.common.http.response import JsonWithStatusResponse
 
 
 def _get_item_page(items, page, per_page):
@@ -120,36 +123,61 @@ def item_update(request, item_id):
     return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
 
 
+def _get_json_item_not_found(item_id):
+    return JsonWithStatusResponse(
+        'Ошибка: элемент с ID "{0}" не существует'.format(item_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
 @http.require_http_methods(["GET"])
 def item_includes_get(request, item_id, include_id=0):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+
+    def format_item_dict(i):
+        return {
+            'id': i.id,
+            'name': i.name,
+            'url': i.get_absolute_url(),
+            'url_title': i.get_absolute_url_title(),
+        }
+
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
     if not include_id:
         includes_list = [
-            {
-                'id': i.id,
-                'name': i.name,
-                'url': i.get_absolute_url(),
-                'url_title': i.get_absolute_url_title(),
-            }
+            format_item_dict(i)
             for i in item.includes.all()
         ]
-        return JsonResponse(includes_list, safe=False)
+        return JsonWithStatusResponse(includes_list)
     else:
         try:
             include_item = models.Item.objects.get(pk=include_id)
         except models.Item.DoesNotExist:
-            pass
-        include_dict = {
-            'id': include_item.id,
-            'name': include_item.name,
-            'url': include_item.get_absolute_url(),
-            'url_title': include_item.get_absolute_url_title(),
-        }
-        return JsonResponse(include_dict)
+            return _get_json_item_not_found(include_id)
+        include_dict = format_item_dict(include_item)
+        return JsonWithStatusResponse(include_dict)
+
 
 @http.require_http_methods(["POST"])
 def item_includes_post(request, item_id):
-    pass
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    try:
+        includes_ids = json.loads(request.POST.get('data', ''))['includes']
+    except [ValueError, KeyError]:
+        return JsonWithStatusResponse(
+            'Неверный формат запроса',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    item.includes.clear()
+    if len(includes_ids) > 0:
+        includes = models.Item.objects.filter(id__in=includes_ids)
+        item.includes.add(*includes)
+    return JsonWithStatusResponse()
 
 
 @http.require_http_methods(["GET"])
