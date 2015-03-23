@@ -21,6 +21,7 @@ function ItemDetailViewModel() {
 
     self.add_include = function() {
         if (isNaN(self.included_item_id())) {
+            alert('Идентификатор должен быть числом');
             return;
         }
         if (self.includes().some(function(i) {
