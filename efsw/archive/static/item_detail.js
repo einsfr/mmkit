@@ -42,27 +42,27 @@ function ItemDetailViewModel() {
 
     self.update_includes = function() {
         var form = $("#includes_update_form");
-        var update_url = form.attr('action');
-        var csrf_token = form.children("input[name='csrfmiddlewaretoken']").val();
-        $.ajax(update_url, {
-            data: {
-                csrfmiddlewaretoken: csrf_token,
-                data: ko.toJSON({
-                    includes: self.includes().map(function(i) {
-                        return i.id;
+        $.ajax(
+            form.attr('action'),
+            {
+                data: {
+                    csrfmiddlewaretoken: form.children("input[name='csrfmiddlewaretoken']").val(),
+                    data: ko.toJSON({
+                        includes: self.includes().map(function(i) {
+                            return i.id;
+                        })
                     })
-                })
-            },
-            type: 'post',
-            success: function(result) {
-                if (result.status == 'ok') {
-                    alert('Сохранено');
-                } else {
-                    alert(result.data);
-                    return;
+                },
+                type: 'post',
+                success: function(result) {
+                    if (result.status == 'ok') {
+                        alert('Сохранено');
+                    } else {
+                        alert(result.data);
+                        return;
+                    }
                 }
-            }
-        });
+            });
     };
 
     $.getJSON(json_url, function(response) {
