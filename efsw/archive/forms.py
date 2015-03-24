@@ -22,10 +22,6 @@ class ItemUpdateAddStorageForm(forms.ModelForm):
         fields = ('storage', 'location')
 
 
-class ItemUpdateRemoveLinkForm(forms.Form):
-    removed_id = forms.IntegerField(min_value=1)
-
-
 class ItemCategoryForm(forms.ModelForm):
     class Meta:
         model = models.ItemCategory

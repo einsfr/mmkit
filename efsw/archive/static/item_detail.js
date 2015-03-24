@@ -73,6 +73,18 @@ function ItemDetailViewModel() {
             });
     };
 
+    self.remove_location = function(location) {
+        self.locations.remove(location);
+    };
+
+    self.add_location = function() {
+
+    };
+
+    self.update_locations = function() {
+
+    };
+
     $.getJSON(url_get_includes, function(response) {
         if (response.status == 'ok') {
             var mapped_includes = $.map(response.data, function(item) {

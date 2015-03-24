@@ -2,7 +2,6 @@ import json
 
 from django.views import generic
 from django import shortcuts
-from django.http import HttpResponse, HttpResponseBadRequest
 from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
@@ -81,6 +80,7 @@ def item_detail(request, item_id):
         'object': item,
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
+        'location_add_form': forms.ItemUpdateAddStorageForm()
     })
 
 
