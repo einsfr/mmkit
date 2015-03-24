@@ -40,7 +40,7 @@
     {% if perms.archive.change_itemlocation %}
         <form id="locations_update_form"
               data-bind="submit: update_locations"
-              action="{% url 'efsw.archive:item_locations_post' object.id %}">
+              action="{% url 'efsw.archive:ajax_item_locations_post' object.id %}">
     {% endif %}
     <table class="table">
         <thead>
@@ -118,7 +118,7 @@
                     {% if perms.archive.change_item %}
                         <form id="includes_update_form"
                               data-bind="submit: update_includes"
-                              action="{% url 'efsw.archive:item_includes_post' object.id %}">
+                              action="{% url 'efsw.archive:ajax_item_includes_post' object.id %}">
                             {% csrf_token %}
                             <input type="number" data-bind="value: include_item_id" placeholder="ID элемента">
                             <input type="button" value="Включить" data-bind="click: add_include">
@@ -164,10 +164,10 @@
     <script type="text/javascript">
         var urls = {
             item_locations_get: function() {
-                return '{% url 'efsw.archive:item_locations_get' object.id %}';
+                return '{% url 'efsw.archive:ajax_item_locations_get' object.id %}';
             },
             item_includes_get: function() {
-                return '{% url 'efsw.archive:item_includes_get' object.id %}';
+                return '{% url 'efsw.archive:ajax_item_includes_get' object.id %}';
             }
         };
     </script>

@@ -52,25 +52,25 @@ urlpatterns = patterns(
     url(
         r'^items/(?P<item_id>\d+)/includes/_get/$',
         views.item_includes_get,
-        name='item_includes_get'
+        name='ajax_item_includes_get'
     ),
     # items/12/_includes/post/ Связи с этим элементом - обновление (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/includes/_post/$',
         permission_required('archive.change_item')(views.item_includes_post),
-        name='item_includes_post'
+        name='ajax_item_includes_post'
     ),
     # items/12/locations/get/ Положение этого элемента в хранилище - получение (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/locations/_get/$',
         views.item_locations_get,
-        name='item_locations_get'
+        name='ajax_item_locations_get'
     ),
     # items/12/locations/post/ Положение этого элемента в хранилище - изменение (AJAX)
     url(
         r'^items/(?P<item_id>\d+)/locations/_post/$',
         permission_required('archive.change_itemlocation')(views.item_locations_post),
-        name='item_locations_post'
+        name='ajax_item_locations_post'
     ),
     # items/12/log/ Все сообщения о внесении изменений в элемент
     url(
@@ -112,6 +112,6 @@ urlpatterns = patterns(
     url(
         r'^storages/_get/$',
         views.storage_get,
-        name='storage_get'
+        name='ajax_storage_get'
     ),
 )
