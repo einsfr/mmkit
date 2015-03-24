@@ -3,34 +3,42 @@ $(document).ready(function() {
 });
 
 function Item(data) {
-    this.id = ko.observable(data.id);
-    this.name = ko.observable(data.name);
-    this.url = ko.observable(data.url);
-    this.url_title = ko.observable(data.url_title);
+    this.id = data.id;
+    this.name = data.name;
+    this.url = data.url;
+    this.url_title = data.url_title;
+}
+
+function ItemLocation(data) {
+    this.id = data.id;
+    this.storage = data.storage;
+    this.location = data.location;
 }
 
 function ItemDetailViewModel() {
     var self = this;
     self.includes = ko.observableArray([]);
-    self.included_item_id = ko.observable();
-    var json_url = $("#includes_container").data('url');
+    self.include_item_id = ko.observable();
+    self.locations = ko.observableArray([]);
+    var url_get_includes = $("#includes_container").data('url');
+    var url_get_locations = $("#locations_container").data('url');
 
     self.remove_include = function(item) {
         self.includes.remove(item);
     };
 
     self.add_include = function() {
-        if (isNaN(self.included_item_id())) {
+        if (isNaN(self.include_item_id())) {
             alert('Идентификатор должен быть числом');
             return;
         }
         if (self.includes().some(function(i) {
-                return (i.id() == self.included_item_id());
+                return (i.id == self.include_item_id());
             })) {
             alert('Элемент уже включён в список');
             return;
         }
-        $.getJSON(json_url + self.included_item_id() + '/', function(response) {
+        $.getJSON(url_get_includes + self.include_item_id() + '/', function(response) {
             if (response.status == 'ok') {
                 self.includes.push(new Item(response.data));
             } else {
@@ -65,12 +73,23 @@ function ItemDetailViewModel() {
             });
     };
 
-    $.getJSON(json_url, function(response) {
+    $.getJSON(url_get_includes, function(response) {
         if (response.status == 'ok') {
             var mapped_includes = $.map(response.data, function(item) {
                 return new Item(item);
             });
             self.includes(mapped_includes);
+        } else {
+            alert(response.data);
+        }
+    });
+
+    $.getJSON(url_get_locations, function(response) {
+        if (response.status == 'ok') {
+            var mapped_locations = $.map(response.data, function(location) {
+                return new ItemLocation(location);
+            });
+            self.locations(mapped_locations);
         } else {
             alert(response.data);
         }

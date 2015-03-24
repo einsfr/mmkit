@@ -189,12 +189,12 @@ class ItemLocation(models.Model):
 
     storage = models.ForeignKey(
         Storage,
-        related_name='items_locations'
+        related_name='locations'
     )
 
     item = models.ForeignKey(
         Item,
-        related_name='storages_locations'
+        related_name='locations'
     )
 
     location = models.CharField(

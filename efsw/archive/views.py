@@ -79,7 +79,6 @@ def item_detail(request, item_id):
         has_more_log_msgs = True
     return shortcuts.render(request, 'archive/item_detail.html', {
         'object': item,
-        'storage_add_form': forms.ItemUpdateAddStorageForm(),
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
     })
@@ -182,48 +181,28 @@ def item_includes_post(request, item_id):
 
 @http.require_http_methods(["GET"])
 def item_locations_get(request, item_id):
-    pass
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    locations = item.locations.all().select_related('storage')
+    response = []
+    for l in locations:
+        d = {
+            'id': l.id,
+            'storage': l.storage.name
+        }
+        if l.storage.is_online_type():
+            d['location'] = l.get_url().format_win()
+        else:
+            d['location'] = l.location
+        response.append(d)
+    return JsonWithStatusResponse(response)
 
 
 @http.require_http_methods(["POST"])
 def item_locations_post(request, item_id):
     pass
-
-
-@http.require_http_methods(["POST"])
-def item_update_remove_link(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    form = forms.ItemUpdateRemoveLinkForm(request.POST)
-    if form.is_valid():
-        removed_id = form.cleaned_data['removed_id']
-        try:
-            removed_item = models.Item.objects.get(pk=removed_id)
-            item.includes.remove(removed_item)
-            models.ItemLog.log_item_include_update(item, request)
-            models.ItemLog.log_item_include_update(removed_item, request)
-        except models.Item.DoesNotExist:
-            pass  # @TODO Здесь по-хорошему надо вносить в лог попытку удалить несуществующий элемент
-        return HttpResponse('{0}-{1}'.format(item_id, removed_id))
-    else:
-        return HttpResponseBadRequest()
-
-
-@http.require_http_methods(["POST"])
-def item_update_add_link(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    form = forms.ItemUpdateAddLinkForm(request.POST)
-    if form.is_valid():
-        linked_id = form.cleaned_data['linked_id']
-        try:
-            linked_item = models.Item.objects.get(pk=linked_id)
-            models.ItemLog.log_item_include_update(item, request)
-            models.ItemLog.log_item_include_update(linked_item, request)
-        except models.Item.DoesNotExist:
-            return HttpResponseBadRequest()
-        item.includes.add(linked_item)
-        return shortcuts.render(request, 'archive/_item_detail_link.html', {'object': item, 'item': linked_item})
-    else:
-        return HttpResponseBadRequest()
 
 
 class CategoryListView(generic.ListView):

@@ -42,10 +42,24 @@
             <tr>
                 <th>Хранилище</th>
                 <th>Размещение</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
-        <tbody>
-
+        <tbody id="locations_container"
+               data-bind="foreach: locations, visible: locations().length > 0"
+               data-url="{% url 'efsw.archive:item_locations_get' object.id %}">
+            <tr>
+                <td data-bind="text: storage"></td>
+                <td data-bind="text: location"></td>
+                <td>
+                    {% if perms.archive.change_itemlocation %}
+                        <a href="#" title="Удалить из хранилища" class="" data-bind=""></a>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+        <tbody data-bind="visible: locations().length == 0">
+            <tr><td colspan="3">-</td></tr>
         </tbody>
     </table>
     <h2>Связи</h2>
@@ -69,7 +83,10 @@
             <tr>
                 <th>Включает</th>
                 <td>
-                    <ul class="list-group" id="includes_container" data-url="{% url 'efsw.archive:item_includes_get' object.id %}" data-bind="foreach: includes, visible: includes().length > 0">
+                    <ul class="list-group"
+                        id="includes_container"
+                        data-url="{% url 'efsw.archive:item_includes_get' object.id %}"
+                        data-bind="foreach: includes, visible: includes().length > 0">
                         <li class="list-group-item">
                             {% if perms.archive.change_item %}
                                 <a href="#" title="Удалить связь" class="fa fa-close" data-bind="click: $parent.remove_include"></a>
