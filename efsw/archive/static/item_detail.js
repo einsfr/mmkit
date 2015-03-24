@@ -15,13 +15,32 @@ function ItemLocation(data) {
     this.location = data.location;
 }
 
+function Storage(data) {
+    if (data) {
+        this.id = data.id,
+        this.name = data.name,
+        this.type = data.type,
+        this.base_url = data.base_url,
+        this.description = data.description,
+        this.mount_dir = data.mount_dir
+    } else {
+        this.id = 0,
+        this.name = '',
+        this.type = '',
+        this.base_url = '',
+        this.description = '',
+        this.mount_dir = ''
+    }
+}
+
 function ItemDetailViewModel() {
     var self = this;
     self.includes = ko.observableArray([]);
     self.include_item_id = ko.observable();
     self.locations = ko.observableArray([]);
-    var url_get_includes = $("#includes_container").data('url');
-    var url_get_locations = $("#locations_container").data('url');
+    self.location = ko.observable();
+    self.storage_id = ko.observable();
+    self.selected_storage = ko.observable(new Storage());
 
     self.remove_include = function(item) {
         self.includes.remove(item);
@@ -38,7 +57,7 @@ function ItemDetailViewModel() {
             alert('Элемент уже включён в список');
             return;
         }
-        $.getJSON(url_get_includes + self.include_item_id() + '/', function(response) {
+        $.getJSON(urls.item_includes_get(), {id: self.include_item_id()}, function(response) {
             if (response.status == 'ok') {
                 self.includes.push(new Item(response.data));
             } else {
@@ -78,14 +97,27 @@ function ItemDetailViewModel() {
     };
 
     self.add_location = function() {
-
+        if (!self.storage_id() || isNaN(self.storage_id())) {
+            alert('Не выбрано хранилище');
+            return;
+        }
+        if (self.location() === undefined || self.location().length == 0) {
+            alert('Неправильное положение в хранилище');
+            return;
+        }
     };
 
     self.update_locations = function() {
 
     };
 
-    $.getJSON(url_get_includes, function(response) {
+    self.storage_changed = function() {
+        if (self.storage_id() && isNaN(self.storage_id())) {
+            $.getJSON();
+        }
+    };
+
+    $.getJSON(urls.item_includes_get(), function(response) {
         if (response.status == 'ok') {
             var mapped_includes = $.map(response.data, function(item) {
                 return new Item(item);
@@ -96,7 +128,7 @@ function ItemDetailViewModel() {
         }
     });
 
-    $.getJSON(url_get_locations, function(response) {
+    $.getJSON(urls.item_locations_get(), function(response) {
         if (response.status == 'ok') {
             var mapped_locations = $.map(response.data, function(location) {
                 return new ItemLocation(location);

@@ -1,4 +1,6 @@
 from django import forms
+from django.forms import widgets
+from django.core import urlresolvers
 
 from efsw.archive import models
 
@@ -20,6 +22,12 @@ class ItemUpdateAddStorageForm(forms.ModelForm):
     class Meta:
         model = models.ItemLocation
         fields = ('storage', 'location')
+        widgets = {
+            'storage': widgets.Select(attrs={
+                'data-bind': 'value: storage_id, event: { change: storage_changed }',
+            }),
+            'location': widgets.TextInput(attrs={'data-bind': 'value: location'}),
+        }
 
 
 class ItemCategoryForm(forms.ModelForm):

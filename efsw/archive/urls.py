@@ -50,31 +50,25 @@ urlpatterns = patterns(
     ),
     # items/12/_includes/get/ Связи с этим элементом - получение (AJAX)
     url(
-        r'^items/(?P<item_id>\d+)/_includes/get/$',
+        r'^items/(?P<item_id>\d+)/includes/_get/$',
         views.item_includes_get,
         name='item_includes_get'
     ),
-    # items/12/_includes/get/17/ Получения информации о новом включении для интерфейса (AJAX)
-    url(
-        r'^items/(?P<item_id>\d+)/_includes/get/(?P<include_id>\d+)/$',
-        views.item_includes_get,
-        name='item_includes_get_one'
-    ),
     # items/12/_includes/post/ Связи с этим элементом - обновление (AJAX)
     url(
-        r'^items/(?P<item_id>\d+)/_includes/post/$',
+        r'^items/(?P<item_id>\d+)/includes/_post/$',
         permission_required('archive.change_item')(views.item_includes_post),
         name='item_includes_post'
     ),
     # items/12/locations/get/ Положение этого элемента в хранилище - получение (AJAX)
     url(
-        r'^items/(?P<item_id>\d+)/_locations/get/$',
+        r'^items/(?P<item_id>\d+)/locations/_get/$',
         views.item_locations_get,
         name='item_locations_get'
     ),
-    # items/12/locations/post/ Положение этого элемента в хранилище - получение (AJAX)
+    # items/12/locations/post/ Положение этого элемента в хранилище - изменение (AJAX)
     url(
-        r'^items/(?P<item_id>\d+)/_locations/post/$',
+        r'^items/(?P<item_id>\d+)/locations/_post/$',
         permission_required('archive.change_itemlocation')(views.item_locations_post),
         name='item_locations_post'
     ),
@@ -110,8 +104,14 @@ urlpatterns = patterns(
     ),
     # categories/3/update/ Редактирование существующей категории
     url(
-        r'^categories/(?P<pk>\d+)/update$',
+        r'^categories/(?P<pk>\d+)/update/$',
         permission_required('archive.change_itemcategory')(views.CategoryUpdateView.as_view()),
         name='category_update'
+    ),
+    # storages/_get/ Получение информации обо всех хранилищах (AJAX)
+    url(
+        r'^storages/_get/$',
+        views.storage_get,
+        name='storage_get'
     ),
 )

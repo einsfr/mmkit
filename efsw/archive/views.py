@@ -16,6 +16,7 @@ from efsw.common.search import elastic
 from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
+from efsw.common.utils import urlformatter
 
 
 def _get_item_page(items, page, per_page):
@@ -130,7 +131,7 @@ def _get_json_item_not_found(item_id):
 
 
 @http.require_http_methods(["GET"])
-def item_includes_get(request, item_id, include_id=0):
+def item_includes_get(request, item_id):
 
     def format_item_dict(i):
         return {
@@ -144,7 +145,8 @@ def item_includes_get(request, item_id, include_id=0):
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
-    if not include_id:
+    include_id = request.GET.get('id', None)
+    if include_id is None:
         includes_list = [
             format_item_dict(i)
             for i in item.includes.all()
@@ -223,6 +225,36 @@ class CategoryUpdateView(generic.UpdateView):
     template_name = 'archive/category_form_update.html'
     form_class = forms.ItemCategoryForm
     success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
+
+
+def _get_json_storage_not_found(storage_id):
+    return JsonWithStatusResponse(
+        'Ошибка: хранилище с ID "{0}" не существует'.format(storage_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def storage_get(request):
+
+    def format_storage_dict(s):
+        return {
+            'id': s.id,
+            'name': s.name,
+            'type': s.type,
+            'base_url': urlformatter.format_url(s.base_url).format_win(),
+            'description': s.description,
+            'mount_dir': s.mount_dir,
+        }
+
+    storage_id = request.GET.get('id', None)
+    if storage_id is None:
+        pass
+    else:
+        try:
+            storage = models.Storage.objects.get(pk=storage_id)
+        except models.Storage.DoesNotExist:
+            return _get_json_storage_not_found(storage_id)
+        return JsonWithStatusResponse(format_storage_dict(storage))
 
 
 @csrf.csrf_exempt
