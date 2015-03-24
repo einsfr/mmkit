@@ -100,7 +100,7 @@
                               data-bind="submit: update_includes"
                               action="{% url 'efsw.archive:item_includes_post' object.id %}">
                             {% csrf_token %}
-                            <input type="number" data-bind="value: included_item_id" placeholder="ID элемента">
+                            <input type="number" data-bind="value: include_item_id" placeholder="ID элемента">
                             <input type="button" value="Включить" data-bind="click: add_include">
                             <input type="submit" value="Сохранить">
                         </form>

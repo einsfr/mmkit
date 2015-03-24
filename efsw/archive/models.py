@@ -271,12 +271,24 @@ class ItemLog(models.Model):
 
     @classmethod
     def log_item_add(cls, item, request):
-        cls._log_item_action(item, cls.ACTION_ADD, request)
+        if type(item) == list:
+            for i in item:
+                cls._log_item_action(i, cls.ACTION_ADD, request)
+        else:
+            cls._log_item_action(item, cls.ACTION_ADD, request)
 
     @classmethod
     def log_item_update(cls, item, request):
-        cls._log_item_action(item, cls.ACTION_UPDATE, request)
+        if type(item) == list:
+            for i in item:
+                cls._log_item_action(i, cls.ACTION_UPDATE, request)
+        else:
+            cls._log_item_action(item, cls.ACTION_UPDATE, request)
 
     @classmethod
     def log_item_include_update(cls, item, request):
-        cls._log_item_action(item, cls.ACTION_INCLUDE_UPDATE, request)
+        if type(item) == list:
+            for i in item:
+                cls._log_item_action(i, cls.ACTION_INCLUDE_UPDATE, request)
+        else:
+            cls._log_item_action(i, cls.ACTION_INCLUDE_UPDATE, request)

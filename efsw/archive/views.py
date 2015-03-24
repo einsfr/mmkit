@@ -173,6 +173,7 @@ def item_includes_post(request, item_id):
             JsonWithStatusResponse.STATUS_ERROR
         )
     item.includes.clear()
+    # TODO Нужно определить, какие элементы изменяются и внести в лог соответствующие записи
     if len(includes_ids) > 0:
         includes = models.Item.objects.filter(id__in=includes_ids)
         item.includes.add(*includes)
