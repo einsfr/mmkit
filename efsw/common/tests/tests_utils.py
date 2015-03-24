@@ -20,7 +20,8 @@ class UrlFormatterTestCase(TestCase):
         input_list = [
             ('smb://host/path\\to\\directory', 'smb://host/path/to/directory'),
             ('http://user@host/path/to/page', 'http://user@host/path/to/page'),
-            ('ftp://user:password@host/path/to/file', 'ftp://user:password@host/path/to/file')
+            ('ftp://user:password@host/path/to/file', 'ftp://user:password@host/path/to/file'),
+            ('smb://192.168.100.1', 'smb://192.168.100.1/')
         ]
         for i in input_list:
             print('Checking "{0}"...'.format(i[0]))
