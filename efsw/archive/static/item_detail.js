@@ -15,21 +15,17 @@ function ItemLocation(data) {
     this.location = data.location;
 }
 
-function Storage(data) {
+function ItemStorage(data) {
     if (data) {
         this.id = data.id,
         this.name = data.name,
-        this.type = data.type,
         this.base_url = data.base_url,
-        this.description = data.description,
-        this.mount_dir = data.mount_dir
+        this.disable_location = data.disable_location
     } else {
         this.id = 0,
         this.name = '',
-        this.type = '',
         this.base_url = '',
-        this.description = '',
-        this.mount_dir = ''
+        this.disable_location = false
     }
 }
 
@@ -40,7 +36,7 @@ function ItemDetailViewModel() {
     self.locations = ko.observableArray([]);
     self.location = ko.observable();
     self.storage_id = ko.observable();
-    self.selected_storage = ko.observable(new Storage());
+    self.selected_storage = ko.observable(new ItemStorage());
 
     self.remove_include = function(item) {
         self.includes.remove(item);
@@ -101,10 +97,15 @@ function ItemDetailViewModel() {
             alert('Не выбрано хранилище');
             return;
         }
-        if (self.location() === undefined || self.location().length == 0) {
-            alert('Неправильное положение в хранилище');
+        if (!self.selected_storage().disable_location && (self.location() === undefined || self.location().length == 0)) {
+            alert('Не указано положение в хранилище');
             return;
         }
+        self.locations.push(new ItemLocation({
+            id: 0,
+            storage: self.selected_storage().name,
+            location: self.selected_storage().disable_location ? 'Определяется автоматически' : self.location()
+        }));
     };
 
     self.update_locations = function() {
@@ -112,9 +113,19 @@ function ItemDetailViewModel() {
     };
 
     self.storage_changed = function() {
-        if (self.storage_id() && isNaN(self.storage_id())) {
-            $.getJSON();
+        if (self.storage_id() && !isNaN(self.storage_id())) {
+            $.getJSON(urls.storages_get(), { id: self.storage_id() }, function(response) {
+                if (response.status == 'ok') {
+                    self.selected_storage(new ItemStorage(response.data));
+                } else {
+                    alert(response.data);
+                }
+            });
         }
+    };
+
+    self.copy_location_url = function() {
+
     };
 
     $.getJSON(urls.item_includes_get(), function(response) {

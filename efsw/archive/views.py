@@ -237,18 +237,23 @@ def _get_json_storage_not_found(storage_id):
 def storage_get(request):
 
     def format_storage_dict(s):
-        return {
+        return_dict = {
             'id': s.id,
             'name': s.name,
-            'type': s.type,
-            'base_url': urlformatter.format_url(s.base_url).format_win(),
-            'description': s.description,
-            'mount_dir': s.mount_dir,
+            'disable_location': s.is_online_master_type(),
         }
+        if s.is_online_type():
+            return_dict['base_url'] = urlformatter.format_url(s.base_url).format_win()
+        else:
+            return_dict['base_url'] = ''
+        return return_dict
 
     storage_id = request.GET.get('id', None)
     if storage_id is None:
-        pass
+        return JsonWithStatusResponse([
+            format_storage_dict(s)
+            for s in models.Storage.objects.all()
+        ])
     else:
         try:
             storage = models.Storage.objects.get(pk=storage_id)

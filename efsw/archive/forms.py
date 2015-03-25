@@ -26,7 +26,9 @@ class ItemUpdateAddStorageForm(forms.ModelForm):
             'storage': widgets.Select(attrs={
                 'data-bind': 'value: storage_id, event: { change: storage_changed }',
             }),
-            'location': widgets.TextInput(attrs={'data-bind': 'value: location'}),
+            'location': widgets.TextInput(attrs={
+                'data-bind': 'value: location, disable: selected_storage().disable_location'
+            }),
         }
 
 

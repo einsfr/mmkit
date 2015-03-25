@@ -71,7 +71,7 @@
             <tfoot>
                     <tr>
                         <td>{{ location_add_form.storage }}</td>
-                        <td><span data-bind="text: selected_storage.base_url"></span>{{ location_add_form.location }}</td>
+                        <td><span data-bind="text: selected_storage().base_url"></span> {{ location_add_form.location }}</td>
                         <td>
                             {% csrf_token %}
                             <a href="#" title="Добавить запись" class="fa fa-lg fa-plus"
@@ -168,6 +168,9 @@
             },
             item_includes_get: function() {
                 return '{% url 'efsw.archive:ajax_item_includes_get' object.id %}';
+            },
+            storages_get: function() {
+                return '{% url 'efsw.archive:ajax_storage_get' %}';
             }
         };
     </script>
