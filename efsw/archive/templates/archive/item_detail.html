@@ -109,7 +109,7 @@
                         data-bind="foreach: includes, visible: includes().length > 0">
                         <li class="list-group-item">
                             {% if perms.archive.change_item %}
-                                <a href="#" title="Удалить связь" class="fa fa-lg fa-close" data-bind="click: $parent.remove_include"></a>
+                                <a href="#" title="Удалить связь" class="fa fa-lg fa-trash-o" data-bind="click: $parent.remove_include"></a>
                             {% endif %}
                             <a data-bind="attr: { href: url, title: url_title, 'data-id': id }, text: name"></a>
                         </li>
