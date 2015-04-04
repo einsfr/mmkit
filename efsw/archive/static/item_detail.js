@@ -11,6 +11,7 @@ function Item(data) {
 
 function ItemLocation(data) {
     this.id = data.id;
+    this.storage_id = data.storage_id;
     this.storage = data.storage;
     this.location = data.location;
 }
@@ -37,6 +38,7 @@ function ItemDetailViewModel() {
     self.location = ko.observable();
     self.storage_id = ko.observable();
     self.selected_storage = ko.observable(new ItemStorage());
+    self.locations_changed = false;
 
     self.remove_include = function(item) {
         self.includes.remove(item);
@@ -90,6 +92,7 @@ function ItemDetailViewModel() {
 
     self.remove_location = function(location) {
         self.locations.remove(location);
+        self.locations_changed = true;
     };
 
     self.add_location = function() {
@@ -104,12 +107,43 @@ function ItemDetailViewModel() {
         self.locations.push(new ItemLocation({
             id: 0,
             storage: self.selected_storage().name,
+            storage_id: self.selected_storage().id,
             location: self.selected_storage().disable_location ? 'Определяется автоматически' : self.location()
         }));
+        self.locations_changed = true;
     };
 
     self.update_locations = function() {
-
+        if (false === self.locations_changed) {
+            alert('Изменений не обнаружено');
+            return;
+        }
+        var form = $("#locations_update_form");
+        $.ajax(
+            form.attr('action'),
+            {
+                data: {
+                    csrfmiddlewaretoken: form.children("input[name='csrfmiddlewaretoken']").val(),
+                    data: ko.toJSON({
+                        locations: self.locations().map(function(i) {
+                            delete i.storage;
+                            return i;
+                        })
+                    })
+                },
+                type: 'post',
+                success: function(result) {
+                    if (result.status == 'ok') {
+                        alert('Сохранено');
+                        self._get_locations();
+                    } else {
+                        alert(result.data);
+                        return;
+                    }
+                }
+            }
+        );
+        self.locations_changed = false;
     };
 
     self.storage_changed = function() {
@@ -124,8 +158,17 @@ function ItemDetailViewModel() {
         }
     };
 
-    self.copy_location_url = function() {
-
+    self._get_locations = function() {
+        $.getJSON(urls.item_locations_get(), function(response) {
+            if (response.status == 'ok') {
+                var mapped_locations = $.map(response.data, function(location) {
+                    return new ItemLocation(location);
+                });
+                self.locations(mapped_locations);
+            } else {
+                alert(response.data);
+            }
+        });
     };
 
     $.getJSON(urls.item_includes_get(), function(response) {
@@ -139,14 +182,5 @@ function ItemDetailViewModel() {
         }
     });
 
-    $.getJSON(urls.item_locations_get(), function(response) {
-        if (response.status == 'ok') {
-            var mapped_locations = $.map(response.data, function(location) {
-                return new ItemLocation(location);
-            });
-            self.locations(mapped_locations);
-        } else {
-            alert(response.data);
-        }
-    });
+    self._get_locations();
 }

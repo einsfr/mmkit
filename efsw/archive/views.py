@@ -7,6 +7,7 @@ from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
 from django.views.decorators import csrf
+from django.db import IntegrityError
 
 from efsw.archive import models
 from efsw.archive import forms
@@ -193,7 +194,8 @@ def item_locations_get(request, item_id):
     for l in locations:
         d = {
             'id': l.id,
-            'storage': l.storage.name
+            'storage': l.storage.name,
+            'storage_id': l.storage.id,
         }
         if l.storage.is_online_type():
             d['location'] = l.get_url().format_win()
@@ -205,7 +207,45 @@ def item_locations_get(request, item_id):
 
 @http.require_http_methods(["POST"])
 def item_locations_post(request, item_id):
-    pass
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    try:
+        locations = json.loads(request.POST.get('data', ''))['locations']
+    except [ValueError, KeyError]:
+        return JsonWithStatusResponse(
+            'Неверный формат запроса',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    if len(locations) == 0:
+        models.ItemLocation.objects.filter(item=item).delete()
+        return JsonWithStatusResponse()
+    storage_ids = set([l['storage_id'] for l in locations])
+    storages = models.Storage.objects.filter(id__in=storage_ids)
+    if len(storage_ids) != len(storages):
+        return JsonWithStatusResponse(
+            'Используется несуществующее хранилище',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    storages_dict = dict([(s.id, s) for s in storages])
+    leftover_locations = [l['id'] for l in locations if l['id']]
+    models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
+    for l in locations:
+        if l['id'] != 0:
+            continue
+        l_obj = models.ItemLocation()
+        l_obj.storage = storages_dict[l['storage_id']]
+        l_obj.item = item
+        l_obj.location = l['location']
+        try:
+            l_obj.save()
+        except IntegrityError:
+            return JsonWithStatusResponse(
+                'Элемент не может иметь несколько расположений в одном хранилище',
+                JsonWithStatusResponse.STATUS_ERROR
+            )
+    return JsonWithStatusResponse()
 
 
 class CategoryListView(generic.ListView):

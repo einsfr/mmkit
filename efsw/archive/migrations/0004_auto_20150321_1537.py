@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='storage',
             name='type',
-            field=models.CharField(choices=[('ONS', 'Онлайн (без управления ФС)'), ('OFF', 'Оффлайн'), ('ONM', 'Онлайн (с управлением ФС)')], verbose_name='тип', max_length=3, default='ONM'),
+            field=models.CharField(choices=[('ONS', 'Онлайн (без управления ФС)'), ('OFF', 'Оффлайн'), ('ONM', 'Онлайн (с управлением ФС)')], verbose_name='тип', max_length=3, default='ONS'),
             preserve_default=False,
         ),
         migrations.AlterField(

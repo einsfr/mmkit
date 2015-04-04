@@ -424,18 +424,18 @@ class ArchiveSecurityTestCase(TestCase):
         (urlresolvers.reverse('efsw.archive:item_list_category', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_list_category_page', args=(1, 1)), True),
         (urlresolvers.reverse('efsw.archive:item_detail', args=(1, )), True),
-        (urlresolvers.reverse('efsw.archive:item_links_get', args=(1, )), True),
-        (urlresolvers.reverse('efsw.archive:item_locations_get', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:ajax_item_includes_get', args=(1, )), True),
+        (urlresolvers.reverse('efsw.archive:ajax_item_locations_get', args=(1, )), True),
         (urlresolvers.reverse('efsw.archive:item_log', args=(1, )), True),
         (
-            urlresolvers.reverse('efsw.archive:item_links_post', args=(1, )),
+            urlresolvers.reverse('efsw.archive:ajax_item_includes_post', args=(1, )),
             False,
             'change_item',
             None,
             200
         ),
         (
-            urlresolvers.reverse('efsw.archive:item_locations_post', args=(1, )),
+            urlresolvers.reverse('efsw.archive:ajax_item_locations_post', args=(1, )),
             False,
             'change_itemlocation',
             None,

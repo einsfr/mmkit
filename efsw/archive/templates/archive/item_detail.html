@@ -41,6 +41,7 @@
         <form id="locations_update_form"
               data-bind="submit: update_locations"
               action="{% url 'efsw.archive:ajax_item_locations_post' object.id %}">
+        {% csrf_token %}
     {% endif %}
     <table class="table">
         <thead>
@@ -73,7 +74,6 @@
                         <td>{{ location_add_form.storage }}</td>
                         <td><span data-bind="text: selected_storage().base_url"></span> {{ location_add_form.location }}</td>
                         <td>
-                            {% csrf_token %}
                             <a href="#" title="Добавить запись" class="fa fa-lg fa-plus"
                                data-bind="click: add_location"></a>
                         </td>
