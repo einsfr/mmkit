@@ -1,6 +1,5 @@
 from django import forms
 from django.forms import widgets
-from django.core import urlresolvers
 
 from efsw.archive import models
 

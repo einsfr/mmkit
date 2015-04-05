@@ -1,9 +1,9 @@
 {% extends '_base.html' %}
 
-{% block title %}{{ block.super }} - Архив{% endblock %}
+{% block title %}{{ block.super }} - Планирование вещания{% endblock %}
 
 {% block content_wrapper %}
-    <ul class="nav nav-pills">
+    <!--<ul class="nav nav-pills">
         <li role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
                 Элементы <span class="caret"></span>
@@ -37,7 +37,7 @@
         <li role="presentation">
             <a href="{% url 'efsw.archive:search' %}" title="Поиск в архиве">Поиск</a>
         </li>
-    </ul>
+    </ul>-->
     {% block content %}{% endblock %}
 {% endblock %}
 

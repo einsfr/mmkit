@@ -4,3 +4,16 @@ a.fa:hover, a.fa:active, a.fa:focus {
 div.search-result h4 {
     margin-top: 2em;
 }
+
+#lineup_table {
+    table-layout: fixed;
+}
+
+#lineup_table td, #lineup_table th {
+    text-align: center;
+    vertical-align: top;
+}
+
+#lineup_table thead td {
+    width: 4em;
+}

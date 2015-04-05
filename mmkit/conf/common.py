@@ -26,6 +26,7 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
     'efsw.archive',
     'efsw.common',
+    'efsw.schedule'
 )
 
 MIDDLEWARE_CLASSES = (
