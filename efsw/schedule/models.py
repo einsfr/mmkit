@@ -1,6 +1,7 @@
 from django.db import models
 from django.core import urlresolvers
 
+
 class Lineup(models.Model):
 
     class Meta:
@@ -91,6 +92,7 @@ class Program(models.Model):
         except KeyError:
             return 'Ошибка: неизвестное значение ограничения по возрасту.'
 
+
 class ProgramPosition(models.Model):
 
     class Meta:
@@ -128,4 +130,14 @@ class ProgramPosition(models.Model):
     comment = models.CharField(
         verbose_name='комментарий',
         max_length=32
+    )
+
+    lineup = models.ForeignKey(
+        Lineup,
+        related_name='program_positions'
+    )
+
+    program = models.ForeignKey(
+        Program,
+        related_name='lineup_positions'
     )
