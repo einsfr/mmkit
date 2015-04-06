@@ -1,0 +1,26 @@
+{% load field_verbose_name from model %}
+
+{% if programs %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>{% field_verbose_name programs 'name' %}</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for program in programs %}
+                <tr>
+                    <td>{{ program.id }}</td>
+                    <td>{{ program.name }}</td>
+                    <td>
+                        <a href="{{ program.get_absolute_url }}" title="{{ program.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>&nbsp;
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    Программы не найдены
+{% endif %}

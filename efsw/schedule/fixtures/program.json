@@ -1,0 +1,38 @@
+[
+  {
+    "model": "schedule.Program",
+    "pk": 1,
+    "fields": {
+      "name": "Новости",
+      "lineup_size": "00:30:00",
+      "max_duration": "00:24:00",
+      "min_duration": "00:22:00",
+      "description": "Новости - это серьёзная и главная передача, без которой ничего бы не было.",
+      "age_limit": 12
+    }
+  },
+  {
+    "model": "schedule.Program",
+    "pk": 2,
+    "fields": {
+      "name": "Длинная интересная программа",
+      "lineup_size": "01:00:00",
+      "max_duration": "00:52:00",
+      "min_duration": "00:48:00",
+      "description": "Какой канал сможет обойтись без длинной и интересной программы?",
+      "age_limit": 6
+    }
+  },
+  {
+    "model": "schedule.Program",
+    "pk": 3,
+    "fields": {
+      "name": "Документальный фильм",
+      "lineup_size": "02:00:00",
+      "max_duration": "01:44:00",
+      "min_duration": "01:36:00",
+      "description": "В документальных фильмах, как правило, показывают много разных документов.",
+      "age_limit": 16
+    }
+  }
+]

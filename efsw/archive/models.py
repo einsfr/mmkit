@@ -291,4 +291,4 @@ class ItemLog(models.Model):
             for i in item:
                 cls._log_item_action(i, cls.ACTION_INCLUDE_UPDATE, request)
         else:
-            cls._log_item_action(i, cls.ACTION_INCLUDE_UPDATE, request)
+            cls._log_item_action(item, cls.ACTION_INCLUDE_UPDATE, request)

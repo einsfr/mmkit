@@ -1,0 +1,14 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Добавление программы{% endblock %}
+
+{% block content %}
+    <h1>Добавление программы</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        <table class="table">
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Добавить">
+    </form>
+{% endblock %}

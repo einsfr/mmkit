@@ -1,0 +1,42 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% load field_verbose_name from model %}
+
+{% block title %}{{ block.super }} - {{ program.get_absolute_url_title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ program.get_absolute_url_title }}</h1>
+    <h2>Свойства</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>ID</th>
+                <td>{{ program.id }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'name' %}</th>
+                <td>{{ program.name }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'description' %}</th>
+                <td>{{ program.description }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'age_limit' %}</th>
+                <td>{{ program.format_age_limit }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'lineup_size' %}</th>
+                <td>{{ program.lineup_size|time:"H:i:s" }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'max_duration' %}</th>
+                <td>{{ program.max_duration|time:"H:i:s" }}</td>
+            </tr>
+            <tr>
+                <th>{% field_verbose_name program 'min_duration' %}</th>
+                <td>{{ program.min_duration|time:"H:i:s" }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

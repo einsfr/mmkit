@@ -302,7 +302,6 @@ def storage_get(request):
         return JsonWithStatusResponse(format_storage_dict(storage))
 
 
-@csrf.csrf_exempt
 def search(request, page=1):
     es_cm = elastic.get_connection_manager()
     es = es_cm.get_es()

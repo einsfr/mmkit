@@ -3,41 +3,36 @@
 {% block title %}{{ block.super }} - Планирование вещания{% endblock %}
 
 {% block content_wrapper %}
-    <!--<ul class="nav nav-pills">
+    <ul class="nav nav-pills">
         <li role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
-                Элементы <span class="caret"></span>
+                Сетка вещания <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
                 <li role="presentation">
-                    <a href="{% url 'efsw.archive:item_list' %}" title="Список элементов">Список</a>
+                    <a href="{% url 'efsw.schedule:lineup_current' %}" title="Текущая сетка вещания">Текущая</a>
                 </li>
-                {% if perms.archive.add_item %}
-                    <li role="presentation">
-                        <a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a>
-                    </li>
-                {% endif %}
+                <li role="presentation">
+                    <a href="{% url 'efsw.schedule:lineup_list' %}" title="Список сеток вещания">Список</a>
+                </li>
             </ul>
         </li>
         <li role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
-                Категории <span class="caret"></span>
+                Программы <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
                 <li role="presentation">
-                    <a href="{% url 'efsw.archive:category_list' %}" title="Список категорий">Список</a>
+                    <a href="{% url 'efsw.schedule:program_list' %}" title="Список программ">Список</a>
                 </li>
-                {% if perms.archive.add_itemcategory %}
+                {% if perms.schedule.add_program %}
                     <li role="presentation">
-                        <a href="{% url 'efsw.archive:category_add' %}" title="Добавить категорию">Добавить</a>
+                        <a href="{% url 'efsw.schedule:program_add' %}" title="Добавить программу">Добавить</a>
                     </li>
                 {% endif %}
             </ul>
         </li>
-        <li role="presentation">
-            <a href="{% url 'efsw.archive:search' %}" title="Поиск в архиве">Поиск</a>
-        </li>
-    </ul>-->
+    </ul>
     {% block content %}{% endblock %}
 {% endblock %}
 

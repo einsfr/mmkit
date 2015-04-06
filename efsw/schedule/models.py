@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.core import urlresolvers
 
 class Lineup(models.Model):
 
@@ -78,6 +78,18 @@ class Program(models.Model):
         verbose_name='ограничение по возрасту'
     )
 
+    def get_absolute_url(self):
+        return urlresolvers.reverse('efsw.schedule:program_detail', args=(self.id, ))
+
+    @staticmethod
+    def get_absolute_url_title(self):
+        return 'Детали программы'
+
+    def format_age_limit(self):
+        try:
+            return self.AGE_LIMIT_DICT[self.age_limit]
+        except KeyError:
+            return 'Ошибка: неизвестное значение ограничения по возрасту.'
 
 class ProgramPosition(models.Model):
 
