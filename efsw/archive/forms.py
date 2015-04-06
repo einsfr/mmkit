@@ -10,6 +10,13 @@ class ItemCreateForm(forms.ModelForm):
     class Meta:
         model = models.Item
         fields = ('name', 'description', 'created', 'author', 'category')
+        widgets = {
+            'created': widgets.DateInput(
+                attrs={
+                    'id': 'created_date_input'
+                }
+            )
+        }
 
 
 class ItemUpdateForm(forms.ModelForm):
