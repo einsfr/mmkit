@@ -30,11 +30,12 @@
     <footer class="container text-center">
         Используется <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank" title="Font Awesome by Dave Gandy">Font Awesome</a>
     </footer>
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'vendor/knockout/knockout.js' %}"></script>
+    <script src="{% static 'vendor/jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-ui/i18n/datepicker-ru.js' %}"></script>
+    <script src="{% static 'script.js' %}"></script>
+    {% block footer_script %}{% endblock %}
 </body>
-<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'vendor/knockout/knockout.js' %}"></script>
-<script src="{% static 'vendor/jquery-ui/jquery-ui.min.js' %}"></script>
-<script src="{% static 'vendor/jquery-ui/i18n/datepicker-ru.js' %}"></script>
-{% block footer_script %}{% endblock %}
 </html>

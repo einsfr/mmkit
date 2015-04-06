@@ -61,6 +61,7 @@ def item_list_category(request, category='0', page='1'):
     return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
 
+@csrf.ensure_csrf_cookie
 def item_detail(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.select_related('category').prefetch_related('includes', 'included_in'),
@@ -169,7 +170,7 @@ def item_includes_post(request, item_id):
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
     try:
-        includes_ids = json.loads(request.POST.get('data', ''))['includes']
+        includes_ids = json.loads(request.POST.get('includes', ''))
     except [ValueError, KeyError]:
         return JsonWithStatusResponse(
             'Неверный формат запроса',
@@ -212,7 +213,7 @@ def item_locations_post(request, item_id):
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
     try:
-        locations = json.loads(request.POST.get('data', ''))['locations']
+        locations = json.loads(request.POST.get('locations', ''))
     except [ValueError, KeyError]:
         return JsonWithStatusResponse(
             'Неверный формат запроса',

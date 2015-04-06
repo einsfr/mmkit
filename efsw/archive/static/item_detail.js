@@ -60,34 +60,34 @@ function ItemDetailViewModel() {
                 self.includes.push(new Item(response.data));
             } else {
                 alert(response.data);
-                return;
             }
         });
     };
 
     self.update_includes = function() {
-        var form = $("#includes_update_form");
         $.ajax(
-            form.attr('action'),
+            $("#includes_update_form").data('update-url'),
             {
                 data: {
-                    csrfmiddlewaretoken: form.children("input[name='csrfmiddlewaretoken']").val(),
-                    data: ko.toJSON({
-                        includes: self.includes().map(function(i) {
+                    includes: ko.toJSON(
+                        self.includes().map(function(i) {
                             return i.id;
                         })
-                    })
+                    )
                 },
-                type: 'post',
-                success: function(result) {
-                    if (result.status == 'ok') {
-                        alert('Сохранено');
-                    } else {
-                        alert(result.data);
-                        return;
-                    }
+                method: 'post'
+            }
+        ).done(function(result) {
+                if (result.status == 'ok') {
+                    alert('Сохранено');
+                } else {
+                    alert(result.data);
                 }
-            });
+            }
+        ).fail(function(jqXHR, textStatus) {
+                alert('При сохранении возникла ошибка: ' + textStatus);
+            }
+        );
     };
 
     self.remove_location = function(location) {
@@ -118,32 +118,32 @@ function ItemDetailViewModel() {
             alert('Изменений не обнаружено');
             return;
         }
-        var form = $("#locations_update_form");
         $.ajax(
-            form.attr('action'),
+            $("#locations_update_form").data('update-url'),
             {
                 data: {
-                    csrfmiddlewaretoken: form.children("input[name='csrfmiddlewaretoken']").val(),
-                    data: ko.toJSON({
-                        locations: self.locations().map(function(i) {
+                    locations: ko.toJSON(
+                        self.locations().map(function(i) {
                             delete i.storage;
                             return i;
                         })
-                    })
+                    )
                 },
-                type: 'post',
-                success: function(result) {
-                    if (result.status == 'ok') {
-                        alert('Сохранено');
-                        self._get_locations();
-                    } else {
-                        alert(result.data);
-                        return;
-                    }
+                method: 'post'
+            }
+        ).done(function(result) {
+                if (result.status == 'ok') {
+                    alert('Сохранено');
+                    self._get_locations();
+                    self.locations_changed = false;
+                } else {
+                    alert(result.data);
                 }
             }
+        ).fail(function(jqXHR, textStatus) {
+                alert('При сохранении возникла ошибка: ' + textStatus);
+            }
         );
-        self.locations_changed = false;
     };
 
     self.storage_changed = function() {
