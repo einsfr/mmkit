@@ -164,25 +164,25 @@ def item_show(request, item_id):
     })
 
 
-def item_show_json(request, item_id):
+def item_show_json(request):
     pass
 
 
-def item_includes_list_json(request, item_id):
-    pass
-
-
-@http.require_POST
-def item_includes_update_json(request, item_id):
-    pass
-
-
-def item_locations_list_json(request, item_id):
+def item_includes_list_json(request):
     pass
 
 
 @http.require_POST
-def item_locations_update_json(request, item_id):
+def item_includes_update_json(request):
+    pass
+
+
+def item_locations_list_json(request):
+    pass
+
+
+@http.require_POST
+def item_locations_update_json(request):
     pass
 
 
@@ -221,31 +221,65 @@ def item_update(request, item_id):
 # ------------------------- ItemCategory -------------------------
 
 
+def category_list(request):
+    categories = models.ItemCategory.objects.all().order_by('name')
+    return shortcuts.render(request, 'archive/category_list.html', {
+        'categories': categories,
+    })
 
 
+@http.require_GET
+def category_new(request):
+    form = forms.ItemCategoryForm()
+    return shortcuts.render(request, 'archive/category_new.html', {'form': form})
 
 
+@http.require_POST
+def category_create(request):
+    form = forms.ItemCategoryForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return shortcuts.redirect(urlresolvers.reverse('efsw.archive:category:list'))
+    else:
+        return shortcuts.render(request, 'archive/category_new.html', {'form': form})
 
 
-
-
-
-
-
-
-
-def category_items_list(request, category='0', page='1'):
-    try:
-        category_id = int(category)
-    except ValueError:
-        category_id = 0
-    if category_id == 0:
-        return item_list(request, page)
+def category_items_list(request, category_id, page='1'):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     items_all = cat.items.all().order_by('-pk')
     items_page = _get_item_list_page(items_all, page)
-    return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
+    return shortcuts.render(request, 'archive/category_items_list.html', {
+        'items': items_page,
+        'category': cat
+    })
 
+
+@http.require_GET
+def category_edit(request, category_id):
+    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
+    form = forms.ItemCategoryForm(request.POST, instance=cat)
+    return shortcuts.render(request, 'archive/category_edit.html', {'form': form})
+
+
+@http.require_POST
+def category_update(request, category_id):
+    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
+    form = forms.ItemCategoryForm(request.POST, instance=cat)
+    if form.is_valid():
+        form.save()
+        return shortcuts.redirect(urlresolvers.reverse('efsw.archive:category:list'))
+    else:
+        return shortcuts.render(request, 'archive/category_edit.html', {'form': form})
+
+
+# ------------------------- Storage -------------------------
+
+
+
+
+
+
+# ------------------------- Старые -------------------------
 
 @http.require_http_methods(["GET"])
 def item_includes_get(request, item_id):
@@ -362,18 +396,6 @@ def item_locations_post(request, item_id):
                 JsonWithStatusResponse.STATUS_ERROR
             )
     return JsonWithStatusResponse()
-
-
-class CategoryListView(generic.ListView):
-    queryset = models.ItemCategory.objects.all().order_by('name')
-    template_name = 'archive/category_list.html'
-
-
-class CategoryAddView(generic.CreateView):
-    model = models.ItemCategory
-    template_name = 'archive/category_form_create.html'
-    form_class = forms.ItemCategoryForm
-    success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
 
 
 class CategoryUpdateView(generic.UpdateView):
