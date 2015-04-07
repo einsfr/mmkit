@@ -42,27 +42,104 @@ def _get_item_list_page(items, page):
     return _get_item_page(items, page, per_page)
 
 
+def _get_json_item_not_found(item_id):
+    return JsonWithStatusResponse(
+        'Ошибка: элемент с ID "{0}" не существует'.format(item_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+# ------------------------- Общие -------------------------
+
+
+def search(request):
+    es_cm = elastic.get_connection_manager()
+    es = es_cm.get_es()
+    es_status = es_cm.get_es_status()
+    if es is None or (es_status != 'yellow' and es_status != 'green'):
+        return shortcuts.render(request, 'archive/search_offline.html', status=500)
+
+    form = forms.ArchiveSearchForm(request.GET)
+    if form.is_valid():
+        sq = EsSearchQuery(es_cm, 'efswarchitem', 'item')
+        if not form.cleaned_data['q'] and not form.cleaned_data['c'] and not form.cleaned_data['p']:
+            return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
+        query = form.cleaned_data['q']
+        if query:
+            sq.query_multi_match(str(query), ['name', 'description', 'author'])
+        order = form.cleaned_data['o']
+        if order == forms.ArchiveSearchForm.ORDER_BY_CREATED_ASC:
+            sq.sort_field('created')
+        elif order == forms.ArchiveSearchForm.ORDER_BY_CREATED_DESC:
+            sq.sort_field('created', sq.ORDER_DESC)
+        categories = form.cleaned_data['c']
+        try:
+            date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
+        except (period.PeriodDoesNotExist, ValueError):
+            date_period = None
+        if categories:
+            sq.filter_terms('category', [x.id for x in categories])
+        if date_period:
+            sq.filter_range('created', gte=date_period[0].isoformat(), lte=date_period[1].isoformat())
+        search_size = getattr(
+            settings,
+            'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
+            common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
+        )
+        sq.from_size(size_param=search_size)
+        result = sq.get_result()
+        hits = result['hits']
+        if hits['total']:
+            hits_ids = [h['_id'] for h in hits['hits']]
+            items_dict = dict(
+                map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids).select_related('category'))
+            )
+            items = list(filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids]))
+        else:
+            items = None
+        return shortcuts.render(
+            request,
+            'archive/search.html',
+            {
+                'form': form,
+                'items': items,
+                'hits': hits['total'],
+                'search_size': search_size,
+                'search_performed': True
+            }
+        )
+    else:
+        return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
+
+
+# ------------------------- Item -------------------------
+
+
 def item_list(request, page='1'):
     items_all = models.Item.objects.all().order_by('-pk').select_related('category')
     items_page = _get_item_list_page(items_all, page)
     return shortcuts.render(request, 'archive/item_list.html', {'items': items_page})
 
 
-def item_list_category(request, category='0', page='1'):
-    try:
-        category_id = int(category)
-    except ValueError:
-        category_id = 0
-    if category_id == 0:
-        return item_list(request, page)
-    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
-    items_all = cat.items.all().order_by('-pk')
-    items_page = _get_item_list_page(items_all, page)
-    return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
+@http.require_GET
+def item_new(request):
+    form = forms.ItemCreateForm()
+    return shortcuts.render(request, 'archive/item_new.html', {'form': form})
+
+
+@http.require_POST
+def item_create(request):
+    form = forms.ItemCreateForm(request.POST)
+    if form.is_valid():
+        item = form.save()
+        models.ItemLog.log_item_add(item, request)
+        return shortcuts.redirect(item.get_absolute_url())
+    else:
+        return shortcuts.render(request, 'archive/item_new.html', {'form': form})
 
 
 @csrf.ensure_csrf_cookie
-def item_detail(request, item_id):
+def item_show(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.select_related('category').prefetch_related('includes', 'included_in'),
         pk=item_id
@@ -79,7 +156,7 @@ def item_detail(request, item_id):
     else:
         log_msgs = item.log.order_by('-pk').all().select_related('user')[0:3]
         has_more_log_msgs = True
-    return shortcuts.render(request, 'archive/item_detail.html', {
+    return shortcuts.render(request, 'archive/item_show.html', {
         'object': item,
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
@@ -87,12 +164,34 @@ def item_detail(request, item_id):
     })
 
 
-def item_log(request, item_id):
+def item_show_json(request, item_id):
+    pass
+
+
+def item_includes_list_json(request, item_id):
+    pass
+
+
+@http.require_POST
+def item_includes_update_json(request, item_id):
+    pass
+
+
+def item_locations_list_json(request, item_id):
+    pass
+
+
+@http.require_POST
+def item_locations_update_json(request, item_id):
+    pass
+
+
+def item_logs_list(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
     log_msgs = item.log.order_by('-pk').all()
     return shortcuts.render(
         request,
-        'archive/item_log.html',
+        'archive/item_logs_list.html',
         {
             'item': item,
             'log_msgs': log_msgs,
@@ -100,36 +199,52 @@ def item_log(request, item_id):
     )
 
 
-def item_add(request):
-    if request.method == 'POST':
-        form = forms.ItemCreateForm(request.POST)
-        if form.is_valid():
-            item = form.save()
-            models.ItemLog.log_item_add(item, request)
-            return shortcuts.redirect(item.get_absolute_url())
-    else:
-        form = forms.ItemCreateForm()
-    return shortcuts.render(request, 'archive/item_form_create.html', {'form': form})
+@http.require_GET
+def item_edit(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    form = forms.ItemUpdateForm(instance=item)
+    return shortcuts.render(request, 'archive/item_edit.html', {'form': form})
 
 
+@http.require_POST
 def item_update(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    if request.method == 'POST':
-        form = forms.ItemUpdateForm(request.POST, instance=item)
-        if form.is_valid():
-            item = form.save()
-            models.ItemLog.log_item_update(item, request)
-            return shortcuts.redirect(item.get_absolute_url())
+    form = forms.ItemUpdateForm(request.POST, instance=item)
+    if form.is_valid():
+        item = form.save()
+        models.ItemLog.log_item_update(item, request)
+        return shortcuts.redirect(item.get_absolute_url())
     else:
-        form = forms.ItemUpdateForm(instance=item)
-    return shortcuts.render(request, 'archive/item_form_update.html', {'form': form})
+        return shortcuts.render(request, 'archive/item_edit.html', {'form': form})
 
 
-def _get_json_item_not_found(item_id):
-    return JsonWithStatusResponse(
-        'Ошибка: элемент с ID "{0}" не существует'.format(item_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
+# ------------------------- ItemCategory -------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def category_items_list(request, category='0', page='1'):
+    try:
+        category_id = int(category)
+    except ValueError:
+        category_id = 0
+    if category_id == 0:
+        return item_list(request, page)
+    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
+    items_all = cat.items.all().order_by('-pk')
+    items_page = _get_item_list_page(items_all, page)
+    return shortcuts.render(request, 'archive/item_list_category.html', {'items': items_page, 'category': cat})
 
 
 @http.require_http_methods(["GET"])
@@ -301,63 +416,3 @@ def storage_get(request):
         except models.Storage.DoesNotExist:
             return _get_json_storage_not_found(storage_id)
         return JsonWithStatusResponse(format_storage_dict(storage))
-
-
-def search(request, page=1):
-    es_cm = elastic.get_connection_manager()
-    es = es_cm.get_es()
-    es_status = es_cm.get_es_status()
-    if es is None or (es_status != 'yellow' and es_status != 'green'):
-        return shortcuts.render(request, 'archive/search_offline.html', status=500)
-
-    form = forms.ArchiveSearchForm(request.GET)
-    if form.is_valid():
-        sq = EsSearchQuery(es_cm, 'efswarchitem', 'item')
-        if not form.cleaned_data['q'] and not form.cleaned_data['c'] and not form.cleaned_data['p']:
-            return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
-        query = form.cleaned_data['q']
-        if query:
-            sq.query_multi_match(str(query), ['name', 'description', 'author'])
-        order = form.cleaned_data['o']
-        if order == forms.ArchiveSearchForm.ORDER_BY_CREATED_ASC:
-            sq.sort_field('created')
-        elif order == forms.ArchiveSearchForm.ORDER_BY_CREATED_DESC:
-            sq.sort_field('created', sq.ORDER_DESC)
-        categories = form.cleaned_data['c']
-        try:
-            date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
-        except (period.PeriodDoesNotExist, ValueError):
-            date_period = None
-        if categories:
-            sq.filter_terms('category', [x.id for x in categories])
-        if date_period:
-            sq.filter_range('created', gte=date_period[0].isoformat(), lte=date_period[1].isoformat())
-        search_size = getattr(
-            settings,
-            'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
-            common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
-        )
-        sq.from_size(size_param=search_size)
-        result = sq.get_result()
-        hits = result['hits']
-        if hits['total']:
-            hits_ids = [h['_id'] for h in hits['hits']]
-            items_dict = dict(
-                map(lambda x: (str(x.id), x), models.Item.objects.filter(id__in=hits_ids).select_related('category'))
-            )
-            items = list(filter(lambda x: x is not None, [items_dict.get(x) for x in hits_ids]))
-        else:
-            items = None
-        return shortcuts.render(
-            request,
-            'archive/search.html',
-            {
-                'form': form,
-                'items': items,
-                'hits': hits['total'],
-                'search_size': search_size,
-                'search_performed': True
-            }
-        )
-    else:
-        return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
