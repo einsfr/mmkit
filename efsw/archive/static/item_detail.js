@@ -6,7 +6,6 @@ function Item(data) {
     this.id = data.id;
     this.name = data.name;
     this.url = data.url;
-    this.url_title = data.url_title;
 }
 
 function ItemLocation(data) {
@@ -159,7 +158,7 @@ function ItemDetailViewModel() {
     };
 
     self._get_locations = function() {
-        $.getJSON(urls.item_locations_get(), function(response) {
+        $.getJSON(urls.item_locations_list_json(), function(response) {
             if (response.status == 'ok') {
                 var mapped_locations = $.map(response.data, function(location) {
                     return new ItemLocation(location);
@@ -171,16 +170,19 @@ function ItemDetailViewModel() {
         });
     };
 
-    $.getJSON(urls.item_includes_get(), function(response) {
-        if (response.status == 'ok') {
-            var mapped_includes = $.map(response.data, function(item) {
-                return new Item(item);
-            });
-            self.includes(mapped_includes);
-        } else {
-            alert(response.data);
-        }
-    });
+    self._get_includes = function() {
+        $.getJSON(urls.item_includes_list_json(), function(response) {
+            if (response.status == 'ok') {
+                var mapped_includes = $.map(response.data, function(item) {
+                    return new Item(item);
+                });
+                self.includes(mapped_includes);
+            } else {
+                alert(response.data);
+            }
+        });
+    };
 
     self._get_locations();
+    self._get_includes();
 }

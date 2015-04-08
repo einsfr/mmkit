@@ -164,12 +164,25 @@ def item_show(request, item_id):
     })
 
 
-def item_show_json(request):
-    pass
-
-
 def item_includes_list_json(request):
-    pass
+
+    def _format_item_dict(i):
+        return {
+            'id': i.id,
+            'name': i.name,
+            'url': i.get_absolute_url(),
+        }
+
+    item_id = request.GET.get('id', None)
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    includes_list = [
+        _format_item_dict(i)
+        for i in item.includes.all()
+    ]
+    return JsonWithStatusResponse(includes_list)
 
 
 @http.require_POST
@@ -178,7 +191,29 @@ def item_includes_update_json(request):
 
 
 def item_locations_list_json(request):
-    pass
+
+    def _format_location_dict(l):
+        d = {
+            'id': l.id,
+            'storage': l.storage.name,
+            'storage_id': l.storage.id,
+        }
+        if l.storage.is_online_type():
+            d['location'] = l.get_url().format_win()
+        else:
+            d['location'] = l.location
+        return d
+
+    item_id = request.GET.get('id', None)
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    locations_list = [
+        _format_location_dict(l)
+        for l in item.locations.all().select_related('storage')
+    ]
+    return JsonWithStatusResponse(locations_list)
 
 
 @http.require_POST
@@ -280,38 +315,6 @@ def category_update(request, category_id):
 
 
 # ------------------------- Старые -------------------------
-
-@http.require_http_methods(["GET"])
-def item_includes_get(request, item_id):
-
-    def format_item_dict(i):
-        return {
-            'id': i.id,
-            'name': i.name,
-            'url': i.get_absolute_url(),
-            'url_title': i.get_absolute_url_title(),
-        }
-
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    include_id = request.GET.get('id', None)
-    if include_id is None:
-        includes_list = [
-            format_item_dict(i)
-            for i in item.includes.all()
-        ]
-        return JsonWithStatusResponse(includes_list)
-    else:
-        try:
-            include_item = models.Item.objects.get(pk=include_id)
-        except models.Item.DoesNotExist:
-            return _get_json_item_not_found(include_id)
-        include_dict = format_item_dict(include_item)
-        return JsonWithStatusResponse(include_dict)
-
-
 @http.require_http_methods(["POST"])
 def item_includes_post(request, item_id):
     try:
@@ -331,28 +334,6 @@ def item_includes_post(request, item_id):
         includes = models.Item.objects.filter(id__in=includes_ids)
         item.includes.add(*includes)
     return JsonWithStatusResponse()
-
-
-@http.require_http_methods(["GET"])
-def item_locations_get(request, item_id):
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    locations = item.locations.all().select_related('storage')
-    response = []
-    for l in locations:
-        d = {
-            'id': l.id,
-            'storage': l.storage.name,
-            'storage_id': l.storage.id,
-        }
-        if l.storage.is_online_type():
-            d['location'] = l.get_url().format_win()
-        else:
-            d['location'] = l.location
-        response.append(d)
-    return JsonWithStatusResponse(response)
 
 
 @http.require_http_methods(["POST"])

@@ -18,7 +18,7 @@
                 <a class="navbar-brand fa fa-home fa-2x" href="/" title="Домашняя страница">&nbsp;</a>
             </div>
             <ul class="nav navbar-nav">
-                <li><a href="{% url 'efsw.archive:item_list' %}" title="Главная страница архива">Архив</a></li>
+                <li><a href="{% url 'efsw.archive:item:list' %}" title="Главная страница архива">Архив</a></li>
                 <li><a href="{% url 'efsw.schedule:lineup_current' %}" title="Планирование вещания - Главная страница">Планирование</a></li>
             </ul>
             {% accountmenu %}

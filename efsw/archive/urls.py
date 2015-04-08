@@ -80,13 +80,6 @@ urlpatterns = [
                 ])
             ),
             # ------------------------- JSON -------------------------
-            # items/show/json/?id=12 Описание одного элемента (JSON)
-            # ( - )
-            url(
-                r'^show/json/$',
-                views.item_show_json,
-                name='show_json'
-            ),
             # items/includes/list/json/?id=12 Включаемые элементы (JSON)
             # ( - )
             url(
@@ -101,6 +94,13 @@ urlpatterns = [
                 permission_required('archive.change_item')(views.item_includes_update_json),
                 name='includes_update_json'
             ),
+            # items/locations/update/json/?id=12 Положение этого элемента в хранилищах (JSON)
+            # ( - )
+            url(
+                r'^locations/list/json/$',
+                views.item_locations_update_json,
+                name='locations_list_json'
+            ),
             # items/locations/update/json/?id=12 Положение этого элемента в хранилищах - обновление (JSON, POST)
             # ( - )
             url(
@@ -110,6 +110,7 @@ urlpatterns = [
             ),
         ], namespace='item')
     ),
+    # ------------------------- ItemCategory -------------------------
     # categories/
     url(
         r'^categories/',
@@ -118,7 +119,7 @@ urlpatterns = [
             # ( Список категорий )
             url(
                 r'^list/$',
-                views.CategoryListView.as_view(),
+                views.category_list,
                 name='list'
             ),
             # categories/new/ Добавление новой категории - форма (GET)
@@ -171,18 +172,21 @@ urlpatterns = [
             ),
         ], namespace='category')
     ),
+    # ------------------------- Storage -------------------------
     # storages/
+    '''
     url(
         r'^storages/',
         include([
             # ------------------------- JSON -------------------------
-            # storages/list/json/ Список всех хранилищ (JSON)
+            # storages/show/json/ Описание одного хранилища (JSON)
             # ( - )
             url(
-                r'^list/json/$',
-                views.storage_list_json,
-                name='storage_list_json'
+                r'^show/json/$',
+                views.storage_show_json,
+                name='show_json'
             ),
-        ])
+        ], namespace='storage')
     )
+    '''
 ]

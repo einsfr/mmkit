@@ -14,7 +14,7 @@
                 </li>
                 {% if perms.archive.add_item %}
                     <li role="presentation">
-                        <a href="{% url 'efsw.archive:item_add' %}" title="Добавить элемент">Добавить</a>
+                        <a href="{% url 'efsw.archive:item_add' %}" title="Добавление нового элемента">Добавить</a>
                     </li>
                 {% endif %}
             </ul>
@@ -29,13 +29,13 @@
                 </li>
                 {% if perms.archive.add_itemcategory %}
                     <li role="presentation">
-                        <a href="{% url 'efsw.archive:category_add' %}" title="Добавить категорию">Добавить</a>
+                        <a href="{% url 'efsw.archive:category_add' %}" title="Добавление новой категории">Добавить</a>
                     </li>
                 {% endif %}
             </ul>
         </li>
         <li role="presentation">
-            <a href="{% url 'efsw.archive:search' %}" title="Поиск в архиве">Поиск</a>
+            <a href="{% url 'efsw.archive:search' %}" title="Поиск по архиву">Поиск</a>
         </li>
     </ul>
     {% block content %}{% endblock %}
