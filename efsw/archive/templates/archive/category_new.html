@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Добавление категории</h1>
-    <form action="" method="post">
+    <form action="{% url 'efsw.archive:category:create' %}" method="post">
         {% csrf_token %}
         <table class="table">
             {{ form.as_table }}

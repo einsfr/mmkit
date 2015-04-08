@@ -9,7 +9,7 @@
     {% include 'archive/_item_list_table.html' %}
     {% if items %}
         <nav class="text-center">
-            {% pagination items 'efsw.archive:item_list_category_page' category=category.id %}
+            {% pagination items 'efsw.archive:category:items_list_page' category_id=category.id %}
         </nav>
     {% endif %}
 {% endblock %}

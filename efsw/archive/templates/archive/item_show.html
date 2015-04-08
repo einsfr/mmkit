@@ -7,32 +7,32 @@
 
 {% block content %}
     <h1>Описание элемента</h1>
-    <h2>Свойства {% if perms.archive.change_item %}<small><a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a></small>{% endif %}</h2>
+    <h2>Свойства {% if perms.archive.change_item %}<small><a href="{% url 'efsw.archive:item:edit' item.id %}" title="Редактирование элемента" class="fa fa-edit"></a></small>{% endif %}</h2>
     <table class="table">
         <tbody>
             <tr>
                 <th>ID</th>
-                <td>{{ object.id }}</td>
+                <td>{{ item.id }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name object 'created' %}</th>
-                <td>{{ object.created }}</td>
+                <th>{% field_verbose_name item 'created' %}</th>
+                <td>{{ item.created }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name object 'category' %}</th>
-                <td>{{ object.category.name }}</td>
+                <th>{% field_verbose_name item 'category' %}</th>
+                <td>{{ item.category.name }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name object 'name' %}</th>
-                <td>{{ object.name }}</td>
+                <th>{% field_verbose_name item 'name' %}</th>
+                <td>{{ item.name }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name object 'description' %}</th>
-                <td>{{ object.description }}</td>
+                <th>{% field_verbose_name item 'description' %}</th>
+                <td>{{ item.description }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name object 'author' %}</th>
-                <td>{{ object.author }}</td>
+                <th>{% field_verbose_name item 'author' %}</th>
+                <td>{{ item.author }}</td>
             </tr>
         </tbody>
     </table>
@@ -86,9 +86,9 @@
             <tr>
                 <th>Входит в</th>
                 <td>
-                    {% if object.included_in.all %}
+                    {% if item.included_in.all %}
                         <ul class="list-group">
-                            {% for item in object.included_in.all %}
+                            {% for item in item.included_in.all %}
                                 <li class="list-group-item"><a href="{{ item.get_absolute_url }}"
                                        title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></li>
                             {% endfor %}
@@ -143,7 +143,7 @@
                 {% endfor %}
                 {% if has_more_log_msgs %}
                     <tr><td colspan="3" class="text-center">
-                        <a href="{% url 'efsw.archive:item_log' object.id %}" title="Посмотреть все записи">Посмотреть все записи</a>
+                        <a href="{% url 'efsw.archive:item_log' item.id %}" title="Посмотреть все записи">Посмотреть все записи</a>
                     </td></tr>
                 {% endif %}
             {% else %}
@@ -158,19 +158,22 @@
     <script type="text/javascript">
         var urls = {
             item_locations_list_json: function() {
-                return '{% url 'efsw.archive:item_locations_list_json' %}?id={{ object.id }}';
+                return '{% url 'efsw.archive:item:locations_list_json' %}?id={{ item.id }}';
             },
             item_locations_update_json: function() {
-                return '{% url 'efsw.archive:item_locations_update_json' %}?id={{ object.id }}';
+                return '{% url 'efsw.archive:item:locations_update_json' %}?id={{ item.id }}';
             },
             item_includes_list_json: function() {
-                return '{% url 'efsw.archive:item_includes_list_json' %}?id={{ object.id }}';
+                return '{% url 'efsw.archive:item:includes_list_json' %}?id={{ item.id }}';
+            },
+            item_includes_check_json: function() {
+                return '{% url 'efsw.archive:item:includes_check_json' %}?id={{ item.id }}';
             },
             item_includes_update_json: function() {
-                return '{% url 'efsw.archive:item_includes_update_json' %}?id={{ object.id }}';
+                return '{% url 'efsw.archive:item:includes_update_json' %}?id={{ item.id }}';
             },
             storage_show_json: function() {
-                return '{% url 'efsw.archive:storage_show_json' %}';
+                return '{% url 'efsw.archive:storage:show_json' %}';
             }
         };
     </script>

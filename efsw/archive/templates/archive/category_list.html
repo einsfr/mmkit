@@ -5,16 +5,16 @@
 {% block content %}
     <h1>Список категорий</h1>
     <ul class="list-group">
-        {% for object in object_list %}
+        {% for cat in categories %}
             <li class="list-group-item">
-                <span class="badge">{{ object.items.count }}</span>
-                {% if object.items.count %}
-                    <a href="{% url 'efsw.archive:item_list_category' object.id %}"
-                       title="Список элементов в этой категории">{{ object.name }}</a>
+                <span class="badge">{{ cat.items.count }}</span>
+                {% if cat.items.count %}
+                    <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
+                       title="Список элементов в категории">{{ cat.name }}</a>
                 {% else %}
-                    {{ object.name }}
+                    {{ cat.name }}
                 {% endif %}
-                {% if perms.archive.change_itemcategory %}<a href="{{ object.get_update_url }}" title="{{ object.get_update_url_title }}" class="fa fa-edit"></a>{% endif %}
+                {% if perms.archive.change_itemcategory %}<a href="{% url 'efsw.archive:category:edit' cat.id %} }}" title="Список элементов в категории" class="fa fa-edit"></a>{% endif %}
             </li>
         {% empty %}
             Категории не найдены

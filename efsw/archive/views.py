@@ -1,6 +1,5 @@
 import json
 
-from django.views import generic
 from django import shortcuts
 from django.core import paginator
 from django.views.decorators import http
@@ -45,6 +44,21 @@ def _get_item_list_page(items, page):
 def _get_json_item_not_found(item_id):
     return JsonWithStatusResponse(
         'Ошибка: элемент с ID "{0}" не существует'.format(item_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def _format_item_dict(i):
+    return {
+        'id': i.id,
+        'name': i.name,
+        'url': i.get_absolute_url(),
+    }
+
+
+def _get_json_storage_not_found(storage_id):
+    return JsonWithStatusResponse(
+        'Ошибка: хранилище с ID "{0}" не существует'.format(storage_id),
         JsonWithStatusResponse.STATUS_ERROR
     )
 
@@ -157,7 +171,7 @@ def item_show(request, item_id):
         log_msgs = item.log.order_by('-pk').all().select_related('user')[0:3]
         has_more_log_msgs = True
     return shortcuts.render(request, 'archive/item_show.html', {
-        'object': item,
+        'item': item,
         'log_msgs': log_msgs,
         'has_more_log_msgs': has_more_log_msgs,
         'location_add_form': forms.ItemUpdateAddStorageForm()
@@ -165,14 +179,6 @@ def item_show(request, item_id):
 
 
 def item_includes_list_json(request):
-
-    def _format_item_dict(i):
-        return {
-            'id': i.id,
-            'name': i.name,
-            'url': i.get_absolute_url(),
-        }
-
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -185,9 +191,46 @@ def item_includes_list_json(request):
     return JsonWithStatusResponse(includes_list)
 
 
+def item_includes_check_json(request):
+    item_id = request.GET.get('id', None)
+    include_id = request.GET.get('include_id', None)
+    try:
+        if int(item_id) == int(include_id):
+            return JsonWithStatusResponse(
+                'Элемент не может быть включён сам в себя',
+                JsonWithStatusResponse.STATUS_ERROR
+            )
+    except ValueError:
+        return JsonWithStatusResponse(
+            'Идентификатор должен быть целым числом'
+        )
+    try:
+        include_item = models.Item.objects.get(pk=include_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(include_id)
+    return JsonWithStatusResponse(_format_item_dict(include_item))
+
+
 @http.require_POST
 def item_includes_update_json(request):
-    pass
+    item_id = request.GET.get('id', None)
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    try:
+        includes_ids = json.loads(request.POST.get('includes', ''))
+    except [ValueError, KeyError]:
+        return JsonWithStatusResponse(
+            'Неверный формат запроса',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    item.includes.clear()
+    # TODO Нужно определить, какие элементы изменяются и внести в лог соответствующие записи
+    if len(includes_ids) > 0:
+        includes = models.Item.objects.filter(id__in=includes_ids)
+        item.includes.add(*includes)
+    return JsonWithStatusResponse()
 
 
 def item_locations_list_json(request):
@@ -218,7 +261,46 @@ def item_locations_list_json(request):
 
 @http.require_POST
 def item_locations_update_json(request):
-    pass
+    item_id = request.GET.get('id', None)
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    try:
+        locations = json.loads(request.POST.get('locations', ''))
+    except [ValueError, KeyError]:
+        return JsonWithStatusResponse(
+            'Неверный формат запроса',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    if len(locations) == 0:
+        models.ItemLocation.objects.filter(item=item).delete()
+        return JsonWithStatusResponse()
+    storage_ids = set([l['storage_id'] for l in locations])
+    storages = models.Storage.objects.filter(id__in=storage_ids)
+    if len(storage_ids) != len(storages):
+        return JsonWithStatusResponse(
+            'Используется несуществующее хранилище',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
+    storages_dict = dict([(s.id, s) for s in storages])
+    leftover_locations = [l['id'] for l in locations if l['id']]
+    models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
+    for l in locations:
+        if l['id'] != 0:
+            continue
+        l_obj = models.ItemLocation()
+        l_obj.storage = storages_dict[l['storage_id']]
+        l_obj.item = item
+        l_obj.location = l['location']
+        try:
+            l_obj.save()
+        except IntegrityError:
+            return JsonWithStatusResponse(
+                'Элемент не может иметь несколько расположений в одном хранилище',
+                JsonWithStatusResponse.STATUS_ERROR
+            )
+    return JsonWithStatusResponse()
 
 
 def item_logs_list(request, item_id):
@@ -310,90 +392,7 @@ def category_update(request, category_id):
 # ------------------------- Storage -------------------------
 
 
-
-
-
-
-# ------------------------- Старые -------------------------
-@http.require_http_methods(["POST"])
-def item_includes_post(request, item_id):
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    try:
-        includes_ids = json.loads(request.POST.get('includes', ''))
-    except [ValueError, KeyError]:
-        return JsonWithStatusResponse(
-            'Неверный формат запроса',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
-    item.includes.clear()
-    # TODO Нужно определить, какие элементы изменяются и внести в лог соответствующие записи
-    if len(includes_ids) > 0:
-        includes = models.Item.objects.filter(id__in=includes_ids)
-        item.includes.add(*includes)
-    return JsonWithStatusResponse()
-
-
-@http.require_http_methods(["POST"])
-def item_locations_post(request, item_id):
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    try:
-        locations = json.loads(request.POST.get('locations', ''))
-    except [ValueError, KeyError]:
-        return JsonWithStatusResponse(
-            'Неверный формат запроса',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
-    if len(locations) == 0:
-        models.ItemLocation.objects.filter(item=item).delete()
-        return JsonWithStatusResponse()
-    storage_ids = set([l['storage_id'] for l in locations])
-    storages = models.Storage.objects.filter(id__in=storage_ids)
-    if len(storage_ids) != len(storages):
-        return JsonWithStatusResponse(
-            'Используется несуществующее хранилище',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
-    storages_dict = dict([(s.id, s) for s in storages])
-    leftover_locations = [l['id'] for l in locations if l['id']]
-    models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
-    for l in locations:
-        if l['id'] != 0:
-            continue
-        l_obj = models.ItemLocation()
-        l_obj.storage = storages_dict[l['storage_id']]
-        l_obj.item = item
-        l_obj.location = l['location']
-        try:
-            l_obj.save()
-        except IntegrityError:
-            return JsonWithStatusResponse(
-                'Элемент не может иметь несколько расположений в одном хранилище',
-                JsonWithStatusResponse.STATUS_ERROR
-            )
-    return JsonWithStatusResponse()
-
-
-class CategoryUpdateView(generic.UpdateView):
-    model = models.ItemCategory
-    template_name = 'archive/category_form_update.html'
-    form_class = forms.ItemCategoryForm
-    success_url = urlresolvers.reverse_lazy('efsw.archive:category_list')
-
-
-def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse(
-        'Ошибка: хранилище с ID "{0}" не существует'.format(storage_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
-
-
-def storage_get(request):
+def storage_show_json(request):
 
     def format_storage_dict(s):
         return_dict = {
@@ -408,14 +407,8 @@ def storage_get(request):
         return return_dict
 
     storage_id = request.GET.get('id', None)
-    if storage_id is None:
-        return JsonWithStatusResponse([
-            format_storage_dict(s)
-            for s in models.Storage.objects.all()
-        ])
-    else:
-        try:
-            storage = models.Storage.objects.get(pk=storage_id)
-        except models.Storage.DoesNotExist:
-            return _get_json_storage_not_found(storage_id)
-        return JsonWithStatusResponse(format_storage_dict(storage))
+    try:
+        storage = models.Storage.objects.get(pk=storage_id)
+    except models.Storage.DoesNotExist:
+        return _get_json_storage_not_found(storage_id)
+    return JsonWithStatusResponse(format_storage_dict(storage))

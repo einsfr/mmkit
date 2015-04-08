@@ -45,7 +45,7 @@ function ItemDetailViewModel() {
 
     self.add_include = function() {
         if (isNaN(self.include_item_id())) {
-            alert('Идентификатор должен быть числом');
+            alert('Идентификатор должен быть целым числом');
             return;
         }
         if (self.includes().some(function(i) {
@@ -54,7 +54,7 @@ function ItemDetailViewModel() {
             alert('Элемент уже включён в список');
             return;
         }
-        $.getJSON(urls.item_includes_get(), {id: self.include_item_id()}, function(response) {
+        $.getJSON(urls.item_includes_check_json(), {include_id: self.include_item_id()}, function(response) {
             if (response.status == 'ok') {
                 self.includes.push(new Item(response.data));
             } else {
@@ -65,7 +65,7 @@ function ItemDetailViewModel() {
 
     self.update_includes = function() {
         $.ajax(
-            $("#includes_update_form").data('update-url'),
+            urls.item_includes_update_json(),
             {
                 data: {
                     includes: ko.toJSON(
@@ -118,7 +118,7 @@ function ItemDetailViewModel() {
             return;
         }
         $.ajax(
-            $("#locations_update_form").data('update-url'),
+            urls.item_locations_update_json(),
             {
                 data: {
                     locations: ko.toJSON(
@@ -147,7 +147,7 @@ function ItemDetailViewModel() {
 
     self.storage_changed = function() {
         if (self.storage_id() && !isNaN(self.storage_id())) {
-            $.getJSON(urls.storages_get(), { id: self.storage_id() }, function(response) {
+            $.getJSON(urls.storage_show_json(), { id: self.storage_id() }, function(response) {
                 if (response.status == 'ok') {
                     self.selected_storage(new ItemStorage(response.data));
                 } else {

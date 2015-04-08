@@ -27,9 +27,6 @@ class ItemCategory(models.Model):
     def __str__(self):
         return self.name
 
-    def get_update_url(self):
-        return urlresolvers.reverse('efsw.archive:category_update', args=(self.id, ))
-
     @staticmethod
     def get_update_url_title():
         return 'Редактировать категорию'
@@ -77,18 +74,7 @@ class Item(IndexableModel, models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('efsw.archive:item_detail', args=(self.id, ))
-
-    @staticmethod
-    def get_absolute_url_title():
-        return 'Детали элемента'
-
-    def get_update_url(self):
-        return urlresolvers.reverse('efsw.archive:item_update', args=(self.id, ))
-
-    @staticmethod
-    def get_update_url_title():
-        return 'Редактировать элемент'
+        return urlresolvers.reverse('efsw.archive:item:show', args=(self.id, ))
 
     @staticmethod
     def get_index_name():
