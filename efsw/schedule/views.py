@@ -37,13 +37,36 @@ def _get_program_list_page(query_set, page):
     return programs_page
 
 
+def _get_lineup_table_data(lineup):
+    pp_week_objects_list = []  # Все объекты из базы данных за неделю, размещённые по дням
+    pp_week_times_list = []  # Все значения временных меток за неделю, уникальные в течение дня, размещённые по дням
+    pp_week_times_set = set()  # Все значения временных меток за неделю одним множеством
+    for dow in range(1, 8):
+        pre_midnight_list = list(lineup.program_positions.filter(
+            dow=dow,
+            start_time__gte=lineup.start_time
+        ).order_by('start_time'))
+        post_midnight_list = list(lineup.program_positions.filter(
+            dow=dow,
+            start_time__lt=lineup.start_time
+        ).order_by('start_time'))
+        pp_week_objects_list.append(pre_midnight_list + post_midnight_list)
+
+
 def lineup_list(request, page=1):
     pass
 
 
+def lineup_show(lineup_id):
+    lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
+    lineup_table_data = _get_lineup_table_data(lineup)
+
+
 def lineup_show_current(request):
     lineup = _get_current_lineup()
-    return shortcuts.render(request, 'schedule/lineup_show_current.html', {'lineup': lineup})
+    if lineup is None:
+        return shortcuts.render(request, 'schedule/lineup_show_current.html', {'lineup': None})
+    lineup_table_data = _get_lineup_table_data(lineup)
 
 
 def program_list(request, page=1):
