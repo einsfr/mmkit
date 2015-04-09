@@ -137,7 +137,8 @@ class ProgramPosition(models.Model):
 
     comment = models.CharField(
         verbose_name='комментарий',
-        max_length=32
+        max_length=32,
+        blank=True
     )
 
     lineup = models.ForeignKey(
