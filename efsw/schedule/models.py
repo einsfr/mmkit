@@ -141,6 +141,11 @@ class ProgramPosition(models.Model):
         blank=True
     )
 
+    locked = models.BooleanField(
+        verbose_name='заблокировано',
+        default=False
+    )
+
     lineup = models.ForeignKey(
         Lineup,
         related_name='program_positions'
@@ -148,5 +153,6 @@ class ProgramPosition(models.Model):
 
     program = models.ForeignKey(
         Program,
-        related_name='lineup_positions'
+        related_name='lineup_positions',
+        null=True
     )
