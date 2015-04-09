@@ -245,36 +245,27 @@ class ItemLog(models.Model):
 
     @classmethod
     def _log_item_action(cls, item, action, request):
-        il = cls()
-        il.action = action
-        if request.user.is_authenticated():
-            user = request.user
-        else:
-            user = None
-        il.user = user
-        il.item = item
-        il.save()
+        if type(item) != list:
+            item = list(item)
+        for i in item:
+            il = cls()
+            il.action = action
+            if request.user.is_authenticated():
+                user = request.user
+            else:
+                user = None
+            il.user = user
+            il.item = i
+            il.save()
 
     @classmethod
     def log_item_add(cls, item, request):
-        if type(item) == list:
-            for i in item:
-                cls._log_item_action(i, cls.ACTION_ADD, request)
-        else:
-            cls._log_item_action(item, cls.ACTION_ADD, request)
+        cls._log_item_action(item, cls.ACTION_ADD, request)
 
     @classmethod
     def log_item_update(cls, item, request):
-        if type(item) == list:
-            for i in item:
-                cls._log_item_action(i, cls.ACTION_UPDATE, request)
-        else:
-            cls._log_item_action(item, cls.ACTION_UPDATE, request)
+        cls._log_item_action(item, cls.ACTION_UPDATE, request)
 
     @classmethod
     def log_item_include_update(cls, item, request):
-        if type(item) == list:
-            for i in item:
-                cls._log_item_action(i, cls.ACTION_INCLUDE_UPDATE, request)
-        else:
-            cls._log_item_action(item, cls.ACTION_INCLUDE_UPDATE, request)
+        cls._log_item_action(item, cls.ACTION_INCLUDE_UPDATE, request)

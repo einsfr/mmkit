@@ -19,7 +19,12 @@ from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.utils import urlformatter
 
 
-def _get_item_page(items, page, per_page):
+def _get_item_list_page(items, page):
+    per_page = getattr(
+        settings,
+        'EFSW_ARCH_ITEM_LIST_PER_PAGE',
+        archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE
+    )
     pagin = paginator.Paginator(items, per_page)
     try:
         items_page = pagin.page(page)
@@ -30,15 +35,6 @@ def _get_item_page(items, page, per_page):
         # Если указанная страница - пустая (т.е. находится вне диапазона страниц) - показать последнюю страницу
         items_page = pagin.page(pagin.num_pages)
     return items_page
-
-
-def _get_item_list_page(items, page):
-    per_page = getattr(
-        settings,
-        'EFSW_ARCH_ITEM_LIST_PER_PAGE',
-        archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE
-    )
-    return _get_item_page(items, page, per_page)
 
 
 def _get_json_item_not_found(item_id):
@@ -225,11 +221,14 @@ def item_includes_update_json(request):
             'Неверный формат запроса',
             JsonWithStatusResponse.STATUS_ERROR
         )
+    old_includes = set([i.id for i in item.includes.all()])
     item.includes.clear()
-    # TODO Нужно определить, какие элементы изменяются и внести в лог соответствующие записи
     if len(includes_ids) > 0:
         includes = models.Item.objects.filter(id__in=includes_ids)
         item.includes.add(*includes)
+    changed_includes_id = old_includes.symmetric_difference(includes_ids)
+    changed_includes_id.add(item_id)
+    models.ItemLog.log_item_include_update(list(models.Item.objects.filter(id__in=changed_includes_id)), request)
     return JsonWithStatusResponse()
 
 
