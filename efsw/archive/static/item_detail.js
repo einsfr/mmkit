@@ -38,9 +38,11 @@ function ItemDetailViewModel() {
     self.storage_id = ko.observable();
     self.selected_storage = ko.observable(new ItemStorage());
     self.locations_changed = false;
+    self.includes_changed = false;
 
     self.remove_include = function(item) {
         self.includes.remove(item);
+        self.includes_changed = true;
     };
 
     self.add_include = function() {
@@ -57,6 +59,7 @@ function ItemDetailViewModel() {
         $.getJSON(urls.item_includes_check_json(), {include_id: self.include_item_id()}, function(response) {
             if (response.status == 'ok') {
                 self.includes.push(new Item(response.data));
+                self.includes_changed = true;
             } else {
                 alert(response.data);
             }
@@ -79,6 +82,7 @@ function ItemDetailViewModel() {
         ).done(function(result) {
                 if (result.status == 'ok') {
                     alert('Сохранено');
+                    self.includes_changed = false;
                 } else {
                     alert(result.data);
                 }
@@ -182,6 +186,15 @@ function ItemDetailViewModel() {
             }
         });
     };
+
+    $(window).bind('beforeunload', function() {
+        if (self.includes_changed) {
+            return 'Обнаружены несохранённые изменения в связанных элементах - если сейчас покинуть страницу, они будут потеряны.';
+        }
+        if (self.locations_changed) {
+            return 'Обнаружены несохранённые изменения в размещении элемента в хранилищах - если сейчас покинуть страницу, они будут потеряны';
+        }
+    });
 
     self._get_locations();
     self._get_includes();
