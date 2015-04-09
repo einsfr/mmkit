@@ -27,6 +27,14 @@ class Lineup(models.Model):
         verbose_name='используется'
     )
 
+    start_time = models.TimeField(
+        verbose_name='время начала эфирных суток'
+    )
+
+    end_time = models.TimeField(
+        verbose_name='время окончания эфирных суток'
+    )
+
     def __str__(self):
         return self.name
 
