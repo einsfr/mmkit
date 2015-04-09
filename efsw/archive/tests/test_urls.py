@@ -50,5 +50,26 @@ class ArchiveUrlsTestCase(UrlsTestCase):
 
             ('efsw.archive:category:new', [],
              '/archive/categories/new/', views.category_new),
+
+            ('efsw.archive:category:create', [],
+             '/archive/categories/create/', views.category_create),
+
+            ('efsw.archive:category:items_list', [3],
+             '/archive/categories/3/items/list/', views.category_items_list),
+
+            ('efsw.archive:category:items_list_page', [3, 2],
+             '/archive/categories/3/items/list/page/2/', views.category_items_list),
+
+            ('efsw.archive:category:edit', [3],
+             '/archive/categories/3/edit/', views.category_edit),
+
+            ('efsw.archive:category:update', [3],
+             '/archive/categories/3/update/', views.category_update),
+
+            ('efsw.archive:storage:show_json', [],
+             '/archive/storages/show/json/', views.storage_show_json),
+
+            ('efsw.archive:search', [],
+             '/archive/search/', views.search)
         ]
         self.process_urls(urls)
