@@ -1,51 +1,83 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import include, url
 from django.contrib.auth.decorators import permission_required
 
 from efsw.schedule import views
 
 
-urlpatterns = patterns(
-    '',
-    # lineups/ Список сеток вещания
+# ------------------------- Lineup -------------------------
+lineup_patterns = [
+    # lineups/list/ Список сеток вещания
+    # ( Список сеток вещания )
     url(
-        r'^lineups/$',
+        r'^list/$',
         views.lineup_list,
-        name='lineup_list'
+        name='list'
     ),
-    # lineups/page/2/ Список сеток вещания - постранично
+    # lineups/list/page/2/ Список сеток вещания - постранично
+    # ( Список сеток вещания, страница 2 )
     url(
-        r'^lineups/page/(?P<page>\d+)/$',
+        r'^list/page/(?P<page>\d+)/$',
         views.lineup_list,
-        name='lineup_list_page'
+        name='list_page'
     ),
-    # lineups/current/ Текущая сетка вещания
+    # lineups/current/show/ Текущая сетка вещания
+    # ( Текущая сетка вещания )
     url(
-        r'^lineups/current/$',
-        views.lineup_current,
-        name='lineup_current'
+        r'^show/current/$',
+        views.lineup_show_current,
+        name='show_current'
     ),
-    # programs/ Список программ
+]
+
+# ------------------------- Program -------------------------
+program_patterns = [
+    # programs/list/ Список программ
+    # ( Список программ )
     url(
-        r'^programs/$',
+        r'^list/$',
         views.program_list,
-        name='program_list'
+        name='list'
     ),
-    # programs/page/2/ Список программ - постранично
+    # programs/list/page/2/ Список программ - постранично
+    # ( Список программ, страница 2 )
     url(
-        r'^programs/page/(?P<page>\d+)/$',
+        r'^list/page/(?P<page>\d+)/$',
         views.program_list,
-        name='program_list_page'
+        name='list_page'
     ),
-    # programs/add/ Добавление новой программы
+    # programs/new/ Добавление новой программы - форма (GET)
+    # ( Добавление новой программы )
     url(
-        r'^programs/add/$',
-        permission_required('schedule.add_program')(views.program_add),
-        name='program_add'
+        r'^new/$',
+        permission_required('schedule.add_program')(views.program_new),
+        name='new'
     ),
-    # programs/12/ Просмотр деталей программы
+    # programs/create/ Добавление новой программы - действие (POST)
+    # ( - )
     url(
-        r'^programs/(?P<program_id>\d+)/$',
-        views.program_detail,
-        name='program_detail'
+        r'^create/$',
+        permission_required('schedule.add_program')(views.program_create),
+        name='create'
     ),
-)
+    # programs/5/...
+    url(
+        r'^(?P<program_id>\d+)/',
+        include([
+            # programs/5/show/ Описание программы
+            # ( Описание программы )
+            url(
+                r'^show/$',
+                views.program_show,
+                name='show'
+            ),
+        ])
+    ),
+]
+
+
+urlpatterns = [
+    # lineups/...
+    url(r'^lineups/', include((lineup_patterns, 'lineup', 'lineup'))),
+    # programs/...
+    url(r'^programs/', include((program_patterns, 'program', 'program'))),
+]

@@ -7,5 +7,5 @@
 {% block content %}
     <h1>Список программ</h1>
     {% include 'schedule/_program_list_table.html' %}
-    {% if programs %}<nav class="text-center">{% pagination programs 'efsw.schedule:program_list_page' %}</nav>{% endif %}
+    {% if programs %}<nav class="text-center">{% pagination programs 'efsw.schedule:program:list_page' %}</nav>{% endif %}
 {% endblock %}

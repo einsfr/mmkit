@@ -80,11 +80,7 @@ class Program(models.Model):
     )
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('efsw.schedule:program_detail', args=(self.id, ))
-
-    @staticmethod
-    def get_absolute_url_title(self):
-        return 'Детали программы'
+        return urlresolvers.reverse('efsw.schedule:program:show', args=(self.id, ))
 
     def format_age_limit(self):
         try:

@@ -1,10 +1,10 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% block title %}{{ block.super }} - Добавление программы{% endblock %}
+{% block title %}{{ block.super }} - Добавление новой программы{% endblock %}
 
 {% block content %}
-    <h1>Добавление программы</h1>
-    <form action="" method="post">
+    <h1>Добавление новой программы</h1>
+    <form action="{% url 'efsw.schedule:program:create' %}" method="post">
         {% csrf_token %}
         <table class="table">
             {{ form.as_table }}

@@ -4,6 +4,7 @@ from django import shortcuts
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from django.core import paginator
+from django.views.decorators import http
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -40,9 +41,9 @@ def lineup_list(request, page=1):
     pass
 
 
-def lineup_current(request):
+def lineup_show_current(request):
     lineup = _get_current_lineup()
-    return shortcuts.render(request, 'schedule/lineup_current.html', {'lineup': lineup})
+    return shortcuts.render(request, 'schedule/lineup_show_current.html', {'lineup': lineup})
 
 
 def program_list(request, page=1):
@@ -56,32 +57,25 @@ def program_list(request, page=1):
     )
 
 
-def program_add(request):
-    if request.method == 'POST':
-        form = forms.ProgramCreateForm(request.POST)
-        if form.is_valid():
-            program = form.save()
-            return shortcuts.redirect(program.get_absolute_url())
+@http.require_GET
+def program_new(request):
+    form = forms.ProgramCreateForm()
+    return shortcuts.render(request, 'schedule/program_new.html', {'form': form})
+
+
+@http.require_POST
+def program_create(request):
+    form = forms.ProgramCreateForm(request.POST)
+    if form.is_valid():
+        program = form.save()
+        return shortcuts.redirect(program.get_absolute_url())
     else:
-        form = forms.ProgramCreateForm()
-    return shortcuts.render(
-        request,
-        'schedule/program_form_create.html',
-        {
-            'form': form
-        }
-    )
+        return shortcuts.render(request, 'schedule/program_new.html', {'form': form})
 
 
-def program_detail(request, program_id):
+def program_show(request, program_id):
     program = shortcuts.get_object_or_404(
         models.Program,
         pk=program_id
     )
-    return shortcuts.render(
-        request,
-        'schedule/program_detail.html',
-        {
-            'program': program
-        }
-    )
+    return shortcuts.render(request, 'schedule/program_show.html', {'program': program})

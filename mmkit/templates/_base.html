@@ -19,7 +19,7 @@
             </div>
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'efsw.archive:item:list' %}" title="Главная страница архива">Архив</a></li>
-                <li><a href="{% url 'efsw.schedule:lineup_current' %}" title="Планирование вещания - Главная страница">Планирование</a></li>
+                <li><a href="{% url 'efsw.schedule:lineup:show_current' %}" title="Планирование вещания - Главная страница">Планирование</a></li>
             </ul>
             {% accountmenu %}
         </div>

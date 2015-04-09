@@ -10,10 +10,10 @@
             </a>
             <ul class="dropdown-menu" role="menu">
                 <li role="presentation">
-                    <a href="{% url 'efsw.schedule:lineup_current' %}" title="Текущая сетка вещания">Текущая</a>
+                    <a href="{% url 'efsw.schedule:lineup:show_current' %}" title="Текущая сетка вещания">Текущая</a>
                 </li>
                 <li role="presentation">
-                    <a href="{% url 'efsw.schedule:lineup_list' %}" title="Список сеток вещания">Список</a>
+                    <a href="{% url 'efsw.schedule:lineup:list' %}" title="Список сеток вещания">Список</a>
                 </li>
             </ul>
         </li>
@@ -23,11 +23,11 @@
             </a>
             <ul class="dropdown-menu" role="menu">
                 <li role="presentation">
-                    <a href="{% url 'efsw.schedule:program_list' %}" title="Список программ">Список</a>
+                    <a href="{% url 'efsw.schedule:program:list' %}" title="Список программ">Список</a>
                 </li>
                 {% if perms.schedule.add_program %}
                     <li role="presentation">
-                        <a href="{% url 'efsw.schedule:program_add' %}" title="Добавить программу">Добавить</a>
+                        <a href="{% url 'efsw.schedule:program:new' %}" title="Добавить программу">Добавить</a>
                     </li>
                 {% endif %}
             </ul>
