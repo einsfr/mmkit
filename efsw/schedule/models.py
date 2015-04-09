@@ -20,11 +20,13 @@ class Lineup(models.Model):
     )
 
     active_until = models.DateField(
-        verbose_name='используется до'
+        verbose_name='используется до',
+        null=True
     )
 
     active = models.BooleanField(
-        verbose_name='используется'
+        verbose_name='используется',
+        default=False
     )
 
     start_time = models.TimeField(
