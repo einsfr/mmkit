@@ -1,0 +1,353 @@
+[
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 1,
+    "fields": {
+      "dow": 1,
+      "start_time": "06:00:00",
+      "end_time": "10:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 2,
+    "fields": {
+      "dow": 1,
+      "start_time": "10:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 3,
+    "fields": {
+      "dow": 1,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 4,
+    "fields": {
+      "dow": 2,
+      "start_time": "06:00:00",
+      "end_time": "08:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 5,
+    "fields": {
+      "dow": 2,
+      "start_time": "08:00:00",
+      "end_time": "14:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 6
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 6,
+    "fields": {
+      "dow": 2,
+      "start_time": "14:00:00",
+      "end_time": "02:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 7,
+    "fields": {
+      "dow": 2,
+      "start_time": "02:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 8,
+    "fields": {
+      "dow": 3,
+      "start_time": "06:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 9,
+    "fields": {
+      "dow": 3,
+      "start_time": "12:00:00",
+      "end_time": "16:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 10,
+    "fields": {
+      "dow": 3,
+      "start_time": "16:00:00",
+      "end_time": "18:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 11,
+    "fields": {
+      "dow": 3,
+      "start_time": "18:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 12,
+    "fields": {
+      "dow": 4,
+      "start_time": "06:00:00",
+      "end_time": "16:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 13,
+    "fields": {
+      "dow": 4,
+      "start_time": "16:00:00",
+      "end_time": "20:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 14,
+    "fields": {
+      "dow": 4,
+      "start_time": "20:00:00",
+      "end_time": "02:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 6
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 15,
+    "fields": {
+      "dow": 4,
+      "start_time": "02:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 16,
+    "fields": {
+      "dow": 5,
+      "start_time": "06:00:00",
+      "end_time": "10:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 17,
+    "fields": {
+      "dow": 5,
+      "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 17,
+    "fields": {
+      "dow": 5,
+      "start_time": "12:00:00",
+      "end_time": "00:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 18,
+    "fields": {
+      "dow": 5,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 19,
+    "fields": {
+      "dow": 5,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 20,
+    "fields": {
+      "dow": 6,
+      "start_time": "06:00:00",
+      "end_time": "08:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 21,
+    "fields": {
+      "dow": 6,
+      "start_time": "08:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 22,
+    "fields": {
+      "dow": 6,
+      "start_time": "12:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 23,
+    "fields": {
+      "dow": 6,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 24,
+    "fields": {
+      "dow": 7,
+      "start_time": "06:00:00",
+      "end_time": "18:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 25,
+    "fields": {
+      "dow": 7,
+      "start_time": "18:00:00",
+      "end_time": "22:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 26,
+    "fields": {
+      "dow": 7,
+      "start_time": "22:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  }
+]

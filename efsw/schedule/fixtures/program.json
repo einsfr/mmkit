@@ -34,5 +34,41 @@
       "description": "В документальных фильмах, как правило, показывают много разных документов.",
       "age_limit": 16
     }
+  },
+  {
+    "model": "schedule.Program",
+    "pk": 4,
+    "fields": {
+      "name": "2-часовая передача",
+      "lineup_size": "02:00:00",
+      "max_duration": "01:44:00",
+      "min_duration": "01:36:00",
+      "description": "Это передача, которая продолжается почти 2 часа",
+      "age_limit": 16
+    }
+  },
+  {
+    "model": "schedule.Program",
+    "pk": 5,
+    "fields": {
+      "name": "4-часовая передача",
+      "lineup_size": "04:00:00",
+      "max_duration": "03:44:00",
+      "min_duration": "03:36:00",
+      "description": "Это передача, которая продолжается почти 4 часа",
+      "age_limit": 12
+    }
+  },
+  {
+    "model": "schedule.Program",
+    "pk": 6,
+    "fields": {
+      "name": "6-часовая передача",
+      "lineup_size": "06:00:00",
+      "max_duration": "05:44:00",
+      "min_duration": "05:36:00",
+      "description": "Это передача, которая продолжается почти 6 часов",
+      "age_limit": 6
+    }
   }
 ]

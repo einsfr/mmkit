@@ -1,0 +1,14 @@
+[
+  {
+    "model": "schedule.Lineup",
+    "pk": 1,
+    "fields": {
+      "name": "Проверочное расписание",
+      "active_since": "2015-04-09",
+      "active_until": null,
+      "active": true,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00"
+    }
+  }
+]
