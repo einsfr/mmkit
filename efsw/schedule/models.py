@@ -123,6 +123,10 @@ class ProgramPosition(models.Model):
         verbose_name='время начала'
     )
 
+    end_time = models.TimeField(
+        verbose_name='время окончания'
+    )
+
     comment = models.CharField(
         verbose_name='комментарий',
         max_length=32
