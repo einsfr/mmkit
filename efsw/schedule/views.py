@@ -5,6 +5,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from django.core import paginator
 from django.views.decorators import http
+from django.db.models import Count
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -71,6 +72,24 @@ def _get_lineup_table_data(lineup):
             day_result.append((pp, end_time_index - start_time_index))
         by_day_table_data.append(day_result)
     return by_day_table_data
+
+
+def _get_lineup_table_data(lineup):
+    pp = list(
+        lineup.program_positions.filter(start_time__gte=lineup.start_time).order_by('start_time')
+    ) + list(
+        lineup.program_positions.filter(start_time__lt=lineup.start_time).order_by('start_time')
+    )
+    start_times_set = set()
+    pp_by_day = [[] for _ in range(0, 7)]
+    for p in pp:
+        start_times_set.add(p.start_time)
+
+    start_times_list = sorted(
+        filter(lambda x: x >= lineup.start_time, start_times_set)
+    ) + sorted(
+        filter(lambda x: x < lineup.start_time, start_times_set)
+    )
 
 
 def lineup_list(request, page=1):
