@@ -1,0 +1,13 @@
+<tbody>
+    {% for row in lineup_table_data %}
+        <tr>
+            {% for cell in row %}
+                {% if forloop.first %}
+                    <td>{{ cell|time:'H:i:s' }}</td>
+                {% else %}
+                    <td rowspan="{{ cell.row_span }}">{{ cell.pp.program.name }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</tbody>

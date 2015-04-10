@@ -39,46 +39,10 @@ def _get_program_list_page(query_set, page):
 
 
 def _get_lineup_table_data(lineup):
-    start_times_all_set = set()
-    objects_by_day_list = []
-    for dow in range(1, 8):
-        day_list = list(lineup.program_positions.filter(
-            dow=dow,
-            start_time__gte=lineup.start_time
-        ).order_by('start_time')) + list(lineup.program_positions.filter(
-            dow=dow,
-            start_time__lt=lineup.start_time
-        ).order_by('start_time'))
-        objects_by_day_list.append(day_list)
-        start_times_all_set = start_times_all_set.union([p.start_time for p in day_list])
-    start_times_all_list = sorted(
-        filter(lambda x: x >= lineup.start_time, start_times_all_set)
-    ) + sorted(
-        filter(lambda x: x < lineup.start_time, start_times_all_set)
-    )
-    by_day_table_data = []
-    for dow in range(0, 7):
-        day_result = []
-        end_time_index = 0
-        for pp in objects_by_day_list[dow]:
-            if end_time_index:
-                start_time_index = end_time_index
-            else:
-                start_time_index = start_times_all_list.index(pp.start_time)
-            if pp.end_time == lineup.end_time:
-                end_time_index = len(start_times_all_list)
-            else:
-                end_time_index = start_times_all_list.index(pp.end_time)
-            day_result.append((pp, end_time_index - start_time_index))
-        by_day_table_data.append(day_result)
-    return by_day_table_data
-
-
-def get_lineup_table_data(lineup):
     pp = list(
-        lineup.program_positions.filter(start_time__gte=lineup.start_time)
+        lineup.program_positions.filter(start_time__gte=lineup.start_time).select_related('program')
     ) + list(
-        lineup.program_positions.filter(start_time__lt=lineup.start_time)
+        lineup.program_positions.filter(start_time__lt=lineup.start_time).select_related('program')
     )
     start_times_set = set()
     pp_by_day = [dict() for _ in range(0, 7)]
@@ -93,7 +57,7 @@ def get_lineup_table_data(lineup):
     result = []
     start_times_count = len(start_times_list)
     for start_time_index, st in enumerate(start_times_list):
-        row = []
+        row = [st]
         for dow in range(0, 7):
             if st in pp_by_day[dow]:
                 p = pp_by_day[dow][st]
@@ -101,7 +65,7 @@ def get_lineup_table_data(lineup):
                     end_time_index = start_times_count
                 else:
                     end_time_index = start_times_list.index(p.end_time)
-                row.append((p, end_time_index - start_time_index))
+                row.append({'pp': p, 'row_span': end_time_index - start_time_index})
         result.append(row)
     return result
 
