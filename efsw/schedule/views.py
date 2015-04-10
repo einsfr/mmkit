@@ -5,7 +5,6 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from django.core import paginator
 from django.views.decorators import http
-from django.db.models import Count
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
