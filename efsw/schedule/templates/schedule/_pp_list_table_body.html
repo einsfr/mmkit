@@ -1,13 +1,16 @@
-<tbody>
-    {% for row in lineup_table_data %}
-        <tr>
-            {% for cell in row %}
-                {% if forloop.first %}
-                    <td>{{ cell|time:'H:i:s' }}</td>
-                {% else %}
-                    <td rowspan="{{ cell.row_span }}">{{ cell.pp.program.name }}</td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-    {% endfor %}
-</tbody>
+{% for row in lineup_table_data %}
+    <tr>
+        {% for cell in row %}
+            {% if forloop.first %}
+                <td>{{ cell|time:'H:i:s' }}</td>
+            {% else %}
+                <td rowspan="{{ cell.row_span }}"{% if cell.pp.locked %} class="locked"{% endif %}{% if cell.pp.program %} style="background-color: {{ cell.pp.program.color }};"{% endif %}>
+                    {{ cell.pp.program.name }}
+                    {% if cell.pp.comment %}
+                        <small>{{ cell.pp.comment }}</small>
+                    {% endif %}
+                </td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+{% endfor %}

@@ -17,3 +17,11 @@ div.search-result h4 {
 #lineup_table thead td {
     width: 6em;
 }
+
+#lineup_table tbody td.locked {
+    background: #cccccc;
+}
+
+#lineup_table tbody td small {
+    font-style: italic;
+}

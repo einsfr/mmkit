@@ -45,8 +45,8 @@
       "dow": 2,
       "start_time": "06:00:00",
       "end_time": "08:00:00",
-      "comment": "",
-      "locked": false,
+      "comment": "Тут не занимать",
+      "locked": true,
       "lineup": 1,
       "program": null
     }
@@ -84,7 +84,7 @@
       "dow": 2,
       "start_time": "02:00:00",
       "end_time": "06:00:00",
-      "comment": "",
+      "comment": "Может, заменить?",
       "locked": false,
       "lineup": 1,
       "program": 5
@@ -175,7 +175,7 @@
       "dow": 4,
       "start_time": "20:00:00",
       "end_time": "02:00:00",
-      "comment": "",
+      "comment": "Как-то не в тему",
       "locked": false,
       "lineup": 1,
       "program": 6
@@ -227,8 +227,8 @@
       "dow": 5,
       "start_time": "12:00:00",
       "end_time": "00:00:00",
-      "comment": "",
-      "locked": false,
+      "comment": "Занято",
+      "locked": true,
       "lineup": 1,
       "program": null
     }
@@ -279,7 +279,7 @@
       "dow": 6,
       "start_time": "08:00:00",
       "end_time": "12:00:00",
-      "comment": "",
+      "comment": "Тут повтор",
       "locked": false,
       "lineup": 1,
       "program": 5
@@ -344,8 +344,8 @@
       "dow": 7,
       "start_time": "22:00:00",
       "end_time": "06:00:00",
-      "comment": "",
-      "locked": false,
+      "comment": "Отдыхать тоже нужно",
+      "locked": true,
       "lineup": 1,
       "program": null
     }
