@@ -362,55 +362,6 @@ class ArchiveViewsTestCase(TestCase):
         self.assertEqual(models.ItemCategory.objects.count(), cat_count)
         self.assertEqual(models.ItemCategory.objects.get(pk=1).name, 'Отредактированное название')
 
-    def test_search_page(self):
-        request_url = urlresolvers.reverse('efsw.archive:search')
-
-        with self.settings(EFSW_ELASTIC_DISABLE=False):
-            response = self.client.get(request_url)
-        self.assertContains(response, '<h1>Поиск в архиве</h1>', status_code=200)
-
-        response = self.client.get(request_url)
-        self.assertContains(response, '<h1>Поиск не работает</h1>', status_code=500)
-
-        with self.settings(
-                EFSW_ELASTIC_DISABLE=False,
-        ):
-            call_command('esinit', replace=True, verbosity=2)
-            call_command('esindex', 'archive.Item', verbosity=2)
-        get_data = {
-            'q': 'новость',
-        }
-        with self.settings(EFSW_ELASTIC_DISABLE=False):
-            response = self.client.get(request_url, get_data)
-        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
-        self.assertEqual(len(response.context['items']), 2)
-        ids = [x.id for x in response.context['items']]
-        self.assertIn(4, ids)
-        self.assertIn(8, ids)
-
-        get_data = {
-            'q': 'новость',
-            'o': '1',
-        }
-        with self.settings(EFSW_ELASTIC_DISABLE=False):
-            response = self.client.get(request_url, get_data)
-        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
-        items = response.context['items']
-        self.assertEqual(len(items), 2)
-        self.assertEqual(items[0].id, 4)
-        self.assertEqual(items[1].id, 8)
-
-        get_data = {
-            'q': 'новость',
-            'c': 1,
-        }
-        with self.settings(EFSW_ELASTIC_DISABLE=False):
-            response = self.client.get(request_url, get_data)
-        self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
-        items = response.context['items']
-        self.assertEqual(len(items), 1)
-        self.assertEqual(items[0].id, 4)
-
 
 class ArchiveSecurityTestCase(TestCase):
 
