@@ -89,6 +89,12 @@ class Program(models.Model):
         verbose_name='ограничение по возрасту'
     )
 
+    color = models.CharField(
+        verbose_name='цвет фона',
+        max_length=7,
+        default='#ffffff'
+    )
+
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.schedule:program:show', args=(self.id, ))
 
