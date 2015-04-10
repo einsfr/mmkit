@@ -74,22 +74,36 @@ def _get_lineup_table_data(lineup):
     return by_day_table_data
 
 
-def _get_lineup_table_data(lineup):
+def get_lineup_table_data(lineup):
     pp = list(
-        lineup.program_positions.filter(start_time__gte=lineup.start_time).order_by('start_time')
+        lineup.program_positions.filter(start_time__gte=lineup.start_time)
     ) + list(
-        lineup.program_positions.filter(start_time__lt=lineup.start_time).order_by('start_time')
+        lineup.program_positions.filter(start_time__lt=lineup.start_time)
     )
     start_times_set = set()
-    pp_by_day = [[] for _ in range(0, 7)]
+    pp_by_day = [dict() for _ in range(0, 7)]
     for p in pp:
         start_times_set.add(p.start_time)
-
+        pp_by_day[p.dow - 1][p.start_time] = p
     start_times_list = sorted(
         filter(lambda x: x >= lineup.start_time, start_times_set)
     ) + sorted(
         filter(lambda x: x < lineup.start_time, start_times_set)
     )
+    result = []
+    start_times_count = len(start_times_list)
+    for start_time_index, st in enumerate(start_times_list):
+        row = []
+        for dow in range(0, 7):
+            if st in pp_by_day[dow]:
+                p = pp_by_day[dow][st]
+                if p.end_time == lineup.end_time:
+                    end_time_index = start_times_count
+                else:
+                    end_time_index = start_times_list.index(p.end_time)
+                row.append((p, end_time_index - start_time_index))
+        result.append(row)
+    return result
 
 
 def lineup_list(request, page=1):
