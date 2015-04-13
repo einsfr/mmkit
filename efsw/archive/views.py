@@ -201,6 +201,10 @@ def item_includes_check_json(request):
             'Идентификатор должен быть целым числом'
         )
     try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    try:
         include_item = models.Item.objects.get(pk=include_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(include_id)
