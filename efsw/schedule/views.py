@@ -11,9 +11,9 @@ from efsw.schedule import default_settings as schedule_default_settings
 from efsw.schedule import forms
 
 
-def _get_current_lineup():
+def _get_current_lineup(channel):
     try:
-        lineup = models.Lineup.objects.get(active=True, active_since__lte=datetime.date.today())
+        lineup = models.Lineup.objects.get(active=True, channel=channel, active_since__lte=datetime.date.today())
     except models.Lineup.DoesNotExist:
         lineup = None
     except MultipleObjectsReturned:
@@ -79,7 +79,7 @@ def lineup_show(lineup_id):
 
 
 def lineup_show_current(request):
-    lineup = _get_current_lineup()
+    lineup = _get_current_lineup(models.Channel.objects.get(pk=1))
     if lineup is None:
         return shortcuts.render(request, 'schedule/lineup_show_current.html', {'lineup': None})
     lineup_table_data = _get_lineup_table_data(lineup)
