@@ -1,4 +1,5 @@
 import math
+import json
 
 from django.test import TestCase
 from django.core import urlresolvers
@@ -6,6 +7,7 @@ from django.core.management import call_command
 
 from efsw.archive import models
 from efsw.common.test.testcase import LoginRequiredTestCase
+from efsw.common.http.response import JsonWithStatusResponse
 
 
 class SearchViewTestCase(TestCase):
@@ -228,13 +230,87 @@ class ItemIncludesListJsonTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_list_json')
+
+    def test_nonexist(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        item_includes = models.Item.objects.get(pk=4).includes.all()
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        id_list = []
+        for d in json_content['data']:
+            self.assertEqual(3, len(d))
+            self.assertIn('id', d)
+            self.assertIn('name', d)
+            self.assertIn('url', d)
+            id_list.append(d['id'])
+        self.assertEqual(len(item_includes), len(json_content['data']))
+        self.assertEqual(id_list, [i.id for i in item_includes])
+
 
 class ItemIncludesCheckJsonTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_check_json')
 
-class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
+    def test_include_self(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Элемент не может быть включён сам в себя', json_content['data'])
+
+    def test_include_non_int(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 'non-int', 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Идентификатор должен быть целым числом', json_content['data'])
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 'non-int'))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Идентификатор должен быть целым числом', json_content['data'])
+
+    def test_nonexist_item(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 1000000, 8))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
+
+    def test_nonexist_include(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 8))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual(3, len(json_content['data']))
+        self.assertIn('id', json_content['data'])
+        self.assertIn('name', json_content['data'])
+        self.assertIn('url', json_content['data'])
+
+
+class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Доделать
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
@@ -248,12 +324,12 @@ class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
         self.assertEqual(405, response.status_code)
 
 
-class ItemLocationsListJsonTestCase(TestCase):
+class ItemLocationsListJsonTestCase(TestCase):  # TODO: Доделать
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
 
-class ItemLocationsUpdateJsonTestCase(TestCase):
+class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Доделать
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
 
