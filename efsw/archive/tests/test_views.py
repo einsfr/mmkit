@@ -1,6 +1,11 @@
+import math
+
 from django.test import TestCase
 from django.core import urlresolvers
 from django.core.management import call_command
+
+from efsw.archive import models
+from efsw.common.test.testcase import LoginRequiredTestCase
 
 
 class SearchViewTestCase(TestCase):
@@ -51,3 +56,276 @@ class SearchViewTestCase(TestCase):
         items = response.context['items']
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].id, 4)
+
+
+class ItemListViewTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_list(self):
+        items_count = models.Item.objects.count()
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=1000):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item:list'))
+            self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
+            self.assertEqual(items_count, len(response.context['items']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+    def test_pagination(self):
+        items_count = models.Item.objects.count()
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=1000):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item:list_page', args=(2, )))
+            self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
+            self.assertEqual(items_count, len(response.context['items']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item:list_page', args=(1, )))
+            self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
+            self.assertEqual(2, len(response.context['items']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+            self.assertContains(response, '<a href="/archive/items/list/page/2/" title="Следующая страница">»</a>')
+            self.assertContains(
+                response,
+                '<a href="/archive/items/list/page/{0}/" title="Последняя страница">{0}</a>'.format(
+                    math.ceil(items_count / 2)
+                )
+            )
+            response = self.client.get(urlresolvers.reverse('efsw.archive:item:list_page', args=(2, )))
+            self.assertContains(response, '<h1>Список элементов</h1>', status_code=200)
+            self.assertEqual(2, len(response.context['items']))
+            self.assertContains(response, '<a href="/archive/items/list/page/1/" title="Предыдущая страница">«</a>')
+            self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
+            self.assertContains(response, '<a href="/archive/items/list/page/3/" title="Следующая страница">»</a>')
+
+
+class ItemNewViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:new')
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertContains(response, '<h1>Добавление нового элемента</h1>', status_code=200)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+
+class ItemCreateViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:create')
+
+    def test_valid(self):
+        self._login_user()
+        post_data = {
+            'name': 'Новый элемент',
+            'description': 'Описание нового элемента',
+            'created': '2015-02-09',
+            'author': 'Автор нового элемента',
+            'storage': '1',
+            'category': '3',
+        }
+        response = self.client.post(self.request_url, post_data, follow=True)
+        self.assertEqual(1, len(response.redirect_chain))
+        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        log = response.context['item'].log.all()
+        self.assertEqual(1, len(log))
+        self.assertEqual(log[0].ACTION_ADD, log[0].action)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+    def test_required_field(self):
+        self._login_user()
+        response = self.client.post(self.request_url)
+        self.assertEqual(response.status_code, 200)
+        for field in ['name', 'description', 'created', 'author', 'category']:
+            self.assertFormError(response, 'form', field, 'Обязательное поле.')
+
+    def test_name_max_length(self):
+        self._login_user()
+        post_data = {
+            'name': 'a' * 256,
+        }
+        response = self.client.post(self.request_url, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'name',
+            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
+        )
+
+    def test_created_not_date(self):
+        self._login_user()
+        post_data = {
+            'created': 'this-is-not-a-date',
+        }
+        response = self.client.post(self.request_url, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'created',
+            'Введите правильную дату.'
+        )
+
+    def test_author_max_length(self):
+        self._login_user()
+        post_data = {
+            'author': 'a' * 256,
+        }
+        response = self.client.post(self.request_url, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'author',
+            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
+        )
+
+    def test_non_existent_category(self):
+        self._login_user()
+        post_data = {
+            'category': 'non-existent-category',
+        }
+        response = self.client.post(self.request_url, post_data)
+        self.assertFormError(
+            response,
+            'form',
+            'category',
+            'Выберите корректный вариант. Вашего варианта нет среди допустимых значений.'
+        )
+
+
+class ItemShowViewTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_show(self):
+        item = models.Item.objects.get(pk=4)
+        includes_count = item.includes.count()
+        log_count = item.log.count()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(4, )))
+        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        self.assertEqual(includes_count, len(response.context['item'].includes.all()))
+        self.assertEqual(log_count, len(response.context['item'].log.all()))
+
+
+class ItemIncludesListJsonTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+
+class ItemIncludesCheckJsonTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+
+class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_update_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+
+class ItemLocationsListJsonTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+
+class ItemLocationsUpdateJsonTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:locations_update_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+
+class ItemLogsListViewTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_logs_list(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1, )))
+        self.assertContains(response, '<h1>Журнал изменений элемента</h1>', status_code=200)
+
+
+class ItemEditViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertContains(response, '<h1>Редактирование элемента</h1>', status_code=200)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertEqual(405, response.status_code)
+
+
+class ItemUpdateViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+
+    def test_valid(self):
+        self._login_user()
+        post_data = {
+            'name': 'Отредактированное название',
+            'description': 'Отредактированное описание',
+            'created': '2015-02-09',
+            'author': 'Автор отредактированного элемента',
+            'category': '1',
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:item:update', args=(4, )),
+            post_data,
+            follow=True
+        )
+        self.assertEqual(1, len(response.redirect_chain))
+        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        log = response.context['item'].log.all()
+        self.assertEqual(len(log), 2)
+        self.assertEqual(log[0].action, log[0].ACTION_ADD)
+        self.assertEqual(log[1].action, log[1].ACTION_UPDATE)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:update', args=(4, )))
+        self.assertEqual(405, response.status_code)
