@@ -198,7 +198,8 @@ def item_includes_check_json(request):
             )
     except ValueError:
         return JsonWithStatusResponse(
-            'Идентификатор должен быть целым числом'
+            'Идентификатор должен быть целым числом',
+            JsonWithStatusResponse.STATUS_ERROR
         )
     try:
         item = models.Item.objects.get(pk=item_id)
