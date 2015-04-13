@@ -246,7 +246,7 @@ class ItemLog(models.Model):
     @classmethod
     def _log_item_action(cls, item, action, request):
         if type(item) != list:
-            item = list(item)
+            item = [item]
         for i in item:
             il = cls()
             il.action = action
