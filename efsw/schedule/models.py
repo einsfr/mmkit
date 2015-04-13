@@ -2,6 +2,25 @@ from django.db import models
 from django.core import urlresolvers
 
 
+class Channel(models.Model):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'канал'
+        verbose_name_plural = 'каналы'
+
+    name = models.CharField(
+        max_length=64,
+        verbose_name='название',
+        unique=True
+    )
+
+    active = models.BooleanField(
+        verbose_name='используется',
+        default=True
+    )
+
+
 class Lineup(models.Model):
 
     class Meta:
@@ -35,6 +54,11 @@ class Lineup(models.Model):
 
     end_time = models.TimeField(
         verbose_name='время окончания эфирных суток'
+    )
+
+    channel = models.ForeignKey(
+        Channel,
+        related_name='lineups'
     )
 
     def __str__(self):

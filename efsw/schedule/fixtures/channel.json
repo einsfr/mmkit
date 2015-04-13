@@ -1,0 +1,10 @@
+[
+  {
+    "model": "schedule.Channel",
+    "pk": 1,
+    "fields": {
+      "name": "Основной канал",
+      "active": true
+    }
+  }
+]
