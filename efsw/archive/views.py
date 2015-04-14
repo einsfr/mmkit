@@ -44,6 +44,13 @@ def _get_json_item_not_found(item_id):
     )
 
 
+def _get_json_wrong_format():
+    return JsonWithStatusResponse(
+        'Неверный формат запроса',
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
 def _format_item_dict(i):
     return {
         'id': i.id,
@@ -57,6 +64,10 @@ def _get_json_storage_not_found(storage_id):
         'Ошибка: хранилище с ID "{0}" не существует'.format(storage_id),
         JsonWithStatusResponse.STATUS_ERROR
     )
+
+
+def _check_include(item, include):
+    return
 
 
 # ------------------------- Общие -------------------------
@@ -215,10 +226,6 @@ def item_includes_check_json(request):
     return JsonWithStatusResponse(_format_item_dict(include_item))
 
 
-def _check_include(item, include):
-    return
-
-
 @http.require_POST
 def item_includes_update_json(request):
     item_id = request.GET.get('id', None)
@@ -226,13 +233,13 @@ def item_includes_update_json(request):
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
+    post_includes = request.POST.get('includes', None)
+    if post_includes is None:
+        return _get_json_wrong_format()
     try:
-        includes_ids = set(json.loads(request.POST.get('includes', '')))
-    except [ValueError, KeyError]:
-        return JsonWithStatusResponse(
-            'Неверный формат запроса',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
+        includes_ids = set(json.loads(post_includes))
+    except ValueError:
+        return _get_json_wrong_format()
     old_includes_ids = set([i.id for i in item.includes.all()])
     removing_includes_ids = old_includes_ids.difference(includes_ids)
     removing_includes_objects = list(models.Item.objects.filter(id__in=removing_includes_ids))
