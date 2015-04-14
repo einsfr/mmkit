@@ -11,6 +11,9 @@ from efsw.common.test.testcase import LoginRequiredTestCase
 from efsw.common.http.response import JsonWithStatusResponse
 
 
+# ------------------------- Общие -------------------------
+
+
 class SearchViewTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
@@ -59,6 +62,9 @@ class SearchViewTestCase(TestCase):
         items = response.context['items']
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].id, 4)
+
+
+# ------------------------- Item -------------------------
 
 
 class ItemListViewTestCase(TestCase):
@@ -612,3 +618,130 @@ class ItemUpdateViewTestCase(LoginRequiredTestCase):
         self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:update', args=(4, )))
         self.assertEqual(405, response.status_code)
+
+
+# ------------------------- ItemCategory -------------------------
+
+
+class CategoryListViewTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_list(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:list'))
+        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+        self.assertEqual(models.ItemCategory.objects.count(), len(response.context['categories']))
+
+
+class CategoryNewViewTestCase(LoginRequiredTestCase):
+
+    fixtures = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:category:new')
+
+    def test_view(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+
+class CategoryCreateViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['itemcategory.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:category:create')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+    def test_valid(self):
+        self._login_user()
+        post_data = {
+            'name': 'Новая категория'
+        }
+        response = self.client.post(self.request_url, post_data, follow=True)
+        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+        self.assertEqual(1, len(response.redirect_chain))
+        self.assertEqual(4, len(response.context['categories']))
+        call_command('loaddata', 'itemcategory.json', verbosity=0)
+
+    def test_duplicate(self):
+        self._login_user()
+        post_data = {
+            'name': 'Новая категория'
+        }
+        self.client.post(self.request_url, post_data)
+        response = self.client.post(self.request_url, post_data)
+        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
+        self.assertFormError(response, 'form', 'name', 'Категория с таким Название уже существует.')
+        call_command('loaddata', 'itemcategory.json', verbosity=0)
+
+    def test_name_max_length(self):
+        self._login_user()
+        post_data = {
+            'name': 'a' * 65
+        }
+        response = self.client.post(self.request_url, post_data)
+        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
+        self.assertFormError(
+            response,
+            'form',
+            'name',
+            'Убедитесь, что это значение содержит не более 64 символов (сейчас 65).'
+        )
+
+
+class CategoryItemsListViewTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
+
+    def test_view(self):
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=1000):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(3, )))
+            self.assertContains(
+                response,
+                '<h1>Список элементов в категории &laquo;Смонтированные репортажи&raquo;</h1>',
+                status_code=200
+            )
+            self.assertEqual(models.ItemCategory.objects.get(pk=3).items.count(), len(response.context['items']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+        with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(2, )))
+            self.assertContains(
+                response,
+                '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>',
+                status_code=200
+            )
+            self.assertEqual(2, len(response.context['items']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+            self.assertContains(
+                response,
+                '<a href="/archive/categories/2/items/list/page/2/" title="Следующая страница">»</a>'
+            )
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list_page', args=(2, 2, )))
+            self.assertContains(
+                response,
+                '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>',
+                status_code=200
+            )
+            self.assertEqual(len(response.context['items']), 1)
+            self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
+            self.assertContains(
+                response,
+                '<a href="/archive/categories/2/items/list/page/1/" title="Предыдущая страница">«</a>'
+            )
