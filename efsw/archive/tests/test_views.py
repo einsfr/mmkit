@@ -1,5 +1,6 @@
 import math
 import json
+import datetime
 
 from django.test import TestCase
 from django.core import urlresolvers
@@ -12,7 +13,7 @@ from efsw.common.http.response import JsonWithStatusResponse
 
 class SearchViewTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,7 +63,7 @@ class SearchViewTestCase(TestCase):
 
 class ItemListViewTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def test_list(self):
         items_count = models.Item.objects.count()
@@ -101,7 +102,7 @@ class ItemListViewTestCase(TestCase):
 
 class ItemNewViewTestCase(LoginRequiredTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,7 +121,7 @@ class ItemNewViewTestCase(LoginRequiredTestCase):
 
 class ItemCreateViewTestCase(LoginRequiredTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -133,12 +134,17 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'description': 'Описание нового элемента',
             'created': '2015-02-09',
             'author': 'Автор нового элемента',
-            'storage': '1',
             'category': '3',
         }
         response = self.client.post(self.request_url, post_data, follow=True)
         self.assertEqual(1, len(response.redirect_chain))
         self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        item = models.Item.objects.get(pk=response.context['item'].id)
+        self.assertEqual('Новый элемент', item.name)
+        self.assertEqual('Описание нового элемента', item.description)
+        self.assertEqual('Автор нового элемента', item.author)
+        self.assertEqual(datetime.date(2015, 2, 9), item.created)
+        self.assertEqual(3, item.category.id)
         log = response.context['item'].log.all()
         self.assertEqual(1, len(log))
         self.assertEqual(log[0].ACTION_ADD, log[0].action)
@@ -210,7 +216,7 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
 
 class ItemShowViewTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def test_nonexist(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(1000000, )))
@@ -228,7 +234,7 @@ class ItemShowViewTestCase(TestCase):
 
 class ItemIncludesListJsonTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -260,7 +266,7 @@ class ItemIncludesListJsonTestCase(TestCase):
 
 class ItemIncludesCheckJsonTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -310,9 +316,9 @@ class ItemIncludesCheckJsonTestCase(TestCase):
         self.assertIn('url', json_content['data'])
 
 
-class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Доделать
+class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -323,15 +329,105 @@ class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Додел
         response = self.client.get(self.request_url)
         self.assertEqual(405, response.status_code)
 
+    def test_nonexist_item(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
 
-class ItemLocationsListJsonTestCase(TestCase):  # TODO: Доделать
+    def test_wrong_format(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Неверный формат запроса', json_content['data'])
+        post_data = {
+            'includes': 'not-a-json-list'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Неверный формат запроса', json_content['data'])
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    def test_clear(self):
+        self._login_user()
+        post_data = {
+            'includes': '[]'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([], list(item.includes.all()))
+        logs = list(item.log.all().order_by('-pk'))
+        self.assertEqual(2, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=5).log.all().order_by('-pk')
+        self.assertEqual(3, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
+
+    def test_normal(self):
+        self._login_user()
+        post_data = {
+            'includes': '[4, 5, 8]'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([5, 8], [i.id for i in item.includes.all()])
+        logs = list(item.log.all().order_by('-pk'))
+        self.assertEqual(2, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=5).log.all()
+        self.assertEqual(2, len(logs))
+        logs = models.Item.objects.get(pk=8).log.all().order_by('-pk')
+        self.assertEqual(1, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
 
 
-class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Доделать
+class ItemLocationsListJsonTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlocation.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:locations_list_json')
+
+    def test_nonexist(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 8))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        locations = json_content['data']
+        self.assertEqual(2, len(locations))
+        for l in locations:
+            self.assertEqual(4, len(l))
+            for _ in ['id', 'storage', 'storage_id', 'location']:
+                self.assertIn(_, l)
+        self.assertEqual([9, 10], sorted([l['id'] for l in locations]))
+
+
+class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json', 'itemlocation.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -342,10 +438,115 @@ class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):  # TODO: Доде�
         response = self.client.get(self.request_url)
         self.assertEqual(405, response.status_code)
 
+    def test_nonexist_item(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
+
+    def test_wrong_format(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Неверный формат запроса', json_content['data'])
+        post_data = {
+            'locations': 'not-a-json-list'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Неверный формат запроса', json_content['data'])
+
+    def test_remove_all(self):
+        self._login_user()
+        post_data = {
+            'locations': '[]'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([], list(item.locations.all()))
+        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
+
+    def test_nonexist_storage(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 0,
+                    'storage_id': 1000000,
+                    'location': 'location'
+                }
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Используется несуществующее хранилище', json_content['data'])
+
+    def test_already_in_storage(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 4,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                },
+                {
+                    'id': 0,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                }
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Элемент не может иметь несколько расположений в одном хранилище', json_content['data'])
+
+    def test_normal(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 4,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                },
+                {
+                    'id': 0,
+                    'storage_id': 2,
+                    'location': '00/00/00/04'
+                },
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        locations = list(item.locations.all().order_by('-pk'))
+        self.assertEqual(2, len(locations))
+        self.assertEqual(2, locations[0].storage.id)
+        self.assertEqual('00/00/00/04', locations[0].location)
+        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
+
 
 class ItemLogsListViewTestCase(TestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
 
     def test_nonexist(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1000000, )))
@@ -358,7 +559,7 @@ class ItemLogsListViewTestCase(TestCase):
 
 class ItemEditViewTestCase(LoginRequiredTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def test_page(self):
         self._login_user()
@@ -378,7 +579,7 @@ class ItemEditViewTestCase(LoginRequiredTestCase):
 
 class ItemUpdateViewTestCase(LoginRequiredTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
 
     def test_valid(self):
         self._login_user()
@@ -396,6 +597,12 @@ class ItemUpdateViewTestCase(LoginRequiredTestCase):
         )
         self.assertEqual(1, len(response.redirect_chain))
         self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        item = models.Item.objects.get(pk=response.context['item'].id)
+        self.assertEqual('Отредактированное название', item.name)
+        self.assertEqual('Отредактированное описание', item.description)
+        self.assertEqual(datetime.date(2015, 2, 9), item.created)
+        self.assertEqual('Автор отредактированного элемента', item.author)
+        self.assertEqual(1, item.category.id)
         log = response.context['item'].log.all()
         self.assertEqual(len(log), 2)
         self.assertEqual(log[0].action, log[0].ACTION_ADD)

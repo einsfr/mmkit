@@ -8,20 +8,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from efsw.archive import models
 
 
-class ArchiveTestCase(TestCase):
-    """ Набор тестов для efsw.archive """
-
-    def test_itemlog_get_action_name(self):
-        il = models.ItemLog()
-        il.dt = timezone.now()
-        il.action = il.ACTION_ADD
-
-        self.assertEqual(il.get_action_name(), il.ACTION_DICT[il.ACTION_ADD])
-
-        il.action = 'fake-action'
-        self.assertEqual(il.get_action_name(), '')
-
-
 class ArchiveViewsTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
@@ -62,83 +48,6 @@ class ArchiveViewsTestCase(TestCase):
                 response,
                 '<a href="/archive/items/category/2/page/1/" title="Предыдущая страница">«</a>'
             )
-
-
-    def test_item_update_remove_link(self):
-        self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )))
-        self.assertEqual(response.status_code, 405)
-
-        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )))
-        self.assertEqual(response.status_code, 400)
-
-        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-        i = models.Item.objects.get(pk=4)
-        self.assertIn(5, map(lambda o: o.id, i.includes.all()))
-        post_data = {
-            'removed_id': '5',
-        }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )),
-            post_data
-        )
-        self.assertContains(response, '4-5', status_code=200)
-        i = models.Item.objects.get(pk=4)
-        inc = i.includes.all()
-        self.assertEqual(len(inc), 2)
-        ids = map(lambda o: o.id, inc)
-        self.assertIn(6, ids)
-        self.assertIn(7, ids)
-
-        post_data = {
-            'removed_id': '1000000'
-        }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_remove_link', args=(4, )),
-            post_data
-        )
-        self.assertContains(response, '4-1000000', status_code=200)
-
-    def test_item_update_add_link(self):
-        self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )))
-        self.assertEqual(response.status_code, 405)
-
-        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )))
-        self.assertEqual(response.status_code, 400)
-
-        response = self.client.post(urlresolvers.reverse('efsw.archive:item_update_add_link', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-        i = models.Item.objects.get(pk=4)
-        self.assertNotIn(8, map(lambda o: o.id, i.includes.all()))
-        post_data = {
-            'linked_id': '8',
-        }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
-            post_data
-        )
-        self.assertEqual(response.status_code, 200)
-        i = models.Item.objects.get(pk=4)
-        ids = map(lambda o: o.id, i.includes.all())
-        self.assertIn(8, ids)
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
-            post_data
-        )
-        self.assertEqual(response.status_code, 200)
-
-        post_data = {
-            'linked_id': '1000000'
-        }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item_update_add_link', args=(4, )),
-            post_data
-        )
-        self.assertEqual(response.status_code, 400)
 
     def test_category_list(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:category_list'))
