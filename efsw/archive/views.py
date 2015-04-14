@@ -209,7 +209,14 @@ def item_includes_check_json(request):
         include_item = models.Item.objects.get(pk=include_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(include_id)
+    check_result = _check_include(item, include_item)
+    if check_result is not None:
+        return JsonWithStatusResponse(check_result, JsonWithStatusResponse.STATUS_ERROR)
     return JsonWithStatusResponse(_format_item_dict(include_item))
+
+
+def _check_include(item, include):
+    return
 
 
 @http.require_POST
@@ -220,20 +227,35 @@ def item_includes_update_json(request):
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
     try:
-        includes_ids = json.loads(request.POST.get('includes', ''))
+        includes_ids = set(json.loads(request.POST.get('includes', '')))
     except [ValueError, KeyError]:
         return JsonWithStatusResponse(
             'Неверный формат запроса',
             JsonWithStatusResponse.STATUS_ERROR
         )
-    old_includes = set([i.id for i in item.includes.all()])
-    item.includes.clear()
-    if len(includes_ids) > 0:
-        includes = models.Item.objects.filter(id__in=includes_ids)
-        item.includes.add(*includes)
-    changed_includes_id = old_includes.symmetric_difference(includes_ids)
-    changed_includes_id.add(item_id)
-    models.ItemLog.log_item_include_update(list(models.Item.objects.filter(id__in=changed_includes_id)), request)
+    old_includes_ids = set([i.id for i in item.includes.all()])
+    removing_includes_ids = old_includes_ids.difference(includes_ids)
+    removing_includes_objects = list(models.Item.objects.filter(id__in=removing_includes_ids))
+    # Если мы только всё убираем - можно немного проще
+    if len(includes_ids) == 0:
+        item.includes.clear()
+        models.ItemLog.log_item_include_update(removing_includes_objects + [item], request)
+        return JsonWithStatusResponse()
+    # Сначала удаляем всё, что нужно удалить
+    item.includes.remove(*removing_includes_objects)
+    models.ItemLog.log_item_include_update(removing_includes_objects + [item], request)
+    # Потом добавляем всё, что нужно добавить
+    adding_includes_ids = includes_ids.difference(old_includes_ids)
+    # Убираем самого себя из включений, если есть
+    if item.id in adding_includes_ids:
+        adding_includes_ids.remove(item.id)
+    adding_includes_objects = [
+        o
+        for o in models.Item.objects.filter(id__in=adding_includes_ids)
+        if _check_include(item, o) is None
+    ]
+    item.includes.add(*adding_includes_objects)
+    models.ItemLog.log_item_include_update(adding_includes_objects, request)
     return JsonWithStatusResponse()
 
 
