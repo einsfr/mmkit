@@ -115,14 +115,14 @@ category_patterns = [
         views.category_list,
         name='list'
     ),
-    # categories/new/ Добавление новой категории - форма (GET)
-    # ( Добавление новой категории )
+    # categories/new/ Добавление категории - форма (GET)
+    # ( Добавление категории )
     url(
         r'^new/$',
         permission_required('archive.add_itemcategory')(views.category_new),
         name='new'
     ),
-    # categories/create/ Добавление новой категории - действие (POST)
+    # categories/create/ Добавление категории - действие (POST)
     # ( - )
     url(
         r'^create/$',
