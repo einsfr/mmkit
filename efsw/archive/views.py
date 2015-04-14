@@ -6,7 +6,7 @@ from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
 from django.views.decorators import csrf
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from efsw.archive import models
 from efsw.archive import forms
@@ -299,13 +299,13 @@ def item_locations_update_json(request):
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
+    post_locations = request.POST.get('locations', None)
+    if post_locations is None:
+        return _get_json_wrong_format()
     try:
-        locations = json.loads(request.POST.get('locations', ''))
-    except [ValueError, KeyError]:
-        return JsonWithStatusResponse(
-            'Неверный формат запроса',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
+        locations = json.loads(post_locations)
+    except ValueError:
+        return _get_json_wrong_format()
     if len(locations) == 0:
         models.ItemLocation.objects.filter(item=item).delete()
         return JsonWithStatusResponse()
@@ -327,7 +327,8 @@ def item_locations_update_json(request):
         l_obj.item = item
         l_obj.location = l['location']
         try:
-            l_obj.save()
+            with transaction.atomic():
+                l_obj.save()
         except IntegrityError:
             return JsonWithStatusResponse(
                 'Элемент не может иметь несколько расположений в одном хранилище',
