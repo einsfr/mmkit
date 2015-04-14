@@ -143,7 +143,7 @@
                 {% endfor %}
                 {% if has_more_log_msgs %}
                     <tr><td colspan="3" class="text-center">
-                        <a href="{% url 'efsw.archive:item_log' item.id %}" title="Посмотреть все записи">Посмотреть все записи</a>
+                        <a href="{% url 'efsw.archive:item:logs_list' item.id %}" title="Посмотреть все записи">Посмотреть все записи</a>
                     </td></tr>
                 {% endif %}
             {% else %}
