@@ -7,30 +7,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from efsw.archive import models
 
-
-class ArchiveViewsTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json']
-
-    def test_category_update(self):
-        request_url = urlresolvers.reverse('efsw.archive:category_update', args=(1, ))
-
-        self._login_user()
-        response = self.client.get(request_url)
-        self.assertContains(response, '<h1>Редактирование категории</h1>', status_code=200)
-        self.assertContains(response, '<form action="" method="post">')
-
-        cat_count = models.ItemCategory.objects.count()
-        post_data = {
-            'name': 'Отредактированное название'
-        }
-        response = self.client.post(request_url, post_data, follow=True)
-        self.assertContains(response, '<h1>Список категорий</h1>')
-        self.assertEqual(len(response.redirect_chain), 1)
-        self.assertEqual(models.ItemCategory.objects.count(), cat_count)
-        self.assertEqual(models.ItemCategory.objects.get(pk=1).name, 'Отредактированное название')
-
-
 class ArchiveSecurityTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlog.json', 'itemlocation.json']

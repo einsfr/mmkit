@@ -745,3 +745,85 @@ class CategoryItemsListViewTestCase(TestCase):
                 response,
                 '<a href="/archive/categories/2/items/list/page/1/" title="Предыдущая страница">«</a>'
             )
+
+
+class CategoryEditViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['itemcategory.json']
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:category:edit', args=(3, )))
+        self.assertEqual(405, response.status_code)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:edit', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:edit', args=(3, )))
+        self.assertContains(response, '<h1>Редактирование категории</h1>', status_code=200)
+
+
+class CategoryUpdateViewTestCase(LoginRequiredTestCase):
+
+    fixtures = ['itemcategory.json']
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:update', args=(3, )))
+        self.assertEqual(405, response.status_code)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:category:update', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
+
+    def test_normal(self):
+        self._login_user()
+        post_data = {
+            'name': 'Отредактированное название'
+        }
+        response = self.client.post(
+            urlresolvers.reverse('efsw.archive:category:update', args=(3, )),
+            post_data,
+            follow=True
+        )
+        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+        self.assertEqual(1, len(response.redirect_chain))
+        self.assertEqual('Отредактированное название', models.ItemCategory.objects.get(pk=3).name)
+        call_command('loaddata', 'itemcategory.json', verbosity=0)
+
+
+# ------------------------- Storage -------------------------
+
+
+class StorageShowJsonViewTestCase(TestCase):
+
+    fixtures = ['storage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:storage:show_json')
+
+    def test_nonexist(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Ошибка: хранилище с ID "1000000" не существует', json_content['data'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        storage_data = json_content['data']
+        self.assertEqual(4, len(storage_data))
+        for _ in ['id', 'name', 'disable_location', 'base_url']:
+            self.assertIn(_, storage_data)
+        self.assertEqual('Онлайн хранилище №1', storage_data['name'])
+        self.assertTrue(storage_data['disable_location'])
+        self.assertEqual('\\\\192.168.100.1\\', storage_data['base_url'])
