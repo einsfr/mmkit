@@ -32,3 +32,26 @@ class LoginRequiredTestCase(TestCase):
 
     def _login_user(self):
         self.client.login(username='_test', password='_test')
+
+
+class AbstractSecurityTestCase(TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._users_before = []
+
+    def setUp(self):
+        self._users_before = list(User.objects.values_list('id', flat=True).order_by('id'))
+
+    def tearDown(self):
+        users_after = list(User.objects.values_list('id', flat=True).order_by('id'))
+        users_to_remove = sorted(list(set(users_after) - set(self._users_before)))
+        User.objects.filter(id__in=users_to_remove).delete()
+
+    def assertNotLoginRequired(self, response, url_tuple):
+        if response.status_code == 302:
+            self.assertNotEqual(self._get_login_path().format(url_tuple[0]), response.redirect_chain[0][0])
+            self.assertNotContains(response, '<h1>Вход в систему</h1>')
+
+    def _get_login_path(self):
+        raise NotImplementedError()
