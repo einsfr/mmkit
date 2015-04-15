@@ -1,5 +1,7 @@
 {% extends 'archive/_app_base.html' %}
 
+{% load staticfiles %}
+
 {% block title %}{{ block.super }} - Редактирование элемента{% endblock %}
 
 {% block content %}
@@ -11,4 +13,9 @@
         </table>
         <input type="submit" value="Сохранить">
     </form>
+{% endblock %}
+
+{% block footer_script %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'item_new.js' %}"></script>
 {% endblock %}
