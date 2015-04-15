@@ -5,13 +5,20 @@
         "ru": {
           "type": "custom",
           "tokenizer": "standard",
-          "filter": ["lowercase", "russian_morphology", "ru_stop"]
+          "filter": ["lowercase", "russian_morphology", "ru_stop"],
+          "char_filter": ["ru_e_yo"]
         }
       },
       "filter": {
         "ru_stop": {
           "type": "stop",
           "stopwords": "_russian_"
+        }
+      },
+      "char_filter": {
+        "ru_e_yo": {
+          "type": "mapping",
+          "mappings": ["ё=>е", "Ё=>Е"]
         }
       }
     }

@@ -87,7 +87,7 @@ def search(request):
             return shortcuts.render(request, 'archive/search.html', {'form': form, 'search_performed': False})
         query = form.cleaned_data['q']
         if query:
-            sq.query_multi_match(str(query), ['name', 'description', 'author'])
+            sq.query_multi_match(str(query).lower().replace('ё', 'е'), ['name', 'description', 'author'])
         order = form.cleaned_data['o']
         if order == forms.ArchiveSearchForm.ORDER_BY_CREATED_ASC:
             sq.sort_field('created')
