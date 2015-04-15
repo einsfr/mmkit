@@ -1,5 +1,6 @@
 import os
 import optparse
+import json
 
 from django.core.management import base
 from django.conf import settings
@@ -82,8 +83,8 @@ class Command(base.BaseCommand):
                 if verbosity >= 2:
                     print('    Индекс существует - пропускаю')
                 return False
-        with open(path, 'r') as f:
-            es.indices.create(index=index_name, body=f.read())
+        with open(path, 'r', encoding='utf-8') as f:
+            es.indices.create(index=index_name, body=json.load(f))
         return True
 
     def _compatible(self, path):
