@@ -212,6 +212,11 @@ def item_includes_check_json(request):
             'Идентификатор должен быть целым числом',
             JsonWithStatusResponse.STATUS_ERROR
         )
+    except TypeError:
+        return JsonWithStatusResponse(
+            'Проверьте строку запроса - возможно, не установлен id или include_id',
+            JsonWithStatusResponse.STATUS_ERROR
+        )
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:

@@ -297,6 +297,18 @@ class ItemIncludesCheckJsonTestCase(TestCase):
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
         self.assertEqual('Идентификатор должен быть целым числом', json_content['data'])
 
+    def test_id_not_set(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Проверьте строку запроса - возможно, не установлен id или include_id', json_content['data'])
+        response = self.client.get('{0}?include_id={1}'.format(self.request_url, 1))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Проверьте строку запроса - возможно, не установлен id или include_id', json_content['data'])
+
     def test_nonexist_item(self):
         response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 1000000, 8))
         self.assertIsInstance(response, JsonWithStatusResponse)
