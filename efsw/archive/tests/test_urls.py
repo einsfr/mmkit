@@ -1,5 +1,5 @@
 from efsw.archive import views
-from efsw.common.test.testcase import UrlsTestCase
+from efsw.common.utils.testcases import UrlsTestCase
 
 
 class ArchiveUrlsTestCase(UrlsTestCase):

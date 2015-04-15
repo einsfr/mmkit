@@ -70,7 +70,7 @@ class AbstractSecurityTestCase(TestCase):
             self.assertEqual(self._get_login_path().format(condition.url), response.redirect_chain[0][0])
             self.assertContains(response, '<h1>Вход в систему</h1>')
 
-    def test_anonymous_access(self):
+    def _test_anonymous_access(self):
         print('Проверка доступа анонимных пользователей...')
         self.client.logout()
         for c in self._get_test_conditions():
@@ -91,7 +91,7 @@ class AbstractSecurityTestCase(TestCase):
                 print(' OK (запрещено)')
         print()
 
-    def test_admin_access(self):
+    def _test_admin_access(self):
         print('Проверка доступа суперпользователя...')
         User.objects.create_superuser('_sec_admin', 'admin@example.com', 'password')
         self.client.login(username='_sec_admin', password='password')
@@ -109,7 +109,7 @@ class AbstractSecurityTestCase(TestCase):
             print(' OK')
         print()
 
-    def test_non_priveleged_access(self):
+    def _test_non_priveleged_access(self):
         print('Проверка доступа пользователя без привелегий...')
         User.objects.create_user('_sec_non_priveleged', password='password')
         self.client.login(username='_sec_non_priveleged', password='password')
@@ -131,7 +131,7 @@ class AbstractSecurityTestCase(TestCase):
                 print(' OK (запрещено)')
         print()
 
-    def test_concrete_permissions(self):
+    def _test_concrete_permissions(self):
         print('Проверка конкретных привелегий...')
         for c in [x for x in self._get_test_conditions() if not x.anonymous]:
             print('    {0}'.format(c.url), end='')

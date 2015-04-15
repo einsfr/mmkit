@@ -1,6 +1,6 @@
 from django.core import urlresolvers
 
-from efsw.common.test.testcase import AbstractSecurityTestCase
+from efsw.common.utils.testcases import AbstractSecurityTestCase
 
 
 class ArchiveSecurityTestCase(AbstractSecurityTestCase):
@@ -85,3 +85,9 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
             # ------------------------- Storage -------------------------
             self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:storage:show_json')),
         ]
+
+    def test_security(self):
+        self._test_admin_access()
+        self._test_anonymous_access()
+        self._test_concrete_permissions()
+        self._test_non_priveleged_access()

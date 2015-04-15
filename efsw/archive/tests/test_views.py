@@ -7,7 +7,7 @@ from django.core import urlresolvers
 from django.core.management import call_command
 
 from efsw.archive import models
-from efsw.common.test.testcase import LoginRequiredTestCase
+from efsw.common.utils.testcases import LoginRequiredTestCase
 from efsw.common.http.response import JsonWithStatusResponse
 
 
