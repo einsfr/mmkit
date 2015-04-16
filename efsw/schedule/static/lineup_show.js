@@ -4,14 +4,18 @@ $(document).ready(function() {
     var lineup_table = $("#lineup_table");
     lineup_table.disableSelection();
     lineup_table.on('dblclick', "tbody td", function() {
-        view_model.process_dblclick();
+        view_model.show_control_modal($(this).data('pp_id'));
     });
 });
 
 function LineupShowViewModel() {
     var self = this;
 
-    self.process_dblclick = function() {
-        alert('!!');
+    self.pp_loaded = ko.observable(false);
+    self.pp_cache = [];
+
+    self.show_control_modal = function(pp_id) {
+        self.pp_loaded(false);
+        $('#pp_table_control_modal').modal();
     };
 }
