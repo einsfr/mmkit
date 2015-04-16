@@ -18,6 +18,10 @@ div.search-result h4 {
     width: 6em;
 }
 
+#lineup_table tbody td {
+    cursor: pointer;
+}
+
 #lineup_table tbody td.locked {
     background: #cccccc;
 }
