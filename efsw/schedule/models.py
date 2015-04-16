@@ -128,6 +128,9 @@ class Program(models.Model):
         except KeyError:
             return 'Ошибка: неизвестное значение ограничения по возрасту.'
 
+    def __str__(self):
+        return self.name
+
 
 class ProgramPosition(models.Model):
 
