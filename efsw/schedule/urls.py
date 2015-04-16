@@ -74,10 +74,22 @@ program_patterns = [
     ),
 ]
 
+# ------------------------- ProgramPosition -------------------------
+pp_patterns = [
+    # pps/show/json/?id=12
+    # ( - )
+    url(
+        r'^show/json/',
+        views.pp_show_json,
+        name='show_json'
+    )
+]
 
 urlpatterns = [
     # lineups/...
     url(r'^lineups/', include((lineup_patterns, 'lineup', 'lineup'))),
     # programs/...
     url(r'^programs/', include((program_patterns, 'program', 'program'))),
+    # pps/...
+    url(r'^pps/', include((pp_patterns, 'pp', 'pp'))),
 ]

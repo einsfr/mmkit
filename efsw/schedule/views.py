@@ -123,3 +123,7 @@ def program_show(request, program_id):
         pk=program_id
     )
     return shortcuts.render(request, 'schedule/program_show.html', {'program': program})
+
+
+def pp_show_json(request):
+    pass
