@@ -2,10 +2,18 @@
     <tr>
         {% for cell in row %}
             {% if forloop.first %}
-                <td>{{ cell|time:'H:i:s' }}</td>
+                <th>{{ cell|time:'H:i:s' }}</th>
             {% else %}
-                <td rowspan="{{ cell.row_span }}"{% if cell.pp.locked %} class="locked"{% endif %}{% if cell.pp.program %} style="background-color: {{ cell.pp.program.color }};"{% endif %}>
-                    {{ cell.pp.program.name }}
+                <td
+                        rowspan="{{ cell.row_span }}"
+                        {% if cell.pp.locked %} class="locked"{% endif %}
+                        {% if cell.pp.program %} style="background-color: {{ cell.pp.program.color }};"{% endif %}
+                        data-pp_id="{{ cell.pp.id }}"
+                        >
+                    {% if cell.pp.program %}
+                        {{ cell.pp.program.name }}
+                        <div>{{ cell.pp.program.format_age_limit }}</div>
+                    {% endif %}
                     {% if cell.pp.comment %}
                         <small>{{ cell.pp.comment }}</small>
                     {% endif %}
