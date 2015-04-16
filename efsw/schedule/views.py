@@ -85,7 +85,8 @@ def lineup_show_current(request):
     lineup_table_data = _get_lineup_table_data(lineup)
     return shortcuts.render(request, 'schedule/lineup_show_current.html', {
         'lineup': lineup,
-        'lineup_table_data': lineup_table_data
+        'lineup_table_data': lineup_table_data,
+        'pp_control_form': forms.ProgramPositionControlForm()
     })
 
 
