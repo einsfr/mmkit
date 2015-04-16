@@ -10,12 +10,31 @@
             </div>
             <div class="modal-body">
                 <table class="table" data-bind="visible: pp_loaded() == true">
-                    {{ pp_control_form.as_table }}
+                    <tr>
+                        <th>Время начала</th>
+                        <td>{{ pp_control_form.st_h }}:{{ pp_control_form.st_m }}</td>
+                    </tr>
+                    <tr>
+                        <th>Время окончания</th>
+                        <td>{{ pp_control_form.et_h }}:{{ pp_control_form.et_m }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ pp_control_form.c.label_tag }}</th>
+                        <td>{{ pp_control_form.c }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ pp_control_form.l.label_tag }}</th>
+                        <td>{{ pp_control_form.l }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ pp_control_form.p.label_tag }}</th>
+                        <td>{{ pp_control_form.p }}</td>
+                    </tr>
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger">Удалить</button>
-                <button type="button" class="btn btn-primary">Сохранить</button>
+                <button type="button" class="btn btn-danger" data-bind="enable: pp_loaded() == true">Удалить</button>
+                <button type="button" class="btn btn-primary" data-bind="enable: pp_loaded() == true">Сохранить</button>
             </div>
         </div>
     </div>
