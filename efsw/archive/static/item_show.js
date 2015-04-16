@@ -17,15 +17,15 @@ function ItemLocation(data) {
 
 function ItemStorage(data) {
     if (data) {
-        this.id = data.id,
-        this.name = data.name,
-        this.base_url = data.base_url,
-        this.disable_location = data.disable_location
+        this.id = data.id;
+        this.name = data.name;
+        this.base_url = data.base_url;
+        this.disable_location = data.disable_location;
     } else {
-        this.id = 0,
-        this.name = '',
-        this.base_url = '',
-        this.disable_location = false
+        this.id = 0;
+        this.name = '';
+        this.base_url = '';
+        this.disable_location = false;
     }
 }
 
