@@ -4,6 +4,13 @@
 
 {% block title %}{{ block.super }} - Текущая сетка вещания{% endblock %}
 
+{% if lineup %}
+    {% block top_level_content %}
+        {{ block.super }}
+        {% include 'schedule/_pp_list_table_modal.html' %}
+    {% endblock %}
+{% endif %}
+
 {% block content %}
     <h1>Текущая сетка вещания</h1>
     {% if lineup %}
