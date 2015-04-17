@@ -4,19 +4,30 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
                 <h3 class="text-center">
-                    <span data-bind="visible: pp_loaded() == true">Название</span>
+                    <span data-bind="text: pp().dow, visible: pp_loaded() == true"></span>
                     <span data-bind="visible: pp_loaded() == false">Загрузка...</span>
                 </h3>
             </div>
             <div class="modal-body">
                 <table class="table" data-bind="visible: pp_loaded() == true">
                     <tr>
-                        <th>Время начала</th>
+                        <th>Время начала:</th>
                         <td>{{ pp_control_form.st_h }}:{{ pp_control_form.st_m }}</td>
                     </tr>
                     <tr>
-                        <th>Время окончания</th>
+                        <th>Время окончания:</th>
                         <td>{{ pp_control_form.et_h }}:{{ pp_control_form.et_m }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ pp_control_form.p.label_tag }}</th>
+                        <td>
+                            {{ pp_control_form.p }}
+                            <div data-bind="visible: program_loaded() == false">Загрузка...</div>
+                            <div data-bind="visible: program_loaded() && pp().program_id">
+                                (Ограничение по возрасту: <span data-bind="text: program().age_limit"></span>, размер окна:
+                                <span data-bind="text: program().ls_hours"></span> ч. <span data-bind="text: program().ls_minutes"></span> мин.)
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <th>{{ pp_control_form.c.label_tag }}</th>
@@ -25,10 +36,6 @@
                     <tr>
                         <th>{{ pp_control_form.l.label_tag }}</th>
                         <td>{{ pp_control_form.l }}</td>
-                    </tr>
-                    <tr>
-                        <th>{{ pp_control_form.p.label_tag }}</th>
-                        <td>{{ pp_control_form.p }}</td>
                     </tr>
                 </table>
             </div>
