@@ -29,6 +29,9 @@
             },
             program_show_json: function(program_id) {
                 return '{% url 'efsw.schedule:program:show_json' %}?id=' + program_id;
+            },
+            pp_delete_json: function(pp_id) {
+                return '{% url 'efsw.schedule:pp:delete_json' %}?id=' + pp_id;
             }
         }
     </script>

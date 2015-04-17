@@ -90,6 +90,13 @@ pp_patterns = [
         r'^show/json/',
         views.pp_show_json,
         name='show_json'
+    ),
+    # pps/delete/json/?id=5
+    # ( - )
+    url(
+        r'delete/json/',
+        views.pp_delete_json,
+        name='delete_json'
     )
 ]
 

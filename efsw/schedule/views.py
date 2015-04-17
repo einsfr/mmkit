@@ -162,6 +162,7 @@ def pp_show_json(request):
 
     def format_pp_dict(pp):
         return_dict = {
+            'id': pp.id,
             'dow': pp.DOW_DICT[pp.dow],
             'start_hours': pp.start_time.hour,
             'start_minutes': pp.start_time.minute,
@@ -182,3 +183,75 @@ def pp_show_json(request):
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
+
+
+def _get_json_delete_empty_pp(pp_id):
+    return JsonWithStatusResponse(
+        'Ошибка: невозможно удалить пустой фрагмент с ID "{0}"'.format(pp_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def pp_delete_json(request):
+
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    if not program_position.program:
+        return _get_json_delete_empty_pp()
+    lineup = program_position.lineup
+    if program_position.start_time == lineup.start_time:
+        previous_pp = None
+    else:
+        previous_pp = lineup.program_positions.get(dow=program_position.dow, end_time=program_position.start_time)
+    if program_position.end_time == lineup.end_time:
+        next_pp = None
+    else:
+        next_pp = lineup.program_positions.get(dow=program_position.dow, start_time=program_position.end_time)
+    if previous_pp is None and next_pp is None:
+        # Значит, этот фрагмент занимает весь день от начала и до конца и нужно просто сделать его пустым
+        program_position.program = None
+        program_position.save()
+    elif previous_pp is None and next_pp is not None:
+        # Если фрагмент находится в начале дня
+        if next_pp.program:
+            program_position.program = None
+            program_position.save()
+        else:
+            next_pp.start_time = program_position.start_time
+            program_position.delete()
+            next_pp.save()
+    elif previous_pp is not None and next_pp is None:
+        # Если фрагмент находится в конце дня
+        if previous_pp.program:
+            program_position.program = None
+            program_position.save()
+        else:
+            previous_pp.end_time = program_position.end_time
+            program_position.delete()
+            previous_pp.save()
+    else:
+        # Если фрагмент находится в середине дня
+        if not previous_pp.program and not next_pp.program:
+            # Если это фрагмент с программой между двумя пустыми
+            previous_pp.end_time = next_pp.end_time
+            program_position.delete()
+            next_pp.delete()
+            previous_pp.save()
+        elif previous_pp.program and not next_pp.program:
+            # Если предыдущий фрагмент с программой, а следующий пустой
+            next_pp.start_time = program_position.start_time
+            program_position.delete()
+            next_pp.save()
+        elif not previous_pp.program and next_pp.program:
+            # Если предыдущий фрагмент пустой, а следующий с программой
+            previous_pp.end_time = program_position.end_time
+            program_position.delete()
+            previous_pp.save()
+        else:
+            # Если и предыдущий и следующий фрагменты с программами
+            program_position.program = None
+            program_position.save()
+    return JsonWithStatusResponse()

@@ -40,7 +40,9 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bind="enable: pp_loaded() == true">Удалить</button>
+                <button type="button"
+                        class="btn btn-danger"
+                        data-bind="enable: pp_loaded() == true && pp().program_id, event: { click: pp_delete }">Удалить</button>
                 <button type="button" class="btn btn-primary" data-bind="enable: pp_loaded() == true">Сохранить</button>
             </div>
         </div>

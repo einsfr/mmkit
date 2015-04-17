@@ -10,6 +10,7 @@ $(document).ready(function() {
 
 function ProgramPosition(data) {
     if (data) {
+        this.id = data.id;
         this.dow = data.dow;
         this.start_hours = data.start_hours;
         this.start_minutes = data.start_minutes;
@@ -19,6 +20,7 @@ function ProgramPosition(data) {
         this.locked = data.locked;
         this.program_id = data.program_id;
     } else {
+        this.id = 0;
         this.dow = '';
         this.start_hours = 0;
         this.start_minutes = 0;
@@ -70,6 +72,21 @@ function LineupShowViewModel() {
         } else {
            self.program_loaded(true);
         }
+    };
+
+    self.pp_delete = function() {
+        if (!confirm('Удалить фрагмент?')) {
+            return;
+        }
+        $.ajax(urls.pp_delete_json(self.pp().id), { method: 'post' }).done(function(result) {
+            if (result.status == 'ok') {
+                alert('Удалено');
+            } else {
+                alert(result.data);
+            }
+        }).fail(function(jqXHR, textStatus) {
+            alert('При удалении возникла ошибка: ' + textStatus);
+        });
     };
 
     self._load_pp = function(pp_id) {
