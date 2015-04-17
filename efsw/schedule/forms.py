@@ -66,5 +66,8 @@ class ProgramPositionControlForm(forms.Form):
 
     p = forms.ModelChoiceField(
         label='Программа',
-        queryset=models.Program.objects.all().order_by('name')
+        queryset=models.Program.objects.all().order_by('name'),
+        widget=forms.Select(attrs={
+            'data-bind': 'value: pp().program_id, event: { change: program_changed }',
+        })
     )
