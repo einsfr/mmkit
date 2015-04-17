@@ -9,6 +9,7 @@ from django.views.decorators import http
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
 from efsw.schedule import forms
+from efsw.common.http.response import JsonWithStatusResponse
 
 
 def _get_current_lineup(channel):
@@ -125,5 +126,59 @@ def program_show(request, program_id):
     return shortcuts.render(request, 'schedule/program_show.html', {'program': program})
 
 
+def _get_json_program_not_found(program_id):
+    return JsonWithStatusResponse(
+        'Ошибка: программа с ID "{0}" не найдена'.format(program_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def program_show_json(request):
+
+    def format_program_dict(program):
+        return {
+            'name': program.name,
+            'ls_hours': program.lineup_size.hour,
+            'ls_minutes': program.lineup_size.minute,
+            'age_limit': program.format_age_limit()
+        }
+
+    program_id = request.GET.get('id', None)
+    try:
+        program = models.Program.objects.get(pk=program_id)
+    except models.Program.DoesNotExist:
+        return _get_json_program_not_found(program_id)
+    return JsonWithStatusResponse(format_program_dict(program))
+
+
+def _get_json_pp_not_found(pp_id):
+    return JsonWithStatusResponse(
+        'Ошибка: не найден фрагмент сетки вещания с ID "{0}"'.format(pp_id),
+        JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
 def pp_show_json(request):
-    pass
+
+    def format_pp_dict(pp):
+        return_dict = {
+            'dow': pp.DOW_DICT[pp.dow],
+            'start_hours': pp.start_time.hour,
+            'start_minutes': pp.start_time.minute,
+            'end_hours': pp.end_time.hour,
+            'end_minutes': pp.end_time.minute,
+            'comment': pp.comment,
+            'locked': pp.locked,
+        }
+        if pp.program:
+            return_dict['program_id'] = pp.program.id
+        else:
+            return_dict['program_id'] = 0
+        return return_dict
+
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    return JsonWithStatusResponse(format_pp_dict(program_position))

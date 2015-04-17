@@ -72,6 +72,14 @@ program_patterns = [
             ),
         ])
     ),
+    # ------------------------- JSON -------------------------
+    # programs/show/json/?id=5
+    # ( - )
+    url(
+        r'^show/json/',
+        views.program_show_json,
+        name='show_json'
+    )
 ]
 
 # ------------------------- ProgramPosition -------------------------
