@@ -27,6 +27,26 @@ lineup_patterns = [
         views.lineup_show_current,
         name='show_current'
     ),
+    # lineups/1/...
+    url(
+        r'^(?P<lineup_id>\d+)/',
+        include([
+            # lineups/1/show/ Просмотр сетки вещания
+            # ( Просмотр сетки вещания )
+            url(
+                r'^show/$',
+                views.lineup_show,
+                name='show'
+            ),
+            # lineups/1/show/part/pp-table-body/ Часть страницы с таблицей фрагментов
+            # ( - )
+            url(
+                r'^show/part/pp_table_body/$',
+                views.lineup_show_part_pp_table_body,
+                name='show_part_pp_table_body'
+            )
+        ])
+    ),
 ]
 
 # ------------------------- Program -------------------------

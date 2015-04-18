@@ -80,10 +80,15 @@ function LineupShowViewModel() {
         }
         $.ajax(urls.pp_delete_json(self.pp().id), { method: 'post' }).done(function(result) {
             if (result.status == 'ok') {
-                alert('Удалено');
+                $('#pp_table_control_modal').modal('hide');
             } else {
                 alert(result.data);
             }
+            $.ajax(urls.lineup_show_part_pp_table_body()).done(function(result) {
+                $('#lineup_table').children('tbody').replaceWith('<tbody>' + result + '</tbody>');
+            }).fail(function(jqXHR, textStatus) {
+                alert('При обновлении таблицы возникла ошибка: ' + textStatus);
+            });
         }).fail(function(jqXHR, textStatus) {
             alert('При удалении возникла ошибка: ' + textStatus);
         });

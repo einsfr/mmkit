@@ -32,6 +32,9 @@
             },
             pp_delete_json: function(pp_id) {
                 return '{% url 'efsw.schedule:pp:delete_json' %}?id=' + pp_id;
+            },
+            lineup_show_part_pp_table_body: function() {
+                return '{% url 'efsw.schedule:lineup:show_part_pp_table_body' lineup.id %}';
             }
         }
     </script>

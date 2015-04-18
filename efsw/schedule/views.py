@@ -91,6 +91,13 @@ def lineup_show_current(request):
     })
 
 
+def lineup_show_part_pp_table_body(request, lineup_id):
+    lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
+    return shortcuts.render(request, 'schedule/_pp_list_table_body.html', {
+        'lineup_table_data': _get_lineup_table_data(lineup)
+    })
+
+
 def program_list(request, page=1):
     programs = models.Program.objects.all().order_by('name')
     return shortcuts.render(
@@ -216,7 +223,7 @@ def pp_delete_json(request):
         program_position.save()
     elif previous_pp is None and next_pp is not None:
         # Если фрагмент находится в начале дня
-        if next_pp.program:
+        if next_pp.program or next_pp.locked:
             program_position.program = None
             program_position.save()
         else:
@@ -225,7 +232,7 @@ def pp_delete_json(request):
             next_pp.save()
     elif previous_pp is not None and next_pp is None:
         # Если фрагмент находится в конце дня
-        if previous_pp.program:
+        if previous_pp.program or previous_pp.locked:
             program_position.program = None
             program_position.save()
         else:
@@ -236,20 +243,40 @@ def pp_delete_json(request):
         # Если фрагмент находится в середине дня
         if not previous_pp.program and not next_pp.program:
             # Если это фрагмент с программой между двумя пустыми
-            previous_pp.end_time = next_pp.end_time
-            program_position.delete()
-            next_pp.delete()
-            previous_pp.save()
+            if previous_pp.locked and next_pp.locked:
+                program_position.program = None
+                program_position.save()
+            elif not previous_pp.locked and next_pp.locked:
+                previous_pp.end_time = program_position.end_time
+                program_position.delete()
+                previous_pp.save()
+            elif previous_pp.locked and not next_pp.locked:
+                next_pp.start_time = program_position.start_time
+                program_position.delete()
+                next_pp.save()
+            else:
+                previous_pp.end_time = next_pp.end_time
+                program_position.delete()
+                next_pp.delete()
+                previous_pp.save()
         elif previous_pp.program and not next_pp.program:
             # Если предыдущий фрагмент с программой, а следующий пустой
-            next_pp.start_time = program_position.start_time
-            program_position.delete()
-            next_pp.save()
+            if next_pp.locked:
+                program_position.program = None
+                program_position.save()
+            else:
+                next_pp.start_time = program_position.start_time
+                program_position.delete()
+                next_pp.save()
         elif not previous_pp.program and next_pp.program:
             # Если предыдущий фрагмент пустой, а следующий с программой
-            previous_pp.end_time = program_position.end_time
-            program_position.delete()
-            previous_pp.save()
+            if previous_pp.locked:
+                program_position.program = None
+                program_position.save()
+            else:
+                previous_pp.end_time = program_position.end_time
+                program_position.delete()
+                previous_pp.save()
         else:
             # Если и предыдущий и следующий фрагменты с программами
             program_position.program = None
