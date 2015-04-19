@@ -60,7 +60,7 @@ class ProgramPositionControlForm(forms.Form):
     l = forms.BooleanField(
         label='Заблокировано',
         widget=forms.CheckboxInput(attrs={
-            'data-bind': 'value: pp().locked',
+            'data-bind': 'checked: pp().locked',
         })
     )
 
