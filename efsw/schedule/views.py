@@ -200,7 +200,6 @@ def _get_json_delete_empty_pp(pp_id):
 
 
 def pp_delete_json(request):
-
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
@@ -282,3 +281,11 @@ def pp_delete_json(request):
             program_position.program = None
             program_position.save()
     return JsonWithStatusResponse()
+
+
+def pp_update_json(request):
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
