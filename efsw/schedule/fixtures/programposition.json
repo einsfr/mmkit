@@ -148,6 +148,32 @@
     "fields": {
       "dow": 3,
       "start_time": "18:00:00",
+      "end_time": "00:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 30,
+    "fields": {
+      "dow": 3,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 31,
+    "fields": {
+      "dow": 3,
+      "start_time": "04:00:00",
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
