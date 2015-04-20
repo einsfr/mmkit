@@ -41,12 +41,26 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-danger"
-                            data-bind="enable: pp_loaded() == true && pp().program_id, event: { click: pp_delete }">Удалить</button>
-                    <button type="button"
-                            class="btn btn-primary"
-                            data-bind="enable: pp_loaded() == true, event: { click: pp_update }">Сохранить</button>
+                    <p>
+                        <button type="button"
+                                class="btn btn-danger"
+                                data-toggle="collapse"
+                                data-target="#delete_confirm"
+                                data-bind="enable: pp_loaded() == true && pp().program_id">Удалить</button>
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bind="enable: pp_loaded() == true, event: { click: pp_update }">Сохранить</button>
+                    </p>
+                    <div class="collapse" id="delete_confirm">
+                        <div class="text-center panel panel-danger">
+                            <div class="panel-heading">Удаление необратимо - Вы уверены?</div>
+                            <div class="panel-body">
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        data-bind="enable: pp_loaded() == true && pp().program_id, event: { click: pp_delete }">Да, удалить</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

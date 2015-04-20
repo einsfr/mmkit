@@ -61,6 +61,7 @@ function LineupShowViewModel() {
         self.pp(new ProgramPosition());
         self.pp_loaded(false);
         self.program_loaded(false);
+        $('#delete_confirm').collapse('hide');
         $('#pp_table_control_modal').modal();
         self._load_pp(pp_id);
     };
@@ -76,9 +77,6 @@ function LineupShowViewModel() {
     };
 
     self.pp_delete = function() {
-        if (!confirm('Удалить фрагмент?')) {
-            return;
-        }
         $.ajax(urls.pp_delete_json(self.pp().id), {
             method: 'post'
         }).done(function(result) {
