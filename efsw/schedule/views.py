@@ -199,14 +199,7 @@ def _get_json_delete_empty_pp(pp_id):
     )
 
 
-def pp_delete_json(request):
-    pp_id = request.GET.get('id', None)
-    try:
-        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
-    except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
-    if not program_position.program:
-        return _get_json_delete_empty_pp()
+def _pp_delete(program_position):
     lineup = program_position.lineup
     if program_position.start_time == lineup.start_time:
         previous_pp = None
@@ -280,7 +273,27 @@ def pp_delete_json(request):
             # Если и предыдущий и следующий фрагменты с программами
             program_position.program = None
             program_position.save()
-    return JsonWithStatusResponse()
+
+
+def _has_similar(program_position):
+    return [x['dow'] for x in models.ProgramPosition.objects.filter(
+        lineup=program_position.lineup,
+        start_time=program_position.start_time,
+        end_time=program_position.end_time,
+        locked=program_position.locked
+    ).exclude(dow=program_position.dow).values('dow')]
+
+
+def pp_delete_json(request):
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    if not program_position.program:
+        return _get_json_delete_empty_pp(pp_id)
+    _pp_delete(program_position)
+    return JsonWithStatusResponse({'repeatable': _has_similar(program_position)})
 
 
 def pp_update_json(request):
