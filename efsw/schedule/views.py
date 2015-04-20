@@ -177,6 +177,7 @@ def pp_show_json(request):
             'end_minutes': pp.end_time.minute,
             'comment': pp.comment,
             'locked': pp.locked,
+            'similar_pps': _get_similar(pp)
         }
         if pp.program:
             return_dict['program_id'] = pp.program.id
@@ -275,12 +276,13 @@ def _pp_delete(program_position):
             program_position.save()
 
 
-def _has_similar(program_position):
+def _get_similar(program_position):
     return [x['dow'] for x in models.ProgramPosition.objects.filter(
         lineup=program_position.lineup,
         start_time=program_position.start_time,
         end_time=program_position.end_time,
-        locked=program_position.locked
+        locked=program_position.locked,
+        program=program_position.program,
     ).exclude(dow=program_position.dow).values('dow')]
 
 
@@ -293,7 +295,7 @@ def pp_delete_json(request):
     if not program_position.program:
         return _get_json_delete_empty_pp(pp_id)
     _pp_delete(program_position)
-    return JsonWithStatusResponse({'repeatable': _has_similar(program_position)})
+    return JsonWithStatusResponse()
 
 
 def pp_update_json(request):

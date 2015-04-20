@@ -29,3 +29,7 @@ div.search-result h4 {
 #lineup_table tbody td small {
     font-style: italic;
 }
+
+#repeat_select_container span {
+    margin: 0 1em;
+}

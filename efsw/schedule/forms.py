@@ -71,3 +71,9 @@ class ProgramPositionControlForm(forms.Form):
             'data-bind': 'value: pp().program_id, event: { change: program_changed }',
         })
     )
+
+    r = forms.MultipleChoiceField(
+        choices=models.ProgramPosition.DOW_DICT.items(),
+        label='Повторить для',
+        widget=forms.CheckboxSelectMultiple(),
+    )

@@ -19,6 +19,7 @@ function ProgramPosition(data) {
         this.comment = data.comment;
         this.locked = data.locked;
         this.program_id = data.program_id;
+        this.similar_pps = data.similar_pps;
     } else {
         this.id = 0;
         this.dow = '';
@@ -29,6 +30,7 @@ function ProgramPosition(data) {
         this.comment = '';
         this.locked = false;
         this.program_id = 0;
+        this.similar_pps = [];
     }
 }
 
@@ -61,6 +63,7 @@ function LineupShowViewModel() {
         self.pp(new ProgramPosition());
         self.pp_loaded(false);
         self.program_loaded(false);
+        $('#repeat_select_container').find('input').attr('checked', false);
         $('#delete_confirm').collapse('hide');
         $('#pp_table_control_modal').modal();
         self._load_pp(pp_id);

@@ -11,34 +11,42 @@
                 </div>
                 <div class="modal-body">
                     <table class="table" data-bind="visible: pp_loaded() == true">
-                        <tr>
-                            <th>Время начала:</th>
-                            <td>{{ pp_control_form.st_h }}:{{ pp_control_form.st_m }}</td>
-                        </tr>
-                        <tr>
-                            <th>Время окончания:</th>
-                            <td>{{ pp_control_form.et_h }}:{{ pp_control_form.et_m }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_control_form.p.label_tag }}</th>
-                            <td>
-                                {{ pp_control_form.p }}
-                                <div data-bind="visible: program_loaded() == false">Загрузка...</div>
-                                <div data-bind="visible: program_loaded() && pp().program_id">
-                                    (Ограничение по возрасту: <span data-bind="text: program().age_limit"></span>, размер окна:
-                                    <span data-bind="text: program().ls_hours"></span> ч. <span data-bind="text: program().ls_minutes"></span> мин.)
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_control_form.c.label_tag }}</th>
-                            <td>{{ pp_control_form.c }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_control_form.l.label_tag }}</th>
-                            <td>{{ pp_control_form.l }}</td>
-                        </tr>
+                        <tbody>
+                            <tr>
+                                <th>Время начала:</th>
+                                <td>{{ pp_control_form.st_h }}:{{ pp_control_form.st_m }}</td>
+                            </tr>
+                            <tr>
+                                <th>Время окончания:</th>
+                                <td>{{ pp_control_form.et_h }}:{{ pp_control_form.et_m }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ pp_control_form.p.label_tag }}</th>
+                                <td>
+                                    {{ pp_control_form.p }}
+                                    <div data-bind="visible: program_loaded() == false">Загрузка...</div>
+                                    <div data-bind="visible: program_loaded() && pp().program_id">
+                                        (Ограничение по возрасту: <span data-bind="text: program().age_limit"></span>, размер окна:
+                                        <span data-bind="text: program().ls_hours"></span> ч. <span data-bind="text: program().ls_minutes"></span> мин.)
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{{ pp_control_form.c.label_tag }}</th>
+                                <td>{{ pp_control_form.c }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ pp_control_form.l.label_tag }}</th>
+                                <td>{{ pp_control_form.l }}</td>
+                            </tr>
+                        </tbody>
                     </table>
+                    <h4 data-bind="visible: pp().similar_pps.length > 0">Повторить для похожих блоков</h4>
+                    <div class="text-center" id="repeat_select_container">
+                        {% for cb in pp_control_form.r %}
+                            <span data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps) >= 0">{{ cb }}</span>
+                        {% endfor %}
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <p>
