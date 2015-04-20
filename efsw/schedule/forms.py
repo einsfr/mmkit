@@ -10,7 +10,16 @@ class ProgramCreateForm(forms.ModelForm):
         fields = ('name', 'description', 'age_limit', 'lineup_size', 'max_duration', 'min_duration')
 
 
-class ProgramPositionControlForm(forms.Form):
+class ProgramPositionRepeatForm(forms.Form):
+
+    r = forms.MultipleChoiceField(
+        choices=models.ProgramPosition.DOW_DICT.items(),
+        label='Повторить для',
+        widget=forms.CheckboxSelectMultiple(),
+    )
+
+
+class ProgramPositionControlForm(ProgramPositionRepeatForm):
 
     st_h = forms.IntegerField(
         label='Время начала (часы)',
@@ -70,10 +79,4 @@ class ProgramPositionControlForm(forms.Form):
         widget=forms.Select(attrs={
             'data-bind': 'value: pp().program_id, event: { change: program_changed }',
         })
-    )
-
-    r = forms.MultipleChoiceField(
-        choices=models.ProgramPosition.DOW_DICT.items(),
-        label='Повторить для',
-        widget=forms.CheckboxSelectMultiple(),
     )

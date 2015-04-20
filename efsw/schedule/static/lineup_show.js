@@ -81,7 +81,8 @@ function LineupShowViewModel() {
 
     self.pp_delete = function() {
         $.ajax(urls.pp_delete_json(self.pp().id), {
-            method: 'post'
+            method: 'post',
+            data: $('#repeat_select_container').find('input').serialize()
         }).done(function(result) {
             self._process_change_result(result);
         }).fail(function(jqXHR, textStatus) {

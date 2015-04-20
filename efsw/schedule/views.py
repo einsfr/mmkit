@@ -177,7 +177,7 @@ def pp_show_json(request):
             'end_minutes': pp.end_time.minute,
             'comment': pp.comment,
             'locked': pp.locked,
-            'similar_pps': _get_similar(pp)
+            'similar_pps': [x.dow for x in _get_similar(pp)]
         }
         if pp.program:
             return_dict['program_id'] = pp.program.id
@@ -277,13 +277,13 @@ def _pp_delete(program_position):
 
 
 def _get_similar(program_position):
-    return [x['dow'] for x in models.ProgramPosition.objects.filter(
+    return models.ProgramPosition.objects.filter(
         lineup=program_position.lineup,
         start_time=program_position.start_time,
         end_time=program_position.end_time,
         locked=program_position.locked,
         program=program_position.program,
-    ).exclude(dow=program_position.dow).values('dow')]
+    ).exclude(dow=program_position.dow).select_related('lineup')
 
 
 def pp_delete_json(request):
@@ -294,6 +294,16 @@ def pp_delete_json(request):
         return _get_json_pp_not_found(pp_id)
     if not program_position.program:
         return _get_json_delete_empty_pp(pp_id)
+    if request.POST.get('r', None) is not None:
+        form = forms.ProgramPositionRepeatForm(request.POST)
+        if form.is_valid():
+            for d in [x for x in _get_similar(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
+                _pp_delete(d)
+        else:
+            return JsonWithStatusResponse(
+                'Неправильный формат списка повторов',
+                JsonWithStatusResponse.STATUS_ERROR
+            )
     _pp_delete(program_position)
     return JsonWithStatusResponse()
 
