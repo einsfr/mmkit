@@ -14,10 +14,23 @@
   },
   {
     "model": "schedule.ProgramPosition",
-    "pk": 2,
+    "pk": 29,
     "fields": {
       "dow": 1,
       "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 2,
+    "fields": {
+      "dow": 1,
+      "start_time": "12:00:00",
       "end_time": "04:00:00",
       "comment": "",
       "locked": false,
@@ -291,11 +304,24 @@
     "fields": {
       "dow": 6,
       "start_time": "12:00:00",
-      "end_time": "04:00:00",
+      "end_time": "00:00:00",
       "comment": "",
       "locked": false,
       "lineup": 1,
       "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 28,
+    "fields": {
+      "dow": 6,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
     }
   },
   {
