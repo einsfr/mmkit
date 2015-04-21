@@ -142,12 +142,12 @@ def _get_json_program_not_found(program_id):
 
 def program_show_json(request):
 
-    def format_program_dict(program):
+    def format_program_dict(p):
         return {
-            'name': program.name,
-            'ls_hours': program.lineup_size.hour,
-            'ls_minutes': program.lineup_size.minute,
-            'age_limit': program.format_age_limit()
+            'name': p.name,
+            'ls_hours': p.lineup_size.hour,
+            'ls_minutes': p.lineup_size.minute,
+            'age_limit': p.format_age_limit()
         }
 
     program_id = request.GET.get('id', None)
