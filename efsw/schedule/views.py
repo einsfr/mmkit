@@ -14,7 +14,7 @@ from efsw.common.http.response import JsonWithStatusResponse
 
 def _get_current_lineup(channel):
     try:
-        lineup = models.Lineup.objects.get(active=True, channel=channel, active_since__lte=datetime.date.today())
+        lineup = models.Lineup.objects.get(active=True, channel=channel, active_since__lte=datetime.date.today())  # TODO условие надо будет подправить
     except models.Lineup.DoesNotExist:
         lineup = None
     except MultipleObjectsReturned:
@@ -224,6 +224,10 @@ def _merge_neighbours(pp, previous_pp, next_pp):
     previous_pp.save()
 
 
+def _pp_is_empty(pp):
+    return not pp.program and not pp.comment and not pp.locked
+
+
 def _pp_delete(program_position):
     lineup = program_position.lineup
     if program_position.start_time == lineup.start_time:
@@ -234,48 +238,15 @@ def _pp_delete(program_position):
         next_pp = None
     else:
         next_pp = lineup.program_positions.get(dow=program_position.dow, start_time=program_position.end_time)
-    if previous_pp is None and next_pp is None:
-        # Значит, этот фрагмент занимает весь день от начала и до конца и нужно просто сделать его пустым
-        _clear_program(program_position)
-    elif previous_pp is None and next_pp is not None:
-        # Если фрагмент находится в начале дня
-        if next_pp.program or next_pp.locked:
-            _clear_program(program_position)
-        else:
-            _expand_next(program_position, next_pp)
-    elif previous_pp is not None and next_pp is None:
-        # Если фрагмент находится в конце дня
-        if previous_pp.program or previous_pp.locked:
-            _clear_program(program_position)
-        else:
-            _expand_previous(program_position, previous_pp)
+
+    if (previous_pp is not None and _pp_is_empty(previous_pp)) and (next_pp is None or not _pp_is_empty(next_pp)):
+        _expand_previous(program_position, previous_pp)
+    elif (previous_pp is None or not _pp_is_empty(previous_pp)) and (next_pp is not None and _pp_is_empty(next_pp)):
+        _expand_next(program_position, next_pp)
+    elif (previous_pp is not None and _pp_is_empty(previous_pp)) and (next_pp is not None and _pp_is_empty(next_pp)):
+        _merge_neighbours(program_position, previous_pp, next_pp)
     else:
-        # Если фрагмент находится в середине дня
-        if not previous_pp.program and not next_pp.program:
-            # Если это фрагмент с программой между двумя пустыми
-            if previous_pp.locked and next_pp.locked:
-                _clear_program(program_position)
-            elif not previous_pp.locked and next_pp.locked:
-                _expand_previous(program_position, previous_pp)
-            elif previous_pp.locked and not next_pp.locked:
-                _expand_next(program_position, next_pp)
-            else:
-                _merge_neighbours(program_position, previous_pp, next_pp)
-        elif previous_pp.program and not next_pp.program:
-            # Если предыдущий фрагмент с программой, а следующий пустой
-            if next_pp.locked:
-                _clear_program(program_position)
-            else:
-                _expand_next(program_position, next_pp)
-        elif not previous_pp.program and next_pp.program:
-            # Если предыдущий фрагмент пустой, а следующий с программой
-            if previous_pp.locked:
-                _clear_program(program_position)
-            else:
-                _expand_previous(program_position, previous_pp)
-        else:
-            # Если и предыдущий и следующий фрагменты с программами
-            _clear_program(program_position)
+        _clear_program(program_position)
 
 
 def _get_similar(program_position):
@@ -320,20 +291,29 @@ def pp_update_json(request):
     if form.is_valid():
         start_time = datetime.time(form.cleaned_data['st_h'], form.cleaned_data['st_m'])
         end_time = datetime.time(form.cleaned_data['et_h'], form.cleaned_data['et_m'])
+        program = form.cleaned_data.get('p', None)
+        locked = form.cleaned_data['l']
+        comment = form.cleaned_data['c']
         if start_time == program_position.start_time and end_time == program_position.end_time:
-            if program_position.locked == form.cleaned_data['l']:
-                program_position.comment = form.cleaned_data['c']
-                program_position.locked = form.cleaned_data['l']
-                program_position.program = form.cleaned_data.get('p', None)
+            # Если фрагмент не меняет свою длительность
+            if program or comment or locked:
+                # и при этом становится или остаётся не пустым
+                program_position.comment = comment
+                program_position.program = program
+                program_position.locked = locked
                 try:
                     program_position.full_clean()
                 except ValidationError as e:
-                    return JsonWithStatusResponse.error(program_position.program)
+                    return JsonWithStatusResponse.error(e.message_dict)
                 program_position.save()
                 return JsonWithStatusResponse.ok()
             else:
-                pass
+                # если же становится или остаётся пустым
+                _pp_delete(program_position)
+                return JsonWithStatusResponse.ok()
         else:
+            # А если всё-таки меняет длительность
             pass
+
     else:
         return JsonWithStatusResponse.error(form.errors.as_json())

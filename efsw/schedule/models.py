@@ -1,5 +1,6 @@
 from django.db import models
 from django.core import urlresolvers
+from django.core.exceptions import ValidationError
 
 
 class Channel(models.Model):
@@ -192,3 +193,35 @@ class ProgramPosition(models.Model):
         null=True,
         blank=True,
     )
+
+    def clean(self):
+        lineup = self.lineup
+        if lineup.start_time < lineup.end_time:
+            if self.start_time == self.end_time:
+                raise ValidationError(
+                    'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
+                )
+
+        elif lineup.end_time < lineup.start_time:
+            if self.start_time == self.end_time:
+                raise ValidationError(
+                    'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
+                )
+            if lineup.end_time <= self.start_time < lineup.start_time:
+                raise ValidationError(
+                    'Время начала фрагмента находится вне временных границ сетки'
+                )
+            if lineup.end_time < self.end_time <= lineup.start_time:
+                raise ValidationError(
+                    'Время окончания фрагмента находится вне временных границ сетки'
+                )
+            if (self.start_time > self.end_time) and self.end_time > lineup.start_time:
+                raise ValidationError(
+                    'Окончание фрагмента находится раньше его начала'
+                )
+        else:
+            # т.е. если сетка круглосуточная
+            if self.start_time < lineup.start_time < self.end_time:
+                raise ValidationError(
+                    'В круглосуточной сетке фрагмент не может начинаться в одни эфирные сутки, а заканчиваться в другие'
+                )
