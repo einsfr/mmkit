@@ -16,9 +16,9 @@ class JsonWithStatusResponse(JsonResponse):
         )
 
     @classmethod
-    def ok(cls, data, **kwargs):
+    def ok(cls, data='', **kwargs):
         return cls(data, cls.STATUS_OK, **kwargs)
 
     @classmethod
-    def error(cls, data, **kwargs):
+    def error(cls, data='', **kwargs):
         return cls(data, cls.STATUS_ERROR, **kwargs)
