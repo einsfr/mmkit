@@ -189,5 +189,6 @@ class ProgramPosition(models.Model):
     program = models.ForeignKey(
         Program,
         related_name='lineup_positions',
-        null=True
+        null=True,
+        blank=True,
     )
