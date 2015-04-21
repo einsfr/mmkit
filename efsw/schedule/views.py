@@ -200,6 +200,30 @@ def _get_json_delete_empty_pp(pp_id):
     )
 
 
+def _clear_program(pp):
+    pp.program = None
+    pp.save()
+
+
+def _expand_next(pp, next_pp):
+    next_pp.start_time = pp.start_time
+    pp.delete()
+    next_pp.save()
+
+
+def _expand_previous(pp, previous_pp):
+    previous_pp.end_time = pp.end_time
+    pp.delete()
+    previous_pp.save()
+
+
+def _merge_neighbours(pp, previous_pp, next_pp):
+    previous_pp.end_time = next_pp.end_time
+    pp.delete()
+    next_pp.delete()
+    previous_pp.save()
+
+
 def _pp_delete(program_position):
     lineup = program_position.lineup
     if program_position.start_time == lineup.start_time:
@@ -212,68 +236,46 @@ def _pp_delete(program_position):
         next_pp = lineup.program_positions.get(dow=program_position.dow, start_time=program_position.end_time)
     if previous_pp is None and next_pp is None:
         # Значит, этот фрагмент занимает весь день от начала и до конца и нужно просто сделать его пустым
-        program_position.program = None
-        program_position.save()
+        _clear_program(program_position)
     elif previous_pp is None and next_pp is not None:
         # Если фрагмент находится в начале дня
         if next_pp.program or next_pp.locked:
-            program_position.program = None
-            program_position.save()
+            _clear_program(program_position)
         else:
-            next_pp.start_time = program_position.start_time
-            program_position.delete()
-            next_pp.save()
+            _expand_next(program_position, next_pp)
     elif previous_pp is not None and next_pp is None:
         # Если фрагмент находится в конце дня
         if previous_pp.program or previous_pp.locked:
-            program_position.program = None
-            program_position.save()
+            _clear_program(program_position)
         else:
-            previous_pp.end_time = program_position.end_time
-            program_position.delete()
-            previous_pp.save()
+            _expand_previous(program_position, previous_pp)
     else:
         # Если фрагмент находится в середине дня
         if not previous_pp.program and not next_pp.program:
             # Если это фрагмент с программой между двумя пустыми
             if previous_pp.locked and next_pp.locked:
-                program_position.program = None
-                program_position.save()
+                _clear_program(program_position)
             elif not previous_pp.locked and next_pp.locked:
-                previous_pp.end_time = program_position.end_time
-                program_position.delete()
-                previous_pp.save()
+                _expand_previous(program_position, previous_pp)
             elif previous_pp.locked and not next_pp.locked:
-                next_pp.start_time = program_position.start_time
-                program_position.delete()
-                next_pp.save()
+                _expand_next(program_position, next_pp)
             else:
-                previous_pp.end_time = next_pp.end_time
-                program_position.delete()
-                next_pp.delete()
-                previous_pp.save()
+                _merge_neighbours(program_position, previous_pp, next_pp)
         elif previous_pp.program and not next_pp.program:
             # Если предыдущий фрагмент с программой, а следующий пустой
             if next_pp.locked:
-                program_position.program = None
-                program_position.save()
+                _clear_program(program_position)
             else:
-                next_pp.start_time = program_position.start_time
-                program_position.delete()
-                next_pp.save()
+                _expand_next(program_position, next_pp)
         elif not previous_pp.program and next_pp.program:
             # Если предыдущий фрагмент пустой, а следующий с программой
             if previous_pp.locked:
-                program_position.program = None
-                program_position.save()
+                _clear_program(program_position)
             else:
-                previous_pp.end_time = program_position.end_time
-                program_position.delete()
-                previous_pp.save()
+                _expand_previous(program_position, previous_pp)
         else:
             # Если и предыдущий и следующий фрагменты с программами
-            program_position.program = None
-            program_position.save()
+            _clear_program(program_position)
 
 
 def _get_similar(program_position):
