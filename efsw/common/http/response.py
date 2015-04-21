@@ -14,3 +14,11 @@ class JsonWithStatusResponse(JsonResponse):
             },
             **kwargs
         )
+
+    @classmethod
+    def ok(cls, data, **kwargs):
+        return cls(data, cls.STATUS_OK, **kwargs)
+
+    @classmethod
+    def error(cls, data, **kwargs):
+        return cls(data, cls.STATUS_ERROR, **kwargs)
