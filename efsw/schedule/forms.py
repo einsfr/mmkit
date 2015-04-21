@@ -16,6 +16,7 @@ class ProgramPositionRepeatForm(forms.Form):
         choices=models.ProgramPosition.DOW_DICT.items(),
         label='Повторить для',
         widget=forms.CheckboxSelectMultiple(),
+        required=False
     )
 
 
@@ -68,6 +69,7 @@ class ProgramPositionControlForm(ProgramPositionRepeatForm):
 
     l = forms.BooleanField(
         label='Заблокировано',
+        required=False,
         widget=forms.CheckboxInput(attrs={
             'data-bind': 'checked: pp().locked',
         })
@@ -76,6 +78,7 @@ class ProgramPositionControlForm(ProgramPositionRepeatForm):
     p = forms.ModelChoiceField(
         label='Программа',
         queryset=models.Program.objects.all().order_by('name'),
+        required=False,
         widget=forms.Select(attrs={
             'data-bind': 'value: pp().program_id, event: { change: program_changed }',
         })

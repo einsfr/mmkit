@@ -1,7 +1,7 @@
 import datetime
 
 from django import shortcuts
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.conf import settings
 from django.core import paginator
 from django.views.decorators import http
@@ -316,3 +316,24 @@ def pp_update_json(request):
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
+    form = forms.ProgramPositionControlForm(request.POST)
+    if form.is_valid():
+        start_time = datetime.time(form.cleaned_data['st_h'], form.cleaned_data['st_m'])
+        end_time = datetime.time(form.cleaned_data['et_h'], form.cleaned_data['et_m'])
+        if start_time == program_position.start_time and end_time == program_position.end_time:
+            if program_position.locked == form.cleaned_data['l']:
+                program_position.comment = form.cleaned_data['c']
+                program_position.locked = form.cleaned_data['l']
+                program_position.program = form.cleaned_data.get('p', None)
+                try:
+                    program_position.full_clean()
+                except ValidationError as e:
+                    return JsonWithStatusResponse.error(program_position.program)
+                program_position.save()
+                return JsonWithStatusResponse.ok()
+            else:
+                pass
+        else:
+            pass
+    else:
+        return JsonWithStatusResponse.error(form.errors.as_json())
