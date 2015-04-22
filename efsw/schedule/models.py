@@ -194,34 +194,34 @@ class ProgramPosition(models.Model):
         blank=True,
     )
 
+    ERR_TEXT_START_END_EQUAL = 'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
+    ERR_TEXT_END_BEFORE_START = 'Окончание фрагмента находится раньше его начала'
+    ERR_TEXT_START_OUT_OF_RANGE = 'Время начала фрагмента находится вне временных границ сетки'
+    ERR_TEXT_END_OUT_OF_RANGE = 'Время окончания фрагмента находится вне временных границ сетки'
+    ERR_TEXT_DAY_MISMATCH = 'В круглосуточной сетке фрагмент не может начинаться в одни эфирные сутки, ' \
+                            'а заканчиваться в другие'
+
     def clean(self):
         lineup = self.lineup
         if lineup.start_time < lineup.end_time:
             if self.start_time == self.end_time:
-                raise ValidationError(
-                    'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
-                )
-
+                raise ValidationError(self.ERR_TEXT_START_END_EQUAL)
+            if self.start_time > self.end_time:
+                raise ValidationError(self.ERR_TEXT_END_BEFORE_START)
+            if self.start_time < lineup.start_time or self.start_time >= lineup.end_time:
+                raise ValidationError(self.ERR_TEXT_START_OUT_OF_RANGE)
+            if self.end_time <= lineup.start_time or self.end_time > lineup.end_time:
+                raise ValidationError(self.ERR_TEXT_END_OUT_OF_RANGE)
         elif lineup.end_time < lineup.start_time:
             if self.start_time == self.end_time:
-                raise ValidationError(
-                    'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
-                )
+                raise ValidationError(self.ERR_TEXT_START_END_EQUAL)
             if lineup.end_time <= self.start_time < lineup.start_time:
-                raise ValidationError(
-                    'Время начала фрагмента находится вне временных границ сетки'
-                )
+                raise ValidationError(self.ERR_TEXT_START_OUT_OF_RANGE)
             if lineup.end_time < self.end_time <= lineup.start_time:
-                raise ValidationError(
-                    'Время окончания фрагмента находится вне временных границ сетки'
-                )
+                raise ValidationError(self.ERR_TEXT_END_OUT_OF_RANGE)
             if (self.start_time > self.end_time) and self.end_time > lineup.start_time:
-                raise ValidationError(
-                    'Окончание фрагмента находится раньше его начала'
-                )
+                raise ValidationError(self.ERR_TEXT_END_BEFORE_START)
         else:
             # т.е. если сетка круглосуточная
             if self.start_time < lineup.start_time < self.end_time:
-                raise ValidationError(
-                    'В круглосуточной сетке фрагмент не может начинаться в одни эфирные сутки, а заканчиваться в другие'
-                )
+                raise ValidationError(self.ERR_TEXT_DAY_MISMATCH)
