@@ -117,6 +117,7 @@ function LineupShowViewModel() {
         } else {
             alert(result.data);
         }
+        self._pp_cache = [];
         $.ajax(urls.lineup_show_part_pp_table_body()).done(function(result) {
             $('#lineup_table').children('tbody').replaceWith('<tbody>' + result + '</tbody>');
         }).fail(function(jqXHR, textStatus) {
