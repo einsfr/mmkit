@@ -10,6 +10,7 @@ from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
 from efsw.schedule import forms
 from efsw.common.http.response import JsonWithStatusResponse
+from efsw.schedule.lineops import get_previous_pp, get_next_pp, get_similar_pp, pp_is_empty
 
 
 def _get_current_lineup(channel):
@@ -181,7 +182,7 @@ def pp_show_json(request):
             'end_minutes': pp.end_time.minute,
             'comment': pp.comment,
             'locked': pp.locked,
-            'similar_pps': [x.dow for x in _get_similar(pp)]
+            'similar_pps': [x.dow for x in get_similar_pp(pp)]
         }
         if pp.program:
             return_dict['program_id'] = pp.program.id
@@ -204,63 +205,25 @@ def _get_json_delete_empty_pp(pp_id):
     )
 
 
-def _clear_program(pp):
-    pp.program = None
-    pp.save()
-
-
-def _expand_next(pp, next_pp):
-    next_pp.start_time = pp.start_time
-    pp.delete()
-    next_pp.save()
-
-
-def _expand_previous(pp, previous_pp):
-    previous_pp.end_time = pp.end_time
-    pp.delete()
-    previous_pp.save()
-
-
-def _merge_neighbours(pp, previous_pp, next_pp):
-    previous_pp.end_time = next_pp.end_time
-    pp.delete()
-    next_pp.delete()
-    previous_pp.save()
-
-
-def _pp_is_empty(pp):
-    return not pp.program and not pp.comment and not pp.locked
-
-
 def _pp_delete(program_position):
-    lineup = program_position.lineup
-    if program_position.start_time == lineup.start_time:
-        previous_pp = None
+    previous_pp = get_previous_pp(program_position)
+    next_pp = get_next_pp(program_position)
+    if (previous_pp is not None and pp_is_empty(previous_pp)) and (next_pp is None or not pp_is_empty(next_pp)):
+        previous_pp.end_time = program_position.end_time
+        program_position.delete()
+        previous_pp.save()
+    elif (previous_pp is None or not pp_is_empty(previous_pp)) and (next_pp is not None and pp_is_empty(next_pp)):
+        next_pp.start_time = program_position.start_time
+        program_position.delete()
+        next_pp.save()
+    elif (previous_pp is not None and pp_is_empty(previous_pp)) and (next_pp is not None and pp_is_empty(next_pp)):
+        previous_pp.end_time = next_pp.end_time
+        program_position.delete()
+        next_pp.delete()
+        previous_pp.save()
     else:
-        previous_pp = lineup.program_positions.get(dow=program_position.dow, end_time=program_position.start_time)
-    if program_position.end_time == lineup.end_time:
-        next_pp = None
-    else:
-        next_pp = lineup.program_positions.get(dow=program_position.dow, start_time=program_position.end_time)
-
-    if (previous_pp is not None and _pp_is_empty(previous_pp)) and (next_pp is None or not _pp_is_empty(next_pp)):
-        _expand_previous(program_position, previous_pp)
-    elif (previous_pp is None or not _pp_is_empty(previous_pp)) and (next_pp is not None and _pp_is_empty(next_pp)):
-        _expand_next(program_position, next_pp)
-    elif (previous_pp is not None and _pp_is_empty(previous_pp)) and (next_pp is not None and _pp_is_empty(next_pp)):
-        _merge_neighbours(program_position, previous_pp, next_pp)
-    else:
-        _clear_program(program_position)
-
-
-def _get_similar(program_position):
-    return models.ProgramPosition.objects.filter(
-        lineup=program_position.lineup,
-        start_time=program_position.start_time,
-        end_time=program_position.end_time,
-        locked=program_position.locked,
-        program=program_position.program,
-    ).exclude(dow=program_position.dow).select_related('lineup')
+        program_position.program = None
+        program_position.save()
 
 
 def pp_delete_json(request):
@@ -274,7 +237,7 @@ def pp_delete_json(request):
     if request.POST.get('r', None) is not None:
         form = forms.ProgramPositionRepeatForm(request.POST)
         if form.is_valid():
-            for d in [x for x in _get_similar(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
+            for d in [x for x in get_similar_pp(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
                 _pp_delete(d)
         else:
             return JsonWithStatusResponse(
@@ -295,16 +258,13 @@ def pp_update_json(request):
     if form.is_valid():
         start_time = datetime.time(form.cleaned_data['st_h'], form.cleaned_data['st_m'])
         end_time = datetime.time(form.cleaned_data['et_h'], form.cleaned_data['et_m'])
-        program = form.cleaned_data.get('p', None)
-        locked = form.cleaned_data['l']
-        comment = form.cleaned_data['c']
+        program_position.program = form.cleaned_data.get('p', None)
+        program_position.locked = form.cleaned_data['l']
+        program_position.comment = form.cleaned_data['c']
         if start_time == program_position.start_time and end_time == program_position.end_time:
             # Если фрагмент не меняет свою длительность
-            if program or comment or locked:
+            if not pp_is_empty(program_position):
                 # и при этом становится или остаётся не пустым
-                program_position.comment = comment
-                program_position.program = program
-                program_position.locked = locked
                 try:
                     program_position.full_clean()
                 except ValidationError as e:
@@ -317,7 +277,50 @@ def pp_update_json(request):
                 return JsonWithStatusResponse.ok()
         else:
             # А если всё-таки меняет длительность
-            pass
-
+            old_start_time = program_position.start_time
+            old_end_time = program_position.end_time
+            program_position.start_time = start_time
+            program_position.end_time = end_time
+            try:
+                program_position.full_clean()
+            except ValidationError as e:
+                return JsonWithStatusResponse.error(e.message_dict)
+            if old_end_time > old_start_time:
+                # если фрагмент не переходил за полночь
+                if not (old_start_time <= start_time < end_time <= old_end_time):
+                    return JsonWithStatusResponse.error('Новый элемент должен находиться в границах старого')
+                if old_start_time != start_time:
+                    # нужно добавить пустое место перед фрагментом - а вдруг уже есть?
+                    previous_pp = get_previous_pp(program_position)
+                    if previous_pp is not None and pp_is_empty(previous_pp):
+                        previous_pp.end_time = start_time
+                        previous_pp.save()
+                    else:
+                        prepend_pp = models.ProgramPosition(
+                            start_time=old_start_time,
+                            end_time=start_time,
+                            dow=program_position.dow,
+                            lineup=program_position.lineup,
+                        )
+                        prepend_pp.save()
+                if old_end_time != end_time:
+                    # нужно добавить пустое место после фрагмента - а вдруг уже есть?
+                    next_pp = get_next_pp(program_position)
+                    if next_pp is not None and pp_is_empty(next_pp):
+                        next_pp.start_time = end_time
+                        next_pp.save()
+                    else:
+                        append_pp = models.ProgramPosition(
+                            start_time=end_time,
+                            end_time=old_end_time,
+                            dow=program_position.dow,
+                            lineup=program_position.lineup,
+                        )
+                        append_pp.save()
+                program_position.save()
+                return JsonWithStatusResponse.ok()
+            else:
+                # а если переходил
+                pass
     else:
         return JsonWithStatusResponse.error(form.errors.as_json())
