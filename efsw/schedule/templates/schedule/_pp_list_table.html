@@ -10,8 +10,18 @@
             <th>СБ</th>
             <th>ВС</th>
         </tr>
+        <tr style="background: aliceblue;">
+            <th>{{ lineup_table_data.lineup_start_time|time:'H:i:s' }}</th>
+            <th colspan="7" class="text-center">Начало эфирных суток</th>
+        </tr>
     </thead>
     <tbody>
         {% include 'schedule/_pp_list_table_body.html' %}
     </tbody>
+    <tfoot>
+        <tr style="background: aliceblue;">
+            <th>{{ lineup_table_data.lineup_end_time|time:'H:i:s' }}</th>
+            <th colspan="7" class="text-center">Окончание эфирных суток</th>
+        </tr>
+    </tfoot>
 </table>

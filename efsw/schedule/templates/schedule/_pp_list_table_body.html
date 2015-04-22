@@ -1,8 +1,8 @@
-{% for row in lineup_table_data %}
+{% for row in lineup_table_data.rows %}
     <tr>
         {% for cell in row %}
             {% if forloop.first %}
-                <th>{{ cell|time:'H:i:s' }}{% if forloop.parentloop.last %}<br>---{% endif %}</th>
+                <th>{{ cell|time:'H:i:s' }}</th>
             {% else %}
                 <td
                         rowspan="{{ cell.row_span }}"

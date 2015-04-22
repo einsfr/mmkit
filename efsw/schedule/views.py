@@ -67,7 +67,11 @@ def _get_lineup_table_data(lineup):
                     end_time_index = start_times_list.index(p.end_time)
                 row.append({'pp': p, 'row_span': end_time_index - start_time_index})
         result.append(row)
-    return result
+    return {
+        'rows': result,
+        'lineup_start_time': lineup.start_time,
+        'lineup_end_time': lineup.end_time,
+    }
 
 
 def lineup_list(request, page=1):
