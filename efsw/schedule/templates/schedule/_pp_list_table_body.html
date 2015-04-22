@@ -17,6 +17,7 @@
                     {% if cell.pp.comment %}
                         <small>{{ cell.pp.comment }}</small>
                     {% endif %}
+                    {% if cell.pp.program and cell.pp.locked %}<br><span class="fa fa-lg fa-lock"></span>{% endif %}
                 </td>
             {% endif %}
         {% endfor %}
