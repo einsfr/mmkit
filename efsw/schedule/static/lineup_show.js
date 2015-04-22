@@ -59,12 +59,16 @@ function LineupShowViewModel() {
     self._pp_cache = {};
     self._program_cache = {};
 
-    self.show_control_modal = function(pp_id) {
-        self.pp(new ProgramPosition());
+    self._init_modal = function() {
         self.pp_loaded(false);
         self.program_loaded(false);
+        self.pp(new ProgramPosition());
         $('#repeat_select_container').find('input').attr('checked', false);
         $('#delete_confirm').collapse('hide');
+    };
+
+    self.show_control_modal = function(pp_id) {
+        self._init_modal();
         $('#pp_table_control_modal').modal();
         self._load_pp(pp_id);
     };
@@ -77,6 +81,12 @@ function LineupShowViewModel() {
             self.program(new Program());
             self.program_loaded(true);
         }
+    };
+
+    self.pp_reload = function() {
+        var pp_id = self.pp().id;
+        self._init_modal();
+        self._load_pp(pp_id);
     };
 
     self.pp_delete = function() {
@@ -119,7 +129,7 @@ function LineupShowViewModel() {
             return;
         }
         if (pp_id.toString() in self._pp_cache) {
-            self.pp(self._pp_cache[pp_id.toString()]);
+            self.pp($.extend(true, {}, self._pp_cache[pp_id.toString()]));
             self.pp_loaded(true);
             if (self.pp().program_id) {
                 self._load_program(self.pp().program_id);
@@ -133,7 +143,8 @@ function LineupShowViewModel() {
             if (response.status == 'ok') {
                 var pp = new ProgramPosition(response.data);
                 self.pp(pp);
-                self._pp_cache[pp_id.toString()] = pp;
+                // Если оставить просто знак равенства - содержимое кэша будет меняться при внесении изменений в форму
+                self._pp_cache[pp_id.toString()] = $.extend(true, {}, pp);
                 self.pp_loaded(true);
             } else {
                 alert(response.data);
