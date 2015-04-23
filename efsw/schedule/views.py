@@ -240,8 +240,8 @@ def pp_delete_json(request):
     if request.POST.get('r', None) is not None:
         form = forms.ProgramPositionRepeatForm(request.POST)
         if form.is_valid():
-            for d in [x for x in lineops.get_similar_pp(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
-                _pp_delete(d)
+            for pp in [x for x in lineops.get_similar_pp(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
+                _pp_delete(pp)
         else:
             return JsonWithStatusResponse(
                 'Неправильный формат списка повторов',
@@ -251,15 +251,7 @@ def pp_delete_json(request):
     return JsonWithStatusResponse()
 
 
-def pp_update_json(request):
-    pp_id = request.GET.get('id', None)
-    try:
-        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
-    except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
-    form = forms.ProgramPositionControlForm(request.POST)
-    if not form.is_valid():
-        return JsonWithStatusResponse.error(form.errors.as_json())
+def _pp_update(program_position, form):
     program_position.program = form.cleaned_data.get('p', None)
     program_position.locked = form.cleaned_data['l']
     program_position.comment = form.cleaned_data['c']
@@ -322,4 +314,21 @@ def pp_update_json(request):
                 )
                 append_pp.save()
         program_position.save()
-        return JsonWithStatusResponse.ok()
+
+
+def pp_update_json(request):
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    form = forms.ProgramPositionControlForm(request.POST)
+    if not form.is_valid():
+        return JsonWithStatusResponse.error(form.errors.as_json())
+    for pp in [
+        x
+        for x in lineops.get_similar_pp(program_position)
+        if str(x.dow) in form.cleaned_data.get('r')
+    ] + [program_position]:
+        _pp_update(pp, form)
+    return JsonWithStatusResponse.ok()
