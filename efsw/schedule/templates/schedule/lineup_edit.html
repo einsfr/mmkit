@@ -1,0 +1,120 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}{{ block.super }} - Редактирование сетки вещания{% endblock %}
+
+{% if lineup %}
+    {% block top_level_content %}
+        {{ block.super }}
+        <div class="modal fade" id="pp_edit_modal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form id="pp_form">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
+                            <h3 class="text-center">
+                                <span data-bind="text: pp().dow, visible: pp_loaded() == true"></span>
+                                <span data-bind="visible: pp_loaded() == false">Загрузка...</span>
+                            </h3>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table" data-bind="visible: pp_loaded() == true">
+                                <tbody>
+                                    <tr>
+                                        <th>Время начала:</th>
+                                        <td>{{ pp_control_form.st_h }}:{{ pp_control_form.st_m }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Время окончания:</th>
+                                        <td>{{ pp_control_form.et_h }}:{{ pp_control_form.et_m }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{{ pp_control_form.p.label_tag }}</th>
+                                        <td>
+                                            {{ pp_control_form.p }}
+                                            <div data-bind="visible: program_loaded() == false">Загрузка...</div>
+                                            <div data-bind="visible: program_loaded() && pp().program_id">
+                                                (Ограничение по возрасту: <span data-bind="text: program().age_limit"></span>, размер окна:
+                                                <span data-bind="text: program().ls_hours"></span> ч. <span data-bind="text: program().ls_minutes"></span> мин.)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>{{ pp_control_form.c.label_tag }}</th>
+                                        <td>{{ pp_control_form.c }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{{ pp_control_form.l.label_tag }}</th>
+                                        <td>{{ pp_control_form.l }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h4 data-bind="visible: pp().similar_pps.length > 0">Повторить для похожих блоков</h4>
+                            <div class="text-center" id="repeat_select_container">
+                                {% for cb in pp_control_form.r %}
+                                    <span data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps) >= 0">{{ cb }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <p>
+                                <button type="button"
+                                        class="btn btn-default"
+                                        title="Перезагрузить форму"
+                                        data-bind="event: { click: pp_reload }"><span class="fa fa-lg fa-refresh"></span></button>
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        data-toggle="collapse"
+                                        data-target="#delete_confirm"
+                                        data-bind="enable: pp_loaded() == true && pp().program_id">Удалить</button>
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        data-bind="enable: pp_loaded() == true, event: { click: pp_update }">Сохранить</button>
+                            </p>
+                            <div class="collapse" id="delete_confirm">
+                                <div class="text-center panel panel-danger">
+                                    <div class="panel-heading">Удаление необратимо - Вы уверены?</div>
+                                    <div class="panel-body">
+                                        <button type="button"
+                                                class="btn btn-danger"
+                                                data-bind="enable: pp_loaded() == true && pp().program_id, event: { click: pp_delete }">Да, удалить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+    <h1>Редактирование сетки вещания</h1>
+    {% include 'schedule/_pp_list_table.html' %}
+{% endblock %}
+
+{% block footer_script %}
+    {{ block.super }}
+    <script type="text/javascript">
+        var urls = {
+            pp_edit_json: function(pp_id) {
+                return '{% url 'efsw.schedule:pp:edit_json' %}?id=' + pp_id;
+            },
+            program_show_json: function(program_id) {
+                return '{% url 'efsw.schedule:program:show_json' %}?id=' + program_id;
+            },
+            pp_delete_json: function(pp_id) {
+                return '{% url 'efsw.schedule:pp:delete_json' %}?id=' + pp_id;
+            },
+            lineup_show_part_pp_table_body: function() {
+                return '{% url 'efsw.schedule:lineup:show_part_pp_table_body' lineup.id %}';
+            },
+            pp_update_json: function(pp_id) {
+                return '{% url 'efsw.schedule:pp:update_json' %}?id=' + pp_id;
+            }
+        };
+    </script>
+    <script type="text/javascript" src="{% static 'pp_edit.js' %}"></script>
+{% endblock %}

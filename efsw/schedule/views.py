@@ -79,7 +79,7 @@ def lineup_list(request, page=1):
     pass
 
 
-def lineup_show(lineup_id):
+def lineup_show(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     lineup_table_data = _get_lineup_table_data(lineup)
 
@@ -91,7 +91,15 @@ def lineup_show_current(request):
     lineup_table_data = _get_lineup_table_data(lineup)
     return shortcuts.render(request, 'schedule/lineup_show_current.html', {
         'lineup': lineup,
-        'lineup_table_data': lineup_table_data,
+        'lineup_table_data': lineup_table_data
+    })
+
+
+def lineup_edit(request, lineup_id):
+    lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
+    return shortcuts.render(request, 'schedule/lineup_edit.html', {
+        'lineup': lineup,
+        'lineup_table_data': _get_lineup_table_data(lineup),
         'pp_control_form': forms.ProgramPositionControlForm()
     })
 
@@ -176,6 +184,33 @@ def pp_show_json(request):
         return_dict = {
             'id': pp.id,
             'dow': pp.DOW_DICT[pp.dow],
+            'start': pp.start_time.strftime('%H:%M'),
+            'end': pp.end_time.strftime('%H:%M'),
+            'comment': pp.comment,
+            'locked': pp.locked
+        }
+        if pp.program:
+            return_dict['program_id'] = pp.program.id
+            return_dict['program_name'] = pp.program.name
+            return_dict['program_url'] = pp.program.get_absolute_url()
+            return_dict['program_ls'] = pp.program.lineup_size.strftime('%H:%M')
+            return_dict['program_age_limit'] = pp.program.format_age_limit()
+        return return_dict
+
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    return JsonWithStatusResponse(format_pp_dict(program_position))
+
+
+def pp_edit_json(request):
+
+    def format_pp_dict(pp):
+        return_dict = {
+            'id': pp.id,
+            'dow': pp.DOW_DICT[pp.dow],
             'start_hours': pp.start_time.hour,
             'start_minutes': pp.start_time.minute,
             'end_hours': pp.end_time.hour,
@@ -184,15 +219,15 @@ def pp_show_json(request):
             'locked': pp.locked,
             'similar_pps': [x.dow for x in lineops.get_similar_pp(pp)]
         }
-        if pp.program:
-            return_dict['program_id'] = pp.program.id
+        if pp.program_id:
+            return_dict['program_id'] = pp.program_id
         else:
             return_dict['program_id'] = 0
         return return_dict
 
     pp_id = request.GET.get('id', None)
     try:
-        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
+        program_position = models.ProgramPosition.objects.get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))

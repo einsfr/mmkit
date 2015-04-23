@@ -38,6 +38,13 @@ lineup_patterns = [
                 views.lineup_show,
                 name='show'
             ),
+            # lineups/1/edit/ Редактирование сетки вещания
+            # ( Редактирование сетки вещания )
+            url(
+                r'^edit/$',
+                views.lineup_edit,
+                name='edit'
+            ),
             # lineups/1/show/part/pp-table-body/ Часть страницы с таблицей фрагментов
             # ( - )
             url(
@@ -110,6 +117,13 @@ pp_patterns = [
         r'^show/json/',
         views.pp_show_json,
         name='show_json'
+    ),
+    # pps/edit/json/?id=12
+    # ( - )
+    url(
+        r'^edit/json/',
+        views.pp_edit_json,
+        name='edit_json'
     ),
     # pps/delete/json/?id=5
     # ( - )

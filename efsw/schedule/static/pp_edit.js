@@ -55,7 +55,6 @@ function LineupShowViewModel() {
     self.pp = ko.observable(new ProgramPosition());
     self.program_loaded = ko.observable(false);
     self.program = ko.observable(new Program());
-    self.modal_error = ko.observable('');
     self._pp_cache = {};
     self._program_cache = {};
 
@@ -69,7 +68,7 @@ function LineupShowViewModel() {
 
     self.show_control_modal = function(pp_id) {
         self._init_modal();
-        $('#pp_table_control_modal').modal();
+        $('#pp_edit_modal').modal();
         self._load_pp(pp_id);
     };
 
@@ -113,7 +112,7 @@ function LineupShowViewModel() {
 
     self._process_change_result = function(result) {
         if (result.status == 'ok') {
-            $('#pp_table_control_modal').modal('hide');
+            $('#pp_edit_modal').modal('hide');
         } else {
             alert(result.data);
         }
@@ -140,7 +139,7 @@ function LineupShowViewModel() {
             }
             return;
         }
-        $.getJSON(urls.pp_show_json(pp_id), function(response) {
+        $.getJSON(urls.pp_edit_json(pp_id), function(response) {
             if (response.status == 'ok') {
                 var pp = new ProgramPosition(response.data);
                 self.pp(pp);
