@@ -6,5 +6,21 @@
       "name": "Основной канал",
       "active": true
     }
+  },
+  {
+    "model": "schedule.Channel",
+    "pk": 2,
+    "fields": {
+      "name": "Интересный канал",
+      "active": true
+    }
+  },
+  {
+    "model": "schedule.Channel",
+    "pk": 3,
+    "fields": {
+      "name": "Отключенный канал",
+      "active": false
+    }
   }
 ]
