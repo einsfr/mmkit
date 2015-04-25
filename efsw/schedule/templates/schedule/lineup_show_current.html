@@ -62,10 +62,21 @@
 
 {% block content %}
     <h1>Текущая сетка вещания</h1>
+    <ul class="nav nav-tabs">
+        {% for ch in channels_list %}
+            {% if ch.id == channel.id %}
+                <li class="active"><a href="#">{{ ch }}</a></li>
+            {% else %}
+                <li><a href="{% url 'efsw.schedule:lineup:show_current_channel' ch.id %}" title="Текущая сетка вещания для канала">{{ ch }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
     {% if lineup %}
         {% include 'schedule/_pp_list_table.html' %}
     {% else %}
-        В настоящий момент не существует ни одной активной сетки вещания
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">В настоящий момент не существует ни одной активной сетки вещания</div>
+        </div>
     {% endif %}
 {% endblock %}
 

@@ -20,12 +20,19 @@ lineup_patterns = [
         views.lineup_list,
         name='list_page'
     ),
-    # lineups/current/show/ Текущая сетка вещания
+    # lineups/show/current/ Текущая сетка вещания для первого по сортировке канала
     # ( Текущая сетка вещания )
     url(
         r'^show/current/$',
         views.lineup_show_current,
         name='show_current'
+    ),
+    # lineups/show/current/channel/2/ Текущая сетка вещания для канала 2
+    # ( Текущая сетка вещания )
+    url(
+        r'^show/current/channel/(?P<channel_id>\d+)/$',
+        views.lineup_show_current,
+        name='show_current_channel'
     ),
     # lineups/1/...
     url(

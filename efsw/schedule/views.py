@@ -5,6 +5,7 @@ from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.conf import settings
 from django.core import paginator
 from django.views.decorators import http
+from django.http import Http404
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -84,14 +85,22 @@ def lineup_show(request, lineup_id):
     lineup_table_data = _get_lineup_table_data(lineup)
 
 
-def lineup_show_current(request):
-    lineup = _get_current_lineup(models.Channel.objects.get(pk=1))
-    if lineup is None:
-        return shortcuts.render(request, 'schedule/lineup_show_current.html', {'lineup': None})
-    lineup_table_data = _get_lineup_table_data(lineup)
+def lineup_show_current(request, channel_id=None):
+    channels_list = list(models.Channel.objects.filter(active=True).order_by('id'))
+    if channel_id is None:
+        try:
+            channel = channels_list[0]
+        except IndexError:
+            raise Http404('Не найдено ни одного активного канала')
+    else:
+        channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
+    lineup = _get_current_lineup(channel)
+    lineup_table_data = _get_lineup_table_data(lineup) if lineup is not None else None
     return shortcuts.render(request, 'schedule/lineup_show_current.html', {
         'lineup': lineup,
-        'lineup_table_data': lineup_table_data
+        'lineup_table_data': lineup_table_data,
+        'channels_list': channels_list,
+        'channel': channel
     })
 
 

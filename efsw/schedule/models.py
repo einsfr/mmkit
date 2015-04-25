@@ -21,6 +21,9 @@ class Channel(models.Model):
         default=True
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Lineup(models.Model):
 
