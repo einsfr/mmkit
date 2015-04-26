@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core import paginator
 from django.views.decorators import http
 from django.http import Http404
+from django.db.models import Q
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -15,8 +16,14 @@ from efsw.schedule import lineops
 
 
 def _get_current_lineup(channel):
+    today = datetime.date.today()
     try:
-        lineup = models.Lineup.objects.get(active=True, channel=channel, active_since__lte=datetime.date.today())  # TODO условие надо будет подправить
+        lineup = models.Lineup.objects.get(
+            Q(active_since__lte=today),
+            Q(active_until__gte=today) | Q(active_until__isnull=True),
+            active=True,
+            channel=channel,
+        )
     except models.Lineup.DoesNotExist:
         lineup = None
     except MultipleObjectsReturned:
@@ -93,7 +100,10 @@ def lineup_show_current(request, channel_id=None):
         except IndexError:
             raise Http404('Не найдено ни одного активного канала')
     else:
-        channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
+        try:
+            channel = [x for x in channels_list if x.id == int(channel_id)][0]
+        except IndexError:
+            raise Http404('Канал с ID "{0}" не существует'.format(channel_id))
     lineup = _get_current_lineup(channel)
     lineup_table_data = _get_lineup_table_data(lineup) if lineup is not None else None
     return shortcuts.render(request, 'schedule/lineup_show_current.html', {
