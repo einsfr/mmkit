@@ -13,6 +13,20 @@ lineup_patterns = [
         views.lineup_list,
         name='list'
     ),
+    # lineups/new/ Создать сетку вещания (GET, форма)
+    # ( Создать сетку вещания )
+    url(
+        r'^new/$',
+        views.lineup_new,
+        name='new'
+    ),
+    # lineups/create/ Создать сетку вещания (POST, действие)
+    # ( - )
+    url(
+        r'^create/$',
+        views.lineup_create,
+        name='create'
+    ),
     # lineups/list/page/2/ Список сеток вещания - постранично
     # ( Список сеток вещания, страница 2 )
     url(
@@ -60,6 +74,14 @@ lineup_patterns = [
                 name='show_part_pp_table_body'
             )
         ])
+    ),
+    # ------------------------- JSON -------------------------
+    # lineups/copy/json/?id=1
+    # ( - )
+    url(
+        r'copy/json/',
+        views.lineup_copy_json,
+        name='copy_json'
     ),
 ]
 

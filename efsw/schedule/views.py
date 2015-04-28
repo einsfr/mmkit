@@ -76,8 +76,20 @@ def _get_lineup_table_data(lineup):
     }
 
 
+def _get_lineup_list_page(query_set, page):
+    per_page = getattr(
+        settings,
+        'EFSW_SCHED_LINEUP_LIST_PER_PAGE',
+        schedule_default_settings.EFSW_SCHED_LINEUP_LIST_PER_PAGE
+    )
+    return pagination.get_page(query_set, page, per_page)
+
+
 def lineup_list(request, page=1):
-    pass
+    lineups = models.Lineup.objects.all().order_by('-id')
+    return shortcuts.render(request, 'schedule/lineup_list.html', {
+        'lineups': _get_lineup_list_page(lineups, page),
+    })
 
 
 def lineup_show(request, lineup_id):
@@ -114,6 +126,21 @@ def lineup_edit(request, lineup_id):
         'lineup_table_data': _get_lineup_table_data(lineup),
         'pp_control_form': forms.ProgramPositionControlForm()
     })
+
+
+@http.require_GET
+def lineup_new(request):
+    pass
+
+
+@http.require_POST
+def lineup_create(request):
+    pass
+
+
+@http.require_POST
+def lineup_copy_json(request):
+    pass
 
 
 def lineup_show_part_pp_table_body(request, lineup_id):
@@ -276,6 +303,7 @@ def _pp_delete(program_position):
         program_position.save()
 
 
+@http.require_POST
 def pp_delete_json(request):
     pp_id = request.GET.get('id', None)
     try:
@@ -363,6 +391,7 @@ def _pp_update(program_position, form):
         program_position.save()
 
 
+@http.require_POST
 def pp_update_json(request):
     pp_id = request.GET.get('id', None)
     try:

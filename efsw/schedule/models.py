@@ -68,6 +68,9 @@ class Lineup(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return urlresolvers.reverse('efsw.schedule:lineup:show', args=(self.id, ))
+
 
 class Program(models.Model):
 

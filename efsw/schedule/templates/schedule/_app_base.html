@@ -1,5 +1,7 @@
 {% extends '_base.html' %}
 
+{% load staticfiles %}
+
 {% block title %}{{ block.super }} - Планирование вещания{% endblock %}
 
 {% block content_wrapper %}
@@ -15,6 +17,11 @@
                 <li role="presentation">
                     <a href="{% url 'efsw.schedule:lineup:list' %}" title="Список сеток вещания">Список</a>
                 </li>
+                {% if perms.schedule.add_lineup %}
+                    <li role="presentation">
+                        <a href="#" title="Создать сетку вещания" id="lineup_new_modal_switch">Создать</a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
         <li role="presentation" class="dropdown">
@@ -36,4 +43,14 @@
     {% block content %}{% endblock %}
 {% endblock %}
 
-{% block footer_script %}{{ block.super }}{% endblock %}
+{% block footer_script %}
+    {{ block.super }}
+    <script type="text/javascript">
+        var urls = {
+            lineup_new_part_modal: function() {
+                return '{% url 'efsw.schedule:lineup:new_part_modal' %}';
+            }
+        };
+    </script>
+    <script type="text/javascript" src="{% static 'schedule/app_base.js' %}"></script>
+{% endblock %}

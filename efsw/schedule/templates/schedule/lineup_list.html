@@ -1,0 +1,72 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% load pagination from pagination %}
+{% load field_verbose_name from model %}
+
+{% block title %}{{ block.super }} - Список сеток вещания{% endblock %}
+
+{% if perms.schedule.change_lineup %}
+    {% block top_level_content %}
+        {{ block.super }}
+        <div class="modal fade" id="lineup_copy_modal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+    <h1>Список сеток вещания</h1>
+    {% if lineups %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Канал</th>
+                    <th>Название</th>
+                    <th>Исп.</th>
+                    <th>Исп. с</th>
+                    <th>Исп. до</th>
+                    <th>Начало эф. суток</th>
+                    <th>Окончание эф. суток</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in lineups %}
+                    <tr>
+                        <td>{{ l.id }}</td>
+                        <td>{{ l.channel.name }}</td>
+                        <td>{{ l.name }}</td>
+                        <td>{{ l.active }}</td>
+                        <td>{{ l.active_since }}</td>
+                        <td>{{ l.active_until }}</td>
+                        <td>{{ l.start_time }}</td>
+                        <td>{{ l.end_time }}</td>
+                        <td class="icon_actions_container">
+                            <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-info"></a>
+                            {% if perms.schedule.change_lineup %}
+                                <a href="#" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
+                                <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy"></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav class="text-center">{% pagination lineups 'efsw.schedule:program:list_page' %}</nav>
+    {% else %}
+        Сетки вещания не найдены
+    {% endif %}
+{% endblock %}

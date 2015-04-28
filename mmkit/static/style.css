@@ -33,3 +33,7 @@ div.search-result h4 {
 #repeat_select_container span {
     margin: 0 1em;
 }
+
+.icon_actions_container a {
+    margin: 0 0.15em;
+}
