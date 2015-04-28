@@ -1,7 +1,6 @@
 import json
 
 from django import shortcuts
-from django.core import paginator
 from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
@@ -17,6 +16,7 @@ from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.utils import urlformatter
+from efsw.common.db import pagination
 
 
 def _get_item_list_page(items, page):
@@ -25,16 +25,7 @@ def _get_item_list_page(items, page):
         'EFSW_ARCH_ITEM_LIST_PER_PAGE',
         archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE
     )
-    pagin = paginator.Paginator(items, per_page)
-    try:
-        items_page = pagin.page(page)
-    except paginator.PageNotAnInteger:
-        # Если параметр page не является целым числом - показать первую страницу
-        items_page = pagin.page(1)
-    except paginator.EmptyPage:
-        # Если указанная страница - пустая (т.е. находится вне диапазона страниц) - показать последнюю страницу
-        items_page = pagin.page(pagin.num_pages)
-    return items_page
+    return pagination.get_page(items, page, per_page)
 
 
 def _get_json_item_not_found(item_id):

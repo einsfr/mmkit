@@ -3,7 +3,6 @@ import datetime
 from django import shortcuts
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.conf import settings
-from django.core import paginator
 from django.views.decorators import http
 from django.http import Http404
 from django.db.models import Q
@@ -13,6 +12,7 @@ from efsw.schedule import default_settings as schedule_default_settings
 from efsw.schedule import forms
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.schedule import lineops
+from efsw.common.db import pagination
 
 
 def _get_current_lineup(channel):
@@ -37,14 +37,7 @@ def _get_program_list_page(query_set, page):
         'EFSW_SCHED_PROGRAM_LIST_PER_PAGE',
         schedule_default_settings.EFSW_SCHED_PROGRAM_LIST_PER_PAGE
     )
-    paginator_instance = paginator.Paginator(query_set, per_page)
-    try:
-        programs_page = paginator_instance.page(page)
-    except paginator.PageNotAnInteger:
-        programs_page = paginator_instance.page(1)
-    except paginator.EmptyPage:
-        programs_page = paginator_instance.page(paginator_instance.num_pages)
-    return programs_page
+    return pagination.get_page(query_set, page, per_page)
 
 
 def _get_lineup_table_data(lineup):
