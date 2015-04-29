@@ -42,29 +42,3 @@
     </ul>
     {% block content %}{% endblock %}
 {% endblock %}
-
-{% block top_level_content %}
-    {{ block.super }}
-    {% if perms.schedule.add_lineup %}
-        <div class="modal fade" id="lineup_new_modal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-
-                    </div>
-                    <div class="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-{% endblock %}
-
-{% block footer_script %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'schedule/app_base.js' %}"></script>
-{% endblock %}
