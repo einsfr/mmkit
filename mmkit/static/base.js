@@ -1,6 +1,5 @@
-// Взято отсюда: https://docs.djangoproject.com/en/1.8/ref/csrf/, с небольшими изменениями
-
-(function($) {
+// Инициализация базовой части приложения, необходимой всегда и везде
+require(['jquery', 'bootstrap', 'jquery_ui', 'knockout'], function(jquery) {
 
     function getCookie(name) {
         var cookieValue = null;
@@ -23,7 +22,7 @@
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
 
-    $.ajaxSetup({
+    jquery.ajaxSetup({
         beforeSend: function(xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                 // Send the token to same-origin, relative URLs only.
@@ -34,4 +33,4 @@
         }
     });
 
-}(jQuery));
+});

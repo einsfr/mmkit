@@ -10,6 +10,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/jquery-ui/jquery-ui.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <script src="{% static 'requirejs_conf.js' %}"></script>
+    <script src="{% static 'vendor/requirejs/require.min.js' %}"></script>
+    <script src="{% static 'base.js' %}"></script>
 </head>
 <body>
     <nav class="navbar navbar-default">
@@ -31,12 +34,11 @@
         Используется <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank" title="Font Awesome by Dave Gandy">Font Awesome</a>
     </footer>
     {% block top_level_content %}{% endblock %}
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    <!--
     <script src="{% static 'vendor/knockout/knockout.js' %}"></script>
     <script src="{% static 'vendor/jquery-ui/jquery-ui.min.js' %}"></script>
     <script src="{% static 'vendor/jquery-ui/i18n/datepicker-ru.js' %}"></script>
-    <script src="{% static 'script.js' %}"></script>
     {% block footer_script %}{% endblock %}
+    -->
 </body>
 </html>
