@@ -65,6 +65,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mmkit', 'static'),
+    os.path.join(BASE_DIR, 'efsw', 'common', 'static'),
     os.path.join(BASE_DIR, 'efsw', 'archive', 'static'),
     os.path.join(BASE_DIR, 'efsw', 'schedule', 'static')
 ]
