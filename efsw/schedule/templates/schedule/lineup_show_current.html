@@ -12,68 +12,15 @@
                 urls: {
                     pp_show_json: function(pp_id) {
                         return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
+                    },
+                    pp_show_part_modal: function() {
+                        return '{% url 'efsw.schedule:pp:show_part_modal' %}';
                     }
                 }
             });
         });
     </script>
 {% endblock %}
-
-{% if lineup %}
-    {% block top_level_content %}
-        {{ block.super }}
-        <div class="modal fade" id="pp_show_modal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
-                        <h3 class="text-center">
-                            <span data-bind="text: pp().dow, visible: pp_loaded() == true"></span>
-                            <span data-bind="visible: pp_loaded() == false">Загрузка...</span>
-                        </h3>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table" data-bind="visible: pp_loaded() == true">
-                            <tbody>
-                                <tr>
-                                    <th>Время начала</th>
-                                    <td data-bind="text: pp().start"></td>
-                                </tr>
-                                <tr>
-                                    <th>Время окончания</th>
-                                    <td data-bind="text: pp().end"></td>
-                                </tr>
-                                <tr>
-                                    <th>Программа</th>
-                                    <td>
-                                        <div data-bind="visible: pp().program_id != 0">
-                                            <h4><a title="Описание программы"
-                                                   data-bind="text: pp().program_name, attr: { href: pp().program_url }"></a></h4>
-                                            <p>Ограничение по возрасту: <span data-bind="text: pp().program_age_limit"></span></p>
-                                            <p>Размер в сетке вещания: <span data-bind="text: pp().program_ls"></span></p>
-                                        </div>
-                                        <div data-bind="visible: pp().program_id == 0">-</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Комментарий</th>
-                                    <td data-bind="text: pp().comment"></td>
-                                </tr>
-                                <tr>
-                                    <th>Заблокировано</th>
-                                    <td>
-                                        <span data-bind="visible: pp().locked == true">Да</span>
-                                        <span data-bind="visible: pp().locked == false">Нет</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endblock %}
-{% endif %}
 
 {% block content %}
     <h1>Текущая сетка вещания</h1>

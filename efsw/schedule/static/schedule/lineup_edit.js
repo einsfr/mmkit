@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
+define(['jquery', 'knockout', 'common/modal_loader', 'jquery_ui', 'bootstrap'], function($, ko, ml) {
 
     return function(conf) {
 
@@ -64,6 +64,7 @@ define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
         self._pp_cache = {};
         self._program_cache = {};
         self.urls = urls;
+        self.modal = null;
 
         self._init_modal = function() {
             self.pp_loaded(false);
@@ -74,9 +75,15 @@ define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
         };
 
         self.show_control_modal = function(pp_id) {
-            self._init_modal();
-            $('#pp_edit_modal').modal();
-            self._load_pp(pp_id);
+            ml(self.urls.pp_edit_part_modal(), function(modal) {
+                if (modal) {
+                    self.modal = modal;
+                    ko.applyBindings(self, modal.children()[0]);
+                    self._init_modal();
+                    modal.modal();
+                    self._load_pp(pp_id);
+                }
+            });
         };
 
         self.program_changed = function() {
@@ -119,7 +126,7 @@ define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
 
         self._process_change_result = function(result) {
             if (result.status == 'ok') {
-                $('#pp_edit_modal').modal('hide');
+                self.modal.modal('hide');
             } else {
                 alert(result.data);
             }

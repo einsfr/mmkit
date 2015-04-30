@@ -2,6 +2,21 @@
 
 {% block title %}{{ block.super }} - Планирование вещания{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/base'], function(module) {
+            module({
+                urls: {
+                    lineup_new_part_modal: function() {
+                        return '{% url 'efsw.schedule:lineup:new_part_modal' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content_wrapper %}
     <ul class="nav nav-pills">
         <li role="presentation" class="dropdown">

@@ -123,14 +123,14 @@ def lineup_edit(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/lineup_edit.html', {
         'lineup': lineup,
-        'lineup_table_data': _get_lineup_table_data(lineup),
-        'pp_control_form': forms.ProgramPositionControlForm()
+        'lineup_table_data': _get_lineup_table_data(lineup)
     })
 
 
-@http.require_GET
-def lineup_new(request):
-    pass
+def lineup_new_part_modal(request):
+    return shortcuts.render(request, 'schedule/_lineup_new_modal.html', {
+
+    })
 
 
 @http.require_POST
@@ -217,6 +217,10 @@ def _get_json_pp_not_found(pp_id):
     )
 
 
+def pp_show_part_modal(request):
+    return shortcuts.render(request, 'schedule/_pp_show_modal.html')
+
+
 def pp_show_json(request):
 
     def format_pp_dict(pp):
@@ -242,6 +246,12 @@ def pp_show_json(request):
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
+
+
+def pp_edit_part_modal(request):
+    return shortcuts.render(request, 'schedule/_pp_edit_modal.html', {
+        'pp_edit_form': forms.ProgramPositionEditForm()
+    })
 
 
 def pp_edit_json(request):
@@ -398,7 +408,7 @@ def pp_update_json(request):
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
-    form = forms.ProgramPositionControlForm(request.POST)
+    form = forms.ProgramPositionEditForm(request.POST)
     if not form.is_valid():
         return JsonWithStatusResponse.error(form.errors.as_json())
     for pp in [

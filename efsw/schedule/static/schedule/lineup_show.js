@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
+define(['jquery', 'knockout', 'common/modal_loader', 'jquery_ui', 'bootstrap'], function($, ko, ml) {
 
     return function(conf) {
         $(document).ready(function() {
@@ -47,9 +47,14 @@ define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
         };
 
         self.show_control_modal = function(pp_id) {
-            self._init_modal();
-            $('#pp_show_modal').modal();
-            self._load_pp(pp_id);
+            ml(self.urls.pp_show_part_modal(), function(modal) {
+                if (modal) {
+                    ko.applyBindings(self, modal.children()[0]);
+                    self._init_modal();
+                    modal.modal();
+                    self._load_pp(pp_id);
+                }
+            });
         };
 
         self._load_pp = function(pp_id) {

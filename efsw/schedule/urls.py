@@ -13,12 +13,12 @@ lineup_patterns = [
         views.lineup_list,
         name='list'
     ),
-    # lineups/new/ Создать сетку вещания (GET, форма)
-    # ( Создать сетку вещания )
+    # lineups/new/part/modal/ Модальное окно для создания новой сетки вещания
+    # ( - )
     url(
-        r'^new/$',
-        views.lineup_new,
-        name='new'
+        r'^new/part/modal/$',
+        views.lineup_new_part_modal,
+        name='new_part_modal'
     ),
     # lineups/create/ Создать сетку вещания (POST, действие)
     # ( - )
@@ -66,7 +66,7 @@ lineup_patterns = [
                 views.lineup_edit,
                 name='edit'
             ),
-            # lineups/1/show/part/pp-table-body/ Часть страницы с таблицей фрагментов
+            # lineups/1/show/part/pp_table_body/ Часть страницы с таблицей фрагментов
             # ( - )
             url(
                 r'^show/part/pp_table_body/$',
@@ -140,12 +140,26 @@ program_patterns = [
 
 # ------------------------- ProgramPosition -------------------------
 pp_patterns = [
+    # pps/show/part/modal/
+    # ( - )
+    url(
+        r'^show/part/modal/',
+        views.pp_show_part_modal,
+        name='show_part_modal'
+    ),
     # pps/show/json/?id=12
     # ( - )
     url(
         r'^show/json/',
         views.pp_show_json,
         name='show_json'
+    ),
+    # pps/edit/part/modal/
+    # ( - )
+    url(
+        r'^edit/part/modal/',
+        views.pp_edit_part_modal,
+        name='edit_part_modal'
     ),
     # pps/edit/json/?id=12
     # ( - )

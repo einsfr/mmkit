@@ -20,7 +20,7 @@ class ProgramPositionRepeatForm(forms.Form):
     )
 
 
-class ProgramPositionControlForm(ProgramPositionRepeatForm):
+class ProgramPositionEditForm(ProgramPositionRepeatForm):
 
     st_h = forms.IntegerField(
         label='Время начала (часы)',
