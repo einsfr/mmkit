@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
+define(['jquery', 'knockout', 'jquery_ui', 'bootstrap'], function($, ko) {
 
     return function(conf) {
         $(document).ready(function() {
