@@ -1,4 +1,16 @@
-define(['knockout', 'jquery', 'bootstrap'], function(ko, $) {
+define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
+
+    return function(conf) {
+        $(document).ready(function() {
+            var view_model = new LineupShowViewModel(conf.urls);
+            ko.applyBindings(view_model);
+            var lineup_table = $("#lineup_table");
+            lineup_table.disableSelection();
+            lineup_table.on('dblclick', "tbody td", function() {
+                view_model.show_control_modal($(this).data('pp_id'));
+            });
+        });
+    };
 
     function ProgramPosition(data) {
         var default_values = {
@@ -21,7 +33,7 @@ define(['knockout', 'jquery', 'bootstrap'], function(ko, $) {
         }
     }
 
-    return function LineupShowViewModel(urls) {
+    function LineupShowViewModel(urls) {
         var self = this;
 
         self.pp_loaded = ko.observable(false);
@@ -62,5 +74,4 @@ define(['knockout', 'jquery', 'bootstrap'], function(ko, $) {
             });
         };
     }
-
 });

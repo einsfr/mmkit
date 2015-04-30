@@ -1,8 +1,15 @@
 {% extends 'archive/_app_base.html' %}
 
-{% load staticfiles %}
-
 {% block title %}{{ block.super }} - Редактирование элемента{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['archive/item_edit'], function(module) {
+            module();
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
     <h1>Редактирование элемента</h1>
@@ -13,9 +20,4 @@
         </table>
         <input type="submit" value="Сохранить">
     </form>
-{% endblock %}
-
-{% block footer_script %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'item_new.js' %}"></script>
 {% endblock %}

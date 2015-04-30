@@ -1,9 +1,38 @@
 {% extends 'archive/_app_base.html' %}
 
 {% load field_verbose_name from model %}
-{% load staticfiles %}
 
 {% block title %}{{ block.super }} - Описание элемента{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['archive/item_show'], function(module) {
+            module({
+                urls: {
+                    item_locations_list_json: function() {
+                        return '{% url 'efsw.archive:item:locations_list_json' %}?id={{ item.id }}';
+                    },
+                    item_locations_update_json: function() {
+                        return '{% url 'efsw.archive:item:locations_update_json' %}?id={{ item.id }}';
+                    },
+                    item_includes_list_json: function() {
+                        return '{% url 'efsw.archive:item:includes_list_json' %}?id={{ item.id }}';
+                    },
+                    item_includes_check_json: function() {
+                        return '{% url 'efsw.archive:item:includes_check_json' %}?id={{ item.id }}';
+                    },
+                    item_includes_update_json: function() {
+                        return '{% url 'efsw.archive:item:includes_update_json' %}?id={{ item.id }}';
+                    },
+                    storage_show_json: function() {
+                        return '{% url 'efsw.archive:storage:show_json' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
     <h1>Описание элемента</h1>
@@ -151,31 +180,4 @@
             {% endif %}
         </tbody>
     </table>
-{% endblock %}
-
-{% block footer_script %}
-    {{ block.super }}
-    <script type="text/javascript">
-        var urls = {
-            item_locations_list_json: function() {
-                return '{% url 'efsw.archive:item:locations_list_json' %}?id={{ item.id }}';
-            },
-            item_locations_update_json: function() {
-                return '{% url 'efsw.archive:item:locations_update_json' %}?id={{ item.id }}';
-            },
-            item_includes_list_json: function() {
-                return '{% url 'efsw.archive:item:includes_list_json' %}?id={{ item.id }}';
-            },
-            item_includes_check_json: function() {
-                return '{% url 'efsw.archive:item:includes_check_json' %}?id={{ item.id }}';
-            },
-            item_includes_update_json: function() {
-                return '{% url 'efsw.archive:item:includes_update_json' %}?id={{ item.id }}';
-            },
-            storage_show_json: function() {
-                return '{% url 'efsw.archive:storage:show_json' %}';
-            }
-        };
-    </script>
-    <script type="text/javascript" src="{% static 'item_show.js' %}"></script>
 {% endblock %}

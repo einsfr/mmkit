@@ -7,8 +7,8 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/pp_show'], function(pp_show) {
-            pp_show({
+        require(['schedule/lineup_show'], function(module) {
+            module({
                 urls: {
                     pp_show_json: function(pp_id) {
                         return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;

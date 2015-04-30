@@ -4,6 +4,33 @@
 
 {% block title %}{{ block.super }} - Редактирование сетки вещания{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/lineup_edit'], function(module) {
+            module({
+                urls: {
+                    pp_edit_json: function(pp_id) {
+                        return '{% url 'efsw.schedule:pp:edit_json' %}?id=' + pp_id;
+                    },
+                    program_show_json: function(program_id) {
+                        return '{% url 'efsw.schedule:program:show_json' %}?id=' + program_id;
+                    },
+                    pp_delete_json: function(pp_id) {
+                        return '{% url 'efsw.schedule:pp:delete_json' %}?id=' + pp_id;
+                    },
+                    lineup_show_part_pp_table_body: function() {
+                        return '{% url 'efsw.schedule:lineup:show_part_pp_table_body' lineup.id %}';
+                    },
+                    pp_update_json: function(pp_id) {
+                        return '{% url 'efsw.schedule:pp:update_json' %}?id=' + pp_id;
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% if lineup %}
     {% block top_level_content %}
         {{ block.super }}
@@ -93,28 +120,4 @@
 {% block content %}
     <h1>Редактирование сетки вещания</h1>
     {% include 'schedule/_pp_list_table.html' %}
-{% endblock %}
-
-{% block footer_script %}
-    {{ block.super }}
-    <script type="text/javascript">
-        var urls = {
-            pp_edit_json: function(pp_id) {
-                return '{% url 'efsw.schedule:pp:edit_json' %}?id=' + pp_id;
-            },
-            program_show_json: function(program_id) {
-                return '{% url 'efsw.schedule:program:show_json' %}?id=' + program_id;
-            },
-            pp_delete_json: function(pp_id) {
-                return '{% url 'efsw.schedule:pp:delete_json' %}?id=' + pp_id;
-            },
-            lineup_show_part_pp_table_body: function() {
-                return '{% url 'efsw.schedule:lineup:show_part_pp_table_body' lineup.id %}';
-            },
-            pp_update_json: function(pp_id) {
-                return '{% url 'efsw.schedule:pp:update_json' %}?id=' + pp_id;
-            }
-        };
-    </script>
-    <script type="text/javascript" src="{% static 'schedule/pp_edit.js' %}"></script>
 {% endblock %}
