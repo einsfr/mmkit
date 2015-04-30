@@ -12,7 +12,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
     <script src="{% static 'requirejs_conf.js' %}"></script>
     <script src="{% static 'vendor/requirejs/require.min.js' %}"></script>
-    <script src="{% static 'base.js' %}"></script>
+    <script type="text/javascript">
+        require(['base']);
+    </script>
+    {% block head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-default">
@@ -33,12 +36,5 @@
     <footer class="container text-center">
         Используется <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank" title="Font Awesome by Dave Gandy">Font Awesome</a>
     </footer>
-    {% block top_level_content %}{% endblock %}
-    <!--
-    <script src="{% static 'vendor/knockout/knockout.js' %}"></script>
-    <script src="{% static 'vendor/jquery-ui/jquery-ui.min.js' %}"></script>
-    <script src="{% static 'vendor/jquery-ui/i18n/datepicker-ru.js' %}"></script>
-    {% block footer_script %}{% endblock %}
-    -->
 </body>
 </html>

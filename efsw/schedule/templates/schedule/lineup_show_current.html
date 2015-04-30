@@ -4,6 +4,21 @@
 
 {% block title %}{{ block.super }} - Текущая сетка вещания{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/pp_show'], function(pp_show) {
+            pp_show({
+                urls: {
+                    pp_show_json: function(pp_id) {
+                        return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% if lineup %}
     {% block top_level_content %}
         {{ block.super }}
@@ -78,16 +93,4 @@
             <div class="panel-body text-center">В настоящий момент не существует ни одной активной сетки вещания</div>
         </div>
     {% endif %}
-{% endblock %}
-
-{% block footer_script %}
-    {{ block.super }}
-    <script type="text/javascript">
-        var urls = {
-            pp_show_json: function(pp_id) {
-                return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
-            }
-        };
-    </script>
-    <script type="text/javascript" src="{% static 'schedule/pp_show.js' %}"></script>
 {% endblock %}

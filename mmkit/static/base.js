@@ -1,5 +1,5 @@
 // Инициализация базовой части приложения, необходимой всегда и везде
-require(['jquery', 'bootstrap', 'jquery_ui', 'knockout'], function(jquery) {
+define(['jquery', 'bootstrap', 'jquery_ui', 'knockout'], function(jquery) {
 
     function getCookie(name) {
         var cookieValue = null;
