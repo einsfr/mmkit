@@ -62,7 +62,8 @@ class Lineup(models.Model):
 
     channel = models.ForeignKey(
         Channel,
-        related_name='lineups'
+        related_name='lineups',
+        verbose_name='канал'
     )
 
     def __str__(self):
