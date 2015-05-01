@@ -4,13 +4,15 @@
             <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
             <h3 class="text-center">Создание сетки вещания</h3>
         </div>
-        <div class="modal-body">
-            <table class="table">
-                {{ form.as_table }}
-            </table>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Создать</button>
-        </div>
+        <form id="lineup_new_form">
+            <div class="modal-body">
+                <table class="table">
+                    {{ form.as_table }}
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bind="event: { click: create_lineup }">Создать</button>
+            </div>
+        </form>
     </div>
 </div>
