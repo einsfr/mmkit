@@ -1,82 +1,33 @@
 define(['jquery', 'knockout', 'common/modal_loader', 'jquery_ui', 'bootstrap'], function($, ko, ml) {
 
+    var view_model;
+
     return function(conf) {
         $(document).ready(function() {
-            var view_model = new LineupShowViewModel(conf.urls);
-            ko.applyBindings(view_model);
             var lineup_table = $("#lineup_table");
             lineup_table.disableSelection();
             lineup_table.on('dblclick', "tbody td", function() {
-                view_model.show_control_modal($(this).data('pp_id'));
+                var pp_id = $(this).data('pp_id');
+                ml(conf.urls.pp_show_part_modal(), function(modal_container, already_loaded) {
+                    if (modal_container) {
+                        if (typeof view_model == 'undefined') {
+                            require(['schedule/model_lineup_show'], function(model) {
+                                view_model = new model(conf.urls);
+                                ko.applyBindings(view_model, modal_container.children()[0]);
+                                view_model.init(pp_id);
+                                modal_container.modal();
+                            });
+                        } else {
+                            if (!already_loaded) {
+                                ko.applyBindings(view_model, modal_container.children()[0]);
+                            }
+                            view_model.init(pp_id);
+                            modal_container.modal();
+                        }
+                    }
+                });
             });
         });
     };
 
-    function ProgramPosition(data) {
-        var default_values = {
-            id: 0,
-            dow: '',
-            start: '',
-            end: '',
-            comment: '',
-            locked: false,
-            program_id: 0,
-            program_name: '',
-            program_url: '',
-            program_ls: '',
-            program_age_limit: ''
-        };
-        if (typeof data == 'undefined') {
-            $.extend(true, this, default_values);
-        } else {
-            $.extend(true, this, default_values, data);
-        }
-    }
-
-    function LineupShowViewModel(urls) {
-        var self = this;
-
-        self.pp_loaded = ko.observable(false);
-        self.pp = ko.observable(new ProgramPosition());
-        self._pp_cache = {};
-        self.urls = urls;
-
-        self._init_modal = function() {
-            self.pp_loaded(false);
-            self.pp(new ProgramPosition());
-        };
-
-        self.show_control_modal = function(pp_id) {
-            ml(self.urls.pp_show_part_modal(), function(modal) {
-                if (modal) {
-                    ko.applyBindings(self, modal.children()[0]);
-                    self._init_modal();
-                    modal.modal();
-                    self._load_pp(pp_id);
-                }
-            });
-        };
-
-        self._load_pp = function(pp_id) {
-            if (isNaN(pp_id)) {
-                return;
-            }
-            if (pp_id.toString() in self._pp_cache) {
-                self.pp($.extend(true, {}, self._pp_cache[pp_id.toString()]));
-                self.pp_loaded(true);
-                return;
-            }
-            $.getJSON(self.urls.pp_show_json(pp_id), function(response) {
-                if (response.status == 'ok') {
-                    var pp = new ProgramPosition(response.data);
-                    self.pp(pp);
-                    // Если оставить просто знак равенства - содержимое кэша будет меняться при внесении изменений в форму
-                    self._pp_cache[pp_id.toString()] = $.extend(true, {}, pp);
-                    self.pp_loaded(true);
-                } else {
-                    alert(response.data);
-                }
-            });
-        };
-    }
 });

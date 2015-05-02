@@ -1,42 +1,36 @@
-define(['jquery', 'knockout', 'common/modal_loader'], function($, ko, ml) {
+define(['jquery', 'knockout'], function($, ko) {
 
     function ProgramPosition(data) {
-        if (data) {
-            this.id = data.id;
-            this.dow = data.dow;
-            this.start_hours = data.start_hours;
-            this.start_minutes = data.start_minutes;
-            this.end_hours = data.end_hours;
-            this.end_minutes = data.end_minutes;
-            this.comment = data.comment;
-            this.locked = data.locked;
-            this.program_id = data.program_id;
-            this.similar_pps = data.similar_pps;
+        var default_values = {
+            id: 0,
+            dow: '',
+            start_hours: 0,
+            start_minutes: 0,
+            end_hours: 0,
+            end_minutes: 0,
+            comment: '',
+            locked: false,
+            program_id: 0,
+            similar_pps: []
+        };
+        if (typeof data == 'undefined') {
+            $.extend(true, this, default_values);
         } else {
-            this.id = 0;
-            this.dow = '';
-            this.start_hours = 0;
-            this.start_minutes = 0;
-            this.end_hours = 0;
-            this.end_minutes = 0;
-            this.comment = '';
-            this.locked = false;
-            this.program_id = 0;
-            this.similar_pps = [];
+            $.extend(true, this, default_values, data);
         }
     }
 
     function Program(data) {
-        if (data) {
-            this.name = data.name;
-            this.ls_hours = data.ls_hours;
-            this.ls_minutes = data.ls_minutes;
-            this.age_limit = data.age_limit;
+        var default_values = {
+            name: '',
+            ls_hours: 0,
+            ls_minutes: 0,
+            age_limit: ''
+        };
+        if (typeof data == 'undefined') {
+            $.extend(true, this, default_values);
         } else {
-            this.name = '';
-            this.ls_hours = 0;
-            this.ls_minutes = 0;
-            this.age_limit = ''
+            $.extend(true, this, default_values, data);
         }
     }
 

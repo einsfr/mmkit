@@ -2,12 +2,12 @@ define(['jquery', 'bootstrap'], function($) {
 
     var cache = {};
     var loaded_url;
+    var modal_container = $('#common_modal');
 
     function update_modal(content, callback) {
-        var container = $('#common_modal');
-        container.empty();
-        container.append(content);
-        callback(container, false);
+        modal_container.empty();
+        modal_container.append(content);
+        callback(modal_container, false);
     }
 
     return function(url, settings, callback) {
@@ -18,7 +18,7 @@ define(['jquery', 'bootstrap'], function($) {
         var already_loaded = (loaded_url == url);
         loaded_url = url;
         if (already_loaded) {
-            callback($('#common_modal'), true);
+            callback(modal_container, true);
         } else {
             if (url in cache) {
                 update_modal(cache[url], callback);
