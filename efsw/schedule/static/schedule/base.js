@@ -12,9 +12,10 @@ define(['jquery', 'knockout', 'common/modal_loader'], function($, ko, ml) {
                         if (typeof view_model == 'undefined') {
                             // загружаем модель, связанную с модальным окном
                             require(['schedule/model_lineup_new'], function(model) {
-                                view_model = new model(conf.urls);
+                                view_model = new model(conf.urls, modal_container);
                                 // привязываем модель к содержимому модального окна
                                 ko.applyBindings(view_model, modal_container.children()[0]);
+                                view_model.init();
                                 // и показываем окошко
                                 modal_container.modal();
                             });
@@ -22,6 +23,7 @@ define(['jquery', 'knockout', 'common/modal_loader'], function($, ko, ml) {
                             if (!already_loaded) {
                                 ko.applyBindings(view_model, modal_container.children()[0]);
                             }
+                            view_model.init();
                             modal_container.modal();
                         }
                     }

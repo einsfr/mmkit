@@ -134,8 +134,13 @@ def lineup_new_part_modal(request):
 
 
 @http.require_POST
-def lineup_create(request):
-    pass
+def lineup_create_json(request):
+    form = forms.LineupCreateForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return JsonWithStatusResponse.ok()
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 @http.require_POST

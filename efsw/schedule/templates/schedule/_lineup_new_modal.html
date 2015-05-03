@@ -4,15 +4,36 @@
             <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
             <h3 class="text-center">Создание сетки вещания</h3>
         </div>
-        <form id="lineup_new_form">
             <div class="modal-body">
-                <table class="table">
-                    {{ form.as_table }}
-                </table>
+                <form id="lineup_new_form" class="form-horizontal">
+                    <div class="form-group" data-bind="css: { 'has-error': typeof errors().name != 'undefined' }">
+                        <label for="{{ form.name.id_for_label }}" class="col-lg-3 control-label">Название</label>
+                        <div class="col-lg-9">
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="form-group" data-bind="css: { 'has-error': typeof errors().start_time != 'undefined' }">
+                        <label for="{{ form.start_time.id_for_label }}" class="col-lg-3 control-label">Время начала</label>
+                        <div class="col-lg-2">
+                            {{ form.start_time }}
+                        </div>
+                    </div>
+                    <div class="form-group" data-bind="css: { 'has-error': typeof errors().end_time != 'undefined' }">
+                        <label for="{{ form.end_time.id_for_label }}" class="col-lg-3 control-label">Время окончания</label>
+                        <div class="col-lg-2">
+                            {{ form.end_time }}
+                        </div>
+                    </div>
+                    <div class="form-group" data-bind="css: { 'has-error': typeof errors().channel != 'undefined' }">
+                        <label for="{{ form.channel.id_for_label }}" class="col-lg-3 control-label">Канал</label>
+                        <div class="col-lg-4">
+                            {{ form.channel }}
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-bind="event: { click: create_lineup }">Создать</button>
             </div>
-        </form>
     </div>
 </div>

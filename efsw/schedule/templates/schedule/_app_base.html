@@ -10,6 +10,9 @@
                 urls: {
                     lineup_new_part_modal: function() {
                         return '{% url 'efsw.schedule:lineup:new_part_modal' %}';
+                    },
+                    lineup_create: function() {
+                        return '{% url 'efsw.schedule:lineup:create_json' %}';
                     }
                 }
             });

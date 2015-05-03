@@ -8,11 +8,25 @@ class LineupCreateForm(forms.ModelForm):
     class Meta:
         model = models.Lineup
         fields = ('name', 'start_time', 'end_time', 'channel')
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'start_time': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'end_time': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'channel': forms.Select(attrs={
+                'class': 'form-control'
+            })
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['channel'].queryset = self.fields['channel'].queryset.exclude(active=False).order_by('name')
-        self.fields['channel'].empty_label = None
+        # self.fields['channel'].empty_label = None
 
 
 class ProgramCreateForm(forms.ModelForm):
