@@ -39,7 +39,8 @@ class Lineup(models.Model):
     )
 
     active_since = models.DateField(
-        verbose_name='используется с'
+        verbose_name='используется с',
+        null=True
     )
 
     active_until = models.DateField(

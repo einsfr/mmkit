@@ -11,12 +11,15 @@ class LineupCreateForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
+                'placeholder': 'Название сетки вещания'
             }),
             'start_time': forms.TextInput(attrs={
                 'class': 'form-control',
+                'placeholder': '00:00'
             }),
             'end_time': forms.TextInput(attrs={
                 'class': 'form-control',
+                'placeholder': '00:00'
             }),
             'channel': forms.Select(attrs={
                 'class': 'form-control',

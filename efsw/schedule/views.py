@@ -137,7 +137,16 @@ def lineup_new_part_modal(request):
 def lineup_create_json(request):
     form = forms.LineupCreateForm(request.POST)
     if form.is_valid():
-        form.save()
+        lineup = form.save()
+        models.ProgramPosition.objects.bulk_create([
+            models.ProgramPosition(
+                dow=d,
+                start_time=lineup.start_time,
+                end_time=lineup.end_time,
+                lineup=lineup
+            )
+            for d in range(1, 8)
+        ])
         return JsonWithStatusResponse.ok()
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
@@ -341,7 +350,21 @@ def pp_delete_json(request):
     return JsonWithStatusResponse()
 
 
-def _pp_update(program_position, form):
+@http.require_POST
+def pp_update_json(request):
+    pp_id = request.GET.get('id', None)
+    try:
+        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except models.ProgramPosition.DoesNotExist:
+        return _get_json_pp_not_found(pp_id)
+    form = forms.ProgramPositionEditForm(request.POST)
+    if not form.is_valid():
+        return JsonWithStatusResponse.error(form.errors.as_json())
+    repeat_for = [
+        x
+        for x in lineops.get_similar_pp(program_position)
+        if str(x.dow) in form.cleaned_data.get('r')
+    ]
     program_position.program = form.cleaned_data.get('p', None)
     program_position.locked = form.cleaned_data['l']
     program_position.comment = form.cleaned_data['c']
@@ -358,11 +381,16 @@ def _pp_update(program_position, form):
         if not lineops.pp_is_empty(program_position):
             # и при этом становится или остаётся не пустым
             program_position.save()
-            return JsonWithStatusResponse.ok()
+            for pp in repeat_for:
+                pp.program = program_position.program
+                pp.comment = program_position.comment
+                pp.locked = program_position.locked
+                pp.save()
         else:
             # если же становится или остаётся пустым
             _pp_delete(program_position)
-            return JsonWithStatusResponse.ok()
+            for pp in repeat_for:
+                _pp_delete(pp)
     else:
         # А если всё-таки меняет длительность
         if lineops.pp_is_empty(program_position):
@@ -375,51 +403,42 @@ def _pp_update(program_position, form):
                     and (end_time <= old_end_time or end_time > old_start_time)
                 )):
             return JsonWithStatusResponse.error('Новый элемент должен находиться в границах старого')
+        program_position.save()
+        for pp in repeat_for:
+            pp.program = program_position.program
+            pp.comment = program_position.comment
+            pp.locked = program_position.locked
+            pp.start_time = program_position.start_time
+            pp.end_time = program_position.end_time
+            pp.save()
         if old_start_time != start_time:
             # нужно добавить пустое место перед фрагментом - а вдруг уже есть?
-            previous_pp = lineops.get_previous_pp_by_time(program_position.lineup, program_position.dow, old_start_time)
-            if previous_pp is not None and lineops.pp_is_empty(previous_pp):
-                previous_pp.end_time = start_time
-                previous_pp.save()
-            else:
-                prepend_pp = models.ProgramPosition(
-                    start_time=old_start_time,
-                    end_time=start_time,
-                    dow=program_position.dow,
-                    lineup=program_position.lineup,
-                )
-                prepend_pp.save()
+            for pp in [program_position] + repeat_for:
+                previous_pp = lineops.get_previous_pp_by_time(pp.lineup, pp.dow, old_start_time)
+                if previous_pp is not None and lineops.pp_is_empty(previous_pp):
+                    previous_pp.end_time = start_time
+                    previous_pp.save()
+                else:
+                    prepend_pp = models.ProgramPosition(
+                        start_time=old_start_time,
+                        end_time=start_time,
+                        dow=pp.dow,
+                        lineup=pp.lineup,
+                    )
+                    prepend_pp.save()
         if old_end_time != end_time:
             # нужно добавить пустое место после фрагмента - а вдруг уже есть?
-            next_pp = lineops.get_next_pp_by_time(program_position.lineup, program_position.dow, old_end_time)
-            if next_pp is not None and lineops.pp_is_empty(next_pp):
-                next_pp.start_time = end_time
-                next_pp.save()
-            else:
-                append_pp = models.ProgramPosition(
-                    start_time=end_time,
-                    end_time=old_end_time,
-                    dow=program_position.dow,
-                    lineup=program_position.lineup,
-                )
-                append_pp.save()
-        program_position.save()
-
-
-@http.require_POST
-def pp_update_json(request):
-    pp_id = request.GET.get('id', None)
-    try:
-        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
-    except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
-    form = forms.ProgramPositionEditForm(request.POST)
-    if not form.is_valid():
-        return JsonWithStatusResponse.error(form.errors.as_json())
-    for pp in [
-        x
-        for x in lineops.get_similar_pp(program_position)
-        if str(x.dow) in form.cleaned_data.get('r')
-    ] + [program_position]:
-        _pp_update(pp, form)
+            for pp in [program_position] + repeat_for:
+                next_pp = lineops.get_next_pp_by_time(pp.lineup, pp.dow, old_end_time)
+                if next_pp is not None and lineops.pp_is_empty(next_pp):
+                    next_pp.start_time = end_time
+                    next_pp.save()
+                else:
+                    append_pp = models.ProgramPosition(
+                        start_time=end_time,
+                        end_time=old_end_time,
+                        dow=pp.dow,
+                        lineup=pp.lineup,
+                    )
+                    append_pp.save()
     return JsonWithStatusResponse.ok()
