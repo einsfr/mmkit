@@ -5,10 +5,16 @@ define(['jquery', 'knockout'], function($, ko) {
         self.urls = urls;
         self.modal_container = modal_container;
         self.form = $('#lineup_new_form');
-        self.errors = ko.observable({});
+        self.errors_empty = {
+            name: '',
+            start_time: '',
+            end_time: '',
+            channel: ''
+        };
+        self.errors = ko.observable(self.errors_empty);
 
         self.init = function() {
-            self.errors({});
+            self.errors(self.errors_empty);
         };
 
         self.create_lineup = function() {
@@ -19,7 +25,13 @@ define(['jquery', 'knockout'], function($, ko) {
                 if (result.status == 'ok') {
                     alert('ok');
                 } else {
-                    self.errors($.parseJSON(result.data.errors));
+                    var errors = $.parseJSON(result.data.errors);
+                    for (var p in errors) {
+                        if (errors.hasOwnProperty(p)) {
+                            errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
+                        }
+                    }
+                    self.errors(errors);
                 }
             }).fail(function(jqXHR, textStatus) {
                 alert('При создании возникла ошибка: ' + textStatus);

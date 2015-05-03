@@ -10,16 +10,16 @@ class LineupCreateForm(forms.ModelForm):
         fields = ('name', 'start_time', 'end_time', 'channel')
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
             }),
             'start_time': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
             }),
             'end_time': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
             }),
             'channel': forms.Select(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
             })
         }
 
