@@ -17,6 +17,7 @@ class ItemCategory(models.Model):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
         app_label = 'archive'
+        ordering = ['name']
 
     name = models.CharField(
         max_length=64,
@@ -101,6 +102,7 @@ class Storage(models.Model):
         app_label = 'archive'
         verbose_name = 'хранилище'
         verbose_name_plural = 'хранилищи'
+        ordering = ['name']
 
     TYPE_OFFLINE = 'OFF'
     TYPE_ONLINE_MASTER = 'ONM'

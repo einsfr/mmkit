@@ -9,6 +9,7 @@ class Channel(models.Model):
         app_label = 'schedule'
         verbose_name = 'канал'
         verbose_name_plural = 'каналы'
+        ordering = ['name']
 
     name = models.CharField(
         max_length=64,
