@@ -431,7 +431,8 @@ def storage_show_json(request):
             'disable_location': s.is_online_master_type(),
         }
         if s.is_online_type():
-            return_dict['base_url'] = urlformatter.format_url(s.base_url).format_win()
+            base_url = s.base_url if s.base_url[-1] == '/' else '{0}/'.format(s.base_url)
+            return_dict['base_url'] = urlformatter.format_url(base_url).format_win()
         else:
             return_dict['base_url'] = ''
         return return_dict
