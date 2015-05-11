@@ -13,8 +13,8 @@ lineup_patterns = [
         views.lineup_list,
         name='list'
     ),
-    # lineups/new/ Создать сетку вещания
-    # ( Создать сетку вещания )
+    # lineups/new/ Создание сетки вещания
+    # ( Создание сетки вещания )
     url(
         r'^new/$',
         views.lineup_new,

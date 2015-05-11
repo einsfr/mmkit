@@ -1,6 +1,6 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% block title %}{{ block.super }} - Редактирование сетки вещания{% endblock %}
+{% block title %}{{ block.super }} - {{ lineup.name }} - Редактирование{% endblock %}
 
 {% block head %}
     {{ block.super }}
@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Редактирование сетки вещания</h1>
+    <h1>{{ lineup.name }} - Редактирование</h1>
     <ul class="nav nav-tabs">
         <li class="active"><a href="#structure" data-toggle="tab">Состав</a></li>
         <li><a href="#properties" data-toggle="tab">Свойства</a></li>
