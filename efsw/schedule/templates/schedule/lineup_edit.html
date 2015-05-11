@@ -1,7 +1,5 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% load staticfiles %}
-
 {% block title %}{{ block.super }} - Редактирование сетки вещания{% endblock %}
 
 {% block head %}
@@ -36,5 +34,16 @@
 
 {% block content %}
     <h1>Редактирование сетки вещания</h1>
-    {% include 'schedule/_pp_list_table.html' %}
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#structure" data-toggle="tab">Состав</a></li>
+        <li><a href="#properties" data-toggle="tab">Свойства</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="structure">
+            {% include 'schedule/_pp_list_table.html' %}
+        </div>
+        <div class="tab-pane" id="properties">
+
+        </div>
+    </div>
 {% endblock %}
