@@ -2,24 +2,6 @@
 
 {% block title %}{{ block.super }} - Планирование вещания{% endblock %}
 
-{% block head %}
-    {{ block.super }}
-    <script type="text/javascript">
-        require(['schedule/base'], function(module) {
-            module({
-                urls: {
-                    lineup_new_part_modal: function() {
-                        return '{% url 'efsw.schedule:lineup:new_part_modal' %}';
-                    },
-                    lineup_create: function() {
-                        return '{% url 'efsw.schedule:lineup:create_json' %}';
-                    }
-                }
-            });
-        });
-    </script>
-{% endblock %}
-
 {% block content_wrapper %}
     <ul class="nav nav-pills">
         <li role="presentation" class="dropdown">
@@ -35,7 +17,7 @@
                 </li>
                 {% if perms.schedule.add_lineup %}
                     <li role="presentation">
-                        <a href="#" title="Создать сетку вещания" id="lineup_new_modal_switch">Создать</a>
+                        <a href="{% url 'efsw.schedule:lineup:new' %}" title="Создать сетку вещания">Создать</a>
                     </li>
                 {% endif %}
             </ul>

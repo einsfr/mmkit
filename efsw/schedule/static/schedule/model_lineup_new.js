@@ -1,9 +1,8 @@
 define(['jquery', 'knockout'], function($, ko) {
 
-    return function LineupNewViewModel(urls, modal_container) {
+    return function LineupNewViewModel(urls) {
         var self = this;
         self.urls = urls;
-        self.modal_container = modal_container;
         self.form = $('#lineup_new_form');
         self.errors_empty = {
             name: '',
@@ -18,7 +17,7 @@ define(['jquery', 'knockout'], function($, ko) {
         };
 
         self.create_lineup = function() {
-            $.ajax(self.urls.lineup_create(), {
+            $.ajax(self.urls.lineup_create_json(), {
                 method: 'post',
                 data: self.form.serialize()
             }).done(function(result) {

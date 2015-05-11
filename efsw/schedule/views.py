@@ -132,8 +132,8 @@ def lineup_edit(request, lineup_id):
     })
 
 
-def lineup_new_part_modal(request):
-    return shortcuts.render(request, 'schedule/_lineup_new_modal.html', {
+def lineup_new(request):
+    return shortcuts.render(request, 'schedule/lineup_new.html', {
         'form': forms.LineupCreateForm()
     })
 

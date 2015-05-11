@@ -13,12 +13,12 @@ lineup_patterns = [
         views.lineup_list,
         name='list'
     ),
-    # lineups/new/part/modal/ Модальное окно для создания новой сетки вещания
-    # ( - )
+    # lineups/new/ Создать сетку вещания
+    # ( Создать сетку вещания )
     url(
-        r'^new/part/modal/$',
-        views.lineup_new_part_modal,
-        name='new_part_modal'
+        r'^new/$',
+        views.lineup_new,
+        name='new'
     ),
     # lineups/list/page/2/ Список сеток вещания - постранично
     # ( Список сеток вещания, страница 2 )
@@ -76,7 +76,7 @@ lineup_patterns = [
         views.lineup_copy_json,
         name='copy_json'
     ),
-    # lineups/create/ Создать сетку вещания (POST, действие)
+    # lineups/create/json/ Создать сетку вещания (POST, действие)
     # ( - )
     url(
         r'^create/json/$',
