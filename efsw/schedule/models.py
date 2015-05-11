@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
@@ -73,6 +75,12 @@ class Lineup(models.Model):
 
     def get_absolute_url(self):
         return urlresolvers.reverse('efsw.schedule:lineup:show', args=(self.id, ))
+
+    def is_editable(self):
+        return not self.active or self.active_since > datetime.date.today()
+
+    def is_deactivatable(self):
+        return self.active and self.active_since > datetime.date.today()
 
 
 class Program(models.Model):
