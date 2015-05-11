@@ -29,19 +29,9 @@ define(['jquery', 'knockout'], function($, ko) {
                 if (result.status == 'ok') {
                     window.location.href = result.data;
                 } else {
-                    try {
-                        var errors = $.parseJSON(result.data.errors);
-                    } catch (err) {
-                        self.non_field_errors(result.data);
-                        return;
-                    }
-                    self.non_field_errors('');
-                    for (var p in errors) {
-                        if (errors.hasOwnProperty(p)) {
-                            errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
-                        }
-                    }
-                    self.errors(errors);
+                    require(['common/form_error_parser'], function(parser) {
+                        parser(result.data, self.errors, self.non_field_errors);
+                    });
                 }
             }).fail(function(jqXHR, textStatus) {
                 alert('При обновлении возникла ошибка: ' + textStatus);
