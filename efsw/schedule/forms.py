@@ -15,11 +15,11 @@ class LineupCreateForm(forms.ModelForm):
             }),
             'start_time': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '00:00'
+                'placeholder': 'Например, 00:00'
             }),
             'end_time': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '00:00'
+                'placeholder': 'Например, 00:00'
             }),
             'channel': forms.Select(attrs={
                 'class': 'form-control',
