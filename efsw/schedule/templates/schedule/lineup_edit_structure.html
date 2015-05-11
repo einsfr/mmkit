@@ -5,7 +5,7 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/lineup_edit'], function(module) {
+        require(['schedule/lineup_edit_structure'], function(module) {
             module({
                 urls: {
                     pp_edit_json: function(pp_id) {
@@ -35,15 +35,8 @@
 {% block content %}
     <h1>{{ lineup.name }} - Редактирование</h1>
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#structure" data-toggle="tab">Состав</a></li>
-        <li><a href="#properties" data-toggle="tab">Свойства</a></li>
+        <li class="active"><a href="#" title="Состав">Состав</a></li>
+        <li><a href="{% url 'efsw.schedule:lineup:edit_properties' lineup.id %}" title="Свойства">Свойства</a></li>
     </ul>
-    <div class="tab-content">
-        <div class="tab-pane active" id="structure">
-            {% include 'schedule/_pp_list_table.html' %}
-        </div>
-        <div class="tab-pane" id="properties">
-
-        </div>
-    </div>
+    {% include 'schedule/_pp_list_table.html' %}
 {% endblock %}

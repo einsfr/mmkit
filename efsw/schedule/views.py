@@ -125,11 +125,52 @@ def lineup_show_current(request, channel_id=None):
 
 
 def lineup_edit(request, lineup_id):
+    return lineup_edit_structure(request, lineup_id)
+
+
+def lineup_edit_properties(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
-    return shortcuts.render(request, 'schedule/lineup_edit.html', {
+    return shortcuts.render(request, 'schedule/lineup_edit_properties.html', {
+        'lineup': lineup,
+        'form': forms.LineupUpdateForm(instance=lineup)
+    })
+
+
+def lineup_edit_structure(request, lineup_id):
+    lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
+    return shortcuts.render(request, 'schedule/lineup_edit_structure.html', {
         'lineup': lineup,
         'lineup_table_data': _get_lineup_table_data(lineup)
     })
+
+
+@http.require_POST
+def lineup_update_json(request):
+    lineup_id = request.GET.get('id', None)
+    try:
+        lineup = models.Lineup.objects.get(pk=lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
+    except ValueError:
+        return _get_json_wrong_lineup_id(lineup_id)
+    form = forms.LineupUpdateForm(request.POST, instance=lineup)
+    if form.is_valid():
+        updated_lineup = form.save()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:edit', args=(updated_lineup.id, )))
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+
+
+def _get_json_lineup_not_found(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: сетка вещания с ID "{0}" не найдена'.format(lineup_id)
+    )
+
+
+def _get_json_wrong_lineup_id(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(lineup_id)
+    )
 
 
 def lineup_new(request):

@@ -59,6 +59,18 @@ lineup_patterns = [
                 views.lineup_edit,
                 name='edit'
             ),
+            # lineups/1/edit/structure/ Редактирование (структура)
+            url(
+                r'^edit/structure/$',
+                views.lineup_edit_structure,
+                name='edit_structure'
+            ),
+            # lineups/1/edit/properties/ Редактирование (свойства)
+            url(
+                r'^edit/properties/$',
+                views.lineup_edit_properties,
+                name='edit_properties'
+            ),
             # lineups/1/show/part/pp_table_body/ Часть страницы с таблицей фрагментов
             # ( - )
             url(
@@ -82,6 +94,13 @@ lineup_patterns = [
         r'^create/json/$',
         views.lineup_create_json,
         name='create_json'
+    ),
+    # lineups/update/json/?id=2 Обновить сетку вещания (POST, действие)
+    # ( - )
+    url(
+        r'^update/json/$',
+        views.lineup_update_json,
+        name='update_json'
     ),
 ]
 

@@ -32,6 +32,18 @@ class LineupCreateForm(forms.ModelForm):
         self.fields['channel'].empty_label = None
 
 
+class LineupUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Lineup
+        fields = ('name', )
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control'
+            })
+        }
+
+
 class ProgramCreateForm(forms.ModelForm):
 
     class Meta:
