@@ -1,0 +1,28 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}{{ block.super }} - {{ lineup.name }}{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/lineup_show'], function(module) {
+            module({
+                urls: {
+                    pp_show_json: function(pp_id) {
+                        return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
+                    },
+                    pp_show_part_modal: function() {
+                        return '{% url 'efsw.schedule:pp:show_part_modal' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ lineup.name }}</h1>
+    {% include 'schedule/_pp_list_table.html' %}
+{% endblock %}

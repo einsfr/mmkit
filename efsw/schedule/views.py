@@ -95,6 +95,10 @@ def lineup_list(request, page=1):
 def lineup_show(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     lineup_table_data = _get_lineup_table_data(lineup)
+    return shortcuts.render(request, 'schedule/lineup_show.html', {
+        'lineup': lineup,
+        'lineup_table_data': lineup_table_data,
+    })
 
 
 def lineup_show_current(request, channel_id=None):
