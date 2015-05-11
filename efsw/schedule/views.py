@@ -149,10 +149,10 @@ def lineup_update_json(request):
     lineup_id = request.GET.get('id', None)
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
-    except models.Lineup.DoesNotExist:
-        return _get_json_lineup_not_found(lineup_id)
     except ValueError:
         return _get_json_wrong_lineup_id(lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
     form = forms.LineupUpdateForm(request.POST, instance=lineup)
     if form.is_valid():
         updated_lineup = form.save()
@@ -252,6 +252,12 @@ def _get_json_program_not_found(program_id):
     )
 
 
+def _get_json_wrong_program_id(program_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор программы должен быть целым числом, предоставлено: "{0}"'.format(program_id)
+    )
+
+
 def program_show_json(request):
 
     def format_program_dict(p):
@@ -265,6 +271,8 @@ def program_show_json(request):
     program_id = request.GET.get('id', None)
     try:
         program = models.Program.objects.get(pk=program_id)
+    except ValueError:
+        return _get_json_wrong_program_id(program_id)
     except models.Program.DoesNotExist:
         return _get_json_program_not_found(program_id)
     return JsonWithStatusResponse(format_program_dict(program))
@@ -274,6 +282,12 @@ def _get_json_pp_not_found(pp_id):
     return JsonWithStatusResponse(
         'Ошибка: не найден фрагмент сетки вещания с ID "{0}"'.format(pp_id),
         JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def _get_json_wrong_pp_id(pp_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор фрагмента сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(pp_id)
     )
 
 
@@ -303,6 +317,8 @@ def pp_show_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
@@ -337,6 +353,8 @@ def pp_edit_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
@@ -378,6 +396,8 @@ def pp_delete_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     if not program_position.program:
@@ -401,6 +421,8 @@ def pp_update_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     form = forms.ProgramPositionEditForm(request.POST)
