@@ -6,6 +6,7 @@ from django.conf import settings
 from django.views.decorators import http
 from django.http import Http404
 from django.db.models import Q
+from django.core import urlresolvers
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -151,7 +152,7 @@ def lineup_create_json(request):
             )
             for d in range(1, 8)
         ])
-        return JsonWithStatusResponse.ok()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 

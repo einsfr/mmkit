@@ -23,7 +23,7 @@ define(['jquery', 'knockout'], function($, ko) {
                 data: self.form.serialize()
             }).done(function(result) {
                 if (result.status == 'ok') {
-                    alert('ok');
+                    window.location.href = result.data;
                 } else {
                     var errors = $.parseJSON(result.data.errors);
                     for (var p in errors) {
