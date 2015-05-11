@@ -36,8 +36,16 @@
                         <td class="icon_actions_container">
                             <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-info"></a>
                             {% if perms.schedule.change_lineup %}
-                                <a href="#" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
+                                {% if l.is_editable %}
+                                    <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
+                                {% endif %}
                                 <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy"></a>
+                                {% if not l.active %}
+                                    <a href="#" title="Активировать сетку вещания" class="fa fa-lg fa-check-square-o"></a>
+                                {% endif %}
+                                {% if l.is_deactivatable %}
+                                    <a href="#" title="Деактивировать сетку вещания" class="fa fa-lg fa-times"></a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>
