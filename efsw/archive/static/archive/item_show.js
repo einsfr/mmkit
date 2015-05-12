@@ -2,7 +2,9 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
 
     return function(conf) {
         $(document).ready(function() {
-            ko.applyBindings(new ItemDetailViewModel(conf.urls));
+            var view_model = new ItemDetailViewModel(conf.urls);
+            ko.applyBindings(view_model);
+            view_model.storage_changed();
         });
     };
 

@@ -18,10 +18,18 @@ class ItemCreateForm(forms.ModelForm):
             )
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].empty_label = None
+
 
 class ItemUpdateForm(forms.ModelForm):
     class Meta(ItemCreateForm.Meta):
         fields = ('name', 'description', 'created', 'author', 'category')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].empty_label = None
 
 
 class ItemUpdateAddStorageForm(forms.ModelForm):
@@ -36,6 +44,10 @@ class ItemUpdateAddStorageForm(forms.ModelForm):
                 'data-bind': 'value: location, disable: selected_storage().disable_location'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['storage'].empty_label = None
 
 
 class ItemCategoryForm(forms.ModelForm):

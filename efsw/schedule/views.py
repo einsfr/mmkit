@@ -6,6 +6,7 @@ from django.conf import settings
 from django.views.decorators import http
 from django.http import Http404
 from django.db.models import Q
+from django.core import urlresolvers
 
 from efsw.schedule import models
 from efsw.schedule import default_settings as schedule_default_settings
@@ -97,7 +98,7 @@ def lineup_show(request, lineup_id):
     lineup_table_data = _get_lineup_table_data(lineup)
     return shortcuts.render(request, 'schedule/lineup_show.html', {
         'lineup': lineup,
-        'lineup_table_data': lineup_table_data
+        'lineup_table_data': lineup_table_data,
     })
 
 
@@ -124,15 +125,56 @@ def lineup_show_current(request, channel_id=None):
 
 
 def lineup_edit(request, lineup_id):
+    return lineup_edit_structure(request, lineup_id)
+
+
+def lineup_edit_properties(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
-    return shortcuts.render(request, 'schedule/lineup_edit.html', {
+    return shortcuts.render(request, 'schedule/lineup_edit_properties.html', {
+        'lineup': lineup,
+        'form': forms.LineupUpdateForm(instance=lineup)
+    })
+
+
+def lineup_edit_structure(request, lineup_id):
+    lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
+    return shortcuts.render(request, 'schedule/lineup_edit_structure.html', {
         'lineup': lineup,
         'lineup_table_data': _get_lineup_table_data(lineup)
     })
 
 
-def lineup_new_part_modal(request):
-    return shortcuts.render(request, 'schedule/_lineup_new_modal.html', {
+@http.require_POST
+def lineup_update_json(request):
+    lineup_id = request.GET.get('id', None)
+    try:
+        lineup = models.Lineup.objects.get(pk=lineup_id)
+    except ValueError:
+        return _get_json_wrong_lineup_id(lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
+    form = forms.LineupUpdateForm(request.POST, instance=lineup)
+    if form.is_valid():
+        updated_lineup = form.save()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:edit', args=(updated_lineup.id, )))
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+
+
+def _get_json_lineup_not_found(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: сетка вещания с ID "{0}" не найдена'.format(lineup_id)
+    )
+
+
+def _get_json_wrong_lineup_id(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(lineup_id)
+    )
+
+
+def lineup_new(request):
+    return shortcuts.render(request, 'schedule/lineup_new.html', {
         'form': forms.LineupCreateForm()
     })
 
@@ -151,7 +193,7 @@ def lineup_create_json(request):
             )
             for d in range(1, 8)
         ])
-        return JsonWithStatusResponse.ok()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
@@ -210,6 +252,12 @@ def _get_json_program_not_found(program_id):
     )
 
 
+def _get_json_wrong_program_id(program_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор программы должен быть целым числом, предоставлено: "{0}"'.format(program_id)
+    )
+
+
 def program_show_json(request):
 
     def format_program_dict(p):
@@ -223,6 +271,8 @@ def program_show_json(request):
     program_id = request.GET.get('id', None)
     try:
         program = models.Program.objects.get(pk=program_id)
+    except ValueError:
+        return _get_json_wrong_program_id(program_id)
     except models.Program.DoesNotExist:
         return _get_json_program_not_found(program_id)
     return JsonWithStatusResponse(format_program_dict(program))
@@ -232,6 +282,12 @@ def _get_json_pp_not_found(pp_id):
     return JsonWithStatusResponse(
         'Ошибка: не найден фрагмент сетки вещания с ID "{0}"'.format(pp_id),
         JsonWithStatusResponse.STATUS_ERROR
+    )
+
+
+def _get_json_wrong_pp_id(pp_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор фрагмента сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(pp_id)
     )
 
 
@@ -261,6 +317,8 @@ def pp_show_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
@@ -295,6 +353,8 @@ def pp_edit_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
@@ -336,6 +396,8 @@ def pp_delete_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     if not program_position.program:
@@ -359,6 +421,8 @@ def pp_update_json(request):
     pp_id = request.GET.get('id', None)
     try:
         program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
+    except ValueError:
+        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     form = forms.ProgramPositionEditForm(request.POST)

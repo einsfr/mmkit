@@ -1,0 +1,63 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}{{ block.super }} - Создание сетки вещания{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/lineup_new'], function(module) {
+            module({
+                urls: {
+                    lineup_create_json: function() {
+                        return '{% url 'efsw.schedule:lineup:create_json' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Создание сетки вещания</h1>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form id="lineup_new_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().name }">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    <div>
+                        {{ form.name }}
+                        <span class="help-block" data-bind="visible: errors().name, text: errors().name" style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().start_time }">
+                        <label for="{{ form.start_time.id_for_label }}">Время начала</label>
+                        <div>
+                            {{ form.start_time }}
+                            <span class="help-block" data-bind="visible: errors().start_time, text: errors().start_time" style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().end_time }">
+                        <label for="{{ form.end_time.id_for_label }}">Время окончания</label>
+                        <div>
+                            {{ form.end_time }}
+                            <span class="help-block" data-bind="visible: errors().end_time, text: errors().end_time" style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 form-group" data-bind="css: { 'has-error': errors().channel }">
+                        <label for="{{ form.channel.id_for_label }}">Канал</label>
+                        <div>
+                            {{ form.channel }}
+                            <span class="help-block" data-bind="visible: errors().channel, text: errors().channel" style="display: none;"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button" class="btn btn-primary" data-bind="event: { click: create_lineup }">Создать</button>
+        </div>
+    </div>
+{% endblock %}

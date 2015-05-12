@@ -13,12 +13,12 @@ lineup_patterns = [
         views.lineup_list,
         name='list'
     ),
-    # lineups/new/part/modal/ Модальное окно для создания новой сетки вещания
-    # ( - )
+    # lineups/new/ Создание сетки вещания
+    # ( Создание сетки вещания )
     url(
-        r'^new/part/modal/$',
-        views.lineup_new_part_modal,
-        name='new_part_modal'
+        r'^new/$',
+        views.lineup_new,
+        name='new'
     ),
     # lineups/list/page/2/ Список сеток вещания - постранично
     # ( Список сеток вещания, страница 2 )
@@ -59,6 +59,18 @@ lineup_patterns = [
                 views.lineup_edit,
                 name='edit'
             ),
+            # lineups/1/edit/structure/ Редактирование (структура)
+            url(
+                r'^edit/structure/$',
+                views.lineup_edit_structure,
+                name='edit_structure'
+            ),
+            # lineups/1/edit/properties/ Редактирование (свойства)
+            url(
+                r'^edit/properties/$',
+                views.lineup_edit_properties,
+                name='edit_properties'
+            ),
             # lineups/1/show/part/pp_table_body/ Часть страницы с таблицей фрагментов
             # ( - )
             url(
@@ -76,12 +88,19 @@ lineup_patterns = [
         views.lineup_copy_json,
         name='copy_json'
     ),
-    # lineups/create/ Создать сетку вещания (POST, действие)
+    # lineups/create/json/ Создать сетку вещания (POST, действие)
     # ( - )
     url(
         r'^create/json/$',
         views.lineup_create_json,
         name='create_json'
+    ),
+    # lineups/update/json/?id=2 Обновить сетку вещания (POST, действие)
+    # ( - )
+    url(
+        r'^update/json/$',
+        views.lineup_update_json,
+        name='update_json'
     ),
 ]
 

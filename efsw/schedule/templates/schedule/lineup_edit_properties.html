@@ -1,0 +1,43 @@
+{% extends 'schedule/_app_base.html' %}
+
+{% block title %}{{ block.super }} - {{ lineup.name }} - Редактирование{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/lineup_edit_properties'], function(module) {
+            module({
+                urls: {
+                    lineup_update_json: function() {
+                        return '{% url 'efsw.schedule:lineup:update_json' %}?id={{ lineup.id }}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ lineup.name }} - Редактирование</h1>
+    <ul class="nav nav-tabs">
+        <li><a href="{% url 'efsw.schedule:lineup:edit_structure' lineup.id %}" title="Состав">Состав</a></li>
+        <li class="active"><a href="#" title="Свойства">Свойства</a></li>
+    </ul>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="alert alert-danger" data-bind="visible: non_field_errors(), text: non_field_errors()" style="display: none;"></div>
+            <form id="lineup_update_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().name }">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    <div>
+                        {{ form.name }}
+                        <span class="help-block" data-bind="visible: errors().name, text: errors().name" style="display: none;"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button" class="btn btn-primary" data-bind="event: { click: update_lineup }">Сохранить</button>
+        </div>
+    </div>
+{% endblock %}

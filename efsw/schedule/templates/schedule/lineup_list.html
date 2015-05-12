@@ -1,7 +1,6 @@
 {% extends 'schedule/_app_base.html' %}
 
 {% load pagination from pagination %}
-{% load field_verbose_name from model %}
 
 {% block title %}{{ block.super }} - Список сеток вещания{% endblock %}
 
@@ -36,15 +35,23 @@
                         <td class="icon_actions_container">
                             <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-info"></a>
                             {% if perms.schedule.change_lineup %}
-                                <a href="#" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
+                                {% if l.is_editable %}
+                                    <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
+                                {% endif %}
                                 <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy"></a>
+                                {% if not l.active %}
+                                    <a href="#" title="Активировать сетку вещания" class="fa fa-lg fa-check-square-o"></a>
+                                {% endif %}
+                                {% if l.is_deactivatable %}
+                                    <a href="#" title="Деактивировать сетку вещания" class="fa fa-lg fa-times"></a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <nav class="text-center">{% pagination lineups 'efsw.schedule:program:list_page' %}</nav>
+        <nav class="text-center">{% pagination lineups 'efsw.schedule:lineup:list_page' %}</nav>
     {% else %}
         Сетки вещания не найдены
     {% endif %}

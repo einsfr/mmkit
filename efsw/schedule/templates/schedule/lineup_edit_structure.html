@@ -1,13 +1,11 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% load staticfiles %}
-
-{% block title %}{{ block.super }} - Редактирование сетки вещания{% endblock %}
+{% block title %}{{ block.super }} - {{ lineup.name }} - Редактирование{% endblock %}
 
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/lineup_edit'], function(module) {
+        require(['schedule/lineup_edit_structure'], function(module) {
             module({
                 urls: {
                     pp_edit_json: function(pp_id) {
@@ -35,6 +33,10 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Редактирование сетки вещания</h1>
+    <h1>{{ lineup.name }} - Редактирование</h1>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#" title="Состав">Состав</a></li>
+        <li><a href="{% url 'efsw.schedule:lineup:edit_properties' lineup.id %}" title="Свойства">Свойства</a></li>
+    </ul>
     {% include 'schedule/_pp_list_table.html' %}
 {% endblock %}
