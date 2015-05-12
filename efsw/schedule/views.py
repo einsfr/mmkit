@@ -22,7 +22,7 @@ def _get_current_lineup(channel):
         lineup = models.Lineup.objects.get(
             Q(active_since__lte=today),
             Q(active_until__gte=today) | Q(active_until__isnull=True),
-            active=True,
+            draft=False,
             channel=channel,
         )
     except models.Lineup.DoesNotExist:

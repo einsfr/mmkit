@@ -51,9 +51,9 @@ class Lineup(models.Model):
         null=True
     )
 
-    active = models.BooleanField(
-        verbose_name='используется',
-        default=False
+    draft = models.BooleanField(
+        verbose_name='черновик',
+        default=True
     )
 
     start_time = models.TimeField(
@@ -77,10 +77,10 @@ class Lineup(models.Model):
         return urlresolvers.reverse('efsw.schedule:lineup:show', args=(self.id, ))
 
     def is_editable(self):
-        return not self.active or self.active_since > datetime.date.today()
+        return self.draft or self.active_since > datetime.date.today()
 
-    def is_deactivatable(self):
-        return self.active and self.active_since > datetime.date.today()
+    def is_returnable_to_draft(self):
+        return not self.draft and self.active_since > datetime.date.today()
 
 
 class Program(models.Model):

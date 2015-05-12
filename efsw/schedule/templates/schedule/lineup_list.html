@@ -13,11 +13,11 @@
                     <th>ID</th>
                     <th>Канал</th>
                     <th>Название</th>
-                    <th>Исп.</th>
+                    <th>Черн.</th>
                     <th>Исп. с</th>
                     <th>Исп. до</th>
-                    <th>Начало эф. суток</th>
-                    <th>Окончание эф. суток</th>
+                    <th>Начало суток</th>
+                    <th>Конец суток</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -27,7 +27,7 @@
                         <td>{{ l.id }}</td>
                         <td>{{ l.channel.name }}</td>
                         <td>{{ l.name }}</td>
-                        <td>{{ l.active }}</td>
+                        <td>{{ l.draft }}</td>
                         <td>{{ l.active_since }}</td>
                         <td>{{ l.active_until }}</td>
                         <td>{{ l.start_time }}</td>
@@ -39,11 +39,11 @@
                                     <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
                                 {% endif %}
                                 <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy"></a>
-                                {% if not l.active %}
-                                    <a href="#" title="Активировать сетку вещания" class="fa fa-lg fa-check-square-o"></a>
+                                {% if l.draft %}
+                                    <a href="#" title="Снять статус черновика" class="fa fa-lg fa-check-square-o"></a>
                                 {% endif %}
-                                {% if l.is_deactivatable %}
-                                    <a href="#" title="Деактивировать сетку вещания" class="fa fa-lg fa-times"></a>
+                                {% if l.is_returnable_to_draft %}
+                                    <a href="#" title="Вернуть статус черновика" class="fa fa-lg fa-times"></a>
                                 {% endif %}
                             {% endif %}
                         </td>
