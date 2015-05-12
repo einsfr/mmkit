@@ -153,6 +153,8 @@ def lineup_update_json(request):
         return _get_json_wrong_lineup_id(lineup_id)
     except models.Lineup.DoesNotExist:
         return _get_json_lineup_not_found(lineup_id)
+    if not lineup.is_editable():
+        return _get_json_lineup_edit_forbidden(lineup_id)
     form = forms.LineupUpdateForm(request.POST, instance=lineup)
     if form.is_valid():
         updated_lineup = form.save()
@@ -170,6 +172,12 @@ def _get_json_lineup_not_found(lineup_id):
 def _get_json_wrong_lineup_id(lineup_id):
     return JsonWithStatusResponse.error(
         'Ошибка: идентификатор сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(lineup_id)
+    )
+
+
+def _get_json_lineup_edit_forbidden(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: сетка вещания с ID "{0}" закрыта для редактирования'.format(lineup_id)
     )
 
 
@@ -400,6 +408,9 @@ def pp_delete_json(request):
         return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
+    lineup = program_position.lineup
+    if not lineup.is_editable():
+        return _get_json_lineup_edit_forbidden(lineup.id)
     if not program_position.program:
         return _get_json_delete_empty_pp(pp_id)
     if request.POST.get('r', None) is not None:
@@ -425,6 +436,9 @@ def pp_update_json(request):
         return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
+    lineup = program_position.lineup
+    if not lineup.is_editable():
+        return _get_json_lineup_edit_forbidden(lineup.id)
     form = forms.ProgramPositionEditForm(request.POST)
     if not form.is_valid():
         return JsonWithStatusResponse.error(form.errors.as_json())
