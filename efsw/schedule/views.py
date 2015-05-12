@@ -211,6 +211,10 @@ def lineup_copy_json(request):
     pass
 
 
+def lineup_copy_part_modal(request):
+    pass
+
+
 def lineup_show_part_pp_table_body(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/_pp_list_table_body.html', {

@@ -41,6 +41,12 @@ lineup_patterns = [
         views.lineup_show_current,
         name='show_current_channel'
     ),
+    # lineups/copy/part/modal/ Содержимое модального окна для копирования сетки вещания
+    url(
+        r'copy/part/modal/$',
+        views.lineup_copy_part_modal,
+        name='copy_part_modal'
+    ),
     # lineups/1/...
     url(
         r'^(?P<lineup_id>\d+)/',

@@ -4,6 +4,21 @@
 
 {% block title %}{{ block.super }} - Список сеток вещания{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/lineup_list'], function(module) {
+            module({
+                urls: {
+                    lineup_copy_part_modal: function() {
+                        return '{% url 'efsw.schedule:lineup:copy_part_modal' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
     <h1>Список сеток вещания</h1>
     {% if lineups %}
@@ -23,7 +38,7 @@
             </thead>
             <tbody>
                 {% for l in lineups %}
-                    <tr>
+                    <tr data-id="{{ l.id }}">
                         <td>{{ l.id }}</td>
                         <td>{{ l.channel.name }}</td>
                         <td>{{ l.name }}</td>
@@ -38,12 +53,12 @@
                                 {% if l.is_editable %}
                                     <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>
                                 {% endif %}
-                                <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy"></a>
+                                <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy act_copy"></a>
                                 {% if l.draft %}
-                                    <a href="#" title="Снять статус черновика" class="fa fa-lg fa-check-square-o"></a>
+                                    <a href="#" title="Снять статус черновика" class="fa fa-lg fa-check-square-o act_make_not_draft"></a>
                                 {% endif %}
                                 {% if l.is_returnable_to_draft %}
-                                    <a href="#" title="Вернуть статус черновика" class="fa fa-lg fa-times"></a>
+                                    <a href="#" title="Вернуть статус черновика" class="fa fa-lg fa-times act_make_draft"></a>
                                 {% endif %}
                             {% endif %}
                         </td>
