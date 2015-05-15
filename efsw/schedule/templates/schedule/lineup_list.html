@@ -12,6 +12,9 @@
                 urls: {
                     lineup_copy_part_modal: function() {
                         return '{% url 'efsw.schedule:lineup:copy_part_modal' %}';
+                    },
+                    lineup_copy_json: function(lineup_id) {
+                        return '{% url 'efsw.schedule:lineup:copy_json' %}?id=' + lineup_id;
                     }
                 }
             });

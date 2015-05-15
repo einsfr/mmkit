@@ -44,6 +44,19 @@ class LineupUpdateForm(forms.ModelForm):
         }
 
 
+class LineupCopyForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Lineup
+        fields = ('name', )
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название для копии',
+            })
+        }
+
+
 class ProgramCreateForm(forms.ModelForm):
 
     class Meta:

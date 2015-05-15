@@ -3,15 +3,27 @@
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
             <h3 class="text-center">
-                <span data-bind="visible: lineup_loaded() == true">Копирование сетки вещания</span>
-                <span data-bind="visible: lineup_loaded() == false">Загрузка...</span>
+                <span>Копирование сетки вещания</span>
             </h3>
         </div>
         <div class="modal-body">
-
+            <div class="alert alert-danger" data-bind="visible: non_field_errors(), text: non_field_errors()" style="display: none;"></div>
+            <form id="lineup_copy_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().name }">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    <div>
+                        {{ form.name }}
+                        <span class="help-block" data-bind="visible: errors().name, text: errors().name" style="display: none;"></span>
+                    </div>
+                </div>
+            </form>
         </div>
         <div class="modal-footer">
-
+            <div>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bind="event: { click: copy_lineup }">Скопировать</button>
+            </div>
         </div>
     </div>
 </div>

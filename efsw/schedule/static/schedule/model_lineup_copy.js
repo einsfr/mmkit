@@ -1,4 +1,4 @@
-define(['knockout'], function(ko) {
+define(['jquery', 'knockout'], function($, ko) {
 
     function Lineup(data) {
 
@@ -7,22 +7,34 @@ define(['knockout'], function(ko) {
     return function LineupCopyViewModel() {
         var self = this;
 
-        self.lineup_loaded = ko.observable(false);
-        self.lineup = ko.observable(new Lineup());
+        self.form = $('#lineup_copy_form');
+        self.errors_empty = {
+            name: ''
+        };
+        self.errors = ko.observable(self.errors_empty);
+        self.non_field_errors = ko.observable('');
 
         self.init = function(urls, lineup_id) {
             self.urls = urls;
-            self.lineup_loaded(false);
-            self.lineup(new Lineup());
-            self._load_lineup(lineup_id);
+            self.lineup_id = lineup_id;
+            self.errors(self.errors_empty);
         };
 
-        self._load_lineup = function(lineup_id) {
-            if (isNaN(lineup_id)) {
-                return;
-            }
-
-            self.lineup_loaded(true);
+        self.copy_lineup = function() {
+            $.ajax(self.urls.lineup_copy_json(self.lineup_id), {
+                'method': 'post',
+                'data': self.form.serialize()
+            }).done(function(response) {
+                if (response.status == 'ok') {
+                    window.location.href = response.data;
+                } else {
+                    require(['common/form_error_parser'], function(parser) {
+                        parser.parse(response.data, self.errors, self.non_field_errors);
+                    });
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                self.non_field_errors('При копировании возникла ошибка: (' + textStatus + ') - ' + errorThrown);
+            });
         };
     };
 
