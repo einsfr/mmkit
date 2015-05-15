@@ -1,9 +1,5 @@
 define(['jquery', 'knockout'], function($, ko) {
 
-    function Lineup(data) {
-
-    }
-
     return function LineupCopyViewModel() {
         var self = this;
 
