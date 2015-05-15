@@ -1,6 +1,6 @@
 define(['jquery'], function($) {
 
-    return function(data, err_observable, nf_err_observable) {
+    function parse(data, err_observable, nf_err_observable) {
         try {
             var errors = $.parseJSON(data.errors);
         } catch (err) {
@@ -14,6 +14,10 @@ define(['jquery'], function($) {
             }
         }
         err_observable(errors);
+    }
+
+    return {
+        parse: parse
     };
 
 });

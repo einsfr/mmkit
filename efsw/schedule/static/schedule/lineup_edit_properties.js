@@ -30,7 +30,7 @@ define(['jquery', 'knockout'], function($, ko) {
                     window.location.href = result.data;
                 } else {
                     require(['common/form_error_parser'], function(parser) {
-                        parser(result.data, self.errors, self.non_field_errors);
+                        parser.parse(result.data, self.errors, self.non_field_errors);
                     });
                 }
             }).fail(function(jqXHR, textStatus) {
