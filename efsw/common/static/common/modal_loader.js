@@ -1,7 +1,8 @@
-define(['jquery', 'bootstrap'], function($) {
+define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
 
     var cache = {};
     var loaded_url;
+    var loaded_model;
     var modal_container = $('#common_modal');
 
     function update_modal(content, callback) {
@@ -10,10 +11,11 @@ define(['jquery', 'bootstrap'], function($) {
         callback(modal_container, false);
     }
 
-    return function(url, settings, callback) {
+    function get(url, settings, callback) {
         if (typeof settings == 'function') {
             // Значит - это callback
             callback = settings;
+            settings = {};
         }
         var already_loaded = (loaded_url == url);
         loaded_url = url;
@@ -31,6 +33,31 @@ define(['jquery', 'bootstrap'], function($) {
                 });
             }
         }
+    }
+
+    function get_with_model(url, settings, model_name, callback) {
+        if (typeof model_name == 'function' && typeof callback == 'undefined') {
+            callback = model_name;
+            model_name = settings;
+            settings = {};
+        }
+        var get_callback = function(modal_container, already_loaded) {
+            if (already_loaded) {
+                callback(modal_container, true, loaded_model);
+            } else {
+                require([model_name], function(model) {
+                    loaded_model = new model();
+                    ko.applyBindings(loaded_model, modal_container.children()[0]);
+                    callback(modal_container, false, loaded_model);
+                });
+            }
+        };
+        get(url, settings, get_callback);
+    }
+
+    return {
+        get: get,
+        get_with_model: get_with_model
     };
 
 });
