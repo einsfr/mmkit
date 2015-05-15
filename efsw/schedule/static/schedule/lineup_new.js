@@ -30,13 +30,9 @@ define(['jquery', 'knockout'], function($, ko) {
                 if (result.status == 'ok') {
                     window.location.href = result.data;
                 } else {
-                    var errors = $.parseJSON(result.data.errors);
-                    for (var p in errors) {
-                        if (errors.hasOwnProperty(p)) {
-                            errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
-                        }
-                    }
-                    self.errors(errors);
+                    require(['common/form_error_parser'], function(parser) {
+                        parser.parse(result.data, self.errors);
+                    });
                 }
             }).fail(function(jqXHR, textStatus) {
                 alert('При создании возникла ошибка: ' + textStatus);

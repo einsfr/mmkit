@@ -4,10 +4,16 @@ define(['jquery'], function($) {
         try {
             var errors = $.parseJSON(data.errors);
         } catch (err) {
-            nf_err_observable(data);
+            if (typeof nf_err_observable != 'undefined') {
+                nf_err_observable(data);
+            } else {
+                alert(data);
+            }
             return;
         }
-        nf_err_observable('');
+        if (typeof nf_err_observable != 'undefined') {
+            nf_err_observable('');
+        }
         for (var p in errors) {
             if (errors.hasOwnProperty(p)) {
                 errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
