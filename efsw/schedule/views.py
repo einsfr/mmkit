@@ -212,7 +212,7 @@ def lineup_copy_json(request):
 
 
 def lineup_copy_part_modal(request):
-    pass
+    return shortcuts.render(request, 'schedule/_lineup_copy_modal.html')
 
 
 def lineup_show_part_pp_table_body(request, lineup_id):
