@@ -1,4 +1,4 @@
-define(['jquery', 'knockout'], function($, ko) {
+define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_loader) {
 
     function ProgramPosition(data) {
         var default_values = {
@@ -41,8 +41,6 @@ define(['jquery', 'knockout'], function($, ko) {
         self.pp = ko.observable(new ProgramPosition());
         self.program_loaded = ko.observable(false);
         self.program = ko.observable(new Program());
-        self._pp_cache = {};
-        self._program_cache = {};
 
         self.init = function (urls, modal_container, pp_id) {
             self.urls = urls;
@@ -109,49 +107,28 @@ define(['jquery', 'knockout'], function($, ko) {
             if (isNaN(pp_id)) {
                 return;
             }
-            if (pp_id.toString() in self._pp_cache) {
-                self.pp($.extend(true, {}, self._pp_cache[pp_id.toString()]));
-                self.pp_loaded(true);
-                if (self.pp().program_id) {
-                    self._load_program(self.pp().program_id);
-                } else {
-                    self.program(new Program());
-                    self.program_loaded(true);
-                }
-                return;
-            }
-            $.getJSON(self.urls.pp_edit_json(pp_id), function (response) {
-                if (response.status == 'ok') {
-                    var pp = new ProgramPosition(response.data);
-                    self.pp(pp);
-                    // Если оставить просто знак равенства - содержимое кэша будет меняться при внесении изменений в форму
-                    self._pp_cache[pp_id.toString()] = $.extend(true, {}, pp);
+            obj_loader.load(
+                self.urls.pp_edit_json(pp_id),
+                ProgramPosition,
+                function(o) {
+                    self.pp(o);
                     self.pp_loaded(true);
-                } else {
-                    alert(response.data);
                 }
-            });
+            );
         };
 
         self._load_program = function (program_id) {
             if (isNaN(program_id)) {
                 return;
             }
-            if (program_id.toString() in self._program_cache) {
-                self.program(self._program_cache[program_id.toString()]);
-                self.program_loaded(true);
-                return;
-            }
-            $.getJSON(self.urls.program_show_json(program_id), function (response) {
-                if (response.status == 'ok') {
-                    var program = new Program(response.data);
-                    self.program(program);
-                    self._program_cache[program_id.toString()] = program;
+            obj_loader.load(
+                self.urls.program_show_json(program_id),
+                Program,
+                function(o) {
+                    self.program(o);
                     self.program_loaded(true);
-                } else {
-                    alert(response.data);
                 }
-            });
+            );
         };
     }
 
