@@ -34,7 +34,7 @@ define(['jquery', 'knockout'], function($, ko) {
         }
     }
 
-    return function LineupEditViewModel(urls, modal_container) {
+    return function LineupEditViewModel() {
         var self = this;
 
         self.pp_loaded = ko.observable(false);
@@ -43,10 +43,10 @@ define(['jquery', 'knockout'], function($, ko) {
         self.program = ko.observable(new Program());
         self._pp_cache = {};
         self._program_cache = {};
-        self.urls = urls;
-        self.modal_container = modal_container;
 
-        self.init = function (pp_id) {
+        self.init = function (urls, modal_container, pp_id) {
+            self.urls = urls;
+            self.modal_container = modal_container;
             self.pp_loaded(false);
             self.program_loaded(false);
             self.pp(new ProgramPosition());

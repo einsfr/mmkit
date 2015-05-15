@@ -21,15 +21,15 @@ define(['jquery', 'knockout'], function($, ko) {
         }
     }
 
-    return function LineupShowViewModel(urls) {
+    return function LineupShowViewModel() {
         var self = this;
 
         self.pp_loaded = ko.observable(false);
         self.pp = ko.observable(new ProgramPosition());
         self._pp_cache = {};
-        self.urls = urls;
 
-        self.init = function(pp_id) {
+        self.init = function(urls, pp_id) {
+            self.urls = urls;
             self.pp_loaded(false);
             self.pp(new ProgramPosition());
             self._load_pp(pp_id);

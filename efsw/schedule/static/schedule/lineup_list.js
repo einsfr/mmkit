@@ -23,21 +23,9 @@ define(['jquery', 'knockout', 'common/modal_loader', 'bootstrap'], function($, k
         self.urls = urls;
 
         self.copy = function(lineup_id) {
-            ml(self.urls.lineup_copy_part_modal(), function(modal_container, already_loaded) {
-                if (modal_container) {
-                    if (typeof self.copy_model == 'undefined') {
-                        require(['schedule/model_lineup_copy'], function(model) {
-                            self.copy_model = new model(self.urls);
-                            ko.applyBindings(self.copy_model, modal_container.children()[0]);
-                            modal_container.modal();
-                        });
-                    } else {
-                        if (!already_loaded) {
-                            ko.applyBindings(self.copy_model, modal_container.children()[0]);
-                        }
-                        modal_container.modal();
-                    }
-                }
+            ml.get_with_model(self.urls.lineup_copy_part_modal(), 'schedule/model_lineup_copy', function(modal_container, already_loaded, model) {
+                model.init(urls, lineup_id);
+                modal_container.modal();
             });
         };
 

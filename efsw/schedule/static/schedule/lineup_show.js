@@ -1,30 +1,14 @@
 define(['jquery', 'knockout', 'common/modal_loader', 'jquery_ui', 'bootstrap'], function($, ko, ml) {
 
-    var view_model;
-
     return function(conf) {
         $(document).ready(function() {
             var lineup_table = $("#lineup_table");
             lineup_table.disableSelection();
             lineup_table.on('dblclick', "tbody td", function() {
                 var pp_id = $(this).data('pp_id');
-                ml(conf.urls.pp_show_part_modal(), function(modal_container, already_loaded) {
-                    if (modal_container) {
-                        if (typeof view_model == 'undefined') {
-                            require(['schedule/model_lineup_show'], function(model) {
-                                view_model = new model(conf.urls);
-                                ko.applyBindings(view_model, modal_container.children()[0]);
-                                view_model.init(pp_id);
-                                modal_container.modal();
-                            });
-                        } else {
-                            if (!already_loaded) {
-                                ko.applyBindings(view_model, modal_container.children()[0]);
-                            }
-                            view_model.init(pp_id);
-                            modal_container.modal();
-                        }
-                    }
+                ml.get_with_model(conf.urls.pp_show_part_modal(), 'schedule/model_lineup_show', function(modal_container, already_loaded, model) {
+                    model.init(conf.urls, pp_id);
+                    modal_container.modal();
                 });
             });
         });
