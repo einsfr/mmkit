@@ -208,7 +208,30 @@ def lineup_create_json(request):
 
 @http.require_POST
 def lineup_copy_json(request):
-    pass
+    lineup_id = request.GET.get('id', None)
+    try:
+        lineup = models.Lineup.objects.get(pk=lineup_id)
+    except ValueError:
+        return _get_json_wrong_lineup_id(lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
+    orig_pp = lineup.program_positions.all()
+    lineup.pk = None
+    lineup.draft = True
+    lineup.active_since = None
+    lineup.active_until = None
+    form = forms.LineupCopyForm(request.POST, instance=lineup)
+    if form.is_valid():
+        lineup = form.save()
+
+        def remove_pk(pp):
+            pp.pk = None
+            return pp
+
+        models.ProgramPosition.objects.bulk_create(list(map(remove_pk, orig_pp)))
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 def lineup_copy_part_modal(request):
