@@ -1,9 +1,9 @@
-define(['jquery', 'knockout'], function($, ko) {
+define(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko) {
 
-    return function LineupCopyViewModel() {
+    return function LineupActivateViewModel() {
         var self = this;
 
-        self.form = $('#lineup_copy_form');
+        self.form = $('#lineup_activate_form');
         self.errors_empty = {
             name: ''
         };
@@ -15,22 +15,30 @@ define(['jquery', 'knockout'], function($, ko) {
             self.lineup_id = lineup_id;
             self.errors(self.errors_empty);
             self.non_field_errors('');
+            self.form.find('#id_active_since').datepicker(
+                {
+                    changeMonth: true,
+                    changeYear: true,
+                    minDate: '+1d'
+                },
+                $.datepicker.regional['ru']
+            );
         };
 
-        self.copy_lineup = function() {
-            $.ajax(self.urls.lineup_copy_json(self.lineup_id), {
+        self.activate_lineup = function() {
+            $.ajax(self.urls.lineup_activate_json(self.lineup_id), {
                 'method': 'post',
                 'data': self.form.serialize()
             }).done(function(response) {
                 if (response.status == 'ok') {
-                    window.location.href = response.data;
+
                 } else {
                     require(['common/form_error_parser'], function(parser) {
                         parser.parse(response.data, self.errors, self.non_field_errors);
                     });
                 }
             }).fail(function(jqXHR, textStatus, errorThrown) {
-                self.non_field_errors('При копировании возникла ошибка: ' + errorThrown);
+                self.non_field_errors('При активации возникла ошибка: ' + errorThrown);
             });
         };
     };

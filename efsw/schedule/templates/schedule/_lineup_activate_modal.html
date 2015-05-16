@@ -1,0 +1,31 @@
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
+            <h3 class="text-center">
+                <span>Активация сетки вещания</span>
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger" data-bind="visible: non_field_errors(), text: non_field_errors()" style="display: none;"></div>
+            <form id="lineup_activate_form">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4 form-group" data-bind="css: { 'has-error': errors().active_since }">
+                        <label for="{{ form.active_since.id_for_label }}">Вступает в силу</label>
+                        <div>
+                            {{ form.active_since }}
+                            <span class="help-block" data-bind="visible: errors().active_since, text: errors().active_since" style="display: none;"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <div>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bind="event: { click: activate_lineup }">Активировать</button>
+            </div>
+        </div>
+    </div>
+</div>

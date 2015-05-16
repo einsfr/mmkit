@@ -57,6 +57,23 @@ class LineupCopyForm(forms.ModelForm):
         }
 
 
+class LineupActivateForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Lineup
+        fields = ('active_since', )
+        widgets = {
+            'active_since': forms.DateInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например, 01.01.2015'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['active_since'].required = True
+
+
 class ProgramCreateForm(forms.ModelForm):
 
     class Meta:

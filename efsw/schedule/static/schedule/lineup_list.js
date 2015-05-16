@@ -8,8 +8,8 @@ define(['jquery', 'knockout', 'common/modal_loader', 'bootstrap'], function($, k
             icon_containers.on('click', '.act_copy', function() {
                 view_model.copy($(this).parents('tr').data('id'));
             });
-            icon_containers.on('click', '.act_make_not_draft', function() {
-                view_model.make_not_draft($(this).parents('tr').data('id'));
+            icon_containers.on('click', '.act_activate', function() {
+                view_model.activate($(this).parents('tr').data('id'));
             });
             icon_containers.on('click', '.act_make_draft', function() {
                 view_model.make_draft($(this).parents('tr').data('id'));
@@ -29,8 +29,11 @@ define(['jquery', 'knockout', 'common/modal_loader', 'bootstrap'], function($, k
             });
         };
 
-        self.make_not_draft = function(lineup_id) {
-
+        self.activate = function(lineup_id) {
+            ml.get_with_model(self.urls.lineup_activate_part_modal(), 'schedule/model_lineup_activate', function(modal_container, already_loaded, model) {
+                model.init(urls, lineup_id);
+                modal_container.modal();
+            })
         };
 
         self.make_draft = function(lineup_id) {

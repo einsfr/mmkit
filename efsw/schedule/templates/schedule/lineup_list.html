@@ -10,11 +10,17 @@
         require(['schedule/lineup_list'], function(module) {
             module({
                 urls: {
-                    lineup_copy_part_modal: function() {
+                    'lineup_copy_part_modal': function() {
                         return '{% url 'efsw.schedule:lineup:copy_part_modal' %}';
                     },
-                    lineup_copy_json: function(lineup_id) {
+                    'lineup_copy_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:copy_json' %}?id=' + lineup_id;
+                    },
+                    'lineup_activate_part_modal': function() {
+                        return '{% url 'efsw.schedule:lineup:activate_part_modal' %}';
+                    },
+                    'lineup_activate_json': function(lineup_id) {
+                        return '{% url 'efsw.schedule:lineup:activate_json' %}?id=' + lineup_id;
                     }
                 }
             });
@@ -58,7 +64,7 @@
                                 {% endif %}
                                 <a href="#" title="Скопировать сетку вещания" class="fa fa-lg fa-copy act_copy"></a>
                                 {% if l.draft %}
-                                    <a href="#" title="Снять статус черновика" class="fa fa-lg fa-check-square-o act_make_not_draft"></a>
+                                    <a href="#" title="Активировать" class="fa fa-lg fa-check-square-o act_activate"></a>
                                 {% endif %}
                                 {% if l.is_returnable_to_draft %}
                                     <a href="#" title="Вернуть статус черновика" class="fa fa-lg fa-times act_make_draft"></a>

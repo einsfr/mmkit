@@ -27,8 +27,6 @@ def _get_current_lineup(channel):
         )
     except models.Lineup.DoesNotExist:
         lineup = None
-    except MultipleObjectsReturned:
-        pass  # TODO: здесь нужно будет снять флажок "активная" со всех лишних сеток, чтобы не делать этого в фоновых процессах
     return lineup
 
 
@@ -238,6 +236,31 @@ def lineup_copy_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_copy_modal.html', {
         'form': forms.LineupCopyForm()
     })
+
+
+def lineup_activate_part_modal(request):
+    return shortcuts.render(request, 'schedule/_lineup_activate_modal.html', {
+        'form': forms.LineupActivateForm()
+    })
+
+
+@http.require_POST
+def lineup_activate_json(request):
+    lineup_id = request.GET.get('id', None)
+    try:
+        lineup = models.Lineup.objects.get(pk=lineup_id)
+    except ValueError:
+        return _get_json_wrong_lineup_id(lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
+    if not lineup.draft:
+        return JsonWithStatusResponse.error('Ошибка: сетка вещания с ID "{0}" не имеет статуса черновика и не может '
+                                            'быть активирована'.format(lineup_id))
+    form = forms.LineupActivateForm(request.POST, instance=lineup)
+    if form.is_valid():
+        pass
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 def lineup_show_part_pp_table_body(request, lineup_id):
