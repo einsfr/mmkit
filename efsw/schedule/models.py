@@ -128,6 +128,7 @@ class Program(models.Model):
 
     age_limit = models.SmallIntegerField(
         choices=AGE_LIMIT_DICT.items(),
+        default=AGE_LIMIT_0,
         verbose_name='ограничение по возрасту'
     )
 
