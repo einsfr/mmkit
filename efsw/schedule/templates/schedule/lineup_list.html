@@ -21,6 +21,12 @@
                     },
                     'lineup_activate_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:activate_json' %}?id=' + lineup_id;
+                    },
+                    'lineup_make_draft_part_modal': function() {
+                        return '{% url 'efsw.schedule:lineup:make_draft_part_modal' %}';
+                    },
+                    'lineup_make_draft_json': function(lineup_id) {
+                        return '{% url 'efsw.schedule:lineup:make_draft_json' %}?id=' + lineup_id;
                     }
                 }
             });

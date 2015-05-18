@@ -37,7 +37,10 @@ define(['jquery', 'knockout', 'common/modal_loader', 'bootstrap'], function($, k
         };
 
         self.make_draft = function(lineup_id) {
-
+            ml.get_with_model(self.urls.lineup_make_draft_part_modal(), 'schedule/model_lineup_make_draft', function(modal_container, already_loaded, model) {
+                model.init(urls, lineup_id);
+                modal_container.modal();
+            })
         };
     }
 

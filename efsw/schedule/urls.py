@@ -53,6 +53,12 @@ lineup_patterns = [
         views.lineup_activate_part_modal,
         name='activate_part_modal'
     ),
+    # lineups/make_draft/part/modal/ Содержимое модального окна для перевода сетки снова в разряд черновиков
+    url(
+        r'make_draft/part/modal/$',
+        views.lineup_make_draft_part_modal,
+        name='make_draft_part_modal'
+    ),
     # lineups/1/...
     url(
         r'^(?P<lineup_id>\d+)/',
@@ -106,6 +112,13 @@ lineup_patterns = [
         r'activate/json/',
         views.lineup_activate_json,
         name='activate_json'
+    ),
+    # lineups/make_draft/json/?id=1
+    # ( - )
+    url(
+        r'make_draft/json/',
+        views.lineup_make_draft_json,
+        name='make_draft_json'
     ),
     # lineups/create/json/ Создать сетку вещания (POST, действие)
     # ( - )

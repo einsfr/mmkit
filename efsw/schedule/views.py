@@ -270,6 +270,41 @@ def lineup_activate_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+def lineup_make_draft_part_modal(request):
+    return shortcuts.render(request, 'schedule/_lineup_make_draft_modal.html')
+
+
+@http.require_POST
+def lineup_make_draft_json(request):
+    lineup_id = request.GET.get('id', None)
+    try:
+        lineup = models.Lineup.objects.get(pk=lineup_id)
+    except ValueError:
+        return _get_json_wrong_lineup_id(lineup_id)
+    except models.Lineup.DoesNotExist:
+        return _get_json_lineup_not_found(lineup_id)
+    if lineup.draft:
+        return JsonWithStatusResponse.error(
+            'Ошибка: сетка вещания с ID "{0}" уже имеет статуса черновика'.format(lineup_id)
+        )
+    try:
+        previous_lineup = models.Lineup.objects.get(
+            channel=lineup.channel,
+            draft=False,
+            active_until=lineup.active_since - datetime.timedelta(days=1)
+        )
+    except models.Lineup.DoesNotExist:
+        previous_lineup = None
+    if previous_lineup is not None:
+        previous_lineup.active_until = lineup.active_until
+        previous_lineup.save()
+    lineup.draft = True
+    lineup.active_since = None
+    lineup.active_until = None
+    lineup.save()
+    return JsonWithStatusResponse.ok()
+
+
 def lineup_show_part_pp_table_body(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/_pp_list_table_body.html', {

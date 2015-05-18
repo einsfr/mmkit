@@ -1,0 +1,27 @@
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span class="fa fa-close"></span></button>
+            <h3 class="text-center">
+                <span>Возврат сетки вещания к черновику</span>
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger" data-bind="visible: non_field_errors(), text: non_field_errors()" style="display: none;"></div>
+                <p>
+                    При возврате сетки вещания в состояние черновика время действия предыдущей сетки (если она есть)
+                    будет продлено автоматически.
+                </p>
+        </div>
+        <div class="modal-footer">
+            <div>
+                <button type="button"
+                        class="btn btn-default"
+                        data-dismiss="modal">Отмена</button>
+                <button type="button"
+                        class="btn btn-danger"
+                        data-bind="event: { click: lineup_make_draft }">Продолжить</button>
+            </div>
+        </div>
+    </div>
+</div>

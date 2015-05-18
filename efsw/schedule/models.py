@@ -77,7 +77,7 @@ class Lineup(models.Model):
         return urlresolvers.reverse('efsw.schedule:lineup:show', args=(self.id, ))
 
     def is_editable(self):
-        return self.draft or self.active_since > datetime.date.today()
+        return self.draft
 
     def is_returnable_to_draft(self):
         return not self.draft and self.active_since > datetime.date.today()
