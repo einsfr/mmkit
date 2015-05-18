@@ -159,13 +159,7 @@ program_patterns = [
         permission_required('schedule.add_program')(views.program_new),
         name='new'
     ),
-    # programs/create/ Добавление новой программы - действие (POST)
-    # ( - )
-    url(
-        r'^create/$',
-        permission_required('schedule.add_program')(views.program_create),
-        name='create'
-    ),
+
     # programs/5/...
     url(
         r'^(?P<program_id>\d+)/',
@@ -186,7 +180,14 @@ program_patterns = [
         r'^show/json/',
         views.program_show_json,
         name='show_json'
-    )
+    ),
+    # programs/create/json/ Добавление новой программы - действие (POST)
+    # ( - )
+    url(
+        r'^create/json/$',
+        permission_required('schedule.add_program')(views.program_create_json),
+        name='create_json'
+    ),
 ]
 
 # ------------------------- ProgramPosition -------------------------

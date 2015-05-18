@@ -1,14 +1,92 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% block title %}{{ block.super }} - Добавление новой программы{% endblock %}
+{% block title %}{{ block.super }} - Создание программы{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['schedule/program_new'], function(module) {
+            module({
+                urls: {
+                    'program_create_json': function() {
+                        return '{% url 'efsw.schedule:program:create_json' %}';
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
-    <h1>Добавление новой программы</h1>
-    <form action="{% url 'efsw.schedule:program:create' %}" method="post">
-        {% csrf_token %}
-        <table class="table">
-            {{ form.as_table }}
-        </table>
-        <input type="submit" value="Добавить">
-    </form>
+    <h1>Создание программы</h1>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="alert alert-danger"
+                 data-bind="visible: non_field_errors(), text: non_field_errors()"
+                 style="display: none;"></div>
+            <form id="program_new_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().name }">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    <div>
+                        {{ form.name }}
+                        <span class="help-block"
+                              data-bind="visible: errors().name, text: errors().name"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="form-group" data-bind="css: { 'has-error': errors().description }">
+                    <label for="{{ form.description.id_for_label }}">Описание</label>
+                    <div>
+                        {{ form.description }}
+                        <span class="help-block"
+                              data-bind="visible: errors().description, text: errors().description"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().age_limit }">
+                        <label for="{{ form.name.id_for_label }}">Ограничение по возрасту</label>
+                        <div>
+                            {{ form.age_limit }}
+                            <span class="help-block"
+                                  data-bind="visible: errors().age_limit, text: errors().age_limit"
+                                  style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().lineup_size }">
+                        <label for="{{ form.lineup_size.id_for_label }}">Размер в сетке</label>
+                        <div>
+                            {{ form.lineup_size }}
+                            <span class="help-block"
+                                  data-bind="visible: errors().lineup_size, text: errors().lineup_size"
+                                  style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().max_duration }">
+                        <label for="{{ form.max_duration.id_for_label }}">Макс. хронометраж</label>
+                        <div>
+                            {{ form.max_duration }}
+                            <span class="help-block"
+                                  data-bind="visible: errors().max_duration, text: errors().max_duration"
+                                  style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().min_duration }">
+                        <label for="{{ form.min_duration.id_for_label }}">Мин. хронометраж</label>
+                        <div>
+                            {{ form.min_duration }}
+                            <span class="help-block"
+                                  data-bind="visible: errors().min_duration, text: errors().min_duration"
+                                  style="display: none;"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bind="event: { click: create_program }">Создать</button>
+        </div>
+    </div>
 {% endblock %}

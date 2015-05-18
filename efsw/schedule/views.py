@@ -330,13 +330,13 @@ def program_new(request):
 
 
 @http.require_POST
-def program_create(request):
+def program_create_json(request):
     form = forms.ProgramCreateForm(request.POST)
     if form.is_valid():
         program = form.save()
-        return shortcuts.redirect(program.get_absolute_url())
+        return JsonWithStatusResponse.ok(program.get_absolute_url())
     else:
-        return shortcuts.render(request, 'schedule/program_new.html', {'form': form})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 def program_show(request, program_id):

@@ -150,6 +150,17 @@ class Program(models.Model):
     def __str__(self):
         return self.name
 
+    ERR_TEXT_LSIZE_SHORTER_THAN_DURATION = 'Размер программы в сетке вещания не может быть меньше её хронометража.'
+    ERR_TEXT_MAX_SHORTER_THAN_MIN = 'Максимальный хронометраж программы не может быть меньше минимального.'
+
+    def clean(self):
+        if self.lineup_size is None or self.max_duration is None or self.min_duration is None:
+            return
+        if self.lineup_size < self.max_duration or self.lineup_size < self.min_duration:
+            raise ValidationError(self.ERR_TEXT_LSIZE_SHORTER_THAN_DURATION)
+        if self.max_duration < self.min_duration:
+            raise ValidationError(self.ERR_TEXT_MAX_SHORTER_THAN_MIN)
+
 
 class ProgramPosition(models.Model):
 

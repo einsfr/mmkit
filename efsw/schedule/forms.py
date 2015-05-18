@@ -87,6 +87,32 @@ class ProgramCreateForm(forms.ModelForm):
     class Meta:
         model = models.Program
         fields = ('name', 'description', 'age_limit', 'lineup_size', 'max_duration', 'min_duration')
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название для новой программы'
+            }),
+            'lineup_size': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например, 00:30:00'
+            }),
+            'max_duration': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например, 00:26:00'
+            }),
+            'min_duration': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например, 00:21:00'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Описание новой программы',
+                'style': 'resize: vertical;'
+            }),
+            'age_limit': forms.Select(attrs={
+                'class': 'form-control'
+            })
+        }
 
 
 class ProgramPositionRepeatForm(forms.Form):
