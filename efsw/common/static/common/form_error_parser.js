@@ -11,15 +11,19 @@ define(['jquery'], function($) {
             }
             return;
         }
-        if (typeof nf_err_observable != 'undefined') {
-            nf_err_observable('');
-        }
         for (var p in errors) {
             if (errors.hasOwnProperty(p)) {
                 errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
             }
         }
         err_observable(errors);
+        if (typeof nf_err_observable != 'undefined') {
+            if ('__all__' in errors) {
+                nf_err_observable(errors['__all__']);
+            } else {
+                nf_err_observable('');
+            }
+        }
     }
 
     return {
