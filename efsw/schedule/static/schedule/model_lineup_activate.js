@@ -1,5 +1,8 @@
 define(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko) {
 
+    // http://stackoverflow.com/questions/21059598/implementing-jquery-datepicker-in-bootstrap-modal
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
     return function LineupActivateViewModel() {
         var self = this;
 
@@ -31,7 +34,7 @@ define(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'
                 'data': self.form.serialize()
             }).done(function(response) {
                 if (response.status == 'ok') {
-
+                    window.location.reload();
                 } else {
                     require(['common/form_error_parser'], function(parser) {
                         parser.parse(response.data, self.errors, self.non_field_errors);

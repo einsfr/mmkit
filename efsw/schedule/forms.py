@@ -1,4 +1,7 @@
+import datetime
+
 from django import forms
+from django.core.exceptions import ValidationError
 
 from efsw.schedule import models
 
@@ -72,6 +75,11 @@ class LineupActivateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['active_since'].required = True
+
+    def clean_active_since(self):
+        if self.cleaned_data['active_since'] <= datetime.date.today():
+            raise ValidationError('Дата активации не может быть меньше или равна текущей дате.')
+        return self.cleaned_data['active_since']
 
 
 class ProgramCreateForm(forms.ModelForm):

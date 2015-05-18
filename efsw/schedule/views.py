@@ -1,7 +1,7 @@
 import datetime
 
 from django import shortcuts
-from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.views.decorators import http
 from django.http import Http404
@@ -16,12 +16,13 @@ from efsw.schedule import lineops
 from efsw.common.db import pagination
 
 
-def _get_current_lineup(channel):
-    today = datetime.date.today()
+def _get_current_lineup(channel, date=None):
+    if date is None:
+        date = datetime.date.today()
     try:
         lineup = models.Lineup.objects.get(
-            Q(active_since__lte=today),
-            Q(active_until__gte=today) | Q(active_until__isnull=True),
+            Q(active_since__lte=date),
+            Q(active_until__gte=date) | Q(active_until__isnull=True),
             draft=False,
             channel=channel,
         )
@@ -256,9 +257,15 @@ def lineup_activate_json(request):
     if not lineup.draft:
         return JsonWithStatusResponse.error('Ошибка: сетка вещания с ID "{0}" не имеет статуса черновика и не может '
                                             'быть активирована'.format(lineup_id))
+    lineup.draft = False
     form = forms.LineupActivateForm(request.POST, instance=lineup)
     if form.is_valid():
-        pass
+        activation_date = form.cleaned_data['active_since']
+        current_active_lineup = _get_current_lineup(lineup.channel, activation_date)
+        form.save()
+        current_active_lineup.active_until = activation_date - datetime.timedelta(days=1)
+        current_active_lineup.save()
+        return JsonWithStatusResponse.ok()
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
