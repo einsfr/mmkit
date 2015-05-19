@@ -28,8 +28,11 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
                 $.ajax(url, settings).done(function(result) {
                     cache[url] = result;
                     update_modal(result, callback);
-                }).fail(function(jqXHR, textStatus) {
-                    alert('При загрузке возникла ошибка: ' + textStatus);
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    alert(
+                        'При выполнении запроса произошла ошибка' + (errorThrown ? ': ' + errorThrown : '') +
+                        ', попробуйте повторить его позднее.'
+                    );
                 });
             }
         }
