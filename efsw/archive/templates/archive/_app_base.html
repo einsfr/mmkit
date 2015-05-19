@@ -2,7 +2,7 @@
 
 {% block title %}{{ block.super }} - Архив{% endblock %}
 
-{% block content_wrapper %}
+{% block app_navigation %}
     <ul class="nav nav-pills">
         <li role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
@@ -38,5 +38,4 @@
             <a href="{% url 'efsw.archive:search' %}" title="Поиск по архиву">Поиск</a>
         </li>
     </ul>
-    {% block content %}{% endblock %}
 {% endblock %}

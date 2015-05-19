@@ -31,7 +31,9 @@
         </div>
     </nav>
     <div class="container">
-        {% block content_wrapper %}{% endblock %}
+        {% block app_navigation %}{% endblock %}
+        <div class="alert alert-danger" id="system_alert" style="display: none;"></div>
+        {% block content %}{% endblock %}
     </div>
     <footer class="container text-center">
         Используется <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank" title="Font Awesome by Dave Gandy">Font Awesome</a>
