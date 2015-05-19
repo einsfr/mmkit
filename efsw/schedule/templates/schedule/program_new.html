@@ -35,10 +35,21 @@
                                   style="display: none;"></span>
                         </div>
                     </div>
-                    <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors(.color }">
+                    <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().color }">
                         <label for="{{ form.color.id_for_label }}">Цвет фона</label>
                         <div>
-                            {{ form.color }}
+                            <div class="input-group">
+                                <span class="input-group-addon"
+                                      id="color_sample"
+                                      data-bind="style: { 'background-color': selected_color() }">&nbsp;</span>
+                                {{ form.color }}
+                                <span class="input-group-btn">
+                                    <button type="button"
+                                            class="btn btn-default"
+                                            data-bind="event: { click: change_color }"
+                                            ><span class="fa fa-lg fa-refresh"></span></button>
+                                </span>
+                            </div>
                             <span class="help-block" data-bind="visible: errors().color, text: errors().color"
                                   style="display: none;"></span>
                         </div>

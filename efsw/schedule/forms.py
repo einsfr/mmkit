@@ -113,7 +113,8 @@ class ProgramCreateForm(forms.ModelForm):
                 'class': 'form-control'
             }),
             'color': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'data-bind': 'event: { change: color_changed }'
             })
         }
 
