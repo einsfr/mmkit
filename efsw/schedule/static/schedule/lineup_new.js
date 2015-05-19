@@ -1,4 +1,4 @@
-define(['jquery', 'knockout'], function($, ko) {
+define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) {
 
     return function(conf) {
         $(document).ready(function() {
@@ -23,20 +23,19 @@ define(['jquery', 'knockout'], function($, ko) {
         };
 
         self.create_lineup = function() {
-            $.ajax(self.urls.lineup_create_json(), {
-                method: 'post',
-                data: self.form.serialize()
-            }).done(function(result) {
-                if (result.status == 'ok') {
-                    window.location.href = result.data;
-                } else {
+            ajr.exec(
+                self.urls.lineup_create_json(),
+                { method: 'post', data: self.form.serialize() },
+                function(response) {
+                    window.location.href = response.data;
+                },
+                function(response) {
                     require(['common/form_error_parser'], function(parser) {
-                        parser.parse(result.data, self.errors);
+                        parser.parse(response.data, self.errors);
                     });
-                }
-            }).fail(function(jqXHR, textStatus) {
-                alert('При создании возникла ошибка: ' + textStatus);
-            });
+                },
+                alert
+            );
         };
     }
 

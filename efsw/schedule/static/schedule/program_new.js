@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'tinycolor'], function($, ko, tc) {
+define(['jquery', 'knockout', 'tinycolor', 'common/ajax_json_request'], function($, ko, tc, ajr) {
 
     return function(conf) {
         $(document).ready(function() {
@@ -26,20 +26,19 @@ define(['jquery', 'knockout', 'tinycolor'], function($, ko, tc) {
         self.selected_color = ko.observable(self.color_input.val());
 
         self.create_program = function() {
-            $.ajax(self.urls.program_create_json(), {
-                'method': 'post',
-                'data': self.form.serialize()
-            }).done(function(response) {
-                if (response.status == 'ok') {
+            ajr.exec(
+                self.urls.program_create_json(),
+                { 'method': 'post', 'data': self.form.serialize() },
+                function(response) {
                     window.location.href = response.data;
-                } else {
+                },
+                function(response) {
                     require(['common/form_error_parser'], function(parser) {
                         parser.parse(response.data, self.errors, self.non_field_errors);
                     });
-                }
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                self.non_field_errors('При создании программы возникла ошибка: ' + errorThrown);
-            });
+                },
+                alert
+            );
         };
 
         self.change_color = function() {

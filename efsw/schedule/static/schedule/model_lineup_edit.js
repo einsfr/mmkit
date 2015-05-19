@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_loader) {
+define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_request'], function($, ko, obj_loader, ajr) {
 
     function ProgramPosition(data) {
         var default_values = {
@@ -68,38 +68,33 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_
         };
 
         self.pp_delete = function () {
-            $.ajax(self.urls.pp_delete_json(self.pp().id), {
-                method: 'post',
-                data: $('#repeat_select_container').find('input').serialize()
-            }).done(function (result) {
-                self._process_change_result(result);
-            }).fail(function (jqXHR, textStatus) {
-                alert('При удалении возникла ошибка: ' + textStatus);
-            });
+            ajr.exec(
+                self.urls.pp_delete_json(self.pp().id),
+                { method: 'post', data: $('#repeat_select_container').find('input').serialize() },
+                self._process_change_result,
+                alert,
+                alert
+            );
         };
 
         self.pp_update = function () {
-            $.ajax(self.urls.pp_update_json(self.pp().id), {
-                method: 'post',
-                data: $('#pp_form').serialize()
-            }).done(function (result) {
-                self._process_change_result(result);
-            }).fail(function (jqXHR, textStatus) {
-                alert('При обновлении возникла ошибка: ' + textStatus);
-            });
+            ajr.exec(
+                self.urls.pp_update_json(self.pp().id),
+                { method: 'post', data: $('#pp_form').serialize() },
+                self._process_change_result,
+                alert,
+                alert
+            );
         };
 
-        self._process_change_result = function (result) {
-            if (result.status == 'ok') {
-                self.modal_container.modal('hide');
-            } else {
-                alert(result.data);
-            }
+        self._process_change_result = function () {
+            self.modal_container.modal('hide');
             self._pp_cache = [];
-            $.ajax(self.urls.lineup_show_part_pp_table_body()).done(function (result) {
-                $('#lineup_table').children('tbody').replaceWith('<tbody>' + result + '</tbody>');
-            }).fail(function (jqXHR, textStatus) {
-                alert('При обновлении таблицы возникла ошибка: ' + textStatus);
+            $.ajax(self.urls.lineup_show_part_pp_table_body()).done(function (response) {
+                $('#lineup_table').children('tbody').replaceWith('<tbody>' + response + '</tbody>');
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert('При выполнении запроса произошла ошибка' + (errorThrown ? ': ' + errorThrown : '') +
+                    ', попробуйте повторить его позднее.');
             });
         };
 

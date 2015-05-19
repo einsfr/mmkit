@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko) {
+define(['jquery', 'knockout', 'common/ajax_json_request', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko, ajr) {
 
     // http://stackoverflow.com/questions/21059598/implementing-jquery-datepicker-in-bootstrap-modal
     $.fn.modal.Constructor.prototype.enforceFocus = function() {};
@@ -29,20 +29,19 @@ define(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'
         };
 
         self.activate_lineup = function() {
-            $.ajax(self.urls.lineup_activate_json(self.lineup_id), {
-                'method': 'post',
-                'data': self.form.serialize()
-            }).done(function(response) {
-                if (response.status == 'ok') {
+            ajr.exec(
+                self.urls.lineup_activate_json(self.lineup_id),
+                { 'method': 'post', 'data': self.form.serialize() },
+                function() {
                     window.location.reload();
-                } else {
+                },
+                function(response) {
                     require(['common/form_error_parser'], function(parser) {
                         parser.parse(response.data, self.errors, self.non_field_errors);
                     });
-                }
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                self.non_field_errors('При активации возникла ошибка: ' + errorThrown);
-            });
+                },
+                alert
+            );
         };
     };
 

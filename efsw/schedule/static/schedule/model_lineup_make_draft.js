@@ -1,4 +1,4 @@
-define(['jquery', 'knockout'], function($, ko) {
+define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) {
 
     return function LineupMakeDraftViewModel() {
         var self = this;
@@ -12,17 +12,15 @@ define(['jquery', 'knockout'], function($, ko) {
         };
 
         self.lineup_make_draft = function() {
-            $.ajax(self.urls.lineup_make_draft_json(self.lineup_id), {
-                'method': 'post'
-            }).done(function(response) {
-                if (response.status == 'ok') {
+            ajr.exec(
+                self.urls.lineup_make_draft_json(self.lineup_id),
+                { 'method': 'post' },
+                function() {
                     window.location.reload();
-                } else {
-                    self.non_field_errors(response.data);
-                }
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                self.non_field_errors('При возврате к черновику возникла ошибка: ' + errorThrown);
-            });
+                },
+                self.non_field_errors,
+                alert
+            );
         };
     };
 
