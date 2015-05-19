@@ -8,9 +8,7 @@ define(['jquery', 'common/ajax_json_request'], function($, ajr) {
         }
         var default_options = {
             ignore_cache: false,
-            ajax_settings: {},
-            fail_alert: true,
-            err_alert: true
+            ajax_settings: {}
         };
         options = $.extend(true, default_options, options);
         if (!options.ignore_cache) {
@@ -20,22 +18,10 @@ define(['jquery', 'common/ajax_json_request'], function($, ajr) {
             }
         }
         if (typeof fail_callback == 'undefined') {
-            if (options.fail_alert) {
-                fail_callback = function(jqXHR, textStatus) {
-                    alert('При загрузке объекта возникла ошибка: ' + textStatus);
-                };
-            } else {
-                fail_callback = function() {};
-            }
+            fail_callback = function() {};
         }
         if (typeof err_callback == 'undefined') {
-            if (options.err_alert) {
-                err_callback = function(response) {
-                    alert(response.data);
-                };
-            } else {
-                err_callback = function() {};
-            }
+            err_callback = function() {};
         }
         ajr.exec(
             url,
