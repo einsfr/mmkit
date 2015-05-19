@@ -17,7 +17,8 @@ define(['jquery', 'knockout'], function($, ko) {
             'age_limit': '',
             'lineup_size': '',
             'max_duration': '',
-            'min_duration': ''
+            'min_duration': '',
+            'color': ''
         };
         self.errors = ko.observable(self.errors_empty);
         self.non_field_errors = ko.observable('');

@@ -4,6 +4,8 @@ from django.db import models
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
 
+from efsw.common.db.models.fields.color import ColorField
+
 
 class Channel(models.Model):
 
@@ -132,9 +134,8 @@ class Program(models.Model):
         verbose_name='ограничение по возрасту'
     )
 
-    color = models.CharField(
+    color = ColorField(
         verbose_name='цвет фона',
-        max_length=7,
         default='#ffffff'
     )
 

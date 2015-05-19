@@ -86,7 +86,7 @@ class ProgramCreateForm(forms.ModelForm):
 
     class Meta:
         model = models.Program
-        fields = ('name', 'description', 'age_limit', 'lineup_size', 'max_duration', 'min_duration')
+        fields = ('name', 'description', 'age_limit', 'lineup_size', 'max_duration', 'min_duration', 'color')
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -110,6 +110,9 @@ class ProgramCreateForm(forms.ModelForm):
                 'style': 'resize: vertical;'
             }),
             'age_limit': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'color': forms.TextInput(attrs={
                 'class': 'form-control'
             })
         }
