@@ -44,10 +44,10 @@ define(['jquery', 'knockout', 'tinycolor'], function($, ko, tc) {
 
         self.change_color = function() {
             var new_color = tc.random();
-            while (new_color.toHsl().l < 0.7) {
+            while (new_color.toHsl().l < 0.75) {
                 new_color.lighten();
             }
-            while (new_color.toHsl().s > 0.5) {
+            while (new_color.toHsl().s > 0.75) {
                 new_color.desaturate();
             }
             self.color_input.val(new_color.toHexString());
