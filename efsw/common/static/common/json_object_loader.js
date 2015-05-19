@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(['jquery', 'common/ajax_json_request'], function($, ajr) {
 
     var object_cache = {};
 
@@ -37,15 +37,17 @@ define(['jquery'], function($) {
                 err_callback = function() {};
             }
         }
-        $.ajax(url, options.ajax_settings).done(function(response) {
-            if (response.status == 'ok') {
+        ajr.exec(
+            url,
+            options.ajax_settings,
+            function(response) {
                 var loaded_obj = new obj_class(response.data);
                 object_cache[url] = $.extend({}, loaded_obj);
                 load_callback(loaded_obj);
-            } else {
-                err_callback(response);
-            }
-        }).fail(fail_callback);
+            },
+            err_callback,
+            fail_callback
+        );
     }
 
     return {
