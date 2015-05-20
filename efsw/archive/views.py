@@ -4,7 +4,6 @@ from django import shortcuts
 from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
-from django.views.decorators import csrf
 from django.db import IntegrityError, transaction
 
 from efsw.archive import models
@@ -150,31 +149,44 @@ def item_create_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
-@csrf.ensure_csrf_cookie
 def item_show(request, item_id):
+    return item_show_properties(request, item_id)
+
+
+def item_show_properties(request, item_id):
     item = shortcuts.get_object_or_404(
-        models.Item.objects.select_related('category').prefetch_related('includes', 'included_in'),
+        models.Item.objects.select_related('category'),
         pk=item_id
     )
-    log_msg_count = item.log.count()
-    max_count = getattr(
-        settings,
-        'EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT',
-        archive_default_settings.EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT
-    )
-    if log_msg_count <= max_count:
-        log_msgs = item.log.order_by('-pk').all().select_related('user')
-        has_more_log_msgs = False
-    else:
-        log_msgs = item.log.order_by('-pk').all().select_related('user')[0:3]
-        has_more_log_msgs = True
-    return shortcuts.render(request, 'archive/item_show.html', {
-        'item': item,
-        'log_msgs': log_msgs,
-        'has_more_log_msgs': has_more_log_msgs,
-        'location_add_form': forms.ItemUpdateAddStorageForm()
+    return shortcuts.render(request, 'archive/item_show_properties.html', {
+        'item': item
     })
 
+
+def item_show_locations(request, item_id):
+    item = shortcuts.get_object_or_404(
+        models.Item.objects.prefetch_related('locations', 'locations__storage'),
+        pk=item_id
+    )
+    return shortcuts.render(request, 'archive/item_show_locations.html', {
+        'item': item
+    })
+
+def item_show_links(request, item_id):
+    item = shortcuts.get_object_or_404(
+        models.Item.objects.prefetch_related('includes', 'included_in'),
+        pk=item_id
+    )
+    return shortcuts.render(request, 'archive/item_show_links.html', {
+        'item': item
+    })
+
+def item_show_log(request, item_id):
+    item = shortcuts.get_object_or_404(models.Item.objects, pk=item_id)
+    return shortcuts.render(request, 'archive/item_show_log.html', {
+        'item': item,
+        'log': item.log.select_related('user').order_by('-pk').all()
+    })
 
 def item_includes_list_json(request):
     item_id = request.GET.get('id', None)

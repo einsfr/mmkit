@@ -1,0 +1,32 @@
+{% extends 'archive/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание элемента - Журнал{% endblock %}
+
+{% block content %}
+    <h1>{{ item.name }}</h1>
+    {% include 'archive/_item_show_nav_tabs.html' with active='log' %}
+    {% if log %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="min-width: 15em;">Дата и время</th>
+                    <th style="min-width: 15em;">Пользователь</th>
+                    <th style="width: 100%">Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in log %}
+                    <tr>
+                        <td>{{ msg.dt|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        <td>{% if msg.user %}{{ msg.user.username }}{% else %}-{% endif %}</td>
+                        <td>{{ msg.get_action_name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Журнал элемента пустой</div>
+        </div>
+    {% endif %}
+{% endblock %}

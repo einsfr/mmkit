@@ -1,0 +1,36 @@
+{% extends 'archive/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание элемента - Свойства{% endblock %}
+
+{% block content %}
+    <h1>{{ item.name }}</h1>
+    {% include 'archive/_item_show_nav_tabs.html' with active='properties' %}
+    <table class="table table-striped obj_properties">
+        <tbody>
+            <tr>
+                <th style="width: 10em;">ID</th>
+                <td>{{ item.id }}</td>
+            </tr>
+            <tr>
+                <th>Дата создания</th>
+                <td>{{ item.created }}</td>
+            </tr>
+            <tr>
+                <th>Категория</th>
+                <td>{{ item.category.name }}</td>
+            </tr>
+            <tr>
+                <th>Название</th>
+                <td>{{ item.name }}</td>
+            </tr>
+            <tr>
+                <th>Описание</th>
+                <td>{{ item.description }}</td>
+            </tr>
+            <tr>
+                <th>Автор</th>
+                <td>{{ item.author }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'archive/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание элемента - Размещение{% endblock %}
+
+{% block content %}
+    <h1>{{ item.name }}</h1>
+    {% include 'archive/_item_show_nav_tabs.html' with active='locations' %}
+    {% if item.locations.count %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="min-width: 20em;">Хранилище</th>
+                    <th style="width: 100%;">Размещение</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for location in item.locations.all %}
+                    <tr>
+                        <td>{{ location.storage.name }}</td>
+                        <td>
+                            {% if location.storage.is_online_type %}
+                                {{ location.get_url.format_win }}
+                            {% else %}
+                                {{ location.location }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Элемент не найден ни в одном хранилище</div>
+        </div>
+    {% endif %}
+{% endblock %}

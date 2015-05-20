@@ -38,6 +38,10 @@ div.search-result h4 {
     margin: 0 0.15em;
 }
 
+table.obj_properties {
+    margin-top: 0.5em;
+}
+
 table.obj_properties th {
     text-align: right;
 }

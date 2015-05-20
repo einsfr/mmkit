@@ -35,7 +35,10 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Описание элемента</h1>
+    <h1>{{ item.name }}</h1>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#">Свойства</a></li>
+    </ul>
     <h2>Свойства {% if perms.archive.change_item %}<small><a href="{% url 'efsw.archive:item:edit' item.id %}" title="Редактирование элемента" class="fa fa-edit"></a></small>{% endif %}</h2>
     <table class="table table-striped obj_properties">
         <tbody>

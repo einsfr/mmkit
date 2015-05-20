@@ -1,0 +1,46 @@
+{% extends 'archive/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание элемента - Связи{% endblock %}
+
+{% block content %}
+    <h1>{{ item.name }}</h1>
+    {% include 'archive/_item_show_nav_tabs.html' with active='links' %}
+    <table class="table table-bordered obj_properties">
+        <tbody>
+            {% for inc in item.included_in.all %}
+                {% if forloop.first %}
+                    <tr>
+                        <th rowspan="{{ item.included_in.all|length }}" style="width: 10em;">Входит в</th>
+                        <td><a href="{{ inc.get_absolute_url }}" title="Описание элемента">{{ inc.name }}</a></td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td><a href="{{ inc.get_absolute_url }}" title="Описание элемента">{{ inc.name }}</a></td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <th style="width: 10em;">Входит в</th>
+                    <td>-</td>
+                </tr>
+            {% endfor %}
+            {% for inc in item.includes.all %}
+                {% if forloop.first %}
+                    <tr>
+                        <th rowspan="{{ item.includes.all|length }}">Включает</th>
+                        <td><a href="{{ inc.get_absolute_url }}" title="Описание элемента">{{ inc.name }}</a></td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td><a href="{{ inc.get_absolute_url }}" title="Описание элемента">{{ inc.name }}</a></td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <th>Включает</th>
+                    <td>-</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

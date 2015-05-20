@@ -32,11 +32,34 @@ item_patterns = [
         r'^(?P<item_id>\d+)/',
         include([
             # items/12/show/ Описание одного элемента
-            # ( Описание элемента )
             url(
                 r'^show/$',
                 views.item_show,
                 name='show'
+            ),
+            # items/12/show/properties/ Описание одного элемента (свойства)
+            url(
+                r'^show/properties/$',
+                views.item_show_properties,
+                name='show_properties'
+            ),
+            # items/12/show/locations/ Описание одного элемента (расположение)
+            url(
+                r'^show/locations/$',
+                views.item_show_locations,
+                name='show_locations'
+            ),
+            # items/12/show/links/ Описание одного элемента (связи с другими)
+            url(
+                r'^show/links/$',
+                views.item_show_links,
+                name='show_links'
+            ),
+            # items/12/show/log/ Описание одного элемента (журнал)
+            url(
+                r'^show/log/$',
+                views.item_show_log,
+                name='show_log'
             ),
             # items/12/logs/list/ Сообщения о внесении изменения в элемент
             # ( Журнал изменений элемента )
