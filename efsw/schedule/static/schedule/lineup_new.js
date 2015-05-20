@@ -18,10 +18,6 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
         };
         self.errors = ko.observable(self.errors_empty);
 
-        self.init = function() {
-            self.errors(self.errors_empty);
-        };
-
         self.create_lineup = function() {
             ajr.exec(
                 self.urls.lineup_create_json(),
