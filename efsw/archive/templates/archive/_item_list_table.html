@@ -1,13 +1,13 @@
 {% load field_verbose_name from model %}
 
 {% if items %}
-    <table class="table">
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>{% field_verbose_name items 'created' %}</th>
-                <th>{% field_verbose_name items 'category' %}</th>
-                <th>{% field_verbose_name items 'name' %}</th>
+                <th class="text-nowrap">{% field_verbose_name items 'created' %}</th>
+                <th style="min-width: 15em;">{% field_verbose_name items 'category' %}</th>
+                <th style="width: 100%">{% field_verbose_name items 'name' %}</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>
@@ -15,11 +15,11 @@
             {% for item in items %}
                 <tr>
                     <td>{{ item.id }}</td>
-                    <td>{{ item.created }}</td>
+                    <td class="text-nowrap">{{ item.created|date:"SHORT_DATE_FORMAT" }}</td>
                     <td>{{ item.category.name }}</td>
                     <td>{{ item.name }}</td>
-                    <td>
-                        <a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>&nbsp;
+                    <td class="text-nowrap">
+                        <a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>
                     </td>
                 </tr>
             {% endfor %}
