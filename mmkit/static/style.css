@@ -37,3 +37,7 @@ div.search-result h4 {
 .icon_actions_container a {
     margin: 0 0.15em;
 }
+
+table.obj_properties th {
+    text-align: right;
+}
