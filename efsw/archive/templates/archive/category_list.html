@@ -1,23 +1,43 @@
 {% extends 'archive/_app_base.html' %}
 
+{% load pagination from pagination %}
+
 {% block title %}{{ block.super }} - Список категорий{% endblock %}
 
 {% block content %}
     <h1>Список категорий</h1>
-    <ul class="list-group">
-        {% for cat in categories %}
-            <li class="list-group-item">
-                <span class="badge">{{ cat.items.count }}</span>
-                {% if cat.items.count %}
-                    <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
-                       title="Список элементов в категории">{{ cat.name }}</a>
-                {% else %}
-                    {{ cat.name }}
-                {% endif %}
-                {% if perms.archive.change_itemcategory %}<a href="{% url 'efsw.archive:category:edit' cat.id %} }}" title="Список элементов в категории" class="fa fa-edit"></a>{% endif %}
-            </li>
-        {% empty %}
-            Категории не найдены
-        {% endfor %}
-    </ul>
+    {% if categories %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th style="width: 100%">Название</th>
+                    <th>Элементов</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                    <tr>
+                        <td>{{ cat.id }}</td>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.items.count }}</td>
+                        <td class="text-nowrap">
+                            <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
+                               title="Список элементов в категории"
+                               class="fa fa-lg fa-folder-open-o"></a>
+                            {% if perms.archive.change_itemcategory %}
+                                <a href="{% url 'efsw.archive:category:edit' cat.id %} }}"
+                                   title="Редактировать категорию"
+                                   class="fa fa-lg fa-edit"></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav class="text-center">{% pagination categories 'efsw.archive:category:list_page' %}</nav>
+    {% else %}
+        Категории не найдены
+    {% endif %}
 {% endblock %}

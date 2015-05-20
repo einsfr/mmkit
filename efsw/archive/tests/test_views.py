@@ -640,9 +640,30 @@ class CategoryListViewTestCase(TestCase):
     fixtures = ['item.json', 'itemcategory.json']
 
     def test_list(self):
-        response = self.client.get(urlresolvers.reverse('efsw.archive:category:list'))
-        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
-        self.assertEqual(models.ItemCategory.objects.count(), len(response.context['categories']))
+        with self.settings(EFSW_ARCH_CATEGORY_LIST_PER_PAGE=1000):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:list'))
+            self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+            self.assertEqual(models.ItemCategory.objects.count(), len(response.context['categories']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+
+    def test_pagination(self):
+        categories_count = models.ItemCategory.objects.count()
+        with self.settings(EFSW_ARCH_CATEGORY_LIST_PER_PAGE=1000):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:list_page', args=(2, )))
+            self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+            self.assertEqual(categories_count, len(response.context['categories']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+        with self.settings(EFSW_ARCH_CATEGORY_LIST_PER_PAGE=2):
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:list_page', args=(1, )))
+            self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+            self.assertEqual(2, len(response.context['categories']))
+            self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
+            self.assertContains(response, '<a href="/archive/categories/list/page/2/" title="Следующая страница">»</a>')
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:list_page', args=(2, )))
+            self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
+            self.assertEqual(1, len(response.context['categories']))
+            self.assertContains(response, '<a href="/archive/categories/list/page/1/" title="Предыдущая страница">«</a>')
+            self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
 
 
 class CategoryNewViewTestCase(LoginRequiredTestCase):

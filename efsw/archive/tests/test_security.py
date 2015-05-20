@@ -59,6 +59,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
             ),
             # ------------------------- ItemCategory -------------------------
             self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list')),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list_page', args=(1, ))),
             self.SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:category:new'),
                 anonymous=False,

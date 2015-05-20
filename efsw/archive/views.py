@@ -368,10 +368,15 @@ def item_update(request, item_id):
 # ------------------------- ItemCategory -------------------------
 
 
-def category_list(request):
+def category_list(request, page='1'):
+    per_page = getattr(
+        settings,
+        'EFSW_ARCH_CATEGORY_LIST_PER_PAGE',
+        archive_default_settings.EFSW_ARCH_CATEGORY_LIST_PER_PAGE
+    )
     categories = models.ItemCategory.objects.all().order_by('name')
     return shortcuts.render(request, 'archive/category_list.html', {
-        'categories': categories,
+        'categories': pagination.get_page(categories, page, per_page),
     })
 
 

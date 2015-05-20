@@ -48,6 +48,9 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:category:list', [],
              '/archive/categories/list/', views.category_list),
 
+            ('efsw.archive:category:list_page', [2],
+             '/archive/categories/list/page/2/', views.category_list),
+
             ('efsw.archive:category:new', [],
              '/archive/categories/new/', views.category_new),
 

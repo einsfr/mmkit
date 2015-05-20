@@ -115,6 +115,12 @@ category_patterns = [
         views.category_list,
         name='list'
     ),
+    # categories/list/page/2/ Список всех категорий постранично
+    url(
+        r'^list/page/(?P<page>\d+)/$',
+        views.category_list,
+        name='list_page'
+    ),
     # categories/new/ Добавление категории - форма (GET)
     # ( Добавление категории )
     url(
