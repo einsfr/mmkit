@@ -7,35 +7,30 @@ from efsw.schedule import views
 # ------------------------- Lineup -------------------------
 lineup_patterns = [
     # lineups/list/ Список сеток вещания
-    # ( Список сеток вещания )
     url(
         r'^list/$',
         views.lineup_list,
         name='list'
     ),
     # lineups/new/ Создание сетки вещания
-    # ( Создание сетки вещания )
     url(
         r'^new/$',
-        views.lineup_new,
+        permission_required('schedule.add_lineup')(views.lineup_new),
         name='new'
     ),
     # lineups/list/page/2/ Список сеток вещания - постранично
-    # ( Список сеток вещания, страница 2 )
     url(
         r'^list/page/(?P<page>\d+)/$',
         views.lineup_list,
         name='list_page'
     ),
     # lineups/show/current/ Текущая сетка вещания для первого по сортировке канала
-    # ( Текущая сетка вещания )
     url(
         r'^show/current/$',
         views.lineup_show_current,
         name='show_current'
     ),
     # lineups/show/current/channel/2/ Текущая сетка вещания для канала 2
-    # ( Текущая сетка вещания )
     url(
         r'^show/current/channel/(?P<channel_id>\d+)/$',
         views.lineup_show_current,
@@ -44,19 +39,19 @@ lineup_patterns = [
     # lineups/copy/part/modal/ Содержимое модального окна для копирования сетки вещания
     url(
         r'copy/part/modal/$',
-        views.lineup_copy_part_modal,
+        permission_required('schedule.add_lineup')(views.lineup_copy_part_modal),
         name='copy_part_modal'
     ),
     # lineups/activate/part/modal/ Содержимое модального окна для перевода сетки из разряда черновиков
     url(
         r'activate/part/modal/$',
-        views.lineup_activate_part_modal,
+        permission_required('schedule.change_lineup')(views.lineup_activate_part_modal),
         name='activate_part_modal'
     ),
     # lineups/make_draft/part/modal/ Содержимое модального окна для перевода сетки снова в разряд черновиков
     url(
         r'make_draft/part/modal/$',
-        views.lineup_make_draft_part_modal,
+        permission_required('schedule.change_lineup')(views.lineup_make_draft_part_modal),
         name='make_draft_part_modal'
     ),
     # lineups/1/...
@@ -64,33 +59,30 @@ lineup_patterns = [
         r'^(?P<lineup_id>\d+)/',
         include([
             # lineups/1/show/ Просмотр сетки вещания
-            # ( Просмотр сетки вещания )
             url(
                 r'^show/$',
                 views.lineup_show,
                 name='show'
             ),
             # lineups/1/edit/ Редактирование сетки вещания
-            # ( Редактирование сетки вещания )
             url(
                 r'^edit/$',
-                views.lineup_edit,
+                permission_required('schedule.change_lineup')(views.lineup_edit),
                 name='edit'
             ),
             # lineups/1/edit/structure/ Редактирование (структура)
             url(
                 r'^edit/structure/$',
-                views.lineup_edit_structure,
+                permission_required('schedule.change_lineup')(views.lineup_edit_structure),
                 name='edit_structure'
             ),
             # lineups/1/edit/properties/ Редактирование (свойства)
             url(
                 r'^edit/properties/$',
-                views.lineup_edit_properties,
+                permission_required('schedule.change_lineup')(views.lineup_edit_properties),
                 name='edit_properties'
             ),
             # lineups/1/show/part/pp_table_body/ Часть страницы с таблицей фрагментов
-            # ( - )
             url(
                 r'^show/part/pp_table_body/$',
                 views.lineup_show_part_pp_table_body,
@@ -99,39 +91,34 @@ lineup_patterns = [
         ])
     ),
     # ------------------------- JSON -------------------------
-    # lineups/copy/json/?id=1
-    # ( - )
+    # lineups/copy/json/?id=1 Копирование сетки вещания, POST
     url(
         r'copy/json/',
-        views.lineup_copy_json,
+        permission_required('schedule.add_lineup')(views.lineup_copy_json),
         name='copy_json'
     ),
-    # lineups/activate/json/?id=1
-    # ( - )
+    # lineups/activate/json/?id=1 Активация сетки вещания, POST
     url(
         r'activate/json/',
-        views.lineup_activate_json,
+        permission_required('schedule.change_lineup')(views.lineup_activate_json),
         name='activate_json'
     ),
-    # lineups/make_draft/json/?id=1
-    # ( - )
+    # lineups/make_draft/json/?id=1 Возврат сетки вещания в состояние черновика
     url(
         r'make_draft/json/',
-        views.lineup_make_draft_json,
+        permission_required('schedule.change_lineup')(views.lineup_make_draft_json),
         name='make_draft_json'
     ),
     # lineups/create/json/ Создать сетку вещания (POST, действие)
-    # ( - )
     url(
         r'^create/json/$',
-        views.lineup_create_json,
+        permission_required('schedule.add_lineup')(views.lineup_create_json),
         name='create_json'
     ),
     # lineups/update/json/?id=2 Обновить сетку вещания (POST, действие)
-    # ( - )
     url(
         r'^update/json/$',
-        views.lineup_update_json,
+        permission_required('schedule.change_lineup')(views.lineup_update_json),
         name='update_json'
     ),
 ]
@@ -139,33 +126,28 @@ lineup_patterns = [
 # ------------------------- Program -------------------------
 program_patterns = [
     # programs/list/ Список программ
-    # ( Список программ )
     url(
         r'^list/$',
         views.program_list,
         name='list'
     ),
     # programs/list/page/2/ Список программ - постранично
-    # ( Список программ, страница 2 )
     url(
         r'^list/page/(?P<page>\d+)/$',
         views.program_list,
         name='list_page'
     ),
     # programs/new/ Добавление новой программы - форма (GET)
-    # ( Добавление новой программы )
     url(
         r'^new/$',
         permission_required('schedule.add_program')(views.program_new),
         name='new'
     ),
-
     # programs/5/...
     url(
         r'^(?P<program_id>\d+)/',
         include([
             # programs/5/show/ Описание программы
-            # ( Описание программы )
             url(
                 r'^show/$',
                 views.program_show,
@@ -174,15 +156,13 @@ program_patterns = [
         ])
     ),
     # ------------------------- JSON -------------------------
-    # programs/show/json/?id=5
-    # ( - )
+    # programs/show/json/?id=5 Сведения о программе
     url(
         r'^show/json/',
         views.program_show_json,
         name='show_json'
     ),
     # programs/create/json/ Добавление новой программы - действие (POST)
-    # ( - )
     url(
         r'^create/json/$',
         permission_required('schedule.add_program')(views.program_create_json),
@@ -192,46 +172,40 @@ program_patterns = [
 
 # ------------------------- ProgramPosition -------------------------
 pp_patterns = [
-    # pps/show/part/modal/
-    # ( - )
+    # pps/show/part/modal/ Модальное окно для просмотра положения программы в сетке
     url(
         r'^show/part/modal/',
         views.pp_show_part_modal,
         name='show_part_modal'
     ),
-    # pps/show/json/?id=12
-    # ( - )
+    # pps/show/json/?id=12 Сведения о положении программы в сетке
     url(
         r'^show/json/',
         views.pp_show_json,
         name='show_json'
     ),
-    # pps/edit/part/modal/
-    # ( - )
+    # pps/edit/part/modal/ Модальное окно для редактирования положения программы в сетке
     url(
         r'^edit/part/modal/',
-        views.pp_edit_part_modal,
+        permission_required('schedule.change_programposition')(views.pp_edit_part_modal),
         name='edit_part_modal'
     ),
-    # pps/edit/json/?id=12
-    # ( - )
+    # pps/edit/json/?id=12 Редактирование положения программы, POST
     url(
         r'^edit/json/',
-        views.pp_edit_json,
+        permission_required('schedule.change_programposition')(views.pp_edit_json),
         name='edit_json'
     ),
-    # pps/delete/json/?id=5
-    # ( - )
+    # pps/delete/json/?id=5 Удаление положения программы, POST
     url(
         r'delete/json/',
-        views.pp_delete_json,
+        permission_required('schedule.change_programposition')(views.pp_delete_json),
         name='delete_json'
     ),
-    # pps/update/json/?id=5
-    # ( - )
+    # pps/update/json/?id=5 Обновление положения программы, POST
     url(
         r'update/json/',
-        views.pp_update_json,
+        permission_required('schedule.change_programposition')(views.pp_update_json),
         name='update_json'
     )
 ]
