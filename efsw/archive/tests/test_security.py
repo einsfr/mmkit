@@ -24,7 +24,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
                 perm_codename='add_item'
             ),
             self.SecurityTestConditions(
-                urlresolvers.reverse('efsw.archive:item:create'),
+                urlresolvers.reverse('efsw.archive:item:create_json'),
                 anonymous=False,
                 perm_codename='add_item',
                 method='post'

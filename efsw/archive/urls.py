@@ -27,13 +27,6 @@ item_patterns = [
         permission_required('archive.add_item')(views.item_new),
         name='new'
     ),
-    # items/create/ Добавление нового элемента - операция с БД (POST)
-    # ( - )
-    url(
-        r'^create/$',
-        permission_required('archive.add_item')(views.item_create),
-        name='create'
-    ),
     # items/12/...
     url(
         r'^(?P<item_id>\d+)/',
@@ -103,6 +96,12 @@ item_patterns = [
         r'^locations/update/json/$',
         permission_required('archive.change_itemlocation')(views.item_locations_update_json),
         name='locations_update_json'
+    ),
+    # items/create/json/ Добавление нового элемента - операция с БД (POST)
+    url(
+        r'^create/$',
+        permission_required('archive.add_item')(views.item_create_json),
+        name='create_json'
     ),
 ]
 

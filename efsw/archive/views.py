@@ -140,14 +140,14 @@ def item_new(request):
 
 
 @http.require_POST
-def item_create(request):
+def item_create_json(request):
     form = forms.ItemCreateForm(request.POST)
     if form.is_valid():
         item = form.save()
         models.ItemLog.log_item_add(item, request)
-        return shortcuts.redirect(item.get_absolute_url())
+        return JsonWithStatusResponse.ok(item.get_absolute_url())
     else:
-        return shortcuts.render(request, 'archive/item_new.html', {'form': form})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 @csrf.ensure_csrf_cookie

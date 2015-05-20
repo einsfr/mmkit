@@ -15,8 +15,8 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:item:new', [],
              '/archive/items/new/', views.item_new),
 
-            ('efsw.archive:item:create', [],
-             '/archive/items/create/', views.item_create),
+            ('efsw.archive:item:create_json', [],
+             '/archive/items/create/json/', views.item_create_json),
 
             ('efsw.archive:item:show', [12],
              '/archive/items/12/show/', views.item_show),

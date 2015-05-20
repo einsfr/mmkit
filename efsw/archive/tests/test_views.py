@@ -131,7 +131,7 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:create')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:create_json')
 
     def test_valid(self):
         self._login_user()
@@ -143,8 +143,11 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'category': '3',
         }
         response = self.client.post(self.request_url, post_data, follow=True)
-        self.assertEqual(1, len(response.redirect_chain))
-        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('/archive/items/1/show/', json_content['data'])
+        response = self.client.get(json_content['data'])
         item = models.Item.objects.get(pk=response.context['item'].id)
         self.assertEqual('Новый элемент', item.name)
         self.assertEqual('Описание нового элемента', item.description)
@@ -163,9 +166,11 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
     def test_required_field(self):
         self._login_user()
         response = self.client.post(self.request_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
         for field in ['name', 'description', 'created', 'author', 'category']:
-            self.assertFormError(response, 'form', field, 'Обязательное поле.')
+            self.assertEqual(json.loads(json_content['data']['errors'])[field][0]['code'], 'required')
 
     def test_name_max_length(self):
         self._login_user()
@@ -173,12 +178,10 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'name': 'a' * 256,
         }
         response = self.client.post(self.request_url, post_data)
-        self.assertFormError(
-            response,
-            'form',
-            'name',
-            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
-        )
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['name'][0]['code'], 'max_length')
 
     def test_created_not_date(self):
         self._login_user()
@@ -186,12 +189,10 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'created': 'this-is-not-a-date',
         }
         response = self.client.post(self.request_url, post_data)
-        self.assertFormError(
-            response,
-            'form',
-            'created',
-            'Введите правильную дату.'
-        )
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['created'][0]['code'], 'invalid')
 
     def test_author_max_length(self):
         self._login_user()
@@ -199,12 +200,10 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'author': 'a' * 256,
         }
         response = self.client.post(self.request_url, post_data)
-        self.assertFormError(
-            response,
-            'form',
-            'author',
-            'Убедитесь, что это значение содержит не более 255 символов (сейчас 256).'
-        )
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['author'][0]['code'], 'max_length')
 
     def test_non_existent_category(self):
         self._login_user()
@@ -212,12 +211,10 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
             'category': 'non-existent-category',
         }
         response = self.client.post(self.request_url, post_data)
-        self.assertFormError(
-            response,
-            'form',
-            'category',
-            'Выберите корректный вариант. Вашего варианта нет среди допустимых значений.'
-        )
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['category'][0]['code'], 'invalid_choice')
 
 
 class ItemShowViewTestCase(TestCase):

@@ -11,11 +11,26 @@ class ItemCreateForm(forms.ModelForm):
         model = models.Item
         fields = ('name', 'description', 'created', 'author', 'category')
         widgets = {
-            'created': widgets.DateInput(
-                attrs={
-                    'id': 'created_date_input'
-                }
-            )
+            'name': widgets.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название нового элемента'
+            }),
+            'created': widgets.DateInput(attrs={
+                'class': 'form-control',
+                'placeholder': '01.01.2015'
+            }),
+            'description': widgets.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Описание нового элемента',
+                'style': 'resize: vertical;'
+            }),
+            'author': widgets.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Автор(ы) элемента'
+            }),
+            'category': widgets.Select(attrs={
+                'class': 'form-control',
+            })
         }
 
     def __init__(self, *args, **kwargs):
