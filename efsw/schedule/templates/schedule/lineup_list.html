@@ -40,15 +40,15 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="width: 3em;">ID</th>
-                    <th style="width: 10em;">Канал</th>
-                    <th>Название</th>
-                    <th style="width: 3em;">Исп.</th>
-                    <th style="width: 7em;">Исп. с</th>
-                    <th style="width: 7em;">Исп. до</th>
-                    <th style="width: 5em;">Начало суток</th>
-                    <th style="width: 5em;">Конец суток</th>
-                    <th style="width: 10em;">&nbsp;</th>
+                    <th>ID</th>
+                    <th style="min-width: 10em;">Канал</th>
+                    <th style="width: 100%">Название</th>
+                    <th>Исп.</th>
+                    <th class="text-nowrap">Исп. с</th>
+                    <th class="text-nowrap">Исп. до</th>
+                    <th class="text-nowrap">Нач. дня</th>
+                    <th class="text-nowrap">Кон. дня</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,12 +57,12 @@
                         <td>{{ l.id }}</td>
                         <td>{{ l.channel.name }}</td>
                         <td>{{ l.name }}</td>
-                        <td>{% if l.draft %}&nbsp;{% else %}<span class="fa fa-lg fa-check"></span>{% endif %}</td>
-                        <td>{% if l.active_since %}{{ l.active_since|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
-                        <td>{% if l.active_until %}{{ l.active_until|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
-                        <td>{{ l.start_time|date:"H:i" }}</td>
-                        <td>{{ l.end_time|date:"H:i" }}</td>
-                        <td class="icon_actions_container">
+                        <td>{% if l.draft %}-{% else %}<span class="fa fa-lg fa-check"></span>{% endif %}</td>
+                        <td class="text-nowrap">{% if l.active_since %}{{ l.active_since|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
+                        <td class="text-nowrap">{% if l.active_until %}{{ l.active_until|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
+                        <td class="text-nowrap">{{ l.start_time|date:"H:i" }}</td>
+                        <td class="text-nowrap">{{ l.end_time|date:"H:i" }}</td>
+                        <td class="icon_actions_container text-nowrap">
                             <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-info"></a>
                             {% if perms.schedule.change_lineup %}
                                 {% if l.is_editable %}

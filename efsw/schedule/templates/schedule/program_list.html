@@ -10,9 +10,9 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="width: 3em;">ID</th>
-                    <th>Название</th>
-                    <th style="width: 5em;">&nbsp;</th>
+                    <th>ID</th>
+                    <th style="width: 100%">Название</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
@@ -20,8 +20,8 @@
                     <tr>
                         <td>{{ program.id }}</td>
                         <td>{{ program.name }}</td>
-                        <td>
-                            <a href="{{ program.get_absolute_url }}" title="Описание программы" class="fa fa-lg fa-info"></a>&nbsp;
+                        <td class="text-nowrap">
+                            <a href="{{ program.get_absolute_url }}" title="Описание программы" class="fa fa-lg fa-info"></a>
                         </td>
                     </tr>
                 {% endfor %}
