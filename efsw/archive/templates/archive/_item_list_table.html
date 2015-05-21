@@ -19,7 +19,12 @@
                     <td>{{ item.category.name }}</td>
                     <td>{{ item.name }}</td>
                     <td class="text-nowrap">
-                        <a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>
+                        <a href="{{ item.get_absolute_url }}"
+                           title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-info"></a>
+                        {% if perms.archive.change_item %}
+                            <a href="{% url 'efsw.archive:item:edit' item.id %}" title="Редактировать элемент"
+                               class="fa fa-lg fa-edit"></a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
