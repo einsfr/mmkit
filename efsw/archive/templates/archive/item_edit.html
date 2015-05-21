@@ -13,7 +13,7 @@
 
 {% block content %}
     <h1>Редактирование элемента</h1>
-    <form action="{% url 'efsw.archive:item:create' %}" method="post">
+    <form action="{% url 'efsw.archive:item:update' item.id %}" method="post">
         {% csrf_token %}
         <table class="table">
             {{ form.as_table }}

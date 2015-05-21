@@ -345,24 +345,14 @@ def item_locations_update_json(request):
     return JsonWithStatusResponse()
 
 
-def item_logs_list(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    log_msgs = item.log.order_by('-pk').all()
-    return shortcuts.render(
-        request,
-        'archive/item_logs_list.html',
-        {
-            'item': item,
-            'log_msgs': log_msgs,
-        }
-    )
-
-
 @http.require_GET
 def item_edit(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
     form = forms.ItemUpdateForm(instance=item)
-    return shortcuts.render(request, 'archive/item_edit.html', {'form': form})
+    return shortcuts.render(request, 'archive/item_edit.html', {
+        'item': item,
+        'form': form
+    })
 
 
 @http.require_POST
@@ -374,7 +364,10 @@ def item_update(request, item_id):
         models.ItemLog.log_item_update(item, request)
         return shortcuts.redirect(item.get_absolute_url())
     else:
-        return shortcuts.render(request, 'archive/item_edit.html', {'form': form})
+        return shortcuts.render(request, 'archive/item_edit.html', {
+            'item': item,
+            'form': form
+        })
 
 
 # ------------------------- ItemCategory -------------------------

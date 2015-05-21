@@ -61,13 +61,6 @@ item_patterns = [
                 views.item_show_log,
                 name='show_log'
             ),
-            # items/12/logs/list/ Сообщения о внесении изменения в элемент
-            # ( Журнал изменений элемента )
-            url(
-                r'^logs/list/$',
-                views.item_logs_list,
-                name='logs_list'
-            ),
             # items/12/edit/ Редактирование существующего элемента - форма (GET)
             # ( Редактирование элемента )
             url(
@@ -122,7 +115,7 @@ item_patterns = [
     ),
     # items/create/json/ Добавление нового элемента - операция с БД (POST)
     url(
-        r'^create/$',
+        r'^create/json/$',
         permission_required('archive.add_item')(views.item_create_json),
         name='create_json'
     ),

@@ -146,7 +146,8 @@ class ItemCreateViewTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('/archive/items/1/show/', json_content['data'])
+        item_id = models.Item.objects.count()
+        self.assertEqual('/archive/items/{0}/show/'.format(item_id), json_content['data'])
         response = self.client.get(json_content['data'])
         item = models.Item.objects.get(pk=response.context['item'].id)
         self.assertEqual('Новый элемент', item.name)
@@ -224,15 +225,44 @@ class ItemShowViewTestCase(TestCase):
     def test_nonexist(self):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(1000000, )))
         self.assertEqual(response.status_code, 404)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_properties', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_links', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_log', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
 
     def test_show(self):
         item = models.Item.objects.get(pk=4)
-        includes_count = item.includes.count()
-        log_count = item.log.count()
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(4, )))
-        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
-        self.assertEqual(includes_count, len(response.context['item'].includes.all()))
-        self.assertEqual(log_count, len(response.context['item'].log.all()))
+        self.assertContains(response, item.name, status_code=200)
+        self.assertContains(response, 'Описание элемента - Свойства')
+
+    def test_show_properties(self):
+        item = models.Item.objects.get(pk=4)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_properties', args=(4, )))
+        self.assertContains(response, item.name, status_code=200)
+        self.assertContains(response, 'Описание элемента - Свойства')
+
+    def test_show_locations(self):
+        item = models.Item.objects.get(pk=4)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_locations', args=(4, )))
+        self.assertContains(response, item.name, status_code=200)
+        self.assertContains(response, 'Описание элемента - Размещение')
+
+    def test_show_links(self):
+        item = models.Item.objects.get(pk=4)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_links', args=(4, )))
+        self.assertContains(response, item.name, status_code=200)
+        self.assertContains(response, 'Описание элемента - Связи')
+
+    def test_show_log(self):
+        item = models.Item.objects.get(pk=4)
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_log', args=(4, )))
+        self.assertContains(response, item.name, status_code=200)
+        self.assertContains(response, 'Описание элемента - Журнал')
 
 
 class ItemIncludesListJsonTestCase(TestCase):
@@ -559,19 +589,6 @@ class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):
         call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
 
 
-class ItemLogsListViewTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
-
-    def test_nonexist(self):
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-    def test_logs_list(self):
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1, )))
-        self.assertContains(response, '<h1>Журнал изменений элемента</h1>', status_code=200)
-
-
 class ItemEditViewTestCase(LoginRequiredTestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
@@ -611,7 +628,7 @@ class ItemUpdateViewTestCase(LoginRequiredTestCase):
             follow=True
         )
         self.assertEqual(1, len(response.redirect_chain))
-        self.assertContains(response, '<h1>Описание элемента</h1>', status_code=200)
+        self.assertContains(response, 'Отредактированное название', status_code=200)
         item = models.Item.objects.get(pk=response.context['item'].id)
         self.assertEqual('Отредактированное название', item.name)
         self.assertEqual('Отредактированное описание', item.description)

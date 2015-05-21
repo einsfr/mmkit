@@ -30,7 +30,10 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
                 method='post'
             ),
             self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show', args=(1,))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:logs_list', args=(1, ))),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_properties', args=(1,))),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1,))),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_links', args=(1,))),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_log', args=(1,))),
             self.SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit', args=(1, )),
                 anonymous=False,

@@ -21,8 +21,17 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:item:show', [12],
              '/archive/items/12/show/', views.item_show),
 
-            ('efsw.archive:item:logs_list', [12],
-             '/archive/items/12/logs/list/', views.item_logs_list),
+            ('efsw.archive:item:show_properties', [12],
+             '/archive/items/12/show/properties/', views.item_show_properties),
+
+            ('efsw.archive:item:show_locations', [12],
+             '/archive/items/12/show/locations/', views.item_show_locations),
+
+            ('efsw.archive:item:show_links', [12],
+             '/archive/items/12/show/links/', views.item_show_links),
+
+            ('efsw.archive:item:show_log', [12],
+             '/archive/items/12/show/log/', views.item_show_log),
 
             ('efsw.archive:item:edit', [12],
              '/archive/items/12/edit/', views.item_edit),
