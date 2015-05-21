@@ -1,0 +1,115 @@
+{% extends 'archive/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Редактирование элемента - Размещение{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['archive/item_edit_locations'], function(module) {
+            module(
+                {
+                    'urls': {
+                        'storage_show_json': function(id) {
+                            return "{% url 'efsw.archive:storage:show_json' %}?id=" + id;
+                        },
+                        'item_locations_update_json': function() {
+                            return "{% url 'efsw.archive:item:locations_update_json' %}?id=" + {{ item.id }};
+                        },
+                        'item_locations_list_json': function() {
+                            return "{% url 'efsw.archive:item:locations_list_json' %}?id=" + {{ item.id }};
+                        }
+                    }
+                },
+                {
+                    'locations': [{% for l in locations %}
+                        {
+                            'id': {{ l.id }},
+                            'storage_id': {{ l.storage_id }},
+                            'storage_name': '{{ l.storage_name|escapejs }}',
+                            'location': '{{ l.location|escapejs }}'
+                        }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}],
+                    'storage': {
+                        'id': {{ init_storage.id }},
+                        'name': '{{ init_storage.name|escapejs }}',
+                        'disable_location': {{ init_storage.disable_location|lower }},
+                        'base_url': '{{ init_storage.base_url|escapejs }}'
+                    }
+                });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ item.name }} - Редактирование</h1>
+    {% include 'archive/_item_edit_nav_tabs.html' with active='locations' %}
+    <div class="panel panel-default" style="margin-top: 0.5em;">
+        <div class="panel-body">
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
+            <div class="alert alert-success"
+                 data-bind="visible: success_msg(), text: success_msg()"
+                 style="display: none;"></div>
+            <table class="table table-hover"
+                   data-bind="visible: locations().length > 0">
+                <thead>
+                    <tr>
+                        <th style="min-width: 20em;">Хранилище</th>
+                        <th style="width: 100%;">Размещение</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody id="locations_container"
+                       data-bind="foreach: locations">
+                    <tr>
+                        <td data-bind="text: storage_name"></td>
+                        <td><span data-bind="text: base_url"></span><span data-bind="text: location"></span></td>
+                        <td>
+                            <a href="#" title="Удалить" class="fa fa-lg fa-trash-o"
+                               data-bind="click: $parent.remove_location "></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="panel panel-warning" style="margin-top: 0.5em;" data-bind="visible: locations().length == 0">
+                <div class="panel-body text-center">Элемент не найден ни в одном хранилище</div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().storage }">
+                    <label for="{{ form.storage.id_for_label }}">Хранилище</label>
+                    <div>
+                        {{ form.storage }}
+                        <span class="help-block"
+                              data-bind="visible: errors().storage, text: errors().storage"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="col-md-9 form-group" data-bind="css: { 'has-error': errors().location }">
+                    <label for="{{ form.location.id_for_label }}">Размещение</label>
+                    <div>
+                        <div class="input-group">
+                            <span class="input-group-addon"
+                                  data-bind="visible: form_storage().base_url, text: form_storage().base_url"></span>
+                            {{ form.location }}
+                            <span class="input-group-btn">
+                                <button type="button"
+                                        class="btn btn-success"
+                                        data-bind="event: { click: add_location }">Добавить</button>
+                            </span>
+                        </div>
+                        <span class="help-block"
+                              data-bind="visible: errors().location, text: errors().location"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bind="event: { click: update_item }, enable: locations_changed">Сохранить</button>
+        </div>
+    </div>
+{% endblock %}

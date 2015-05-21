@@ -14,27 +14,6 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
         this.url = data.url;
     }
 
-    function ItemLocation(data) {
-        this.id = data.id;
-        this.storage_id = data.storage_id;
-        this.storage = data.storage;
-        this.location = data.location;
-    }
-
-    function ItemStorage(data) {
-        if (data) {
-            this.id = data.id;
-            this.name = data.name;
-            this.base_url = data.base_url;
-            this.disable_location = data.disable_location;
-        } else {
-            this.id = 0;
-            this.name = '';
-            this.base_url = '';
-            this.disable_location = false;
-        }
-    }
-
     function ItemDetailViewModel(urls) {
         var self = this;
         self.includes = ko.observableArray([]);
@@ -100,29 +79,6 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
             );
         };
 
-        self.remove_location = function(location) {
-            self.locations.remove(location);
-            self.locations_changed = true;
-        };
-
-        self.add_location = function() {
-            if (!self.storage_id() || isNaN(self.storage_id())) {
-                alert('Не выбрано хранилище');
-                return;
-            }
-            if (!self.selected_storage().disable_location && (self.location() === undefined || self.location().length == 0)) {
-                alert('Не указано положение в хранилище');
-                return;
-            }
-            self.locations.push(new ItemLocation({
-                id: 0,
-                storage: self.selected_storage().name,
-                storage_id: self.selected_storage().id,
-                location: self.selected_storage().disable_location ? 'Определяется автоматически' : self.location()
-            }));
-            self.locations_changed = true;
-        };
-
         self.update_locations = function() {
             if (false === self.locations_changed) {
                 alert('Изменений не обнаружено');
@@ -156,31 +112,6 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
             );
         };
 
-        self.storage_changed = function() {
-            if (self.storage_id() && !isNaN(self.storage_id())) {
-                $.getJSON(self.urls.storage_show_json(), { id: self.storage_id() }, function(response) {
-                    if (response.status == 'ok') {
-                        self.selected_storage(new ItemStorage(response.data));
-                    } else {
-                        alert(response.data);
-                    }
-                });
-            }
-        };
-
-        self._get_locations = function() {
-            $.getJSON(self.urls.item_locations_list_json(), function(response) {
-                if (response.status == 'ok') {
-                    var mapped_locations = $.map(response.data, function(location) {
-                        return new ItemLocation(location);
-                    });
-                    self.locations(mapped_locations);
-                } else {
-                    alert(response.data);
-                }
-            });
-        };
-
         self._get_includes = function() {
             $.getJSON(self.urls.item_includes_list_json(), function(response) {
                 if (response.status == 'ok') {
@@ -198,12 +129,8 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
             if (self.includes_changed) {
                 return 'Обнаружены несохранённые изменения в связанных элементах - если сейчас покинуть страницу, они будут потеряны.';
             }
-            if (self.locations_changed) {
-                return 'Обнаружены несохранённые изменения в размещении элемента в хранилищах - если сейчас покинуть страницу, они будут потеряны';
-            }
         });
 
-        self._get_locations();
         self._get_includes();
     }
 

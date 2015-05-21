@@ -61,19 +61,29 @@ item_patterns = [
                 views.item_show_log,
                 name='show_log'
             ),
-            # items/12/edit/ Редактирование существующего элемента - форма (GET)
-            # ( Редактирование элемента )
+            # items/12/edit/ Редактирование существующего элемента (GET)
             url(
                 r'^edit/$',
                 permission_required('archive.change_item')(views.item_edit),
                 name='edit'
             ),
-            # items/12/update/ Редактирование существующего элемента - операция с БД (POST)
-            # ( - )
+            # items/12/edit/properties/ Редактирование существующего элемента - свойства (GET)
             url(
-                r'^update/$',
-                permission_required('archive.change_item')(views.item_update),
-                name='update'
+                r'^edit/properties/$',
+                permission_required('archive.change_item')(views.item_edit_properties),
+                name='edit_properties'
+            ),
+            # items/12/edit/locations/ Редактирование существующего элемента - расположение (GET)
+            url(
+                r'^edit/locations/$',
+                permission_required('archive.change_item')(views.item_edit_locations),
+                name='edit_locations'
+            ),
+            # items/12/edit/links/ Редактирование существующего элемента - связи (GET)
+            url(
+                r'^edit/links/$',
+                permission_required('archive.change_item')(views.item_edit_links),
+                name='edit_links'
             ),
         ])
     ),
@@ -118,6 +128,12 @@ item_patterns = [
         r'^create/json/$',
         permission_required('archive.add_item')(views.item_create_json),
         name='create_json'
+    ),
+    # items/update/properties/json/ Обновление существующего элемента (POST)
+    url(
+        r'^update/properties/json/',
+        permission_required('archive.change_item')(views.item_update_properties_json),
+        name='update_properties_json'
     ),
 ]
 

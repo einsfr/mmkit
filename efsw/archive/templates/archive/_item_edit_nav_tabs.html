@@ -1,0 +1,17 @@
+<ul class="nav nav-tabs">
+    {% if active == 'properties' %}
+        <li class="active"><a href="#">Свойства</a></li>
+    {% else %}
+        <li><a href="{% url 'efsw.archive:item:edit_properties' item.id %}">Свойства</a></li>
+    {% endif %}
+    {% if active == 'locations' %}
+        <li class="active"><a href="#">Расположение</a></li>
+    {% else %}
+        <li><a href="{% url 'efsw.archive:item:edit_locations' item.id %}">Расположение</a></li>
+    {% endif %}
+    {% if active == 'links' %}
+        <li class="active"><a href="#">Связи</a></li>
+    {% else %}
+        <li><a href="{% url 'efsw.archive:item:edit_links' item.id %}">Связи</a></li>
+    {% endif %}
+</ul>

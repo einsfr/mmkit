@@ -27,7 +27,7 @@
                                title="Список элементов в категории"
                                class="fa fa-lg fa-folder-open-o"></a>
                             {% if perms.archive.change_itemcategory %}
-                                <a href="{% url 'efsw.archive:category:edit' cat.id %} }}"
+                                <a href="{% url 'efsw.archive:category:edit' cat.id %}"
                                    title="Редактировать категорию"
                                    class="fa fa-lg fa-edit"></a>
                             {% endif %}

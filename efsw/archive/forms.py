@@ -38,7 +38,7 @@ class ItemCreateForm(forms.ModelForm):
         self.fields['category'].empty_label = None
 
 
-class ItemUpdateForm(forms.ModelForm):
+class ItemUpdatePropertiesForm(forms.ModelForm):
     class Meta(ItemCreateForm.Meta):
         fields = ('name', 'description', 'created', 'author', 'category')
 
@@ -47,16 +47,18 @@ class ItemUpdateForm(forms.ModelForm):
         self.fields['category'].empty_label = None
 
 
-class ItemUpdateAddStorageForm(forms.ModelForm):
+class ItemUpdateLocationsForm(forms.ModelForm):
     class Meta:
         model = models.ItemLocation
         fields = ('storage', 'location')
         widgets = {
             'storage': widgets.Select(attrs={
-                'data-bind': 'value: storage_id, event: { change: storage_changed }',
+                'class': 'form-control',
+                'data-bind': 'value: form_storage().id, event: { change: storage_changed }',
             }),
             'location': widgets.TextInput(attrs={
-                'data-bind': 'value: location, disable: selected_storage().disable_location'
+                'class': 'form-control',
+                'data-bind': 'value: form_location, disable: form_storage().disable_location'
             }),
         }
 

@@ -34,6 +34,18 @@ def _get_json_item_not_found(item_id):
     )
 
 
+def _get_json_item_wrong_id(item_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор элемента должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+    )
+
+
+def _get_json_storage_wrong_id(item_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+    )
+
+
 def _get_json_wrong_format():
     return JsonWithStatusResponse(
         'Неверный формат запроса',
@@ -275,55 +287,51 @@ def item_includes_update_json(request):
 
 
 def item_locations_list_json(request):
-
-    def _format_location_dict(l):
-        d = {
-            'id': l.id,
-            'storage': l.storage.name,
-            'storage_id': l.storage.id,
-        }
-        if l.storage.is_online_type():
-            d['location'] = l.get_url().format_win()
-        else:
-            d['location'] = l.location
-        return d
-
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
+    except ValueError:
+        return _get_json_item_wrong_id(item_id)
     locations_list = [
-        _format_location_dict(l)
+        _prepare_location_for_ui(l)
         for l in item.locations.all().select_related('storage')
     ]
-    return JsonWithStatusResponse(locations_list)
+    return JsonWithStatusResponse.ok(locations_list)
 
 
 @http.require_POST
 def item_locations_update_json(request):
+
+    def _clean_location(loc):
+        loc['storage_id'] = int(loc['storage_id'])
+        return loc
+
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
+    except ValueError:
+        return _get_json_item_wrong_id(item_id)
     post_locations = request.POST.get('locations', None)
     if post_locations is None:
         return _get_json_wrong_format()
     try:
-        locations = json.loads(post_locations)
+        locations = list(map(_clean_location, json.loads(post_locations)))
     except ValueError:
         return _get_json_wrong_format()
     if len(locations) == 0:
         models.ItemLocation.objects.filter(item=item).delete()
-        return JsonWithStatusResponse()
-    storage_ids = set([l['storage_id'] for l in locations])
+        return JsonWithStatusResponse.ok()
+    storage_ids_list = [l['storage_id'] for l in locations]
+    storage_ids = set(storage_ids_list)
+    if len(storage_ids_list) > len(storage_ids):
+        return JsonWithStatusResponse.error('Элемент не может иметь несколько расположений в одном хранилище.')
     storages = models.Storage.objects.filter(id__in=storage_ids)
     if len(storage_ids) != len(storages):
-        return JsonWithStatusResponse(
-            'Используется несуществующее хранилище',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
+        return JsonWithStatusResponse.error('Используется несуществующее хранилище.')
     storages_dict = dict([(s.id, s) for s in storages])
     leftover_locations = [l['id'] for l in locations if l['id']]
     models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
@@ -334,40 +342,86 @@ def item_locations_update_json(request):
         l_obj.storage = storages_dict[l['storage_id']]
         l_obj.item = item
         l_obj.location = l['location']
-        try:
-            with transaction.atomic():
-                l_obj.save()
-        except IntegrityError:
-            return JsonWithStatusResponse(
-                'Элемент не может иметь несколько расположений в одном хранилище',
-                JsonWithStatusResponse.STATUS_ERROR
-            )
-    return JsonWithStatusResponse()
+        l_obj.save()
+    return JsonWithStatusResponse.ok()
 
 
 @http.require_GET
 def item_edit(request, item_id):
+    return item_edit_properties(request, item_id)
+
+
+@http.require_GET
+def item_edit_properties(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    form = forms.ItemUpdateForm(instance=item)
-    return shortcuts.render(request, 'archive/item_edit.html', {
+    form = forms.ItemUpdatePropertiesForm(instance=item)
+    return shortcuts.render(request, 'archive/item_edit_properties.html', {
         'item': item,
         'form': form
     })
 
 
-@http.require_POST
-def item_update(request, item_id):
+def _prepare_location_for_ui(l):
+    r = {
+        'id': l.id,
+        'storage_id': l.storage_id,
+        'storage_name': l.storage.name,
+    }
+    if l.storage.is_online_type():
+        r['location'] = l.get_url().format_win()
+    else:
+        r['location'] = l.location
+    return r
+
+
+def _prepare_storage_for_ui(s):
+    r = {
+        'id': s.id,
+        'name': s.name,
+        'disable_location': s.is_online_master_type(),
+    }
+    if s.is_online_type():
+        base_url = s.base_url if s.base_url[-1] == '/' else '{0}/'.format(s.base_url)
+        r['base_url'] = urlformatter.format_url(base_url).format_win()
+    else:
+        r['base_url'] = ''
+    return r
+
+
+@http.require_GET
+def item_edit_locations(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    form = forms.ItemUpdateForm(request.POST, instance=item)
+    locations = list(map(_prepare_location_for_ui, item.locations.select_related('storage').order_by('pk').all()))
+    storage_qs = models.Storage.objects.all()[0:1]
+    return shortcuts.render(request, 'archive/item_edit_locations.html', {
+        'item': item,
+        'locations': locations,
+        'init_storage': (_prepare_storage_for_ui(storage_qs[0]) if storage_qs else None),
+        'form': forms.ItemUpdateLocationsForm()
+    })
+
+
+@http.require_GET
+def item_edit_links(request, item_id):
+    pass
+
+
+@http.require_POST
+def item_update_properties_json(request):
+    item_id = request.GET.get('id', None)
+    try:
+        item = models.Item.objects.get(pk=item_id)
+    except models.Item.DoesNotExist:
+        return _get_json_item_not_found(item_id)
+    except ValueError:
+        return _get_json_item_wrong_id(item_id)
+    form = forms.ItemUpdatePropertiesForm(request.POST, instance=item)
     if form.is_valid():
         item = form.save()
         models.ItemLog.log_item_update(item, request)
-        return shortcuts.redirect(item.get_absolute_url())
+        return JsonWithStatusResponse.ok()
     else:
-        return shortcuts.render(request, 'archive/item_edit.html', {
-            'item': item,
-            'form': form
-        })
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 # ------------------------- ItemCategory -------------------------
@@ -414,7 +468,7 @@ def category_items_list(request, category_id, page='1'):
 @http.require_GET
 def category_edit(request, category_id):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
-    form = forms.ItemCategoryForm(request.POST, instance=cat)
+    form = forms.ItemCategoryForm(instance=cat)
     return shortcuts.render(request, 'archive/category_edit.html', {'form': form})
 
 
@@ -433,23 +487,11 @@ def category_update(request, category_id):
 
 
 def storage_show_json(request):
-
-    def format_storage_dict(s):
-        return_dict = {
-            'id': s.id,
-            'name': s.name,
-            'disable_location': s.is_online_master_type(),
-        }
-        if s.is_online_type():
-            base_url = s.base_url if s.base_url[-1] == '/' else '{0}/'.format(s.base_url)
-            return_dict['base_url'] = urlformatter.format_url(base_url).format_win()
-        else:
-            return_dict['base_url'] = ''
-        return return_dict
-
     storage_id = request.GET.get('id', None)
     try:
         storage = models.Storage.objects.get(pk=storage_id)
     except models.Storage.DoesNotExist:
         return _get_json_storage_not_found(storage_id)
-    return JsonWithStatusResponse(format_storage_dict(storage))
+    except ValueError:
+        return _get_json_storage_wrong_id(storage_id)
+    return JsonWithStatusResponse(_prepare_storage_for_ui(storage))

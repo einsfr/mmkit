@@ -28,10 +28,6 @@ class ItemCategory(models.Model):
     def __str__(self):
         return self.name
 
-    @staticmethod
-    def get_update_url_title():
-        return 'Редактировать категорию'
-
 
 class Item(IndexableModel, models.Model):
     """
