@@ -37,7 +37,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'jquery_ui', 'vendor/j
                 },
                 function(response) {
                     require(['common/form_error_parser'], function(parser) {
-                        parser.parse(response.data, self.errors, self.non_field_errors);
+                        parser.parse(response.data, self.errors, self.non_field_errors, alert);
                     });
                 },
                 alert

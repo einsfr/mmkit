@@ -17,6 +17,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
             channel: ''
         };
         self.errors = ko.observable(self.errors_empty);
+        self.error_msg = ko.observable('');
 
         self.create_lineup = function() {
             ajr.exec(
@@ -27,7 +28,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
                 },
                 function(response) {
                     require(['common/form_error_parser'], function(parser) {
-                        parser.parse(response.data, self.errors);
+                        parser.parse(response.data, self.errors, self.error_msg, alert);
                     });
                 },
                 alert

@@ -63,7 +63,7 @@
                         <td class="text-nowrap">{{ l.start_time|date:"H:i" }}</td>
                         <td class="text-nowrap">{{ l.end_time|date:"H:i" }}</td>
                         <td class="icon_actions_container text-nowrap">
-                            <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-info"></a>
+                            <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-eye"></a>
                             {% if perms.schedule.change_lineup %}
                                 {% if l.is_editable %}
                                     <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>

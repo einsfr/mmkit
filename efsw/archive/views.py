@@ -403,7 +403,10 @@ def item_edit_locations(request, item_id):
 
 @http.require_GET
 def item_edit_links(request, item_id):
-    pass
+    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
+    return shortcuts.render(request, 'archive/item_edit_links.html', {
+        'item': item,
+    })
 
 
 @http.require_POST
