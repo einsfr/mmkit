@@ -1,17 +1,37 @@
 {% extends 'archive/_app_base.html' %}
 
-{% block title %}{{ block.super }} - Редактирование элемента - Свойства{% endblock %}
+{% block title %}{{ block.super }} - Редактирование элемента - Связи{% endblock %}
 
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['archive/item_edit_properties'], function(module) {
+        require(['archive/item_edit_links'], function(module) {
             module({
                 'urls': {
-                    'item_update_properties_json': function() {
-                        return "{% url 'efsw.archive:item:update_properties_json' %}?id={{ item.id }}";
+                    'item_update_links_json': function() {
+                        return "{% url 'efsw.archive:item:includes_update_json' %}?id={{ item.id }}";
+                    },
+                    'item_includes_check_json': function() {
+                        return "{% url 'efsw.archive:item:includes_check_json' %}?id={{ item.id }}";
                     }
                 }
+            }, {
+                'includes': [{% for i in item.includes.all %}
+                    {
+                        'id': {{ i.id }},
+                        'name': '{{ i.name|escapejs }}',
+                        'url': '{{ i.get_absolute_url|escapejs }}'
+                    }
+                    {% if not forloop.last %},{% endif %}
+                {% endfor %}],
+                'included_in': [{% for i in item.included_in.all %}
+                    {
+                        'id': {{ i.id }},
+                        'name': '{{ i.name|escapejs }}',
+                        'url': '{{ i.get_absolute_url|escapejs }}'
+                    }
+                    {% if not forloop.last %},{% endif %}
+                {% endfor %}]
             });
         });
     </script>
@@ -32,14 +52,97 @@
             <div class="alert alert-success"
                  data-bind="visible: success_msg(), text: success_msg()"
                  style="display: none;"></div>
-            <form id="item_links_form">
-
-            </form>
+            <table class="table table-bordered obj_properties" style="margin-top: 0;">
+                <tbody>
+                    <tr>
+                        <th style="width: 10em;"
+                            data-bind="attr: { rowspan: (included_in().length > 1 ? included_in().length : 1) }">Входит в</th>
+                        <td>
+                            <span data-bind="visible: included_in().length == 0" style="display: none;">-</span>
+                            <!-- ko if: included_in().length > 0 -->
+                                <a title="Описание элемента"
+                                   data-bind="text: included_in()[0].name, attr: { href: included_in()[0].url }"></a>
+                            <!-- /ko -->
+                        </td>
+                    </tr>
+                    <!-- ko foreach: included_in-->
+                        <!-- ko if: $index() != 0 -->
+                            <tr data-bind="visible: true" style="display: none;">
+                                <td>
+                                    <a title="Описание элемента"
+                                       data-bind="text: name, attr: { href: url }"></a>
+                                </td>
+                            </tr>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                    <tr>
+                        <th style="width: 10em;"
+                            data-bind="attr: { rowspan: (includes().length > 1 ? includes().length : 1) }">Включает</th>
+                        <td>
+                            <span data-bind="visible: includes().length == 0" style="display: none;">-</span>
+                            <!-- ko if: includes().length > 0 -->
+                                <a title="Описание элемента"
+                                   data-bind="text: includes()[0].name, attr: { href: includes()[0].url }"></a>
+                            <!-- /ko -->
+                        </td>
+                    </tr>
+                    <!-- ko foreach: includes-->
+                        <!-- ko if: $index() != 0 -->
+                            <tr data-bind="visible: true" style="display: none;">
+                                <td>
+                                    <a title="Описание элемента"
+                                       data-bind="text: name, attr: { href: url }"></a>
+                                </td>
+                            </tr>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-md-2 form-group">
+                    <label for="id_type">Тип связи</label>
+                    <div>
+                        <select id="id_type" class="form-control" data-bind="value: form_type">
+                            <option value="1">Входит в</option>
+                            <option value="2">Включает</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().item_select_type }">
+                    <label for="id_item_select_type">Выбрать по</label>
+                    <div>
+                        <select id="id_item_select_type" class="form-control"
+                                data-bind="value: form_item_select_type">
+                            <option value="1">ID</option>
+                            <option value="2" disabled>URL</option>
+                        </select>
+                    </div>
+                    <span class="help-block"
+                          data-bind="visible: errors().item_select_type, text: errors().item_select_type"
+                          style="display: none;"></span>
+                </div>
+                <div class="col-md-8 form-group" data-bind="css: { 'has-error': errors().item }">
+                    <label for="id_item">Элемент</label>
+                    <div>
+                        <div class="input-group">
+                            <input id="id_item" type="text" class="form-control" data-bind="textInput: form_item">
+                            <span class="input-group-btn">
+                                <button type="button"
+                                        class="btn btn-success"
+                                        data-bind="event: { click: add_item }, enable: form_item().length > 0">Добавить</button>
+                            </span>
+                        </div>
+                    </div>
+                    <span class="help-block"
+                          data-bind="visible: errors().item, text: errors().item"
+                          style="display: none;"></span>
+                </div>
+            </div>
         </div>
         <div class="panel-footer text-center">
             <button type="button"
                     class="btn btn-primary"
-                    data-bind="event: { click: update_item }">Сохранить</button>
+                    data-bind="event: { click: update_item }, enable: includes_changed">Сохранить</button>
         </div>
     </div>
 {% endblock %}

@@ -8,12 +8,6 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
         });
     };
 
-    function Item(data) {
-        this.id = data.id;
-        this.name = data.name;
-        this.url = data.url;
-    }
-
     function ItemDetailViewModel(urls) {
         var self = this;
         self.includes = ko.observableArray([]);
@@ -124,12 +118,6 @@ define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
                 }
             });
         };
-
-        $(window).bind('beforeunload', function() {
-            if (self.includes_changed) {
-                return 'Обнаружены несохранённые изменения в связанных элементах - если сейчас покинуть страницу, они будут потеряны.';
-            }
-        });
 
         self._get_includes();
     }
