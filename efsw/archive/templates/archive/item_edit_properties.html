@@ -18,7 +18,11 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{{ item.name }} - Редактирование</h1>
+    <h1>
+        {{ item.name }}<span style="vertical-align: sub; font-size: 50%; color: red;">
+        Редактирование</span><a href="{% url 'efsw.archive:item:show_properties' item.id %}"
+                                title="Просмотр элемента - Свойства" class="fa fa-eye"></a>
+    </h1>
     {% include 'archive/_item_edit_nav_tabs.html' with active='properties' %}
     <div class="panel panel-default" style="margin-top: 0.5em;">
         <div class="panel-body">

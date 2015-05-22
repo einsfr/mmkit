@@ -45,3 +45,8 @@ table.obj_properties {
 table.obj_properties th {
     text-align: right;
 }
+
+h1 .fa {
+    vertical-align: super;
+    font-size: 70%;
+}

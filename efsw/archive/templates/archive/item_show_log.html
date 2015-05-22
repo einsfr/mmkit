@@ -3,7 +3,13 @@
 {% block title %}{{ block.super }} - Описание элемента - Журнал{% endblock %}
 
 {% block content %}
-    <h1>{{ item.name }}</h1>
+    <h1>
+        {{ item.name }}
+        {% if perms.archive.change_item %}
+            <a href="{% url 'efsw.archive:item:edit' item.id %}"
+               title="Редактирование элемента" class="fa fa-edit"></a>
+        {% endif %}
+    </h1>
     {% include 'archive/_item_show_nav_tabs.html' with active='log' %}
     {% if log %}
         <table class="table table-hover">

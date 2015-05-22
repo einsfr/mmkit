@@ -3,7 +3,13 @@
 {% block title %}{{ block.super }} - Описание элемента - Связи{% endblock %}
 
 {% block content %}
-    <h1>{{ item.name }}</h1>
+    <h1>
+        {{ item.name }}
+        {% if perms.archive.change_item %}
+            <a href="{% url 'efsw.archive:item:edit_links' item.id %}"
+               title="Редактирование элемента - Связи" class="fa fa-edit"></a>
+        {% endif %}
+    </h1>
     {% include 'archive/_item_show_nav_tabs.html' with active='links' %}
     <table class="table table-bordered obj_properties">
         <tbody>
