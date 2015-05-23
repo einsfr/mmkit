@@ -54,6 +54,9 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
 
         self.add_item = function() {
             self.errors($.extend({}, self.errors_empty));
+            if (self.form_type() != '1' || self.form_type() != '2') {
+                self._set_error('type', 'Неизвестный тип связи.');
+            }
             if (self.form_item_select_type() == '1') {
                 self._add_item_by_id();
             } else if (self.form_item_select_type() == '2') {
@@ -75,11 +78,30 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                 self._set_error('item', 'Связь с элементом с таким ID уже существует.');
                 return;
             }
-
+            jol.load(
+                self.urls.item_includes_check_json(),
+                {
+                    'data': {
+                        'include_id': self.form_item(),
+                        'type': self.form_type()
+                    }
+                },
+                Item,
+                function(i) {
+                    if (self.form_type() == '1') {
+                        self.included_in.push(i);
+                    } else if (self.form_type() == '2') {
+                        self.includes.push(i);
+                    }
+                    self.includes_changed(true);
+                },
+                self.error_msg,
+                alert
+            )
         };
 
         self._add_item_by_url = function() {
-
+            // TODO: Написать реализацию
         };
 
         self.update_item = function() {
