@@ -104,11 +104,14 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             }
             obj_loader.load(
                 self.urls.pp_edit_json(pp_id),
+                {},
                 ProgramPosition,
                 function(o) {
                     self.pp(o);
                     self.pp_loaded(true);
-                }
+                },
+                alert,
+                alert
             );
         };
 
@@ -118,11 +121,14 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             }
             obj_loader.load(
                 self.urls.program_show_json(program_id),
+                {},
                 Program,
                 function(o) {
                     self.program(o);
                     self.program_loaded(true);
-                }
+                },
+                alert,
+                alert
             );
         };
     }

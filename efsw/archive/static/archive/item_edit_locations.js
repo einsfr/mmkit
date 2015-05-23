@@ -126,6 +126,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
             self.form_location('');
             jol.load(
                 self.urls.storage_show_json(id),
+                {},
                 ItemStorage,
                 self.form_storage,
                 alert,

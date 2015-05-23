@@ -40,11 +40,14 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_
             }
             obj_loader.load(
                 self.urls.pp_show_json(pp_id),
+                {},
                 ProgramPosition,
                 function(o) {
                     self.pp(o);
                     self.pp_loaded(true);
-                }
+                },
+                alert,
+                alert
             );
         };
     }
