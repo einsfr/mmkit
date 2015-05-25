@@ -67,6 +67,16 @@ def _check_include_in(item, include_in):
     return None
 
 
+def _get_json_category_not_found(item_id):
+    return JsonWithStatusResponse.error('Ошибка: категория с ID "{0}" не существует'.format(item_id))
+
+
+def _get_json_category_wrong_id(item_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+    )
+
+
 # ------------------------- Общие -------------------------
 
 
@@ -179,6 +189,7 @@ def item_show_locations(request, item_id):
         'item': item
     })
 
+
 def item_show_links(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.prefetch_related('includes', 'included_in'),
@@ -188,12 +199,14 @@ def item_show_links(request, item_id):
         'item': item
     })
 
+
 def item_show_log(request, item_id):
     item = shortcuts.get_object_or_404(models.Item.objects, pk=item_id)
     return shortcuts.render(request, 'archive/item_show_log.html', {
         'item': item,
         'log': item.log.select_related('user').order_by('-pk').all()
     })
+
 
 def item_includes_list_json(request):
     item_id = request.GET.get('id', None)
@@ -207,8 +220,10 @@ def item_includes_list_json(request):
     ]
     return JsonWithStatusResponse(includes_list)
 
+
 LINK_TYPE_INCLUDED_IN = 1
 LINK_TYPE_INCLUDES = 2
+
 
 def item_includes_check_json(request):
     item_id = request.GET.get('id', None)
@@ -219,11 +234,11 @@ def item_includes_check_json(request):
         return JsonWithStatusResponse.error('Неизвестный тип связи.')
     try:
         if int(item_id) == int(inc_id):
-            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя')
+            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя.')
     except ValueError:
-        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом')
+        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом.')
     except TypeError:
-        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен id или inc_id')
+        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен id или inc_id.')
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
@@ -473,13 +488,13 @@ def category_new(request):
 
 
 @http.require_POST
-def category_create(request):
+def category_create_json(request):
     form = forms.ItemCategoryForm(request.POST)
     if form.is_valid():
         form.save()
-        return shortcuts.redirect(urlresolvers.reverse('efsw.archive:category:list'))
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:category:list'))
     else:
-        return shortcuts.render(request, 'archive/category_new.html', {'form': form})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 def category_items_list(request, category_id, page='1'):
@@ -496,18 +511,27 @@ def category_items_list(request, category_id, page='1'):
 def category_edit(request, category_id):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     form = forms.ItemCategoryForm(instance=cat)
-    return shortcuts.render(request, 'archive/category_edit.html', {'form': form})
+    return shortcuts.render(request, 'archive/category_edit.html', {
+        'category': cat,
+        'form': form
+    })
 
 
 @http.require_POST
-def category_update(request, category_id):
-    cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
+def category_update_json(request):
+    cat_id = request.GET.get('id', None)
+    try:
+        cat = models.ItemCategory.objects.get(pk=cat_id)
+    except models.ItemCategory.DoesNotExist:
+        return _get_json_category_not_found(cat_id)
+    except ValueError:
+        return _get_json_category_wrong_id(cat_id)
     form = forms.ItemCategoryForm(request.POST, instance=cat)
     if form.is_valid():
         form.save()
-        return shortcuts.redirect(urlresolvers.reverse('efsw.archive:category:list'))
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:category:list'))
     else:
-        return shortcuts.render(request, 'archive/category_edit.html', {'form': form})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
 # ------------------------- Storage -------------------------

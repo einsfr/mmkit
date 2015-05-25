@@ -71,6 +71,12 @@ class ItemCategoryForm(forms.ModelForm):
     class Meta:
         model = models.ItemCategory
         fields = ('name', )
+        widgets = {
+            'name': widgets.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название новой категории'
+            })
+        }
 
 
 class ArchiveSearchForm(forms.Form):

@@ -95,7 +95,7 @@ item_patterns = [
         views.item_includes_list_json,
         name='includes_list_json'
     ),
-    # items/includes/check/json/?id=12&include_id=11 Включаемые элементы - проверка возможности включения (JSON)
+    # items/includes/check/json/?id=12&type=1&include_id=11 Включаемые элементы - проверка возможности включения (JSON)
     # ( - )
     url(
         r'^includes/check/json/$',
@@ -159,13 +159,6 @@ category_patterns = [
         permission_required('archive.add_itemcategory')(views.category_new),
         name='new'
     ),
-    # categories/create/ Добавление категории - действие (POST)
-    # ( - )
-    url(
-        r'^create/$',
-        permission_required('archive.add_itemcategory')(views.category_create),
-        name='create'
-    ),
     # categories/3/...
     url(
         r'^(?P<category_id>\d+)/',
@@ -191,14 +184,20 @@ category_patterns = [
                 permission_required('archive.change_itemcategory')(views.category_edit),
                 name='edit'
             ),
-            # categories/3/update/ Редактирование существующей категории - действие (POST)
-            # ( - )
-            url(
-                r'^update/$',
-                permission_required('archive.change_itemcategory')(views.category_update),
-                name='update'
-            ),
         ])
+    ),
+    # ------------------------- JSON -------------------------
+    # categories/create/json/ Добавление категории - действие (POST)
+    url(
+        r'^create/json/$',
+        permission_required('archive.add_itemcategory')(views.category_create_json),
+        name='create_json'
+    ),
+    # categories/update/json/?id=3 Редактирование существующей категории - действие (POST)
+    url(
+        r'^update/json/',
+        permission_required('archive.change_itemcategory')(views.category_update_json),
+        name='update_json'
     ),
 ]
 
