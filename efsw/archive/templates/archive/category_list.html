@@ -23,9 +23,11 @@
                         <td>{{ cat.name }}</td>
                         <td>{{ cat.items.count }}</td>
                         <td class="text-nowrap">
-                            <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
-                               title="Список элементов в категории"
-                               class="fa fa-lg fa-folder-open-o"></a>
+                            {% if cat.items.count > 0 %}
+                                <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
+                                   title="Список элементов в категории"
+                                   class="fa fa-lg fa-folder-open-o"></a>
+                            {% endif %}
                             {% if perms.archive.change_itemcategory %}
                                 <a href="{% url 'efsw.archive:category:edit' cat.id %}"
                                    title="Редактировать категорию"
@@ -38,6 +40,8 @@
         </table>
         <nav class="text-center">{% pagination categories 'efsw.archive:category:list_page' %}</nav>
     {% else %}
-        Категории не найдены
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Категории не найдены</div>
+        </div>
     {% endif %}
 {% endblock %}

@@ -52,7 +52,9 @@
                 </div>
             {% endfor %}
         {% else %}
-            Ничего не найдено
+            <div class="panel panel-warning" style="margin-top: 0.5em;">
+                <div class="panel-body text-center">По данному запросу ничего не найдено</div>
+            </div>
         {% endif %}
     {% endif %}
 {% endblock %}
