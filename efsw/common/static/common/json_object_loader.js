@@ -11,9 +11,15 @@ define(['jquery', 'common/ajax_json_request'], function($, ajr) {
         } else {
             options = $.extend(true, default_options, options);
         }
+        var cache_key;
+        if ('data' in ajax_settings) {
+            cache_key = url + $.param(ajax_settings.data);
+        } else {
+            cache_key = url;
+        }
         if (!options.ignore_cache) {
-            if (url in object_cache) {
-                ok_callback($.extend({}, object_cache[url]));
+            if (cache_key in object_cache) {
+                ok_callback($.extend({}, object_cache[cache_key]));
                 return;
             }
         }
@@ -28,7 +34,7 @@ define(['jquery', 'common/ajax_json_request'], function($, ajr) {
             ajax_settings,
             function(response) {
                 var loaded_obj = new obj_class(response.data);
-                object_cache[url] = $.extend({}, loaded_obj);
+                object_cache[cache_key] = $.extend({}, loaded_obj);
                 ok_callback(loaded_obj);
             },
             err_callback,
