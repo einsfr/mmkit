@@ -7,15 +7,21 @@ from efsw.common.search import models, elastic
 
 def create_model_index_doc(instance: models.IndexableModel):
     es_cm = elastic.get_connection_manager()
-    es_cm.get_es().create(
+    if es_cm.get_es().exists(
         es_cm.prefix_index_name(instance.get_index_name()),
-        instance.get_doc_type(),
-        json.dumps(
-            instance.get_doc_body()
-        ),
-        id=instance.id
-    )
-
+        instance.id,
+        instance.get_doc_type()
+    ):
+        update_model_index_doc(instance)
+    else:
+        es_cm.get_es().create(
+            es_cm.prefix_index_name(instance.get_index_name()),
+            instance.get_doc_type(),
+            json.dumps(
+                instance.get_doc_body()
+            ),
+            id=instance.id
+        )
 
 def update_model_index_doc(instance: models.IndexableModel):
     es_cm = elastic.get_connection_manager()
