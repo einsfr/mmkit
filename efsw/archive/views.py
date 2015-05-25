@@ -28,10 +28,7 @@ def _get_item_list_page(items, page):
 
 
 def _get_json_item_not_found(item_id):
-    return JsonWithStatusResponse(
-        'Ошибка: элемент с ID "{0}" не существует'.format(item_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
+    return JsonWithStatusResponse.error('Ошибка: элемент с ID "{0}" не существует'.format(item_id))
 
 
 def _get_json_item_wrong_id(item_id):
@@ -47,10 +44,7 @@ def _get_json_storage_wrong_id(item_id):
 
 
 def _get_json_wrong_format():
-    return JsonWithStatusResponse(
-        'Неверный формат запроса',
-        JsonWithStatusResponse.STATUS_ERROR
-    )
+    return JsonWithStatusResponse.error('Неверный формат запроса')
 
 
 def _format_item_dict(i):
@@ -62,14 +56,15 @@ def _format_item_dict(i):
 
 
 def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse(
-        'Ошибка: хранилище с ID "{0}" не существует'.format(storage_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
+    return JsonWithStatusResponse.error('Ошибка: хранилище с ID "{0}" не существует'.format(storage_id))
 
 
 def _check_include(item, include):
-    return
+    return None
+
+
+def _check_include_in(item, include_in):
+    return None
 
 
 # ------------------------- Общие -------------------------
@@ -212,38 +207,50 @@ def item_includes_list_json(request):
     ]
     return JsonWithStatusResponse(includes_list)
 
+LINK_TYPE_INCLUDED_IN = 1
+LINK_TYPE_INCLUDES = 2
 
 def item_includes_check_json(request):
     item_id = request.GET.get('id', None)
-    include_id = request.GET.get('include_id', None)
+    inc_id = request.GET.get('include_id', None)
     try:
-        if int(item_id) == int(include_id):
-            return JsonWithStatusResponse(
-                'Элемент не может быть включён сам в себя',
-                JsonWithStatusResponse.STATUS_ERROR
-            )
+        inc_type = int(request.GET.get('type', None))
     except ValueError:
-        return JsonWithStatusResponse(
-            'Идентификатор должен быть целым числом',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
+        return JsonWithStatusResponse.error('Неизвестный тип связи.')
+    try:
+        if int(item_id) == int(inc_id):
+            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя')
+    except ValueError:
+        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом')
     except TypeError:
-        return JsonWithStatusResponse(
-            'Проверьте строку запроса - возможно, не установлен id или include_id',
-            JsonWithStatusResponse.STATUS_ERROR
-        )
+        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен id или inc_id')
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
     try:
-        include_item = models.Item.objects.get(pk=include_id)
+        inc_item = models.Item.objects.get(pk=inc_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(include_id)
-    check_result = _check_include(item, include_item)
+        return _get_json_item_not_found(inc_id)
+    if inc_type == LINK_TYPE_INCLUDED_IN:
+        check_result = _check_include_in(item, inc_item)
+    elif inc_type == LINK_TYPE_INCLUDES:
+        check_result = _check_include(item, inc_item)
+    else:
+        return JsonWithStatusResponse.error('Неизвестный тип связи.')
     if check_result is not None:
-        return JsonWithStatusResponse(check_result, JsonWithStatusResponse.STATUS_ERROR)
-    return JsonWithStatusResponse(_format_item_dict(include_item))
+        return JsonWithStatusResponse.error(check_result)
+    return JsonWithStatusResponse.ok(_format_item_dict(inc_item))
+
+
+def _log_inc_update(inc_list, request):
+    obj_ids_list = []
+    obj_list = []
+    for i in inc_list:
+        if i.id not in obj_ids_list:
+            obj_ids_list.append(i.id)
+            obj_list.append(i)
+    models.ItemLog.log_item_include_update(obj_list, request)
 
 
 @http.require_POST
@@ -254,35 +261,49 @@ def item_includes_update_json(request):
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
     post_includes = request.POST.get('includes', None)
-    if post_includes is None:
+    post_included_in = request.POST.get('included_in', None)
+    if post_includes is None or post_included_in is None:
         return _get_json_wrong_format()
     try:
         includes_ids = set(json.loads(post_includes))
+        included_in_ids = set(json.loads(post_included_in))
     except ValueError:
         return _get_json_wrong_format()
+    log_inc_update = [item]
     old_includes_ids = set([i.id for i in item.includes.all()])
-    removing_includes_ids = old_includes_ids.difference(includes_ids)
-    removing_includes_objects = list(models.Item.objects.filter(id__in=removing_includes_ids))
-    # Если мы только всё убираем - можно немного проще
+    old_included_in_ids = set([i.id for i in item.included_in.all()])
+    removing_includes_obj = list(models.Item.objects.filter(id__in=old_includes_ids.difference(includes_ids)))
+    removing_included_in_obj = list(models.Item.objects.filter(id__in=old_included_in_ids.difference(included_in_ids)))
     if len(includes_ids) == 0:
         item.includes.clear()
-        models.ItemLog.log_item_include_update(removing_includes_objects + [item], request)
-        return JsonWithStatusResponse()
-    # Сначала удаляем всё, что нужно удалить
-    item.includes.remove(*removing_includes_objects)
-    models.ItemLog.log_item_include_update(removing_includes_objects + [item], request)
-    # Потом добавляем всё, что нужно добавить
+    else:
+        item.includes.remove(*removing_includes_obj)
+    log_inc_update = log_inc_update + removing_includes_obj
+    if len(included_in_ids) == 0:
+        item.included_in.clear()
+    else:
+        item.included_in.remove(*removing_included_in_obj)
+    log_inc_update = log_inc_update + removing_included_in_obj
+    if len(includes_ids) == 0 and len(included_in_ids) == 0:
+        _log_inc_update(log_inc_update, request)
+        return JsonWithStatusResponse.ok()
     adding_includes_ids = includes_ids.difference(old_includes_ids)
-    # Убираем самого себя из включений, если есть
+    adding_included_in_ids = included_in_ids.difference(old_included_in_ids)
     if item.id in adding_includes_ids:
         adding_includes_ids.remove(item.id)
-    adding_includes_objects = [
-        o
-        for o in models.Item.objects.filter(id__in=adding_includes_ids)
-        if _check_include(item, o) is None
-    ]
-    item.includes.add(*adding_includes_objects)
-    models.ItemLog.log_item_include_update(adding_includes_objects, request)
+    if item.id in adding_included_in_ids:
+        adding_included_in_ids.remove(item.id)
+    adding_includes_obj = list(
+        filter(lambda o: _check_include(item, o) is None, models.Item.objects.filter(id__in=adding_includes_ids))
+    )
+    adding_included_in_obj = list(
+        filter(lambda o: _check_include_in(item, o) is None, models.Item.objects.filter(id__in=adding_included_in_ids))
+    )
+    item.includes.add(*adding_includes_obj)
+    log_inc_update = log_inc_update + adding_includes_obj
+    item.included_in.add(*adding_included_in_obj)
+    log_inc_update = log_inc_update + adding_included_in_obj
+    _log_inc_update(log_inc_update, request)
     return JsonWithStatusResponse()
 
 

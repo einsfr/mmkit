@@ -54,47 +54,41 @@
                  style="display: none;"></div>
             <table class="table table-bordered obj_properties" style="margin-top: 0;">
                 <tbody>
-                    <tr>
-                        <th style="width: 10em;"
-                            data-bind="attr: { rowspan: (included_in().length > 1 ? included_in().length : 1) }">Входит в</th>
-                        <td>
-                            <span data-bind="visible: included_in().length == 0" style="display: none;">-</span>
-                            <!-- ko if: included_in().length > 0 -->
-                                <a title="Описание элемента"
-                                   data-bind="text: included_in()[0].name, attr: { href: included_in()[0].url }"></a>
-                            <!-- /ko -->
-                        </td>
+                    <tr data-bind="visible: included_in().length == 0" style="display: none;">
+                        <th style="min-width: 10em;">Входит в</th>
+                        <td colspan="2" style="width: 100%;">-</td>
                     </tr>
-                    <!-- ko foreach: included_in-->
-                        <!-- ko if: $index() != 0 -->
-                            <tr data-bind="visible: true" style="display: none;">
-                                <td>
-                                    <a title="Описание элемента"
-                                       data-bind="text: name, attr: { href: url }"></a>
-                                </td>
-                            </tr>
-                        <!-- /ko -->
+                    <!-- ko foreach: included_in -->
+                        <tr>
+                            <!-- ko if: $index() == 0 -->
+                                <th style="min-width: 10em;"
+                                    data-bind="attr: { rowspan: ($parent.included_in().length > 1 ? $parent.included_in().length : 1) }">Входит в</th>
+                            <!-- /ko -->
+                            <td style="width: 100%; border-right: none;">
+                                <a title="Описание элемента"
+                                   data-bind="text: name, attr: { href: url }"></a>
+                            </td>
+                            <td style="border-left: none;"><a href="#" title="Удалить" class="fa fa-lg fa-trash-o"
+                                                              data-bind="click: $parent.remove_included_in"></a></td>
+                        </tr>
                     <!-- /ko -->
-                    <tr>
-                        <th style="width: 10em;"
-                            data-bind="attr: { rowspan: (includes().length > 1 ? includes().length : 1) }">Включает</th>
-                        <td>
-                            <span data-bind="visible: includes().length == 0" style="display: none;">-</span>
-                            <!-- ko if: includes().length > 0 -->
-                                <a title="Описание элемента"
-                                   data-bind="text: includes()[0].name, attr: { href: includes()[0].url }"></a>
-                            <!-- /ko -->
-                        </td>
+                    <tr data-bind="visible: includes().length == 0" style="display: none;">
+                        <th style="min-width: 10em;">Включает</th>
+                        <td colspan="2" style="width: 100%;">-</td>
                     </tr>
-                    <!-- ko foreach: includes-->
-                        <!-- ko if: $index() != 0 -->
-                            <tr data-bind="visible: true" style="display: none;">
-                                <td>
-                                    <a title="Описание элемента"
-                                       data-bind="text: name, attr: { href: url }"></a>
-                                </td>
-                            </tr>
-                        <!-- /ko -->
+                    <!-- ko foreach: includes -->
+                        <tr>
+                            <!-- ko if: $index() == 0 -->
+                                <th style="min-width: 10em;"
+                                    data-bind="attr: { rowspan: ($parent.includes().length > 1 ? $parent.includes().length : 1) }">Включает</th>
+                            <!-- /ko -->
+                            <td style="width: 100%; border-right: none;">
+                                <a title="Описание элемента"
+                                   data-bind="text: name, attr: { href: url }"></a>
+                            </td>
+                            <td style="border-left: none;"><a href="#" title="Удалить" class="fa fa-lg fa-trash-o"
+                                                              data-bind="click: $parent.remove_includes"></a></td>
+                        </tr>
                     <!-- /ko -->
                 </tbody>
             </table>

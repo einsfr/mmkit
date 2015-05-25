@@ -52,6 +52,20 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
             self.errors(errors);
         };
 
+        self.remove_includes = function(inc) {
+            self.success_msg('');
+            self.error_msg('');
+            self.includes_changed(true);
+            self.includes.remove(inc);
+        };
+
+        self.remove_included_in = function(inc) {
+            self.success_msg('');
+            self.error_msg('');
+            self.includes_changed(true);
+            self.included_in.remove(inc);
+        };
+
         self.add_item = function() {
             self.errors($.extend({}, self.errors_empty));
             if (self.form_type() != '1' || self.form_type() != '2') {
@@ -95,7 +109,9 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                     }
                     self.includes_changed(true);
                 },
-                self.error_msg,
+                function(e) {
+                    self.error_msg(e.data);
+                },
                 alert
             )
         };
@@ -105,7 +121,34 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         };
 
         self.update_item = function() {
-
+            ajr.exec(
+                self.urls.item_update_links_json(),
+                {
+                    'data': {
+                        'includes': ko.toJSON(
+                            self.includes().map(function(i) {
+                                return i.id;
+                            })
+                        ),
+                        'included_in': ko.toJSON(
+                            self.included_in().map(function(i) {
+                                return i.id;
+                            })
+                        )
+                    },
+                    'method': 'post'
+                },
+                function() {
+                    self.error_msg('');
+                    self.success_msg('Изменения сохранены.');
+                    self.includes_changed(false);
+                },
+                function(response) {
+                    self.success_msg('');
+                    self.error_msg(response.data);
+                },
+                alert
+            );
         };
     }
 
