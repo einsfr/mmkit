@@ -1,13 +1,5 @@
 define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_loader'], function($, ko, ajr, jol) {
 
-    return function(conf, initial_data) {
-        $(document).ready(function() {
-            var view_model = new ItemEditLinksViewModel(conf.urls);
-            view_model.init(initial_data);
-            ko.applyBindings(view_model);
-        });
-    };
-
     function Item(data) {
         var default_values = { 'id': 0, 'name': '', 'url': '' };
         if (typeof data == 'undefined') {
@@ -17,7 +9,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         }
     }
 
-    function ItemEditLinksViewModel(urls) {
+    return function ItemEditLinksViewModel(urls) {
         var self = this;
         self.urls = urls;
         self.success_msg = ko.observable('');

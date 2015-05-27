@@ -5,13 +5,25 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['archive/item_new'], function(module) {
-            module({
-                'urls': {
-                    'item_create_json': function() {
-                        return "{% url 'efsw.archive:item:create_json' %}";
-                    }
-                }
+        require(['jquery', 'knockout', 'common/generic_form_model', 'jquery_ui',
+            'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko, model) {
+            $(document).ready(function() {
+                ko.applyBindings(new model(
+                        '#item_new_form',
+                        "{% url 'efsw.archive:item:create_json' %}",
+                        function(response) {
+                            window.location.href = response.data;
+                        }
+                ));
+                $('#id_created').datepicker(
+                    {
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: '1990:c',
+                        maxDate: new Date()
+                    },
+                    $.datepicker.regional['ru']
+                );
             });
         });
     </script>
@@ -22,7 +34,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="alert alert-danger"
-                 data-bind="visible: non_field_errors(), text: non_field_errors()"
+                 data-bind="visible: error_msg(), text: error_msg()"
                  style="display: none;"></div>
             <form id="item_new_form">
                 <div class="row">
@@ -79,7 +91,7 @@
         <div class="panel-footer text-center">
             <button type="button"
                     class="btn btn-primary"
-                    data-bind="event: { click: create_item }">Создать</button>
+                    data-bind="event: { click: submit_form }">Создать</button>
         </div>
     </div>
 {% endblock %}

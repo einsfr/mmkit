@@ -5,33 +5,35 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['archive/item_edit_links'], function(module) {
-            module({
-                'urls': {
+        require(['jquery', 'knockout', 'archive/model_item_edit_links'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
                     'item_update_links_json': function() {
                         return "{% url 'efsw.archive:item:update_links_json' %}?id={{ item.id }}";
                     },
                     'item_check_links_json': function() {
                         return "{% url 'efsw.archive:item:check_links_json' %}?id={{ item.id }}";
                     }
-                }
-            }, {
-                'includes': [{% for i in item.includes.all %}
-                    {
-                        'id': {{ i.id }},
-                        'name': '{{ i.name|escapejs }}',
-                        'url': '{{ i.get_absolute_url|escapejs }}'
-                    }
-                    {% if not forloop.last %},{% endif %}
-                {% endfor %}],
-                'included_in': [{% for i in item.included_in.all %}
-                    {
-                        'id': {{ i.id }},
-                        'name': '{{ i.name|escapejs }}',
-                        'url': '{{ i.get_absolute_url|escapejs }}'
-                    }
-                    {% if not forloop.last %},{% endif %}
-                {% endfor %}]
+                });
+                view_model.init({
+                    'includes': [{% for i in item.includes.all %}
+                        {
+                            'id': {{ i.id }},
+                            'name': '{{ i.name|escapejs }}',
+                            'url': '{{ i.get_absolute_url|escapejs }}'
+                        }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}],
+                    'included_in': [{% for i in item.included_in.all %}
+                        {
+                            'id': {{ i.id }},
+                            'name': '{{ i.name|escapejs }}',
+                            'url': '{{ i.get_absolute_url|escapejs }}'
+                        }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}]
+                });
+                ko.applyBindings(view_model);
             });
         });
     </script>

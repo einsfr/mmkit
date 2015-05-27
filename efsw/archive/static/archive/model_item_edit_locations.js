@@ -1,13 +1,5 @@
 define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_loader'], function($, ko, ajr, jol) {
 
-    return function(conf, initial_data) {
-        $(document).ready(function() {
-            var view_model = new ItemEditLocationsViewModel(conf.urls);
-            view_model.init(initial_data);
-            ko.applyBindings(view_model);
-        });
-    };
-
     function ItemLocation(data) {
         var default_values = { 'id': 0, 'storage_id': 0, 'storage_name': '', 'location': '', 'base_url': '' };
         if (typeof data == 'undefined') {
@@ -26,7 +18,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         }
     }
 
-    function ItemEditLocationsViewModel(urls) {
+    return function ItemEditLocationsViewModel(urls) {
         var self = this;
         self.urls = urls;
         self.success_msg = ko.observable('');

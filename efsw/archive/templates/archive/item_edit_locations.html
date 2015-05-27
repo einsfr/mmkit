@@ -5,22 +5,20 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['archive/item_edit_locations'], function(module) {
-            module(
-                {
-                    'urls': {
-                        'storage_show_json': function(id) {
-                            return "{% url 'efsw.archive:storage:show_json' %}?id=" + id;
-                        },
-                        'item_update_locations_json': function() {
-                            return "{% url 'efsw.archive:item:update_locations_json' %}?id=" + {{ item.id }};
-                        },
-                        'item_show_locations_json': function() {
-                            return "{% url 'efsw.archive:item:show_locations_json' %}?id=" + {{ item.id }};
-                        }
+        require(['jquery', 'knockout', 'archive/model_item_edit_locations'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
+                    'storage_show_json': function(id) {
+                        return "{% url 'efsw.archive:storage:show_json' %}?id=" + id;
+                    },
+                    'item_update_locations_json': function() {
+                        return "{% url 'efsw.archive:item:update_locations_json' %}?id=" + {{ item.id }};
+                    },
+                    'item_show_locations_json': function() {
+                        return "{% url 'efsw.archive:item:show_locations_json' %}?id=" + {{ item.id }};
                     }
-                },
-                {
+                });
+                view_model.init({
                     'locations': [{% for l in locations %}
                         {
                             'id': {{ l.id }},
@@ -37,6 +35,8 @@
                         'base_url': '{{ init_storage.base_url|escapejs }}'
                     }
                 });
+                ko.applyBindings(view_model);
+            });
         });
     </script>
 {% endblock %}
