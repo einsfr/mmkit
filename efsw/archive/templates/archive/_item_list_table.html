@@ -1,13 +1,11 @@
-{% load field_verbose_name from model %}
-
 {% if items %}
     <table class="table table-hover">
         <thead>
             <tr>
                 <th>ID</th>
-                <th class="text-nowrap">{% field_verbose_name items 'created' %}</th>
-                <th style="min-width: 15em;">{% field_verbose_name items 'category' %}</th>
-                <th style="width: 100%">{% field_verbose_name items 'name' %}</th>
+                <th class="text-nowrap">Дата создания</th>
+                <th style="min-width: 15em;">Категория</th>
+                <th style="width: 100%">Название</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>

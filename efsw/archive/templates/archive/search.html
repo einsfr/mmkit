@@ -1,7 +1,6 @@
 {% extends 'archive/_app_base.html' %}
 
 {% load pagination from pagination %}
-{% load field_verbose_name from model %}
 
 {% block title %}{{ block.super }} - Поиск по архиву{% endblock %}
 
@@ -19,6 +18,7 @@
                     <div class="form-group col-md-4">
                         <label for="{{ form.c.id_for_label }}">Категория элемента</label>
                         {{ form.c }}
+                        <span class="help-block">Удерживайте <code>Ctrl</code> для выбора нескольких вариантов</span>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="{{ form.o.id_for_label }}">Порядок сортировки</label>

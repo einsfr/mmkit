@@ -1,7 +1,5 @@
 {% extends 'schedule/_app_base.html' %}
 
-{% load field_verbose_name from model %}
-
 {% block title %}{{ block.super }} - Описание программы{% endblock %}
 
 {% block content %}
@@ -9,31 +7,31 @@
     <table class="table table-striped obj_properties">
         <tbody>
             <tr>
-                <th style="width: 16em;">ID</th>
-                <td>{{ program.id }}</td>
+                <th style="min-width: 16em;">ID</th>
+                <td style="width: 100%">{{ program.id }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'name' %}</th>
+                <th>Название</th>
                 <td>{{ program.name }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'description' %}</th>
+                <th>Описание</th>
                 <td>{{ program.description }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'age_limit' %}</th>
+                <th>Ограничение по возрасту</th>
                 <td>{{ program.format_age_limit }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'lineup_size' %}</th>
+                <th>Размер в сетке вещания</th>
                 <td>{{ program.lineup_size|time:"H:i:s" }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'max_duration' %}</th>
+                <th>Макс. хронометраж</th>
                 <td>{{ program.max_duration|time:"H:i:s" }}</td>
             </tr>
             <tr>
-                <th>{% field_verbose_name program 'min_duration' %}</th>
+                <th>Мин. хронометраж</th>
                 <td>{{ program.min_duration|time:"H:i:s" }}</td>
             </tr>
         </tbody>
