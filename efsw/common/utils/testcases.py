@@ -37,13 +37,14 @@ class LoginRequiredTestCase(TestCase):
 
 class AbstractSecurityTestCase(TestCase):
 
-    class SecurityTestConditions():
+    class SecurityTestConditions:
 
-        def __init__(self, url, anonymous=True, method='get', perm_codename=None):
+        def __init__(self, url, anonymous=True, method='get', perm_codename=None, status_codes=None):
             self.url = url
             self.anonymous = anonymous
             self.method = method
             self.perm_codename = perm_codename
+            self.status_codes = status_codes if status_codes is not None else [200, 302]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -79,9 +80,13 @@ class AbstractSecurityTestCase(TestCase):
                 response = self.client.get(c.url)
             else:
                 response = self.client.post(c.url)
-            if response.status_code in [404, 500]:
+            if response.status_code not in c.status_codes:
                 raise AssertionError(
-                    'При обращении по адресу "{0}" получен код ответа {1}'.format(c.url, response.status_code)
+                    'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
+                        c.url,
+                        response.status_code,
+                        ', '.join(c.status_codes)
+                    )
                 )
             if c.anonymous:
                 self.assertNotLoginRequired(response, c)
@@ -101,9 +106,13 @@ class AbstractSecurityTestCase(TestCase):
                 response = self.client.get(c.url, follow=True)
             else:
                 response = self.client.post(c.url, follow=True)
-            if response.status_code in [404, 500]:
+            if response.status_code not in c.status_codes:
                 raise AssertionError(
-                    'При обращении по адресу "{0}" получен код ответа {1}'.format(c.url, response.status_code)
+                    'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
+                        c.url,
+                        response.status_code,
+                        ', '.join(c.status_codes)
+                    )
                 )
             self.assertNotLoginRequired(response, c)
             print(' OK')
@@ -119,9 +128,13 @@ class AbstractSecurityTestCase(TestCase):
                 response = self.client.get(c.url, follow=True)
             else:
                 response = self.client.post(c.url, follow=True)
-            if response.status_code in [404, 500]:
+            if response.status_code not in c.status_codes:
                 raise AssertionError(
-                    'При обращении по адресу "{0}" получен код ответа {1}'.format(c.url, response.status_code)
+                    'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
+                        c.url,
+                        response.status_code,
+                        ', '.join(c.status_codes)
+                    )
                 )
             if c.anonymous:
                 self.assertNotLoginRequired(response, c)
@@ -146,9 +159,13 @@ class AbstractSecurityTestCase(TestCase):
                 response = self.client.get(c.url)
             else:
                 response = self.client.post(c.url)
-            if response.status_code in [404, 500]:
+            if response.status_code not in c.status_codes:
                 raise AssertionError(
-                    'При обращении по адресу "{0}" получен код ответа {1}'.format(c.url, response.status_code)
+                    'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
+                        c.url,
+                        response.status_code,
+                        ', '.join(c.status_codes)
+                    )
                 )
             self.assertNotLoginRequired(response, c)
             print(' OK')
