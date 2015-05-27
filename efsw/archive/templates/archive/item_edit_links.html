@@ -9,10 +9,10 @@
             module({
                 'urls': {
                     'item_update_links_json': function() {
-                        return "{% url 'efsw.archive:item:includes_update_json' %}?id={{ item.id }}";
+                        return "{% url 'efsw.archive:item:update_links_json' %}?id={{ item.id }}";
                     },
-                    'item_includes_check_json': function() {
-                        return "{% url 'efsw.archive:item:includes_check_json' %}?id={{ item.id }}";
+                    'item_check_links_json': function() {
+                        return "{% url 'efsw.archive:item:check_links_json' %}?id={{ item.id }}";
                     }
                 }
             }, {

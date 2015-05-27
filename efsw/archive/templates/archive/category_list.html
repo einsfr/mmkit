@@ -24,7 +24,7 @@
                         <td>{{ cat.items.count }}</td>
                         <td class="text-nowrap">
                             {% if cat.items.count > 0 %}
-                                <a href="{% url 'efsw.archive:category:items_list' cat.id %}"
+                                <a href="{% url 'efsw.archive:category:show_items' cat.id %}"
                                    title="Список элементов в категории"
                                    class="fa fa-lg fa-folder-open-o"></a>
                             {% endif %}

@@ -12,11 +12,11 @@
                         'storage_show_json': function(id) {
                             return "{% url 'efsw.archive:storage:show_json' %}?id=" + id;
                         },
-                        'item_locations_update_json': function() {
-                            return "{% url 'efsw.archive:item:locations_update_json' %}?id=" + {{ item.id }};
+                        'item_update_locations_json': function() {
+                            return "{% url 'efsw.archive:item:update_locations_json' %}?id=" + {{ item.id }};
                         },
-                        'item_locations_list_json': function() {
-                            return "{% url 'efsw.archive:item:locations_list_json' %}?id=" + {{ item.id }};
+                        'item_show_locations_json': function() {
+                            return "{% url 'efsw.archive:item:show_locations_json' %}?id=" + {{ item.id }};
                         }
                     }
                 },

@@ -6,6 +6,9 @@ class ArchiveUrlsTestCase(UrlsTestCase):
 
     def test_urls(self):
         urls = [
+
+            # ------------------------- Item -------------------------
+
             ('efsw.archive:item:list', [],
              '/archive/items/list/', views.item_list),
 
@@ -14,9 +17,6 @@ class ArchiveUrlsTestCase(UrlsTestCase):
 
             ('efsw.archive:item:new', [],
              '/archive/items/new/', views.item_new),
-
-            ('efsw.archive:item:create_json', [],
-             '/archive/items/create/json/', views.item_create_json),
 
             ('efsw.archive:item:show', [12],
              '/archive/items/12/show/', views.item_show),
@@ -36,23 +36,39 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:item:edit', [12],
              '/archive/items/12/edit/', views.item_edit),
 
-            ('efsw.archive:item:update', [12],
-             '/archive/items/12/update/', views.item_update),
+            ('efsw.archive:item:edit_properties', [12],
+             '/archive/items/12/edit/properties/', views.item_edit_properties),
 
-            ('efsw.archive:item:includes_list_json', [],
-             '/archive/items/includes/list/json/', views.item_includes_list_json),
+            ('efsw.archive:item:edit_locations', [12],
+             '/archive/items/12/edit/locations/', views.item_edit_locations),
 
-            ('efsw.archive:item:includes_check_json', [],
-             '/archive/items/includes/check/json/', views.item_includes_check_json),
+            ('efsw.archive:item:edit_links', [12],
+             '/archive/items/12/edit/links/', views.item_edit_links),
 
-            ('efsw.archive:item:includes_update_json', [],
-             '/archive/items/includes/update/json/', views.item_includes_update_json),
+            # ------------------------- Item JSON -------------------------
 
-            ('efsw.archive:item:locations_list_json', [],
-             '/archive/items/locations/list/json/', views.item_locations_list_json),
+            ('efsw.archive:item:show_links_json', [],
+             '/archive/items/show/links/json/', views.item_show_links_json),
 
-            ('efsw.archive:item:locations_update_json', [],
-             '/archive/items/locations/update/json/', views.item_locations_update_json),
+            ('efsw.archive:item:check_links_json', [],
+             '/archive/items/check/links/json/', views.item_check_links_json),
+
+            ('efsw.archive:item:update_links_json', [],
+             '/archive/items/update/links/json/', views.item_update_links_json),
+
+            ('efsw.archive:item:show_locations_json', [],
+             '/archive/items/show/locations/json/', views.item_show_locations_json),
+
+            ('efsw.archive:item:update_locations_json', [],
+             '/archive/items/update/locations/json/', views.item_update_locations_json),
+
+            ('efsw.archive:item:create_json', [],
+             '/archive/items/create/json/', views.item_create_json),
+
+            ('efsw.archive:item:update_properties_json', [],
+             '/archive/items/update/properties/json/', views.item_update_properties_json),
+
+            # ------------------------- ItemCategory -------------------------
 
             ('efsw.archive:category:list', [],
              '/archive/categories/list/', views.category_list),
@@ -63,23 +79,29 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:category:new', [],
              '/archive/categories/new/', views.category_new),
 
-            ('efsw.archive:category:create', [],
-             '/archive/categories/create/', views.category_create),
+            ('efsw.archive:category:show_items', [3],
+             '/archive/categories/3/show/items/', views.category_show_items),
 
-            ('efsw.archive:category:items_list', [3],
-             '/archive/categories/3/items/list/', views.category_items_list),
-
-            ('efsw.archive:category:items_list_page', [3, 2],
-             '/archive/categories/3/items/list/page/2/', views.category_items_list),
+            ('efsw.archive:category:show_items_page', [3, 2],
+             '/archive/categories/3/show/items/page/2/', views.category_show_items),
 
             ('efsw.archive:category:edit', [3],
              '/archive/categories/3/edit/', views.category_edit),
 
-            ('efsw.archive:category:update', [3],
-             '/archive/categories/3/update/', views.category_update),
+            # ------------------------- ItemCategory JSON -------------------------
+
+            ('efsw.archive:category:create_json', [],
+             '/archive/categories/create/json/', views.category_create_json),
+
+            ('efsw.archive:category:update_json', [],
+             '/archive/categories/update/json/', views.category_update_json),
+
+            # ------------------------- Storage JSON -------------------------
 
             ('efsw.archive:storage:show_json', [],
              '/archive/storages/show/json/', views.storage_show_json),
+
+            # ------------------------- Общие -------------------------
 
             ('efsw.archive:search', [],
              '/archive/search/', views.search)

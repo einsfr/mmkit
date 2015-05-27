@@ -87,41 +87,41 @@ item_patterns = [
             ),
         ])
     ),
-    # ------------------------- JSON -------------------------
-    # items/includes/list/json/?id=12 Включаемые элементы (JSON)
+    # ------------------------- Item JSON -------------------------
+    # items/show/links/json/?id=12 Включаемые элементы (JSON)
     # ( - )
     url(
-        r'^includes/list/json/$',
-        views.item_includes_list_json,
-        name='includes_list_json'
+        r'^show/links/json/$',
+        views.item_show_links_json,
+        name='show_links_json'
     ),
-    # items/includes/check/json/?id=12&type=1&include_id=11 Включаемые элементы - проверка возможности включения (JSON)
+    # items/check/links/json/?id=12&type=1&include_id=11 Включаемые элементы - проверка возможности включения (JSON)
     # ( - )
     url(
-        r'^includes/check/json/$',
-        views.item_includes_check_json,
-        name='includes_check_json'
+        r'^check/links/json/$',
+        views.item_check_links_json,
+        name='check_links_json'
     ),
-    # items/includes/update/json/?id=12 Включаемые элементы - обновление (JSON, POST)
+    # items/update/links/json/?id=12 Включаемые элементы - обновление (JSON, POST)
     # ( - )
     url(
-        r'^includes/update/json/$',
-        permission_required('archive.change_item')(views.item_includes_update_json),
-        name='includes_update_json'
+        r'^update/links/json/$',
+        permission_required('archive.change_item')(views.item_update_links_json),
+        name='update_links_json'
     ),
-    # items/locations/list/json/?id=12 Положение этого элемента в хранилищах (JSON)
+    # items/show/locations/json/?id=12 Положение этого элемента в хранилищах (JSON)
     # ( - )
     url(
-        r'^locations/list/json/$',
-        views.item_locations_list_json,
-        name='locations_list_json'
+        r'^show/locations/json/$',
+        views.item_show_locations_json,
+        name='show_locations_json'
     ),
-    # items/locations/update/json/?id=12 Положение этого элемента в хранилищах - обновление (JSON, POST)
+    # items/update/locations/json/?id=12 Положение этого элемента в хранилищах - обновление (JSON, POST)
     # ( - )
     url(
-        r'^locations/update/json/$',
-        permission_required('archive.change_itemlocation')(views.item_locations_update_json),
-        name='locations_update_json'
+        r'^update/locations/json/$',
+        permission_required('archive.change_itemlocation')(views.item_update_locations_json),
+        name='update_locations_json'
     ),
     # items/create/json/ Добавление нового элемента - операция с БД (POST)
     url(
@@ -163,19 +163,19 @@ category_patterns = [
     url(
         r'^(?P<category_id>\d+)/',
         include([
-            # categories/3/items/list/ Список элементов, входящих в категорию
+            # categories/3/show/items/ Список элементов, входящих в категорию
             # ( Список элементов в категории )
             url(
-                r'items/list/$',
-                views.category_items_list,
-                name='items_list'
+                r'show/items/$',
+                views.category_show_items,
+                name='show_items'
             ),
-            # categories/3/items/list/page/2/ Список элементов, входящих в категорию, постранично
+            # categories/3/show/items/page/2/ Список элементов, входящих в категорию, постранично
             # ( Список элементов в категории, страница 2 )
             url(
-                r'^items/list/page/(?P<page>\d+)/$',
-                views.category_items_list,
-                name='items_list_page'
+                r'^show/items/page/(?P<page>\d+)/$',
+                views.category_show_items,
+                name='show_items_page'
             ),
             # categories/3/edit/ Редактирование существующей категории - форма (GET)
             # ( Редактирование категории )
@@ -186,7 +186,7 @@ category_patterns = [
             ),
         ])
     ),
-    # ------------------------- JSON -------------------------
+    # ------------------------- ItemCategory JSON -------------------------
     # categories/create/json/ Добавление категории - действие (POST)
     url(
         r'^create/json/$',
@@ -203,7 +203,7 @@ category_patterns = [
 
 # ------------------------- Storage -------------------------
 storage_patterns = [
-    # ------------------------- JSON -------------------------
+    # ------------------------- Storage JSON -------------------------
     # storages/show/json/?id=12 Описание одного хранилища (JSON)
     # ( - )
     url(

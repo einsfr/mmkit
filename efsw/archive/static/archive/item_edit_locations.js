@@ -83,7 +83,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
 
         self.update_item = function() {
             ajr.exec(
-                self.urls.item_locations_update_json(),
+                self.urls.item_update_locations_json(),
                 {
                     'method': 'post',
                     'data':
@@ -100,7 +100,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                     self.success_msg('Изменения сохранены.');
                     self.locations_changed(false);
                     ajr.exec(
-                        self.urls.item_locations_list_json(),
+                        self.urls.item_show_locations_json(),
                         function(response) {
                             self.locations($.map(response.data, function(data) {
                                 return new ItemLocation(data);

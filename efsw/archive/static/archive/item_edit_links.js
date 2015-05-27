@@ -93,7 +93,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                 return;
             }
             jol.load(
-                self.urls.item_includes_check_json(),
+                self.urls.item_check_links_json(),
                 {
                     'data': {
                         'include_id': self.form_item(),

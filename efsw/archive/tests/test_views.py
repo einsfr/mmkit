@@ -271,7 +271,7 @@ class ItemIncludesListJsonTestCase(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_list_json')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:show_links_json')
 
     def test_nonexist(self):
         response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
@@ -303,7 +303,7 @@ class ItemIncludesCheckJsonTestCase(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_check_json')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:check_links_json')
 
     def test_include_self(self):
         response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 4))
@@ -367,7 +367,7 @@ class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:includes_update_json')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:update_links_json')
 
     def test_wrong_method(self):
         self._login_user()
@@ -447,7 +447,7 @@ class ItemLocationsListJsonTestCase(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:locations_list_json')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:show_locations_json')
 
     def test_nonexist(self):
         response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
@@ -476,7 +476,7 @@ class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:locations_update_json')
+        self.request_url = urlresolvers.reverse('efsw.archive:item:update_locations_json')
 
     def test_wrong_method(self):
         self._login_user()
@@ -754,12 +754,12 @@ class CategoryItemsListViewTestCase(TestCase):
     fixtures = ['item.json', 'itemcategory.json']
 
     def test_nonexist(self):
-        response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(1000000, )))
+        response = self.client.get(urlresolvers.reverse('efsw.archive:category:show_items', args=(1000000, )))
         self.assertEqual(404, response.status_code)
 
     def test_view(self):
         with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=1000):
-            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(3, )))
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:show_items', args=(3, )))
             self.assertContains(
                 response,
                 '<h1>Список элементов в категории &laquo;Смонтированные репортажи&raquo;</h1>',
@@ -768,7 +768,7 @@ class CategoryItemsListViewTestCase(TestCase):
             self.assertEqual(models.ItemCategory.objects.get(pk=3).items.count(), len(response.context['items']))
             self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
         with self.settings(EFSW_ARCH_ITEM_LIST_PER_PAGE=2):
-            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list', args=(2, )))
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:show_items', args=(2, )))
             self.assertContains(
                 response,
                 '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>',
@@ -778,9 +778,9 @@ class CategoryItemsListViewTestCase(TestCase):
             self.assertContains(response, '<a href="#" title="Страница 1">1</a>')
             self.assertContains(
                 response,
-                '<a href="/archive/categories/2/items/list/page/2/" title="Следующая страница">»</a>'
+                '<a href="/archive/categories/2/show/items/page/2/" title="Следующая страница">»</a>'
             )
-            response = self.client.get(urlresolvers.reverse('efsw.archive:category:items_list_page', args=(2, 2, )))
+            response = self.client.get(urlresolvers.reverse('efsw.archive:category:show_items_page', args=(2, 2, )))
             self.assertContains(
                 response,
                 '<h1>Список элементов в категории &laquo;Исходные материалы&raquo;</h1>',
@@ -790,7 +790,7 @@ class CategoryItemsListViewTestCase(TestCase):
             self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
             self.assertContains(
                 response,
-                '<a href="/archive/categories/2/items/list/page/1/" title="Предыдущая страница">«</a>'
+                '<a href="/archive/categories/2/show/items/page/1/" title="Предыдущая страница">«</a>'
             )
 
 

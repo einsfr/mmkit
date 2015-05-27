@@ -208,7 +208,7 @@ def item_show_log(request, item_id):
     })
 
 
-def item_includes_list_json(request):
+def item_show_links_json(request):
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -225,20 +225,24 @@ LINK_TYPE_INCLUDED_IN = 1
 LINK_TYPE_INCLUDES = 2
 
 
-def item_includes_check_json(request):
+def item_check_links_json(request):
     item_id = request.GET.get('id', None)
     inc_id = request.GET.get('include_id', None)
     try:
         inc_type = int(request.GET.get('type', None))
     except ValueError:
         return JsonWithStatusResponse.error('Неизвестный тип связи.')
+    except TypeError:
+        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен параметр type.')
     try:
         if int(item_id) == int(inc_id):
             return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя.')
     except ValueError:
         return JsonWithStatusResponse.error('Идентификатор должен быть целым числом.')
     except TypeError:
-        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен id или inc_id.')
+        return JsonWithStatusResponse.error(
+            'Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.'
+        )
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
@@ -269,7 +273,7 @@ def _log_inc_update(inc_list, request):
 
 
 @http.require_POST
-def item_includes_update_json(request):
+def item_update_links_json(request):
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -322,7 +326,7 @@ def item_includes_update_json(request):
     return JsonWithStatusResponse()
 
 
-def item_locations_list_json(request):
+def item_show_locations_json(request):
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -338,7 +342,7 @@ def item_locations_list_json(request):
 
 
 @http.require_POST
-def item_locations_update_json(request):
+def item_update_locations_json(request):
 
     def _clean_location(loc):
         loc['storage_id'] = int(loc['storage_id'])
@@ -497,11 +501,11 @@ def category_create_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
-def category_items_list(request, category_id, page='1'):
+def category_show_items(request, category_id, page='1'):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     items_all = cat.items.all().order_by('-pk')
     items_page = _get_item_list_page(items_all, page)
-    return shortcuts.render(request, 'archive/category_items_list.html', {
+    return shortcuts.render(request, 'archive/category_show_items.html', {
         'items': items_page,
         'category': cat
     })
