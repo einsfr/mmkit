@@ -4,16 +4,13 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
         var self = this;
 
         self.form = $('#lineup_copy_form');
-        self.errors_empty = {
-            name: ''
-        };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.non_field_errors = ko.observable('');
 
         self.init = function(urls, lineup_id) {
             self.urls = urls;
             self.lineup_id = lineup_id;
-            self.errors(self.errors_empty);
+            self.errors({});
             self.non_field_errors('');
         };
 

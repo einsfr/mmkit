@@ -11,8 +11,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function ($, ko, ajr)
 
         self.urls = urls;
         self.form = $('#category_update_form');
-        self.errors_empty = {};
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.error_msg = ko.observable('');
 
         self.category_update = function () {

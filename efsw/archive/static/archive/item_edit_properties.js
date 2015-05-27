@@ -19,8 +19,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'jquery_ui', 'vendor/j
         var self = this;
         self.urls = urls;
         self.form = $('#item_edit_form');
-        self.errors_empty = { 'name': '', 'description': '', 'created': '', 'author': '', 'category': '' };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.non_field_errors = ko.observable('');
         self.success_msg = ko.observable('');
 

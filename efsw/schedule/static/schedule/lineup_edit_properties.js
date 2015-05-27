@@ -10,14 +10,11 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
         var self = this;
         self.urls = urls;
         self.form = $('#lineup_update_form');
-        self.errors_empty = {
-            name: ''
-        };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.non_field_errors = ko.observable('');
 
         self.init = function() {
-            self.errors(self.errors_empty);
+            self.errors({});
         };
 
         self.update_lineup = function() {

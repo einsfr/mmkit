@@ -11,16 +11,7 @@ define(['jquery', 'knockout', 'tinycolor', 'common/ajax_json_request'], function
 
         self.urls = urls;
         self.form = $('#program_new_form');
-        self.errors_empty = {
-            'name': '',
-            'description': '',
-            'age_limit': '',
-            'lineup_size': '',
-            'max_duration': '',
-            'min_duration': '',
-            'color': ''
-        };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.non_field_errors = ko.observable('');
         self.color_input = $('#id_color');
         self.selected_color = ko.observable(self.color_input.val());

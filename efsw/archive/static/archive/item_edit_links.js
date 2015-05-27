@@ -22,8 +22,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         self.urls = urls;
         self.success_msg = ko.observable('');
         self.error_msg = ko.observable('');
-        self.errors_empty = { 'type': '', 'item_select_type': '', 'item': '' };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.includes_changed = ko.observable(false);
         self.includes = ko.observableArray([]);
         self.included_in = ko.observableArray([]);
@@ -67,7 +66,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         };
 
         self.add_item = function() {
-            self.errors($.extend({}, self.errors_empty));
+            self.errors({});
             if (self.form_type() != '1' || self.form_type() != '2') {
                 self._set_error('type', 'Неизвестный тип связи.');
             }

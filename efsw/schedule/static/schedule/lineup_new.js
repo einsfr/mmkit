@@ -10,13 +10,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
         var self = this;
         self.urls = urls;
         self.form = $('#lineup_new_form');
-        self.errors_empty = {
-            name: '',
-            start_time: '',
-            end_time: '',
-            channel: ''
-        };
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.error_msg = ko.observable('');
 
         self.create_lineup = function() {

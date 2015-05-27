@@ -31,10 +31,9 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         self.urls = urls;
         self.success_msg = ko.observable('');
         self.error_msg = ko.observable('');
-        self.errors_empty = { 'storage': '', 'location': '' };
         self.locations = ko.observableArray([]);
         self.locations_changed = ko.observable(false);
-        self.errors = ko.observable(self.errors_empty);
+        self.errors = ko.observable({});
         self.form_storage = ko.observable();
         self.form_location = ko.observable('');
 
@@ -59,7 +58,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         };
 
         self.add_location = function() {
-            var errors = $.extend({}, self.errors_empty);
+            var errors = {};
             if (!self.form_storage().id || isNaN(self.form_storage().id)) {
                 errors.storage = 'Не выбрано хранилище.';
             }
