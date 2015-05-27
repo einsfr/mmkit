@@ -97,19 +97,32 @@ class ArchiveSearchForm(forms.Form):
         max_length=255,
         label='Текст запроса',
         required=False,
+        widget=widgets.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Текст поискового запроса'
+        })
     )
     c = forms.ModelMultipleChoiceField(
         queryset=models.ItemCategory.objects.all().order_by('name'),
         label='Категория',
         required=False,
+        widget=widgets.SelectMultiple(attrs={
+            'class': 'form-control',
+        })
     )
     o = forms.ChoiceField(
         choices=[('', 'По релевантности')] + list(ORDER_CHOICES.items()),
         label='Порядок сортировки',
         required=False,
+        widget=widgets.Select(attrs={
+            'class': 'form-control',
+        })
     )
     p = forms.ChoiceField(
-        choices=[('', '---------')] + [(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()],
+        choices=[('', 'За всё время')] + [(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()],
         label='Дата записи',
         required=False,
+        widget=widgets.Select(attrs={
+            'class': 'form-control',
+        })
     )

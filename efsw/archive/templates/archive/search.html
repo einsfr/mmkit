@@ -9,48 +9,44 @@
     <h1>Поиск по архиву</h1>
     <h2>Запрос</h2>
     <form action="" method="get">
-        <table class="table">
-            {{ form.as_table }}
-        </table>
-        <input type="submit" value="Искать">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="{{ form.q.id_for_label }}">Текст запроса</label>
+                    {{ form.q }}
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="{{ form.c.id_for_label }}">Категория элемента</label>
+                        {{ form.c }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="{{ form.o.id_for_label }}">Порядок сортировки</label>
+                        {{ form.o }}
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="{{ form.p.id_for_label }}">Период</label>
+                        {{ form.p }}
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer text-center">
+                <button class="btn btn-primary" type="submit">Искать</button>
+            </div>
+        </div>
     </form>
     {% if search_performed %}
         <h2>Результаты поиска</h2>
         {% if items %}
             {% if hits > search_size %}
-                <div class="text-center">
-                    Слишком много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте уточнить
-                    условия поиска: например, использовать более конкретный текстовый запрос.
+                <div class="panel panel-warning">
+                    <div class="panel-body">
+                        Слишком много совпадений - показаны только первые {{ search_size }} из {{ hits }}. Попробуйте
+                        уточнить условия поиска: например, использовать более конкретный текстовый запрос.
+                    </div>
                 </div>
             {% endif %}
-            {% for item in items %}
-                <div class="search-result">
-                    <h4><a href="{{ item.get_absolute_url }}" title="{{ item.get_absolute_url_title }}">{{ item.name }}</a></h4>
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td colspan="2">{{ item.description }}</td>
-                            </tr>
-                            <tr>
-                                <th>ID</th>
-                                <td>{{ item.id }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% field_verbose_name item 'category' %}</th>
-                                <td>{{ item.category.name }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% field_verbose_name item 'created' %}</th>
-                                <td>{{ item.created }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% field_verbose_name item 'author' %}</th>
-                                <td>{{ item.author }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            {% endfor %}
+            {% include 'archive/_item_list_table.html' %}
         {% else %}
             <div class="panel panel-warning" style="margin-top: 0.5em;">
                 <div class="panel-body text-center">По данному запросу ничего не найдено</div>
