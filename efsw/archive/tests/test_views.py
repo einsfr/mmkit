@@ -125,7 +125,7 @@ class ItemNewViewTestCase(LoginRequiredTestCase):
         self.assertEqual(405, response.status_code)
 
 
-class ItemCreateViewTestCase(LoginRequiredTestCase):
+class ItemCreateJsonViewTestCase(LoginRequiredTestCase):
 
     fixtures = ['itemcategory.json']
 
@@ -263,6 +263,90 @@ class ItemShowViewTestCase(TestCase):
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_log', args=(4, )))
         self.assertContains(response, item.name, status_code=200)
         self.assertContains(response, 'Описание элемента - Журнал')
+
+
+class ItemShowPropertiesTestCase(TestCase):
+    pass
+
+
+class ItemShowLocationsTestCase(TestCase):
+    pass
+
+
+class ItemShowLinksTestCase(TestCase):
+    pass
+
+
+class ItemShowLogTestCase(TestCase):
+    pass
+
+
+class ItemShowLinksJsonTestCase(TestCase):
+    pass
+
+
+class ItemCheckLinksJsonTestCase(TestCase):
+    pass
+
+
+class ItemUpdateLinksJsonTestCase(TestCase):
+    pass
+
+
+class ItemShowLocationsJsonTestCase(TestCase):
+    pass
+
+
+class ItemUpdateLocationsJsonTestCase(TestCase):
+    pass
+
+
+class ItemEditTestCase(TestCase):
+    pass
+
+
+class ItemEditPropertiesTestCase(TestCase):
+    pass
+
+
+class ItemEditLocationsTestCase(TestCase):
+    pass
+
+
+class ItemEditLinksTestCase(TestCase):
+    pass
+
+
+class ItemUpdatePropertiesJsonTestCase(TestCase):
+    pass
+
+
+class CategoryListTestCase(TestCase):
+    pass
+
+
+class CategoryNewTestCase(TestCase):
+    pass
+
+
+class CategoryCreateJsonTestCase(TestCase):
+    pass
+
+
+class CategoryShowItemsTestCase(TestCase):
+    pass
+
+
+class CategoryEditTestCase(TestCase):
+    pass
+
+
+class CategoryUpdateJsonTestCase(TestCase):
+    pass
+
+
+class StorageShowJsonTestCase(TestCase):
+    pass
 
 
 class ItemIncludesListJsonTestCase(TestCase):
