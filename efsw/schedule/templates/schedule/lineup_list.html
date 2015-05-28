@@ -7,9 +7,9 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/lineup_list'], function(module) {
-            module({
-                urls: {
+        require(['jquery', 'knockout', 'schedule/model_lineup_list'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
                     'lineup_copy_part_modal': function() {
                         return '{% url 'efsw.schedule:lineup:copy_part_modal' %}';
                     },
@@ -28,7 +28,18 @@
                     'lineup_make_draft_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:make_draft_json' %}?id=' + lineup_id;
                     }
-                }
+                });
+                ko.applyBindings(view_model);
+                var icon_containers = $('table td.icon_actions_container');
+                icon_containers.on('click', '.act_copy', function() {
+                    view_model.copy($(this).parents('tr').data('id'));
+                });
+                icon_containers.on('click', '.act_activate', function() {
+                    view_model.activate($(this).parents('tr').data('id'));
+                });
+                icon_containers.on('click', '.act_make_draft', function() {
+                    view_model.make_draft($(this).parents('tr').data('id'));
+                });
             });
         });
     </script>

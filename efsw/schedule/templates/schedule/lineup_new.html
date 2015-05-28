@@ -7,13 +7,15 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/lineup_new'], function(module) {
-            module({
-                urls: {
-                    lineup_create_json: function() {
-                        return '{% url 'efsw.schedule:lineup:create_json' %}';
-                    }
-                }
+        require(['jquery', 'knockout', 'common/generic_form_model'], function($, ko, model) {
+            $(document).ready(function() {
+                ko.applyBindings(new model(
+                        '#lineup_new_form',
+                        "{% url 'efsw.schedule:lineup:create_json' %}",
+                        function(response) {
+                            window.location.href = response.data;
+                        }
+                ));
             });
         });
     </script>
@@ -58,7 +60,7 @@
             </form>
         </div>
         <div class="panel-footer text-center">
-            <button type="button" class="btn btn-primary" data-bind="event: { click: create_lineup }">Создать</button>
+            <button type="button" class="btn btn-primary" data-bind="event: { click: submit_form }">Создать</button>
         </div>
     </div>
 {% endblock %}

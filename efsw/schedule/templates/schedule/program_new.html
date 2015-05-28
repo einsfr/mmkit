@@ -5,13 +5,13 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/program_new'], function(module) {
-            module({
-                urls: {
+        require(['jquery', 'knockout', 'schedule/model_program_new'], function($, ko, model) {
+            $(document).ready(function() {
+                ko.applyBindings(new model({
                     'program_create_json': function() {
                         return '{% url 'efsw.schedule:program:create_json' %}';
                     }
-                }
+                }));
             });
         });
     </script>

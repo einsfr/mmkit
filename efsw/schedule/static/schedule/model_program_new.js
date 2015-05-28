@@ -1,12 +1,6 @@
 define(['jquery', 'knockout', 'tinycolor', 'common/ajax_json_request'], function($, ko, tc, ajr) {
 
-    return function(conf) {
-        $(document).ready(function() {
-            ko.applyBindings(new ProgramNewViewModel(conf.urls));
-        })
-    };
-
-    function ProgramNewViewModel(urls) {
+    return function ProgramNewViewModel(urls) {
         var self = this;
 
         self.urls = urls;
