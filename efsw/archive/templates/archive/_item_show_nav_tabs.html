@@ -5,7 +5,7 @@
         <li><a href="{% url 'efsw.archive:item:show_properties' item.id %}">Свойства</a></li>
     {% endif %}
     {% if active == 'locations' %}
-        <li class="active"><a href="#">Расположение</a></li>
+        <li class="active"><a href="#">Размещение</a></li>
     {% else %}
         <li><a href="{% url 'efsw.archive:item:show_locations' item.id %}">Расположение</a></li>
     {% endif %}

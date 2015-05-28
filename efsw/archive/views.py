@@ -28,23 +28,27 @@ def _get_item_list_page(items, page):
 
 
 def _get_json_item_not_found(item_id):
-    return JsonWithStatusResponse.error('Ошибка: элемент с ID "{0}" не существует'.format(item_id))
+    return JsonWithStatusResponse.error(
+        'Ошибка: элемент с ID "{0}" не существует.'.format(item_id),
+        'item_not_found'
+    )
 
 
 def _get_json_item_wrong_id(item_id):
     return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор элемента должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+        'Ошибка: идентификатор элемента должен быть целым числом, предоставлено: "{0}".'.format(item_id),
+        'id_not_int'
     )
 
 
 def _get_json_storage_wrong_id(item_id):
     return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}".'.format(item_id)
     )
 
 
 def _get_json_wrong_format():
-    return JsonWithStatusResponse.error('Неверный формат запроса')
+    return JsonWithStatusResponse.error('Неверный формат запроса.', 'wrong_format')
 
 
 def _format_item_dict(i):
@@ -56,7 +60,7 @@ def _format_item_dict(i):
 
 
 def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse.error('Ошибка: хранилище с ID "{0}" не существует'.format(storage_id))
+    return JsonWithStatusResponse.error('Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id))
 
 
 def _check_include(item, include):
@@ -68,12 +72,12 @@ def _check_include_in(item, include_in):
 
 
 def _get_json_category_not_found(item_id):
-    return JsonWithStatusResponse.error('Ошибка: категория с ID "{0}" не существует'.format(item_id))
+    return JsonWithStatusResponse.error('Ошибка: категория с ID "{0}" не существует.'.format(item_id))
 
 
 def _get_json_category_wrong_id(item_id):
     return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}"'.format(item_id)
+        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}".'.format(item_id)
     )
 
 
@@ -214,20 +218,6 @@ def item_show_log(request, item_id):
     })
 
 
-@http.require_GET
-def item_show_links_json(request):
-    item_id = request.GET.get('id', None)
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    includes_list = [
-        _format_item_dict(i)
-        for i in item.includes.all()
-    ]
-    return JsonWithStatusResponse(includes_list)
-
-
 LINK_TYPE_INCLUDED_IN = 1
 LINK_TYPE_INCLUDES = 2
 
@@ -239,17 +229,21 @@ def item_check_links_json(request):
     try:
         inc_type = int(request.GET.get('type', None))
     except ValueError:
-        return JsonWithStatusResponse.error('Неизвестный тип связи.')
-    except TypeError:
-        return JsonWithStatusResponse.error('Проверьте строку запроса - возможно, не установлен параметр type.')
-    try:
-        if int(item_id) == int(inc_id):
-            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя.')
-    except ValueError:
-        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом.')
+        return JsonWithStatusResponse.error('Неизвестный тип связи.', 'unknown_link_type')
     except TypeError:
         return JsonWithStatusResponse.error(
-            'Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.'
+            'Проверьте строку запроса - возможно, не установлен параметр type.',
+            'link_type_is_missed'
+        )
+    try:
+        if int(item_id) == int(inc_id):
+            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя.', 'self_self_link')
+    except ValueError:
+        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом.', 'id_not_int')
+    except TypeError:
+        return JsonWithStatusResponse.error(
+            'Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.',
+            'id_is_missed'
         )
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -264,7 +258,7 @@ def item_check_links_json(request):
     elif inc_type == LINK_TYPE_INCLUDES:
         check_result = _check_include(item, inc_item)
     else:
-        return JsonWithStatusResponse.error('Неизвестный тип связи.')
+        return JsonWithStatusResponse.error('Неизвестный тип связи.', 'unknown_link_type')
     if check_result is not None:
         return JsonWithStatusResponse.error(check_result)
     return JsonWithStatusResponse.ok(_format_item_dict(inc_item))
@@ -287,6 +281,8 @@ def item_update_links_json(request):
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
         return _get_json_item_not_found(item_id)
+    except ValueError:
+        return _get_json_item_wrong_id(item_id)
     post_includes = request.POST.get('includes', None)
     post_included_in = request.POST.get('included_in', None)
     if post_includes is None or post_included_in is None:
@@ -377,10 +373,13 @@ def item_update_locations_json(request):
     storage_ids_list = [l['storage_id'] for l in locations]
     storage_ids = set(storage_ids_list)
     if len(storage_ids_list) > len(storage_ids):
-        return JsonWithStatusResponse.error('Элемент не может иметь несколько расположений в одном хранилище.')
+        return JsonWithStatusResponse.error(
+            'Элемент не может иметь несколько расположений в одном хранилище.',
+            'item_storage_twice'
+        )
     storages = models.Storage.objects.filter(id__in=storage_ids)
     if len(storage_ids) != len(storages):
-        return JsonWithStatusResponse.error('Используется несуществующее хранилище.')
+        return JsonWithStatusResponse.error('Используется несуществующее хранилище.', 'storage_not_found')
     storages_dict = dict([(s.id, s) for s in storages])
     leftover_locations = [l['id'] for l in locations if l['id']]
     models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()

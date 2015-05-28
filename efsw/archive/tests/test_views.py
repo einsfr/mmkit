@@ -218,27 +218,13 @@ class ItemCreateJsonViewTestCase(LoginRequiredTestCase):
         self.assertEqual(json.loads(json_content['data']['errors'])['category'][0]['code'], 'invalid_choice')
 
 
-class ItemShowViewTestCase(TestCase):
+class ItemShowPropertiesTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
 
     def test_nonexist(self):
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_properties', args=(1000000, )))
         self.assertEqual(response.status_code, 404)
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_links', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_log', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-    def test_show(self):
-        item = models.Item.objects.get(pk=4)
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show', args=(4, )))
-        self.assertContains(response, item.name, status_code=200)
-        self.assertContains(response, 'Описание элемента - Свойства')
 
     def test_show_properties(self):
         item = models.Item.objects.get(pk=4)
@@ -246,17 +232,44 @@ class ItemShowViewTestCase(TestCase):
         self.assertContains(response, item.name, status_code=200)
         self.assertContains(response, 'Описание элемента - Свойства')
 
+
+class ItemShowLocationsTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
     def test_show_locations(self):
         item = models.Item.objects.get(pk=4)
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_locations', args=(4, )))
         self.assertContains(response, item.name, status_code=200)
         self.assertContains(response, 'Описание элемента - Размещение')
 
+
+class ItemShowLinksTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_links', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
     def test_show_links(self):
         item = models.Item.objects.get(pk=4)
         response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_links', args=(4, )))
         self.assertContains(response, item.name, status_code=200)
         self.assertContains(response, 'Описание элемента - Связи')
+
+
+class ItemShowLogTestCase(TestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_nonexist(self):
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:show_log', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
 
     def test_show_log(self):
         item = models.Item.objects.get(pk=4)
@@ -265,56 +278,412 @@ class ItemShowViewTestCase(TestCase):
         self.assertContains(response, 'Описание элемента - Журнал')
 
 
-class ItemShowPropertiesTestCase(TestCase):
-    pass
-
-
-class ItemShowLocationsTestCase(TestCase):
-    pass
-
-
-class ItemShowLinksTestCase(TestCase):
-    pass
-
-
-class ItemShowLogTestCase(TestCase):
-    pass
-
-
-class ItemShowLinksJsonTestCase(TestCase):
-    pass
-
-
 class ItemCheckLinksJsonTestCase(TestCase):
-    pass
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:check_links_json')
+
+    def test_wrong_type(self):
+        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 1, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('link_type_is_missed', json_content['status_ext'])
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1, 2, 'non-int'))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('unknown_link_type', json_content['status_ext'])
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1, 2, 3))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('unknown_link_type', json_content['status_ext'])
+
+    def test_include_self(self):
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 4, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('self_self_link', json_content['status_ext'])
+
+    def test_include_non_int(self):
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 'non-int', 3, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('id_not_int', json_content['status_ext'])
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 'non-int', 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('id_not_int', json_content['status_ext'])
+
+    def test_id_not_set(self):
+        response = self.client.get('{0}?id={1}&type={2}'.format(self.request_url, 1, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.', json_content['data'])
+        response = self.client.get('{0}?include_id={1}&type={2}'.format(self.request_url, 1, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('id_is_missed', json_content['status_ext'])
+
+    def test_nonexist_item(self):
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1000000, 8, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_not_found', json_content['status_ext'])
+
+    def test_nonexist_include(self):
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 1000000, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_not_found', json_content['status_ext'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 8, 2))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual(3, len(json_content['data']))
+        self.assertIn('id', json_content['data'])
+        self.assertIn('name', json_content['data'])
+        self.assertIn('url', json_content['data'])
 
 
-class ItemUpdateLinksJsonTestCase(TestCase):
-    pass
+class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:update_links_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+    def test_nonexist_item(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_not_found', json_content['status_ext'])
+
+    def test_wrong_id(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 'not-int'))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('id_not_int', json_content['status_ext'])
+
+    def test_wrong_format(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('wrong_format', json_content['status_ext'])
+        post_data = {
+            'includes': 'not-a-json-list',
+            'included_in': 'not-a-json-list'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('wrong_format', json_content['status_ext'])
+
+    def test_clear(self):
+        self._login_user()
+        post_data = {
+            'includes': '[]',
+            'included_in': '[]',
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([], list(item.includes.all()))
+        self.assertEqual([], list(item.included_in.all()))
+        logs = list(item.log.all().order_by('-pk'))
+        self.assertEqual(2, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=5).log.all().order_by('-pk')
+        self.assertEqual(3, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=11).log.all().order_by('-pk')
+        self.assertEqual(1, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
+
+    def test_normal(self):
+        self._login_user()
+        post_data = {
+            'includes': '[4, 5, 8]',
+            'included_in': '[10]',
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([5, 8], [i.id for i in item.includes.all()])
+        self.assertEqual([10], [i.id for i in item.included_in.all()])
+        logs = list(item.log.all().order_by('-pk'))
+        self.assertEqual(2, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=5).log.all()
+        self.assertEqual(2, len(logs))
+        logs = models.Item.objects.get(pk=8).log.all().order_by('-pk')
+        self.assertEqual(1, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        logs = models.Item.objects.get(pk=10).log.all().order_by('-pk')
+        self.assertEqual(1, len(logs))
+        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
+        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
 
 
 class ItemShowLocationsJsonTestCase(TestCase):
-    pass
+
+    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlocation.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:show_locations_json')
+
+    def test_nonexist(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_not_found', json_content['status_ext'])
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 8))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        locations = json_content['data']
+        self.assertEqual(2, len(locations))
+        for l in locations:
+            self.assertEqual(4, len(l))
+            for _ in ['id', 'storage_name', 'storage_id', 'location']:
+                self.assertIn(_, l)
+        self.assertEqual([9, 10], sorted([l['id'] for l in locations]))
 
 
-class ItemUpdateLocationsJsonTestCase(TestCase):
-    pass
+class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json', 'itemlocation.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:item:update_locations_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.request_url)
+        self.assertEqual(405, response.status_code)
+
+    def test_nonexist_item(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_not_found', json_content['status_ext'])
+
+    def test_wrong_format(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('wrong_format', json_content['status_ext'])
+        post_data = {
+            'locations': 'not-a-json-list'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('wrong_format', json_content['status_ext'])
+
+    def test_remove_all(self):
+        self._login_user()
+        post_data = {
+            'locations': '[]'
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        self.assertEqual([], list(item.locations.all()))
+        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
+
+    def test_nonexist_storage(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 0,
+                    'storage_id': 1000000,
+                    'location': 'location'
+                }
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('storage_not_found', json_content['status_ext'])
+
+    def test_already_in_storage(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 4,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                },
+                {
+                    'id': 0,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                }
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('item_storage_twice', json_content['status_ext'])
+
+    def test_normal(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': 4,
+                    'storage_id': 1,
+                    'location': '00/00/00/04'
+                },
+                {
+                    'id': 0,
+                    'storage_id': 2,
+                    'location': '00/00/00/04'
+                },
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
+        locations = list(item.locations.all().order_by('-pk'))
+        self.assertEqual(2, len(locations))
+        self.assertEqual(2, locations[0].storage.id)
+        self.assertEqual('00/00/00/04', locations[0].location)
+        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
 
 
-class ItemEditTestCase(TestCase):
-    pass
+class ItemEditTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertContains(response, 'Редактирование элемента - Свойства', status_code=200)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertEqual(405, response.status_code)
 
 
-class ItemEditPropertiesTestCase(TestCase):
-    pass
+class ItemEditPropertiesTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertContains(response, 'Редактирование элемента - Свойства', status_code=200)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
+        self.assertEqual(405, response.status_code)
 
 
-class ItemEditLocationsTestCase(TestCase):
-    pass
+class ItemEditLocationsTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(4, )))
+        self.assertContains(response, 'Редактирование элемента - Размещение', status_code=200)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(4, )))
+        self.assertEqual(405, response.status_code)
 
 
-class ItemEditLinksTestCase(TestCase):
-    pass
+class ItemEditLinksTestCase(LoginRequiredTestCase):
+
+    fixtures = ['item.json', 'itemcategory.json']
+
+    def test_page(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit_links', args=(4, )))
+        self.assertContains(response, 'Редактирование элемента - Связи', status_code=200)
+
+    def test_nonexist(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit_links', args=(1000000, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit_links', args=(4, )))
+        self.assertEqual(405, response.status_code)
 
 
 class ItemUpdatePropertiesJsonTestCase(TestCase):
@@ -349,348 +718,10 @@ class StorageShowJsonTestCase(TestCase):
     pass
 
 
-class ItemIncludesListJsonTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:show_links_json')
-
-    def test_nonexist(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_normal(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 4))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        item_includes = models.Item.objects.get(pk=4).includes.all()
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        id_list = []
-        for d in json_content['data']:
-            self.assertEqual(3, len(d))
-            self.assertIn('id', d)
-            self.assertIn('name', d)
-            self.assertIn('url', d)
-            id_list.append(d['id'])
-        self.assertEqual(len(item_includes), len(json_content['data']))
-        self.assertEqual(id_list, [i.id for i in item_includes])
 
 
-class ItemIncludesCheckJsonTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:check_links_json')
-
-    def test_include_self(self):
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 4))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Элемент не может быть включён сам в себя', json_content['data'])
-
-    def test_include_non_int(self):
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 'non-int', 4))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Идентификатор должен быть целым числом', json_content['data'])
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 'non-int'))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Идентификатор должен быть целым числом', json_content['data'])
-
-    def test_id_not_set(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Проверьте строку запроса - возможно, не установлен id или include_id', json_content['data'])
-        response = self.client.get('{0}?include_id={1}'.format(self.request_url, 1))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Проверьте строку запроса - возможно, не установлен id или include_id', json_content['data'])
-
-    def test_nonexist_item(self):
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 1000000, 8))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_nonexist_include(self):
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_normal(self):
-        response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 4, 8))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual(3, len(json_content['data']))
-        self.assertIn('id', json_content['data'])
-        self.assertIn('name', json_content['data'])
-        self.assertIn('url', json_content['data'])
 
 
-class ItemIncludesUpdateJsonTestCase(LoginRequiredTestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:update_links_json')
-
-    def test_wrong_method(self):
-        self._login_user()
-        response = self.client.get(self.request_url)
-        self.assertEqual(405, response.status_code)
-
-    def test_nonexist_item(self):
-        self._login_user()
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_wrong_format(self):
-        self._login_user()
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Неверный формат запроса', json_content['data'])
-        post_data = {
-            'includes': 'not-a-json-list'
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Неверный формат запроса', json_content['data'])
-
-    def test_clear(self):
-        self._login_user()
-        post_data = {
-            'includes': '[]'
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('', json_content['data'])
-        item = models.Item.objects.get(pk=4)
-        self.assertEqual([], list(item.includes.all()))
-        logs = list(item.log.all().order_by('-pk'))
-        self.assertEqual(2, len(logs))
-        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
-        logs = models.Item.objects.get(pk=5).log.all().order_by('-pk')
-        self.assertEqual(3, len(logs))
-        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
-        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
-
-    def test_normal(self):
-        self._login_user()
-        post_data = {
-            'includes': '[4, 5, 8]'
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('', json_content['data'])
-        item = models.Item.objects.get(pk=4)
-        self.assertEqual([5, 8], [i.id for i in item.includes.all()])
-        logs = list(item.log.all().order_by('-pk'))
-        self.assertEqual(2, len(logs))
-        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
-        logs = models.Item.objects.get(pk=5).log.all()
-        self.assertEqual(2, len(logs))
-        logs = models.Item.objects.get(pk=8).log.all().order_by('-pk')
-        self.assertEqual(1, len(logs))
-        self.assertEqual(models.ItemLog.ACTION_INCLUDE_UPDATE, logs[0].action)
-        call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
-
-
-class ItemLocationsListJsonTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlocation.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:show_locations_json')
-
-    def test_nonexist(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_normal(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 8))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        locations = json_content['data']
-        self.assertEqual(2, len(locations))
-        for l in locations:
-            self.assertEqual(4, len(l))
-            for _ in ['id', 'storage', 'storage_id', 'location']:
-                self.assertIn(_, l)
-        self.assertEqual([9, 10], sorted([l['id'] for l in locations]))
-
-
-class ItemLocationsUpdateJsonTestCase(LoginRequiredTestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json', 'itemlocation.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:update_locations_json')
-
-    def test_wrong_method(self):
-        self._login_user()
-        response = self.client.get(self.request_url)
-        self.assertEqual(405, response.status_code)
-
-    def test_nonexist_item(self):
-        self._login_user()
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: элемент с ID "1000000" не существует', json_content['data'])
-
-    def test_wrong_format(self):
-        self._login_user()
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Неверный формат запроса', json_content['data'])
-        post_data = {
-            'locations': 'not-a-json-list'
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Неверный формат запроса', json_content['data'])
-
-    def test_remove_all(self):
-        self._login_user()
-        post_data = {
-            'locations': '[]'
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('', json_content['data'])
-        item = models.Item.objects.get(pk=4)
-        self.assertEqual([], list(item.locations.all()))
-        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
-
-    def test_nonexist_storage(self):
-        self._login_user()
-        post_data = {
-            'locations': json.dumps([
-                {
-                    'id': 0,
-                    'storage_id': 1000000,
-                    'location': 'location'
-                }
-            ])
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Используется несуществующее хранилище', json_content['data'])
-
-    def test_already_in_storage(self):
-        self._login_user()
-        post_data = {
-            'locations': json.dumps([
-                {
-                    'id': 4,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
-                },
-                {
-                    'id': 0,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
-                }
-            ])
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Элемент не может иметь несколько расположений в одном хранилище', json_content['data'])
-
-    def test_normal(self):
-        self._login_user()
-        post_data = {
-            'locations': json.dumps([
-                {
-                    'id': 4,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
-                },
-                {
-                    'id': 0,
-                    'storage_id': 2,
-                    'location': '00/00/00/04'
-                },
-            ])
-        }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('', json_content['data'])
-        item = models.Item.objects.get(pk=4)
-        locations = list(item.locations.all().order_by('-pk'))
-        self.assertEqual(2, len(locations))
-        self.assertEqual(2, locations[0].storage.id)
-        self.assertEqual('00/00/00/04', locations[0].location)
-        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
-
-
-class ItemEditViewTestCase(LoginRequiredTestCase):
-
-    fixtures = ['item.json', 'itemcategory.json']
-
-    def test_page(self):
-        self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
-        self.assertContains(response, '<h1>Редактирование элемента</h1>', status_code=200)
-
-    def test_nonexist(self):
-        self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:edit', args=(1000000, )))
-        self.assertEqual(response.status_code, 404)
-
-    def test_wrong_method(self):
-        self._login_user()
-        response = self.client.post(urlresolvers.reverse('efsw.archive:item:edit', args=(4, )))
-        self.assertEqual(405, response.status_code)
 
 
 class ItemUpdateViewTestCase(LoginRequiredTestCase):

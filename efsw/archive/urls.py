@@ -88,13 +88,6 @@ item_patterns = [
         ])
     ),
     # ------------------------- Item JSON -------------------------
-    # items/show/links/json/?id=12 Включаемые элементы (JSON)
-    # ( - )
-    url(
-        r'^show/links/json/$',
-        views.item_show_links_json,
-        name='show_links_json'
-    ),
     # items/check/links/json/?id=12&type=1&include_id=11 Включаемые элементы - проверка возможности включения (JSON)
     # ( - )
     url(
