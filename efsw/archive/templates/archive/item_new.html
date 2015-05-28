@@ -33,9 +33,6 @@
     <h1>Создание элемента</h1>
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="alert alert-danger"
-                 data-bind="visible: error_msg(), text: error_msg()"
-                 style="display: none;"></div>
             <form id="item_new_form">
                 <div class="row">
                     <div class="col-md-10 form-group" data-bind="css: { 'has-error': errors().name }">
@@ -87,6 +84,9 @@
                     </div>
                 </div>
             </form>
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
         </div>
         <div class="panel-footer text-center">
             <button type="button"

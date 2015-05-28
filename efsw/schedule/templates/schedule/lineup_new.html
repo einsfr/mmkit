@@ -25,7 +25,6 @@
     <h1>Создание сетки вещания</h1>
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="alert alert-danger" data-bind="visible: error_msg(), text: error_msg()" style="display: none;"></div>
             <form id="lineup_new_form">
                 <div class="form-group" data-bind="css: { 'has-error': errors().name }">
                     <label for="{{ form.name.id_for_label }}">Название</label>
@@ -58,6 +57,7 @@
                     </div>
                 </div>
             </form>
+            <div class="alert alert-danger" data-bind="visible: error_msg(), text: error_msg()" style="display: none;"></div>
         </div>
         <div class="panel-footer text-center">
             <button type="button" class="btn btn-primary" data-bind="event: { click: submit_form }">Создать</button>

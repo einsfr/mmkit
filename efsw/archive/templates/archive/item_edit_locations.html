@@ -50,12 +50,6 @@
     {% include 'archive/_item_edit_nav_tabs.html' with active='locations' %}
     <div class="panel panel-default" style="margin-top: 0.5em;">
         <div class="panel-body">
-            <div class="alert alert-danger"
-                 data-bind="visible: error_msg(), text: error_msg()"
-                 style="display: none;"></div>
-            <div class="alert alert-success"
-                 data-bind="visible: success_msg(), text: success_msg()"
-                 style="display: none;"></div>
             <table class="table table-hover"
                    data-bind="visible: locations().length > 0" style="display: none;">
                 <thead>
@@ -109,6 +103,12 @@
                     </div>
                 </div>
             </div>
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
+            <div class="alert alert-success"
+                 data-bind="visible: success_msg(), text: success_msg()"
+                 style="display: none;"></div>
         </div>
         <div class="panel-footer text-center">
             <button type="button"
