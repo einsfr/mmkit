@@ -79,7 +79,7 @@ def _get_json_category_wrong_id(item_id):
 
 # ------------------------- Общие -------------------------
 
-
+@http.require_GET
 def search(request):
     es_cm = elastic.get_connection_manager()
     es = es_cm.get_es()
@@ -143,6 +143,7 @@ def search(request):
 # ------------------------- Item -------------------------
 
 
+@http.require_GET
 def item_list(request, page='1'):
     items_all = models.Item.objects.all().order_by('-pk').select_related('category')
     items_page = _get_item_list_page(items_all, page)
@@ -166,10 +167,12 @@ def item_create_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+@http.require_GET
 def item_show(request, item_id):
     return item_show_properties(request, item_id)
 
 
+@http.require_GET
 def item_show_properties(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.select_related('category'),
@@ -180,6 +183,7 @@ def item_show_properties(request, item_id):
     })
 
 
+@http.require_GET
 def item_show_locations(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.prefetch_related('locations', 'locations__storage'),
@@ -190,6 +194,7 @@ def item_show_locations(request, item_id):
     })
 
 
+@http.require_GET
 def item_show_links(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.prefetch_related('includes', 'included_in'),
@@ -200,6 +205,7 @@ def item_show_links(request, item_id):
     })
 
 
+@http.require_GET
 def item_show_log(request, item_id):
     item = shortcuts.get_object_or_404(models.Item.objects, pk=item_id)
     return shortcuts.render(request, 'archive/item_show_log.html', {
@@ -208,6 +214,7 @@ def item_show_log(request, item_id):
     })
 
 
+@http.require_GET
 def item_show_links_json(request):
     item_id = request.GET.get('id', None)
     try:
@@ -225,6 +232,7 @@ LINK_TYPE_INCLUDED_IN = 1
 LINK_TYPE_INCLUDES = 2
 
 
+@http.require_GET
 def item_check_links_json(request):
     item_id = request.GET.get('id', None)
     inc_id = request.GET.get('include_id', None)
@@ -326,6 +334,7 @@ def item_update_links_json(request):
     return JsonWithStatusResponse()
 
 
+@http.require_GET
 def item_show_locations_json(request):
     item_id = request.GET.get('id', None)
     try:
@@ -473,6 +482,7 @@ def item_update_properties_json(request):
 # ------------------------- ItemCategory -------------------------
 
 
+@http.require_GET
 def category_list(request, page='1'):
     per_page = getattr(
         settings,
@@ -501,6 +511,7 @@ def category_create_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+@http.require_GET
 def category_show_items(request, category_id, page='1'):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     items_all = cat.items.all().order_by('-pk')
@@ -541,6 +552,7 @@ def category_update_json(request):
 # ------------------------- Storage -------------------------
 
 
+@http.require_GET
 def storage_show_json(request):
     storage_id = request.GET.get('id', None)
     try:
