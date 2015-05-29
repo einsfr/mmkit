@@ -85,6 +85,90 @@ def _get_lineup_list_page(query_set, page):
     return pagination.get_page(query_set, page, per_page)
 
 
+def _get_json_lineup_not_found(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: сетка вещания с ID "{0}" не найдена'.format(lineup_id),
+        'lineup_not_found'
+    )
+
+
+def _get_json_wrong_lineup_id(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(lineup_id),
+        'id_not_int'
+    )
+
+
+def _get_json_lineup_edit_forbidden(lineup_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: сетка вещания с ID "{0}" закрыта для редактирования'.format(lineup_id),
+        'lineup_edit_forbidden'
+    )
+
+
+def _get_json_program_not_found(program_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: программа с ID "{0}" не найдена'.format(program_id),
+        'program_not_found'
+    )
+
+
+def _get_json_wrong_program_id(program_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор программы должен быть целым числом, предоставлено: "{0}"'.format(program_id),
+        'id_not_int'
+    )
+
+
+def _get_json_pp_not_found(pp_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: не найден фрагмент сетки вещания с ID "{0}"'.format(pp_id),
+        'pp_not_found'
+    )
+
+
+def _get_json_wrong_pp_id(pp_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор фрагмента сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(pp_id),
+        'id_not_int'
+    )
+
+
+def _get_json_delete_empty_pp(pp_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: невозможно удалить пустой фрагмент с ID "{0}"'.format(pp_id),
+        'pp_delete_empty'
+    )
+
+
+def _pp_delete(program_position):
+    previous_pp = lineops.get_previous_pp(program_position)
+    next_pp = lineops.get_next_pp(program_position)
+    if (previous_pp is not None and lineops.pp_is_empty(previous_pp)) \
+            and (next_pp is None or not lineops.pp_is_empty(next_pp)):
+        previous_pp.end_time = program_position.end_time
+        program_position.delete()
+        previous_pp.save()
+    elif (previous_pp is None or not lineops.pp_is_empty(previous_pp)) \
+            and (next_pp is not None and lineops.pp_is_empty(next_pp)):
+        next_pp.start_time = program_position.start_time
+        program_position.delete()
+        next_pp.save()
+    elif (previous_pp is not None and lineops.pp_is_empty(previous_pp)) \
+            and (next_pp is not None and lineops.pp_is_empty(next_pp)):
+        previous_pp.end_time = next_pp.end_time
+        program_position.delete()
+        next_pp.delete()
+        previous_pp.save()
+    else:
+        program_position.program = None
+        program_position.save()
+
+
+# ------------------------- Lineup -------------------------
+
+
+@http.require_GET
 def lineup_list(request, page=1):
     lineups = models.Lineup.objects.all().order_by('-id')
     return shortcuts.render(request, 'schedule/lineup_list.html', {
@@ -92,6 +176,7 @@ def lineup_list(request, page=1):
     })
 
 
+@http.require_GET
 def lineup_show(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     lineup_table_data = _get_lineup_table_data(lineup)
@@ -101,6 +186,7 @@ def lineup_show(request, lineup_id):
     })
 
 
+@http.require_GET
 def lineup_show_current(request, channel_id=None):
     channels_list = list(models.Channel.objects.filter(active=True).order_by('id'))
     if channel_id is None:
@@ -123,10 +209,12 @@ def lineup_show_current(request, channel_id=None):
     })
 
 
+@http.require_GET
 def lineup_edit(request, lineup_id):
     return lineup_edit_structure(request, lineup_id)
 
 
+@http.require_GET
 def lineup_edit_properties(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/lineup_edit_properties.html', {
@@ -135,6 +223,7 @@ def lineup_edit_properties(request, lineup_id):
     })
 
 
+@http.require_GET
 def lineup_edit_structure(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/lineup_edit_structure.html', {
@@ -162,24 +251,7 @@ def lineup_update_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
-def _get_json_lineup_not_found(lineup_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: сетка вещания с ID "{0}" не найдена'.format(lineup_id)
-    )
-
-
-def _get_json_wrong_lineup_id(lineup_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(lineup_id)
-    )
-
-
-def _get_json_lineup_edit_forbidden(lineup_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: сетка вещания с ID "{0}" закрыта для редактирования'.format(lineup_id)
-    )
-
-
+@http.require_GET
 def lineup_new(request):
     return shortcuts.render(request, 'schedule/lineup_new.html', {
         'form': forms.LineupCreateForm()
@@ -233,12 +305,14 @@ def lineup_copy_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+@http.require_GET
 def lineup_copy_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_copy_modal.html', {
         'form': forms.LineupCopyForm()
     })
 
 
+@http.require_GET
 def lineup_activate_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_activate_modal.html', {
         'form': forms.LineupActivateForm()
@@ -270,6 +344,7 @@ def lineup_activate_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+@http.require_GET
 def lineup_make_draft_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_make_draft_modal.html')
 
@@ -305,6 +380,7 @@ def lineup_make_draft_json(request):
     return JsonWithStatusResponse.ok()
 
 
+@http.require_GET
 def lineup_show_part_pp_table_body(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/_pp_list_table_body.html', {
@@ -312,6 +388,7 @@ def lineup_show_part_pp_table_body(request, lineup_id):
     })
 
 
+@http.require_GET
 def program_list(request, page=1):
     programs = models.Program.objects.all().order_by('name')
     return shortcuts.render(
@@ -339,6 +416,7 @@ def program_create_json(request):
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 
+@http.require_GET
 def program_show(request, program_id):
     program = shortcuts.get_object_or_404(
         models.Program,
@@ -347,19 +425,7 @@ def program_show(request, program_id):
     return shortcuts.render(request, 'schedule/program_show.html', {'program': program})
 
 
-def _get_json_program_not_found(program_id):
-    return JsonWithStatusResponse(
-        'Ошибка: программа с ID "{0}" не найдена'.format(program_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
-
-
-def _get_json_wrong_program_id(program_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор программы должен быть целым числом, предоставлено: "{0}"'.format(program_id)
-    )
-
-
+@http.require_GET
 def program_show_json(request):
 
     def format_program_dict(p):
@@ -380,23 +446,12 @@ def program_show_json(request):
     return JsonWithStatusResponse(format_program_dict(program))
 
 
-def _get_json_pp_not_found(pp_id):
-    return JsonWithStatusResponse(
-        'Ошибка: не найден фрагмент сетки вещания с ID "{0}"'.format(pp_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
-
-
-def _get_json_wrong_pp_id(pp_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор фрагмента сетки вещания должен быть целым числом, предоставлено: "{0}"'.format(pp_id)
-    )
-
-
+@http.require_GET
 def pp_show_part_modal(request):
     return shortcuts.render(request, 'schedule/_pp_show_modal.html')
 
 
+@http.require_GET
 def pp_show_json(request):
 
     def format_pp_dict(pp):
@@ -426,12 +481,14 @@ def pp_show_json(request):
     return JsonWithStatusResponse(format_pp_dict(program_position))
 
 
+@http.require_GET
 def pp_edit_part_modal(request):
     return shortcuts.render(request, 'schedule/_pp_edit_modal.html', {
         'pp_edit_form': forms.ProgramPositionEditForm()
     })
 
 
+@http.require_GET
 def pp_edit_json(request):
 
     def format_pp_dict(pp):
@@ -460,37 +517,6 @@ def pp_edit_json(request):
     except models.ProgramPosition.DoesNotExist:
         return _get_json_pp_not_found(pp_id)
     return JsonWithStatusResponse(format_pp_dict(program_position))
-
-
-def _get_json_delete_empty_pp(pp_id):
-    return JsonWithStatusResponse(
-        'Ошибка: невозможно удалить пустой фрагмент с ID "{0}"'.format(pp_id),
-        JsonWithStatusResponse.STATUS_ERROR
-    )
-
-
-def _pp_delete(program_position):
-    previous_pp = lineops.get_previous_pp(program_position)
-    next_pp = lineops.get_next_pp(program_position)
-    if (previous_pp is not None and lineops.pp_is_empty(previous_pp)) \
-            and (next_pp is None or not lineops.pp_is_empty(next_pp)):
-        previous_pp.end_time = program_position.end_time
-        program_position.delete()
-        previous_pp.save()
-    elif (previous_pp is None or not lineops.pp_is_empty(previous_pp)) \
-            and (next_pp is not None and lineops.pp_is_empty(next_pp)):
-        next_pp.start_time = program_position.start_time
-        program_position.delete()
-        next_pp.save()
-    elif (previous_pp is not None and lineops.pp_is_empty(previous_pp)) \
-            and (next_pp is not None and lineops.pp_is_empty(next_pp)):
-        previous_pp.end_time = next_pp.end_time
-        program_position.delete()
-        next_pp.delete()
-        previous_pp.save()
-    else:
-        program_position.program = None
-        program_position.save()
 
 
 @http.require_POST

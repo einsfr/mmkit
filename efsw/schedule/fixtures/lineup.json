@@ -8,7 +8,8 @@
       "active_until": null,
       "draft": false,
       "start_time": "06:00:00",
-      "end_time": "06:00:00"
+      "end_time": "06:00:00",
+      "channel_id": 1
     }
   }
 ]
