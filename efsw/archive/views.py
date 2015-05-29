@@ -43,7 +43,8 @@ def _get_json_item_wrong_id(item_id):
 
 def _get_json_storage_wrong_id(item_id):
     return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}".'.format(item_id)
+        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}".'.format(item_id),
+        'id_not_int'
     )
 
 
@@ -60,7 +61,10 @@ def _format_item_dict(i):
 
 
 def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse.error('Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id))
+    return JsonWithStatusResponse.error(
+        'Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id),
+        'storage_not_found'
+    )
 
 
 def _check_include(item, include):
@@ -72,12 +76,16 @@ def _check_include_in(item, include_in):
 
 
 def _get_json_category_not_found(item_id):
-    return JsonWithStatusResponse.error('Ошибка: категория с ID "{0}" не существует.'.format(item_id))
+    return JsonWithStatusResponse.error(
+        'Ошибка: категория с ID "{0}" не существует.'.format(item_id),
+        'category_not_found'
+    )
 
 
 def _get_json_category_wrong_id(item_id):
     return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}".'.format(item_id)
+        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}".'.format(item_id),
+        'id_not_int'
     )
 
 

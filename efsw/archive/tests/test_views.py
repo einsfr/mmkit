@@ -32,14 +32,14 @@ class SearchViewTestCase(TestCase):
             response = self.client.get(self.request_url)
         self.assertContains(response, '<h1>Поиск по архиву</h1>', status_code=200)
         response = self.client.get(self.request_url)
-        self.assertContains(response, '<h1>Поиск не работает</h1>', status_code=500)
+        self.assertContains(response, 'Поиск не работает', status_code=500)
 
     def test_search_queries_q(self):
         get_data = {'q': 'новость'}
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             response = self.client.get(self.request_url, get_data)
         self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
-        self.assertEqual(len(response.context['items']), 2)
+        self.assertEqual(len(response.context['items']), 3)
         ids = [x.id for x in response.context['items']]
         self.assertIn(4, ids)
         self.assertIn(8, ids)
@@ -50,9 +50,10 @@ class SearchViewTestCase(TestCase):
             response = self.client.get(self.request_url, get_data)
         self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
         items = response.context['items']
-        self.assertEqual(len(items), 2)
-        self.assertEqual(items[0].id, 4)
-        self.assertEqual(items[1].id, 8)
+        self.assertEqual(len(items), 3)
+        self.assertEqual(items[0].id, 11)
+        self.assertEqual(items[1].id, 4)
+        self.assertEqual(items[2].id, 8)
 
     def test_search_queries_qc(self):
         get_data = {'q': 'новость', 'c': 1}
@@ -60,7 +61,7 @@ class SearchViewTestCase(TestCase):
             response = self.client.get(self.request_url, get_data)
         self.assertContains(response, '<h2>Результаты поиска</h2>', status_code=200)
         items = response.context['items']
-        self.assertEqual(len(items), 1)
+        self.assertEqual(len(items), 2)
         self.assertEqual(items[0].id, 4)
 
 
@@ -117,7 +118,7 @@ class ItemNewViewTestCase(LoginRequiredTestCase):
     def test_page(self):
         self._login_user()
         response = self.client.get(self.request_url)
-        self.assertContains(response, '<h1>Добавление нового элемента</h1>', status_code=200)
+        self.assertContains(response, '<h1>Создание элемента</h1>', status_code=200)
 
     def test_wrong_method(self):
         self._login_user()
@@ -127,7 +128,7 @@ class ItemNewViewTestCase(LoginRequiredTestCase):
 
 class ItemCreateJsonViewTestCase(LoginRequiredTestCase):
 
-    fixtures = ['itemcategory.json']
+    fixtures = ['item.json', 'itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -686,45 +687,7 @@ class ItemEditLinksTestCase(LoginRequiredTestCase):
         self.assertEqual(405, response.status_code)
 
 
-class ItemUpdatePropertiesJsonTestCase(TestCase):
-    pass
-
-
-class CategoryListTestCase(TestCase):
-    pass
-
-
-class CategoryNewTestCase(TestCase):
-    pass
-
-
-class CategoryCreateJsonTestCase(TestCase):
-    pass
-
-
-class CategoryShowItemsTestCase(TestCase):
-    pass
-
-
-class CategoryEditTestCase(TestCase):
-    pass
-
-
-class CategoryUpdateJsonTestCase(TestCase):
-    pass
-
-
-class StorageShowJsonTestCase(TestCase):
-    pass
-
-
-
-
-
-
-
-
-class ItemUpdateViewTestCase(LoginRequiredTestCase):
+class ItemUpdatePropertiesJsonTestCase(LoginRequiredTestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json']
 
@@ -738,33 +701,37 @@ class ItemUpdateViewTestCase(LoginRequiredTestCase):
             'category': '1',
         }
         response = self.client.post(
-            urlresolvers.reverse('efsw.archive:item:update', args=(4, )),
-            post_data,
-            follow=True
+            '{0}?id={1}'.format(
+                urlresolvers.reverse('efsw.archive:item:update_properties_json'),
+                4
+            ),
+            post_data
         )
-        self.assertEqual(1, len(response.redirect_chain))
-        self.assertContains(response, 'Отредактированное название', status_code=200)
-        item = models.Item.objects.get(pk=response.context['item'].id)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+        self.assertEqual('', json_content['data'])
+        item = models.Item.objects.get(pk=4)
         self.assertEqual('Отредактированное название', item.name)
         self.assertEqual('Отредактированное описание', item.description)
         self.assertEqual(datetime.date(2015, 2, 9), item.created)
         self.assertEqual('Автор отредактированного элемента', item.author)
         self.assertEqual(1, item.category.id)
-        log = response.context['item'].log.all()
+        log = item.log.all()
         self.assertEqual(len(log), 2)
         self.assertEqual(log[0].action, log[0].ACTION_ADD)
         self.assertEqual(log[1].action, log[1].ACTION_UPDATE)
 
     def test_wrong_method(self):
         self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:item:update', args=(4, )))
+        response = self.client.get('{0}?id={1}'.format(
+            urlresolvers.reverse('efsw.archive:item:update_properties_json'),
+            4
+        ))
         self.assertEqual(405, response.status_code)
 
 
-# ------------------------- ItemCategory -------------------------
-
-
-class CategoryListViewTestCase(TestCase):
+class CategoryListTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
 
@@ -795,7 +762,7 @@ class CategoryListViewTestCase(TestCase):
             self.assertContains(response, '<a href="#" title="Страница 2">2</a>')
 
 
-class CategoryNewViewTestCase(LoginRequiredTestCase):
+class CategoryNewTestCase(LoginRequiredTestCase):
 
     fixtures = []
 
@@ -806,7 +773,7 @@ class CategoryNewViewTestCase(LoginRequiredTestCase):
     def test_view(self):
         self._login_user()
         response = self.client.get(self.request_url)
-        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
+        self.assertContains(response, '<h1>Создание категории</h1>', status_code=200)
 
     def test_wrong_method(self):
         self._login_user()
@@ -814,13 +781,13 @@ class CategoryNewViewTestCase(LoginRequiredTestCase):
         self.assertEqual(405, response.status_code)
 
 
-class CategoryCreateViewTestCase(LoginRequiredTestCase):
+class CategoryCreateJsonTestCase(LoginRequiredTestCase):
 
     fixtures = ['itemcategory.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:category:create')
+        self.request_url = urlresolvers.reverse('efsw.archive:category:create_json')
 
     def test_wrong_method(self):
         self._login_user()
@@ -832,10 +799,10 @@ class CategoryCreateViewTestCase(LoginRequiredTestCase):
         post_data = {
             'name': 'Новая категория'
         }
-        response = self.client.post(self.request_url, post_data, follow=True)
-        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
-        self.assertEqual(1, len(response.redirect_chain))
-        self.assertEqual(4, len(response.context['categories']))
+        response = self.client.post(self.request_url, post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
         call_command('loaddata', 'itemcategory.json', verbosity=0)
 
     def test_duplicate(self):
@@ -845,8 +812,10 @@ class CategoryCreateViewTestCase(LoginRequiredTestCase):
         }
         self.client.post(self.request_url, post_data)
         response = self.client.post(self.request_url, post_data)
-        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
-        self.assertFormError(response, 'form', 'name', 'Категория с таким Название уже существует.')
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['name'][0]['code'], 'unique')
         call_command('loaddata', 'itemcategory.json', verbosity=0)
 
     def test_name_max_length(self):
@@ -855,16 +824,13 @@ class CategoryCreateViewTestCase(LoginRequiredTestCase):
             'name': 'a' * 65
         }
         response = self.client.post(self.request_url, post_data)
-        self.assertContains(response, '<h1>Добавление категории</h1>', status_code=200)
-        self.assertFormError(
-            response,
-            'form',
-            'name',
-            'Убедитесь, что это значение содержит не более 64 символов (сейчас 65).'
-        )
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(json.loads(json_content['data']['errors'])['name'][0]['code'], 'max_length')
 
 
-class CategoryItemsListViewTestCase(TestCase):
+class CategoryShowItemsTestCase(TestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
 
@@ -909,7 +875,7 @@ class CategoryItemsListViewTestCase(TestCase):
             )
 
 
-class CategoryEditViewTestCase(LoginRequiredTestCase):
+class CategoryEditTestCase(LoginRequiredTestCase):
 
     fixtures = ['itemcategory.json']
 
@@ -929,40 +895,41 @@ class CategoryEditViewTestCase(LoginRequiredTestCase):
         self.assertContains(response, '<h1>Редактирование категории</h1>', status_code=200)
 
 
-class CategoryUpdateViewTestCase(LoginRequiredTestCase):
+class CategoryUpdateJsonTestCase(LoginRequiredTestCase):
 
     fixtures = ['itemcategory.json']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_url = urlresolvers.reverse('efsw.archive:category:update_json')
+
     def test_wrong_method(self):
         self._login_user()
-        response = self.client.get(urlresolvers.reverse('efsw.archive:category:update', args=(3, )))
+        response = self.client.get('{0}?id={1}'.format(self.request_url, 3))
         self.assertEqual(405, response.status_code)
 
     def test_nonexist(self):
         self._login_user()
-        response = self.client.post(urlresolvers.reverse('efsw.archive:category:update', args=(1000000, )))
-        self.assertEqual(404, response.status_code)
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1000000))
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual('category_not_found', json_content['status_ext'])
 
     def test_normal(self):
         self._login_user()
         post_data = {
             'name': 'Отредактированное название'
         }
-        response = self.client.post(
-            urlresolvers.reverse('efsw.archive:category:update', args=(3, )),
-            post_data,
-            follow=True
-        )
-        self.assertContains(response, '<h1>Список категорий</h1>', status_code=200)
-        self.assertEqual(1, len(response.redirect_chain))
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 3), post_data)
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
         self.assertEqual('Отредактированное название', models.ItemCategory.objects.get(pk=3).name)
         call_command('loaddata', 'itemcategory.json', verbosity=0)
 
 
-# ------------------------- Storage -------------------------
-
-
-class StorageShowJsonViewTestCase(TestCase):
+class StorageShowJsonTestCase(TestCase):
 
     fixtures = ['storage.json']
 
@@ -975,7 +942,7 @@ class StorageShowJsonViewTestCase(TestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Ошибка: хранилище с ID "1000000" не существует', json_content['data'])
+        self.assertEqual('storage_not_found', json_content['status_ext'])
 
     def test_normal(self):
         response = self.client.get('{0}?id={1}'.format(self.request_url, 1))

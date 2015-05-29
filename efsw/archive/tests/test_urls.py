@@ -47,9 +47,6 @@ class ArchiveUrlsTestCase(UrlsTestCase):
 
             # ------------------------- Item JSON -------------------------
 
-            ('efsw.archive:item:show_links_json', [],
-             '/archive/items/show/links/json/', views.item_show_links_json),
-
             ('efsw.archive:item:check_links_json', [],
              '/archive/items/check/links/json/', views.item_check_links_json),
 

@@ -53,7 +53,6 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- Item JSON -------------------------
 
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_links_json')),
             self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:check_links_json')),
             self.SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_links_json'),
