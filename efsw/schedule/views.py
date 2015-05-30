@@ -237,8 +237,6 @@ def lineup_update_json(request):
     lineup_id = request.GET.get('id', None)
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
-    except ValueError:
-        return _get_json_wrong_lineup_id(lineup_id)
     except models.Lineup.DoesNotExist:
         return _get_json_lineup_not_found(lineup_id)
     if not lineup.is_editable():
@@ -248,7 +246,10 @@ def lineup_update_json(request):
         updated_lineup = form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:edit', args=(updated_lineup.id, )))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 
 @http.require_GET

@@ -11,5 +11,18 @@
       "end_time": "06:00:00",
       "channel_id": 1
     }
+  },
+  {
+    "model": "schedule.Lineup",
+    "pk": 2,
+    "fields": {
+      "name": "Расписание для тестов на редактирование",
+      "active_since": null,
+      "active_until": null,
+      "draft": true,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "channel_id": 1
+    }
   }
 ]

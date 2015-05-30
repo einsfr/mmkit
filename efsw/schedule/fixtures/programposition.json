@@ -401,5 +401,408 @@
       "lineup": 1,
       "program": null
     }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 32,
+    "fields": {
+      "dow": 1,
+      "start_time": "06:00:00",
+      "end_time": "10:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 33,
+    "fields": {
+      "dow": 1,
+      "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 34,
+    "fields": {
+      "dow": 1,
+      "start_time": "12:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 35,
+    "fields": {
+      "dow": 1,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 36,
+    "fields": {
+      "dow": 2,
+      "start_time": "06:00:00",
+      "end_time": "08:00:00",
+      "comment": "Тут не занимать",
+      "locked": true,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 37,
+    "fields": {
+      "dow": 2,
+      "start_time": "08:00:00",
+      "end_time": "14:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 6
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 38,
+    "fields": {
+      "dow": 2,
+      "start_time": "14:00:00",
+      "end_time": "02:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 39,
+    "fields": {
+      "dow": 2,
+      "start_time": "02:00:00",
+      "end_time": "06:00:00",
+      "comment": "Может, заменить?",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 40,
+    "fields": {
+      "dow": 3,
+      "start_time": "06:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 41,
+    "fields": {
+      "dow": 3,
+      "start_time": "12:00:00",
+      "end_time": "16:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 42,
+    "fields": {
+      "dow": 3,
+      "start_time": "16:00:00",
+      "end_time": "18:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 43,
+    "fields": {
+      "dow": 3,
+      "start_time": "18:00:00",
+      "end_time": "00:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 44,
+    "fields": {
+      "dow": 3,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 45,
+    "fields": {
+      "dow": 3,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 46,
+    "fields": {
+      "dow": 4,
+      "start_time": "06:00:00",
+      "end_time": "16:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 47,
+    "fields": {
+      "dow": 4,
+      "start_time": "16:00:00",
+      "end_time": "20:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 48,
+    "fields": {
+      "dow": 4,
+      "start_time": "20:00:00",
+      "end_time": "02:00:00",
+      "comment": "Как-то не в тему",
+      "locked": false,
+      "lineup": 1,
+      "program": 6
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 49,
+    "fields": {
+      "dow": 4,
+      "start_time": "02:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 50,
+    "fields": {
+      "dow": 5,
+      "start_time": "06:00:00",
+      "end_time": "10:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 51,
+    "fields": {
+      "dow": 5,
+      "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 52,
+    "fields": {
+      "dow": 5,
+      "start_time": "12:00:00",
+      "end_time": "00:00:00",
+      "comment": "Занято",
+      "locked": true,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 53,
+    "fields": {
+      "dow": 5,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 54,
+    "fields": {
+      "dow": 5,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 55,
+    "fields": {
+      "dow": 6,
+      "start_time": "06:00:00",
+      "end_time": "08:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 56,
+    "fields": {
+      "dow": 6,
+      "start_time": "08:00:00",
+      "end_time": "12:00:00",
+      "comment": "Тут повтор",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 57,
+    "fields": {
+      "dow": 6,
+      "start_time": "12:00:00",
+      "end_time": "00:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 58,
+    "fields": {
+      "dow": 6,
+      "start_time": "00:00:00",
+      "end_time": "04:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 59,
+    "fields": {
+      "dow": 6,
+      "start_time": "04:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 4
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 60,
+    "fields": {
+      "dow": 7,
+      "start_time": "06:00:00",
+      "end_time": "18:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 61,
+    "fields": {
+      "dow": 7,
+      "start_time": "18:00:00",
+      "end_time": "22:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 1,
+      "program": 5
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 62,
+    "fields": {
+      "dow": 7,
+      "start_time": "22:00:00",
+      "end_time": "06:00:00",
+      "comment": "Отдыхать тоже нужно",
+      "locked": true,
+      "lineup": 1,
+      "program": null
+    }
   }
 ]
