@@ -195,14 +195,17 @@ class AbstractSecurityTestCase(TestCase):
 
 class JsonResponseTestCase(TestCase):
 
-    def assertJsonOk(self, response):
+    def assertJsonStatus(self, response, status, status_ext=None, data=None):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-
-    def assertJsonError(self, response, status_ext=None):
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        self.assertEqual(status, json_content['status'])
         if status_ext is not None:
             self.assertEqual(status_ext, json_content['status_ext'])
+        if data is not None:
+            self.assertEqual(data, json_content['data'])
+
+    def assertJsonOk(self, response, status_ext=None, data=None):
+        self.assertJsonStatus(response, JsonWithStatusResponse.STATUS_OK, status_ext, data)
+
+    def assertJsonError(self, response, status_ext=None, data=None):
+        self.assertJsonStatus(response, JsonWithStatusResponse.STATUS_ERROR, status_ext, data)
