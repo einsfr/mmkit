@@ -1,7 +1,11 @@
+import json
+
 from django.test import TestCase
 from django.core import urlresolvers
 from django.contrib.auth.models import User, Permission
 from django.http import HttpResponse, HttpResponseRedirect
+
+from efsw.common.http.response import JsonWithStatusResponse
 
 
 class UrlsTestCase(TestCase):
@@ -187,3 +191,18 @@ class AbstractSecurityTestCase(TestCase):
 
     def _get_app_label(self):
         raise NotImplementedError()
+
+
+class JsonResponseTestCase(TestCase):
+
+    def assertJsonOk(self, response):
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
+
+    def assertJsonError(self, response, status_ext=None):
+        self.assertIsInstance(response, JsonWithStatusResponse)
+        json_content = json.loads(response.content.decode())
+        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
+        if status_ext is not None:
+            self.assertEqual(status_ext, json_content['status_ext'])
