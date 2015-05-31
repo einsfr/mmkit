@@ -275,7 +275,10 @@ def lineup_create_json(request):
         ])
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 
 @http.require_POST
@@ -303,7 +306,10 @@ def lineup_copy_json(request):
         models.ProgramPosition.objects.bulk_create(list(map(remove_pk, orig_pp)))
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 
 @http.require_GET
@@ -330,8 +336,11 @@ def lineup_activate_json(request):
     except models.Lineup.DoesNotExist:
         return _get_json_lineup_not_found(lineup_id)
     if not lineup.draft:
-        return JsonWithStatusResponse.error('Ошибка: сетка вещания с ID "{0}" не имеет статуса черновика и не может '
-                                            'быть активирована'.format(lineup_id))
+        return JsonWithStatusResponse.error(
+            'Ошибка: сетка вещания с ID "{0}" не имеет статуса черновика '
+            'и не может быть активирована'.format(lineup_id),
+            'lineup_not_draft'
+        )
     lineup.draft = False
     form = forms.LineupActivateForm(request.POST, instance=lineup)
     if form.is_valid():
@@ -342,7 +351,10 @@ def lineup_activate_json(request):
         current_active_lineup.save()
         return JsonWithStatusResponse.ok()
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 
 @http.require_GET

@@ -122,3 +122,123 @@ class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
             data=urlresolvers.reverse('efsw.schedule:lineup:edit', args=(2, ))
         )
 
+class LineupCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['channel.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:lineup:create_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_invalid(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_valid(self):
+        self._login_user()
+        response = self.client.post(
+            self.url,
+            {
+                'name': 'Название сетки вещания для теста',
+                'start_time': '06:00',
+                'end_time': '06:00',
+                'channel': 1
+            }
+        )
+        lineup_id = models.Lineup.objects.count()
+        self.assertJsonOk(
+            response,
+            data=urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup_id, ))
+        )
+        self.assertEqual(7, models.Lineup.objects.get(pk=lineup_id).program_positions.count())
+
+class LineupCopyJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['channel.json', 'lineup.json', 'programposition.json', 'program.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:lineup:copy_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'lineup_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'lineup_not_found')
+
+    def test_invalid(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_valid(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 1),
+            {
+                'name': 'Название для скопированной сетки'
+            }
+        )
+        lineup_id = models.Lineup.objects.count()
+        self.assertJsonOk(
+            response,
+            data=urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup_id, ))
+        )
+        self.assertEqual(
+            models.Lineup.objects.get(pk=1).program_positions.count(),
+            models.Lineup.objects.get(pk=lineup_id).program_positions.count()
+        )
+
+class LineupActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['channel.json', 'lineup.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:lineup:activate_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'lineup_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'lineup_not_found')
+
+    def test_non_draft(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonError(response, 'lineup_not_draft')
+
+    def test_invalid(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 2))
+        self.assertJsonError(response, 'form_invalid')
