@@ -373,7 +373,8 @@ def lineup_make_draft_json(request):
         return _get_json_lineup_not_found(lineup_id)
     if lineup.draft:
         return JsonWithStatusResponse.error(
-            'Ошибка: сетка вещания с ID "{0}" уже имеет статуса черновика'.format(lineup_id)
+            'Ошибка: сетка вещания с ID "{0}" уже имеет статуса черновика'.format(lineup_id),
+            'lineup_not_active'
         )
     try:
         previous_lineup = models.Lineup.objects.get(
@@ -426,7 +427,10 @@ def program_create_json(request):
         program = form.save()
         return JsonWithStatusResponse.ok(program.get_absolute_url())
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 
 @http.require_GET

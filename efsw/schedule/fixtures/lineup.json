@@ -24,5 +24,18 @@
       "end_time": "06:00:00",
       "channel_id": 1
     }
+  },
+  {
+    "model": "schedule.Lineup",
+    "pk": 3,
+    "fields": {
+      "name": "Проверочное расписание, которое было перед проверочным",
+      "active_since": "2015-01-01",
+      "active_until": "2015-04-08",
+      "draft": false,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "channel_id": 1
+    }
   }
 ]

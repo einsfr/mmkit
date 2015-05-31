@@ -21,6 +21,7 @@ class LineupListTestCase(TestCase):
         self.assertIsInstance(response.context['lineups'], paginator.Page)
         self.assertEqual(1, response.context['lineups'].number)
 
+
 class LineupShowTestCase(TestCase):
 
     fixtures = ['channel.json', 'lineup.json', 'program.json', 'programposition.json']
@@ -47,6 +48,7 @@ class LineupShowTestCase(TestCase):
             sorted([pp.id for pp in pps])
         )
 
+
 class LineupShowCurrentTestCase(TestCase):
 
     fixtures = ['channel.json', 'lineup.json', 'program.json', 'programposition.json']
@@ -60,6 +62,7 @@ class LineupShowCurrentTestCase(TestCase):
         self.assertEqual(404, response.status_code)
         call_command('loaddata', 'channel.json', verbosity=0)
 
+
 class LineupEditPropertiesTestCase(LoginRequiredTestCase):
 
     fixtures = []
@@ -68,6 +71,7 @@ class LineupEditPropertiesTestCase(LoginRequiredTestCase):
         self._login_user()
         response = self.client.get(urlresolvers.reverse('efsw.schedule:lineup:edit_properties', args=(1000000, )))
         self.assertEqual(404, response.status_code)
+
 
 class LineupEditStructureTestCase(LoginRequiredTestCase):
 
@@ -78,7 +82,6 @@ class LineupEditStructureTestCase(LoginRequiredTestCase):
         response = self.client.get(urlresolvers.reverse('efsw.schedule:lineup:edit_structure', args=(1000000, )))
         self.assertEqual(404, response.status_code)
 
-# ------------------------- Lineup JSON -------------------------
 
 class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
@@ -122,6 +125,7 @@ class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
             data=urlresolvers.reverse('efsw.schedule:lineup:edit', args=(2, ))
         )
 
+
 class LineupCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
     fixtures = ['channel.json']
@@ -157,6 +161,7 @@ class LineupCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
             data=urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup_id, ))
         )
         self.assertEqual(7, models.Lineup.objects.get(pk=lineup_id).program_positions.count())
+
 
 class LineupCopyJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
@@ -207,6 +212,7 @@ class LineupCopyJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
             models.Lineup.objects.get(pk=lineup_id).program_positions.count()
         )
 
+
 class LineupActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
     fixtures = ['channel.json', 'lineup.json']
@@ -242,3 +248,110 @@ class LineupActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 2))
         self.assertJsonError(response, 'form_invalid')
+
+
+class LineupMakeDraftJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['channel.json', 'lineup.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:lineup:make_draft_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'lineup_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'lineup_not_found')
+
+    def test_draft(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 2))
+        self.assertJsonError(response, 'lineup_not_active')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonOk(response)
+        prev_lineup = models.Lineup.objects.get(pk=3)
+        lineup = models.Lineup.objects.get(pk=1)
+        self.assertIsNone(prev_lineup.active_until)
+        self.assertTrue(lineup.draft)
+        self.assertIsNone(lineup.active_since)
+
+
+class ProgramCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['program.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:program:create_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_invalid_form(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_valid(self):
+        self._login_user()
+        response = self.client.post(
+            self.url,
+            {
+                'name': 'Название тестовой программы',
+                'lineup_size': '00:30:00',
+                'max_duration': '00:27:00',
+                'min_duration': '00:24:00',
+                'description': 'Описание тестовой программы',
+                'age_limit': '6',
+                'color': '#ffffff'
+            }
+        )
+        program_id = models.Program.objects.count()
+        self.assertJsonOk(
+            response,
+            data=models.Program.objects.get(pk=program_id).get_absolute_url()
+        )
+
+
+class ProgramShowJsonTestCase(JsonResponseTestCase):
+
+    fixtures = ['program.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:program:show_json')
+
+    def test_wrong_id(self):
+        for i in ['', 'non-int']:
+            response = self.client.get('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        response = self.client.get(self.url)
+        self.assertJsonError(response, 'program_not_found')
+        response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'program_not_found')
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonOk(response)
+        for p in ['name', 'ls_hours', 'ls_minutes', 'age_limit']:
+            self.assertIn(p, json.loads(response.content.decode())['data'])
