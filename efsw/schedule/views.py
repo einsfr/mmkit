@@ -518,7 +518,7 @@ def pp_edit_json(request):
             'end_minutes': pp.end_time.minute,
             'comment': pp.comment,
             'locked': pp.locked,
-            'similar_pps': [x.dow for x in lineops.get_similar_pp(pp)]
+            'similar_pps_dow': [x.dow for x in lineops.get_similar_pp(pp)]
         }
         if pp.program_id:
             return_dict['program_id'] = pp.program_id
@@ -556,12 +556,12 @@ def pp_delete_json(request):
             for pp in [x for x in lineops.get_similar_pp(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
                 _pp_delete(pp)
         else:
-            return JsonWithStatusResponse(
+            return JsonWithStatusResponse.error(
                 'Неправильный формат списка повторов',
-                JsonWithStatusResponse.STATUS_ERROR
+                'form_invalid'
             )
     _pp_delete(program_position)
-    return JsonWithStatusResponse()
+    return JsonWithStatusResponse.ok()
 
 
 @http.require_POST

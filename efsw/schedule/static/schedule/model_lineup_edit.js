@@ -11,7 +11,7 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             comment: '',
             locked: false,
             program_id: 0,
-            similar_pps: []
+            similar_pps_dow: []
         };
         if (typeof data == 'undefined') {
             $.extend(true, this, default_values);

@@ -411,7 +411,7 @@
       "end_time": "10:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -424,7 +424,7 @@
       "end_time": "12:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 4
     }
   },
@@ -437,7 +437,7 @@
       "end_time": "04:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -450,7 +450,7 @@
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 4
     }
   },
@@ -463,7 +463,7 @@
       "end_time": "08:00:00",
       "comment": "Тут не занимать",
       "locked": true,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -476,7 +476,7 @@
       "end_time": "14:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 6
     }
   },
@@ -489,7 +489,7 @@
       "end_time": "02:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -502,7 +502,7 @@
       "end_time": "06:00:00",
       "comment": "Может, заменить?",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -515,7 +515,7 @@
       "end_time": "12:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -528,7 +528,7 @@
       "end_time": "16:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -541,7 +541,7 @@
       "end_time": "18:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 4
     }
   },
@@ -554,7 +554,7 @@
       "end_time": "00:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -567,7 +567,7 @@
       "end_time": "04:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -580,7 +580,7 @@
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -593,7 +593,7 @@
       "end_time": "16:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -606,7 +606,7 @@
       "end_time": "20:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -619,7 +619,7 @@
       "end_time": "02:00:00",
       "comment": "Как-то не в тему",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 6
     }
   },
@@ -632,7 +632,7 @@
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -645,7 +645,7 @@
       "end_time": "10:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -658,7 +658,7 @@
       "end_time": "12:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 4
     }
   },
@@ -671,7 +671,7 @@
       "end_time": "00:00:00",
       "comment": "Занято",
       "locked": true,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -684,7 +684,7 @@
       "end_time": "04:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -697,7 +697,7 @@
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -710,7 +710,7 @@
       "end_time": "08:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -723,7 +723,7 @@
       "end_time": "12:00:00",
       "comment": "Тут повтор",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -736,7 +736,7 @@
       "end_time": "00:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -749,7 +749,7 @@
       "end_time": "04:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -762,7 +762,7 @@
       "end_time": "06:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 4
     }
   },
@@ -771,11 +771,11 @@
     "pk": 60,
     "fields": {
       "dow": 7,
-      "start_time": "06:00:00",
+      "start_time": "08:00:00",
       "end_time": "18:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
     }
   },
@@ -788,7 +788,7 @@
       "end_time": "22:00:00",
       "comment": "",
       "locked": false,
-      "lineup": 1,
+      "lineup": 2,
       "program": 5
     }
   },
@@ -801,8 +801,112 @@
       "end_time": "06:00:00",
       "comment": "Отдыхать тоже нужно",
       "locked": true,
-      "lineup": 1,
+      "lineup": 2,
       "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 63,
+    "fields": {
+      "dow": 1,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 64,
+    "fields": {
+      "dow": 2,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 65,
+    "fields": {
+      "dow": 3,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 66,
+    "fields": {
+      "dow": 4,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 67,
+    "fields": {
+      "dow": 5,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 68,
+    "fields": {
+      "dow": 6,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 69,
+    "fields": {
+      "dow": 7,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 3,
+      "program": null
+    }
+  },
+  {
+    "model": "schedule.ProgramPosition",
+    "pk": 70,
+    "fields": {
+      "dow": 7,
+      "start_time": "06:00:00",
+      "end_time": "08:00:00",
+      "comment": "",
+      "locked": false,
+      "lineup": 2,
+      "program": 4
     }
   }
 ]

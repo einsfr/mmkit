@@ -359,7 +359,7 @@ class ProgramShowJsonTestCase(JsonResponseTestCase):
 
 class ProgramPositionShowJsonTestCase(JsonResponseTestCase):
 
-    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
+    fixtures = ['program.json', 'programposition.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -382,3 +382,128 @@ class ProgramPositionShowJsonTestCase(JsonResponseTestCase):
         for p in ['id', 'dow', 'start', 'end', 'comment', 'locked', 'program_id', 'program_name', 'program_url',
                   'program_ls', 'program_age_limit']:
             self.assertIn(p, json.loads(response.content.decode())['data'])
+
+
+class ProgramPositionEditJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:pp:edit_json')
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.get('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertJsonError(response, 'pp_not_found')
+        response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'pp_not_found')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.get('{0}?id={1}'.format(self.url, 30))
+        self.assertJsonOk(response)
+        json_data = json.loads(response.content.decode())['data']
+        for p in ['id', 'dow', 'start_hours', 'start_minutes', 'end_hours', 'end_minutes', 'comment', 'locked',
+                  'similar_pps_dow', 'program_id']:
+            self.assertIn(p, json_data)
+        self.assertEqual([5, 6], sorted(json_data['similar_pps_dow']))
+
+
+class ProgramPositionDeleteJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:pp:delete_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'pp_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'pp_not_found')
+
+    def test_edit_forbidden(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonError(response, 'lineup_edit_forbidden')
+
+    def test_delete_empty(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 34))
+        self.assertJsonError(response, 'pp_delete_empty')
+
+    def test_delete_repeat_invalid(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 32),
+            {'r': 'invalid_repeat_data'}
+        )
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_delete_single_expand_previous(self):
+        self._login_user()
+        pps = [(61, 60), (39, 38)]
+        for pp_id, prev_pp_id in pps:
+            pp_end_time = models.ProgramPosition.objects.get(pk=pp_id).end_time
+            response = self.client.post('{0}?id={1}'.format(self.url, pp_id))
+            self.assertJsonOk(response)
+            with self.assertRaises(models.ProgramPosition.DoesNotExist):
+                models.ProgramPosition.objects.get(pk=pp_id)
+            self.assertEqual(pp_end_time, models.ProgramPosition.objects.get(pk=prev_pp_id).end_time)
+        call_command('loaddata', 'programposition.json', verbosity=0)
+
+    def test_delete_single_expand_next(self):
+        self._login_user()
+        pps = [(70, 60), (48, 49)]
+        for pp_id, next_pp_id in pps:
+            pp_start_time = models.ProgramPosition.objects.get(pk=pp_id).start_time
+            response = self.client.post('{0}?id={1}'.format(self.url, pp_id))
+            self.assertJsonOk(response)
+            with self.assertRaises(models.ProgramPosition.DoesNotExist):
+                models.ProgramPosition.objects.get(pk=pp_id)
+            self.assertEqual(pp_start_time, models.ProgramPosition.objects.get(pk=next_pp_id).start_time)
+        call_command('loaddata', 'programposition.json', verbosity=0)
+
+    def test_delete_single_merge_empty(self):
+        self._login_user()
+        pp_id = 56
+        previous_pp_id = 55
+        next_pp_id = 57
+        next_pp_end_time = models.ProgramPosition.objects.get(pk=next_pp_id).end_time
+        response = self.client.post('{0}?id={1}'.format(self.url, pp_id))
+        self.assertJsonOk(response)
+        for i in [pp_id, next_pp_id]:
+            with self.assertRaises(models.ProgramPosition.DoesNotExist):
+                models.ProgramPosition.objects.get(pk=i)
+        self.assertEqual(next_pp_end_time, models.ProgramPosition.objects.get(pk=previous_pp_id).end_time)
+        call_command('loaddata', 'programposition.json', verbosity=0)
+
+    def test_delete_single_make_empty(self):
+        self._login_user()
+        pp_id = 51
+        response = self.client.post('{0}?id={1}'.format(self.url, pp_id))
+        self.assertJsonOk(response)
+        self.assertIsNone(models.ProgramPosition.objects.get(pk=pp_id).program)
+
+    def test_delete_repeat(self):
+        pass

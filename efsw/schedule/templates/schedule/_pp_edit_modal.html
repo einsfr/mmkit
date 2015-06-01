@@ -40,10 +40,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <h4 data-bind="visible: pp().similar_pps.length > 0">Повторить для похожих блоков</h4>
+                <h4 data-bind="visible: pp().similar_pps_dow.length > 0">Повторить для похожих блоков</h4>
                 <div class="text-center" id="repeat_select_container">
                     {% for cb in pp_edit_form.r %}
-                        <span data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps) >= 0">{{ cb }}</span>
+                        <span data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps_dow) >= 0">{{ cb }}</span>
                     {% endfor %}
                 </div>
             </div>
