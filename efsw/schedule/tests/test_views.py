@@ -355,3 +355,30 @@ class ProgramShowJsonTestCase(JsonResponseTestCase):
         self.assertJsonOk(response)
         for p in ['name', 'ls_hours', 'ls_minutes', 'age_limit']:
             self.assertIn(p, json.loads(response.content.decode())['data'])
+
+
+class ProgramPositionShowJsonTestCase(JsonResponseTestCase):
+
+    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:pp:show_json')
+
+    def test_wrong_id(self):
+        for i in ['', 'non-int']:
+            response = self.client.get('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        response = self.client.get(self.url)
+        self.assertJsonError(response, 'pp_not_found')
+        response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'pp_not_found')
+
+    def test_normal(self):
+        response = self.client.get('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonOk(response)
+        for p in ['id', 'dow', 'start', 'end', 'comment', 'locked', 'program_id', 'program_name', 'program_url',
+                  'program_ls', 'program_age_limit']:
+            self.assertIn(p, json.loads(response.content.decode())['data'])
