@@ -7,16 +7,25 @@
 {% block head %}
     {{ block.super }}
     <script type="text/javascript">
-        require(['schedule/lineup_show'], function(module) {
-            module({
-                urls: {
-                    pp_show_json: function(pp_id) {
-                        return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
-                    },
-                    pp_show_part_modal: function() {
-                        return '{% url 'efsw.schedule:pp:show_part_modal' %}';
-                    }
-                }
+        require(['jquery', 'knockout', 'common/modal_loader', 'jquery_ui', 'bootstrap'], function($, ko, ml) {
+            $(document).ready(function() {
+                var lineup_table = $("#lineup_table");
+                lineup_table.disableSelection();
+                lineup_table.on('dblclick', "tbody td", function() {
+                    var pp_id = $(this).data('pp_id');
+                    ml.get_with_model(
+                            '{% url 'efsw.schedule:pp:show_part_modal' %}',
+                            'schedule/model_lineup_show',
+                            function(modal_container, already_loaded, model) {
+                                model.init({
+                                    pp_show_json: function(pp_id) {
+                                        return '{% url 'efsw.schedule:pp:show_json' %}?id=' + pp_id;
+                                    }
+                                }, pp_id);
+                                modal_container.modal();
+                            }
+                    );
+                });
             });
         });
     </script>
