@@ -9,7 +9,15 @@ define(['jquery'], function($) {
         }
         for (var p in errors) {
             if (errors.hasOwnProperty(p)) {
-                errors[p] = errors[p].map(function(e) { return e.message; }).join(' ');
+                errors[p] = errors[p].map(
+                    function(e) {
+                        if (typeof e == 'object' && 'message' in e) {
+                            return e.message;
+                        } else {
+                            return e;
+                        }
+                    }
+                ).join(' ');
             }
         }
         field_err_callback(errors);
