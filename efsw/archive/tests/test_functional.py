@@ -12,7 +12,7 @@ class SearchTestCase(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.browser = webdriver.Firefox()
-        cls.browser.implicitly_wait(3)
+        cls.browser.implicitly_wait(1)
 
     @classmethod
     def tearDownClass(cls):

@@ -137,6 +137,7 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         max_value=23,
         widget=forms.NumberInput(attrs={
             'data-bind': 'value: pp().start_hours',
+            'class': 'form-control'
         })
     )
 
@@ -146,6 +147,7 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         max_value=59,
         widget=forms.NumberInput(attrs={
             'data-bind': 'value: pp().start_minutes',
+            'class': 'form-control'
         })
     )
 
@@ -155,6 +157,7 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         max_value=23,
         widget=forms.NumberInput(attrs={
             'data-bind': 'value: pp().end_hours',
+            'class': 'form-control'
         })
     )
 
@@ -164,6 +167,7 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         max_value=59,
         widget=forms.NumberInput(attrs={
             'data-bind': 'value: pp().end_minutes',
+            'class': 'form-control'
         })
     )
 
@@ -173,6 +177,7 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         required=False,
         widget=forms.TextInput(attrs={
             'data-bind': 'value: pp().comment',
+            'class': 'form-control'
         })
     )
 
@@ -190,5 +195,6 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
         required=False,
         widget=forms.Select(attrs={
             'data-bind': 'value: pp().program_id, event: { change: program_changed }',
+            'class': 'form-control'
         })
     )

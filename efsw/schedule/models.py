@@ -224,12 +224,14 @@ class ProgramPosition(models.Model):
         blank=True,
     )
 
-    ERR_TEXT_START_END_EQUAL = 'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке'
-    ERR_TEXT_END_BEFORE_START = 'Окончание фрагмента находится раньше его начала'
-    ERR_TEXT_START_OUT_OF_RANGE = 'Время начала фрагмента находится вне временных границ сетки'
-    ERR_TEXT_END_OUT_OF_RANGE = 'Время окончания фрагмента находится вне временных границ сетки'
+    ERR_TEXT_START_END_EQUAL = 'Время начала и окончания фрагмента может совпадать только в круглосуточной сетке.'
+    ERR_TEXT_START_END_EQUAL_24 = 'Время начала и окончания фрагмента в круглосуточной сетке может совпадать только ' \
+                                  'если они равны времени начала (и окончания) сетки.'
+    ERR_TEXT_END_BEFORE_START = 'Окончание фрагмента находится раньше его начала.'
+    ERR_TEXT_START_OUT_OF_RANGE = 'Время начала фрагмента находится вне временных границ сетки.'
+    ERR_TEXT_END_OUT_OF_RANGE = 'Время окончания фрагмента находится вне временных границ сетки.'
     ERR_TEXT_DAY_MISMATCH = 'В круглосуточной сетке фрагмент не может начинаться в одни эфирные сутки, ' \
-                            'а заканчиваться в другие'
+                            'а заканчиваться в другие.'
 
     def clean(self):
         lineup = self.lineup
@@ -255,3 +257,9 @@ class ProgramPosition(models.Model):
             # т.е. если сетка круглосуточная
             if self.start_time < lineup.start_time < self.end_time:
                 raise ValidationError(self.ERR_TEXT_DAY_MISMATCH)
+            if self.end_time < self.start_time < lineup.start_time:
+                raise ValidationError(self.ERR_TEXT_END_BEFORE_START)
+            if lineup.start_time < self.end_time < self.start_time:
+                raise ValidationError(self.ERR_TEXT_END_BEFORE_START)
+            if self.start_time == self.end_time and (self.start_time != lineup.start_time):
+                raise ValidationError(self.ERR_TEXT_START_END_EQUAL_24)

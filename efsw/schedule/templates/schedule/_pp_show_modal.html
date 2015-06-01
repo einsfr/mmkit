@@ -8,11 +8,11 @@
             </h3>
         </div>
         <div class="modal-body">
-            <table class="table" data-bind="visible: pp_loaded() == true">
+            <table class="table table-striped obj_properties" data-bind="visible: pp_loaded() == true">
                 <tbody>
                     <tr>
-                        <th>Время начала</th>
-                        <td data-bind="text: pp().start"></td>
+                        <th style="min-width: 12em;">Время начала</th>
+                        <td style="width: 100%;" data-bind="text: pp().start"></td>
                     </tr>
                     <tr>
                         <th>Время окончания</th>

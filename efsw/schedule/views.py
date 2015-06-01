@@ -578,7 +578,7 @@ def pp_update_json(request):
         return _get_json_lineup_edit_forbidden(lineup.id)
     form = forms.ProgramPositionEditForm(request.POST)
     if not form.is_valid():
-        return JsonWithStatusResponse.error(form.errors.as_json())
+        return JsonWithStatusResponse.error(form.errors.as_json(), 'form_invalid')
     repeat_for = [
         x
         for x in lineops.get_similar_pp(program_position)
@@ -594,7 +594,7 @@ def pp_update_json(request):
     try:
         program_position.full_clean()
     except ValidationError as e:
-        return JsonWithStatusResponse.error(e.message_dict)
+        return JsonWithStatusResponse.error(e.message_dict, 'pp_model_invalid')
     if old_start_time == program_position.start_time and old_end_time == program_position.end_time:
         # Если фрагмент не меняет свою длительность
         if not lineops.pp_is_empty(program_position):
@@ -613,7 +613,10 @@ def pp_update_json(request):
     else:
         # А если всё-таки меняет длительность
         if lineops.pp_is_empty(program_position):
-            return JsonWithStatusResponse.error('Нельзя изменить длительность элемента, при этом сделав его пустым')
+            return JsonWithStatusResponse.error(
+                'Нельзя изменить длительность элемента, при этом сделав (или оставив) его пустым',
+                'pp_resize_empty'
+            )
         start_time = program_position.start_time
         end_time = program_position.end_time
         if (old_end_time > old_start_time and not (old_start_time <= start_time < end_time <= old_end_time)) \
@@ -621,7 +624,10 @@ def pp_update_json(request):
                     (start_time >= old_start_time or start_time < old_end_time)
                     and (end_time <= old_end_time or end_time > old_start_time)
                 )):
-            return JsonWithStatusResponse.error('Новый элемент должен находиться в границах старого')
+            return JsonWithStatusResponse.error(
+                'Новый элемент должен находиться в границах старого',
+                'pp_out_of_bounds'
+            )
         program_position.save()
         for pp in repeat_for:
             pp.program = program_position.program

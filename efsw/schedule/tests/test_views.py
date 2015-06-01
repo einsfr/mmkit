@@ -128,7 +128,7 @@ class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
 class LineupCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
-    fixtures = ['channel.json']
+    fixtures = ['lineup.json', 'channel.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -359,7 +359,7 @@ class ProgramShowJsonTestCase(JsonResponseTestCase):
 
 class ProgramPositionShowJsonTestCase(JsonResponseTestCase):
 
-    fixtures = ['program.json', 'programposition.json']
+    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -504,6 +504,207 @@ class ProgramPositionDeleteJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
         response = self.client.post('{0}?id={1}'.format(self.url, pp_id))
         self.assertJsonOk(response)
         self.assertIsNone(models.ProgramPosition.objects.get(pk=pp_id).program)
+        call_command('loaddata', 'programposition.json', verbosity=0)
 
     def test_delete_repeat(self):
-        pass
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 44),
+            {'r': '5'}
+        )
+        self.assertJsonOk(response)
+        with self.assertRaises(models.ProgramPosition.DoesNotExist):
+            models.ProgramPosition.objects.get(pk=44)
+        with self.assertRaises(models.ProgramPosition.DoesNotExist):
+            models.ProgramPosition.objects.get(pk=53)
+        self.assertEqual(5, models.ProgramPosition.objects.get(pk=58).program_id)
+        call_command('loaddata', 'programposition.json', verbosity=0)
+
+
+class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['lineup.json', 'channel.json', 'program.json', 'programposition.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:pp:update_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'pp_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'pp_not_found')
+
+    def test_edit_forbidden(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonError(response, 'lineup_edit_forbidden')
+
+    def test_form_invalid(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 32))
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_model_invalid(self):
+        self._login_user()
+        data = {
+            'st_m': 0,
+            'et_m': 0,
+            'c': '',
+            'l': False,
+            'p': 1
+        }
+        test_data = [
+            (71, 7, 7), (71, 8, 7), (71, 5, 7), (71, 20, 23),  # без перехода через полночь
+            (78, 19, 19), (78, 17, 19), (78, 5, 7), (78, 22, 20),  # с переходом через полночь
+            (85, 5, 7), (85, 5, 4), (85, 8, 7), (85, 5, 5),  # круглосуточная
+        ]
+        for d in test_data:
+            data['st_h'] = d[1]
+            data['et_h'] = d[2]
+            response = self.client.post('{0}?id={1}'.format(self.url, d[0]), data)
+            self.assertJsonError(response, 'pp_model_invalid')
+
+    def test_resize_empty(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 85),
+            {
+                'st_h': 8,
+                'st_m': 0,
+                'et_h': 4,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': ''
+            }
+        )
+        self.assertJsonError(response, 'pp_resize_empty')
+
+    def test_out_of_bounds(self):
+        self._login_user()
+        data = {
+            'st_m': 0,
+            'et_m': 0,
+            'c': '',
+            'l': False,
+            'p': 1
+        }
+        test_data = [
+            (92, 11, 18), (92, 11, 19), (92, 11, 17), (92, 12, 19), (92, 13, 19),  # без перехода через полночь
+            (94, 21, 2), (94, 21, 3), (94, 21, 1), (94, 22, 3), (94, 23, 3),  # с переходом через полночь
+        ]
+        for d in test_data:
+            data['st_h'] = d[1]
+            data['et_h'] = d[2]
+            response = self.client.post('{0}?id={1}'.format(self.url, d[0]), data)
+            self.assertJsonError(response, 'pp_out_of_bounds')
+
+    def test_normal_expand_previous(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 92),
+            {
+                'st_h': 14,
+                'st_m': 0,
+                'et_h': 18,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': 1
+            }
+        )
+        self.assertJsonOk(response)
+        self.assertEqual(14, models.ProgramPosition.objects.get(pk=92).start_time.hour)
+        self.assertEqual(14, models.ProgramPosition.objects.get(pk=72).end_time.hour)
+
+    def test_normal_expand_next(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 92),
+            {
+                'st_h': 12,
+                'st_m': 0,
+                'et_h': 16,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': 1
+            }
+        )
+        self.assertJsonOk(response)
+        self.assertEqual(16, models.ProgramPosition.objects.get(pk=92).end_time.hour)
+        self.assertEqual(16, models.ProgramPosition.objects.get(pk=93).start_time.hour)
+
+    def test_normal_insert_before(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 51),
+            {
+                'st_h': 11,
+                'st_m': 0,
+                'et_h': 12,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': 4
+            }
+        )
+        self.assertJsonOk(response)
+        new_start_time = models.ProgramPosition.objects.get(pk=51).start_time
+        self.assertEqual(11, new_start_time.hour)
+        self.assertEqual(
+            10,
+            models.ProgramPosition.objects.get(lineup_id=2, end_time=new_start_time, dow=5).start_time.hour
+        )
+
+    def test_normal_insert_after(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 61),
+            {
+                'st_h': 18,
+                'st_m': 0,
+                'et_h': 21,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': 5
+            }
+        )
+        self.assertJsonOk(response)
+        new_end_time = models.ProgramPosition.objects.get(pk=61).end_time
+        self.assertEqual(21, new_end_time.hour)
+        self.assertEqual(
+            22,
+            models.ProgramPosition.objects.get(lineup_id=2, start_time=new_end_time, dow=7).end_time.hour
+        )
+
+    def test_normal_length_unchanged(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 39),
+            {
+                'st_h': 2,
+                'st_m': 0,
+                'et_h': 6,
+                'et_m': 0,
+                'c': '',
+                'l': False,
+                'p': 4
+            }
+        )
+        self.assertJsonOk(response)
+        self.assertEqual(4, models.ProgramPosition.objects.get(pk=39).program_id)

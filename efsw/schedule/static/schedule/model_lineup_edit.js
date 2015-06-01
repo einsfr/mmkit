@@ -41,6 +41,8 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
         self.pp = ko.observable(new ProgramPosition());
         self.program_loaded = ko.observable(false);
         self.program = ko.observable(new Program());
+        self.errors = ko.observable({});
+        self.error_msg = ko.observable('');
 
         self.init = function (urls, modal_container, pp_id) {
             self.urls = urls;
@@ -51,9 +53,13 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             $('#repeat_select_container').find('input').attr('checked', false);
             $('#delete_confirm').collapse('hide');
             self._load_pp(pp_id);
+            self.errors({});
+            self.error_msg('');
         };
 
         self.program_changed = function () {
+            self.errors({});
+            self.error_msg('');
             if (self.pp().program_id) {
                 self.program_loaded(false);
                 self._load_program(self.pp().program_id);
@@ -64,25 +70,35 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
         };
 
         self.pp_reload = function () {
+            self.errors({});
+            self.error_msg('');
             self.init(self.pp().id);
         };
 
         self.pp_delete = function () {
+            self.errors({});
+            self.error_msg('');
             ajr.exec(
                 self.urls.pp_delete_json(self.pp().id),
                 { method: 'post', data: $('#repeat_select_container').find('input').serialize() },
                 self._process_change_result,
-                alert,
+                self.error_msg,
                 alert
             );
         };
 
         self.pp_update = function () {
+            self.errors({});
+            self.error_msg('');
             ajr.exec(
                 self.urls.pp_update_json(self.pp().id),
                 { method: 'post', data: $('#pp_form').serialize() },
                 self._process_change_result,
-                alert,
+                function(response) {
+                    require(['common/form_error_parser'], function(parser) {
+                        parser.parse(response.data, self.errors, self.error_msg, alert);
+                    });
+                },
                 alert
             );
         };

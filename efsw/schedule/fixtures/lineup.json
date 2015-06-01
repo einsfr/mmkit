@@ -37,5 +37,44 @@
       "end_time": "06:00:00",
       "channel_id": 1
     }
+  },
+  {
+    "model": "schedule.Lineup",
+    "pk": 4,
+    "fields": {
+      "name": "Расписание для тестов, не переходящее через полночь",
+      "active_since": null,
+      "active_until": null,
+      "draft": true,
+      "start_time": "06:00:00",
+      "end_time": "22:00:00",
+      "channel_id": 1
+    }
+  },
+  {
+    "model": "schedule.Lineup",
+    "pk": 5,
+    "fields": {
+      "name": "Расписание для тестов, переходящее через полночь",
+      "active_since": null,
+      "active_until": null,
+      "draft": true,
+      "start_time": "18:00:00",
+      "end_time": "06:00:00",
+      "channel_id": 1
+    }
+  },
+  {
+    "model": "schedule.Lineup",
+    "pk": 6,
+    "fields": {
+      "name": "Расписание для тестов, круглосуточное",
+      "active_since": null,
+      "active_until": null,
+      "draft": true,
+      "start_time": "06:00:00",
+      "end_time": "06:00:00",
+      "channel_id": 1
+    }
   }
 ]

@@ -9,45 +9,96 @@
                 </h3>
             </div>
             <div class="modal-body">
-                <table class="table" data-bind="visible: pp_loaded() == true">
-                    <tbody>
-                        <tr>
-                            <th>Время начала:</th>
-                            <td>{{ pp_edit_form.st_h }}:{{ pp_edit_form.st_m }}</td>
-                        </tr>
-                        <tr>
-                            <th>Время окончания:</th>
-                            <td>{{ pp_edit_form.et_h }}:{{ pp_edit_form.et_m }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_edit_form.p.label_tag }}</th>
-                            <td>
+                <div data-bind="visible: pp_loaded() == true">
+                    <div class="row">
+                        <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().st_h }">
+                            <label for="{{ pp_edit_form.st_h.id_for_label }}">Начало (ч.)</label>
+                            <div>
+                                {{ pp_edit_form.st_h }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().st_h, text: errors().st_h"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().st_m }">
+                            <label for="{{ pp_edit_form.st_m.id_for_label }}">Начало (мин.)</label>
+                            <div>
+                                {{ pp_edit_form.st_m }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().st_m, text: errors().st_m"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().et_h }">
+                            <label for="{{ pp_edit_form.et_h.id_for_label }}">Конец (ч.)</label>
+                            <div>
+                                {{ pp_edit_form.et_h }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().et_h, text: errors().et_h"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().et_m }">
+                            <label for="{{ pp_edit_form.et_m.id_for_label }}">Конец (мин.)</label>
+                            <div>
+                                {{ pp_edit_form.et_m }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().et_m, text: errors().et_m"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 form-group" data-bind="css: { 'has-error': errors().p }">
+                            <label for="{{ pp_edit_form.p.id_for_label }}">Программа</label>
+                            <div>
                                 {{ pp_edit_form.p }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().p, text: errors().p"
+                                      style="display: none;"></span>
                                 <div data-bind="visible: program_loaded() == false">Загрузка...</div>
                                 <div data-bind="visible: program_loaded() && pp().program_id">
                                     (Ограничение по возрасту: <span data-bind="text: program().age_limit"></span>, размер окна:
                                     <span data-bind="text: program().ls_hours"></span> ч. <span data-bind="text: program().ls_minutes"></span> мин.)
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_edit_form.c.label_tag }}</th>
-                            <td>{{ pp_edit_form.c }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ pp_edit_form.l.label_tag }}</th>
-                            <td>{{ pp_edit_form.l }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4 data-bind="visible: pp().similar_pps_dow.length > 0">Повторить для похожих блоков</h4>
-                <div class="text-center" id="repeat_select_container">
-                    {% for cb in pp_edit_form.r %}
-                        <span data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps_dow) >= 0">{{ cb }}</span>
-                    {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10 form-group" data-bind="css: { 'has-error': errors().c }">
+                            <label for="{{ pp_edit_form.c.id_for_label }}">Комментарий</label>
+                            <div>
+                                {{ pp_edit_form.c }}
+                                <span class="help-block"
+                                      data-bind="visible: errors().c, text: errors().c"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 form-group" data-bind="css: { 'has-error': errors().l }">
+                            <label for="{{ pp_edit_form.l.id_for_label }}">Заблокировано</label>
+                            <div>
+                                <div class="checkbox text-center">
+                                    <label>
+                                        {{ pp_edit_form.l }}
+                                    </label>
+                                </div>
+                                <span class="help-block"
+                                      data-bind="visible: errors().l, text: errors().l"
+                                      style="display: none;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 data-bind="visible: pp().similar_pps_dow.length > 0">Повторить для похожих блоков</h4>
+                    <div class="text-center" id="repeat_select_container">
+                        {% for cb in pp_edit_form.r %}
+                            <label class="checkbox-inline" data-bind="visible: $.inArray({{ forloop.counter }}, pp().similar_pps_dow) >= 0">
+                                {{ cb.tag }}
+                                {{ cb.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
+                <div class="alert alert-danger text-center" data-bind="visible: error_msg(), text: error_msg()" style="display: none;"></div>
                 <div>
                     <button type="button"
                             class="btn btn-default"
