@@ -14,11 +14,15 @@
                 <tr>
                     <td>{{ item.id }}</td>
                     <td class="text-nowrap">{{ item.created|date:"SHORT_DATE_FORMAT" }}</td>
-                    <td>{{ item.category.name }}</td>
-                    <td>{{ item.name }}</td>
-                    <td class="text-nowrap">
+                    <td>
+                        <a href="{% url 'efsw.archive:category:show_items' item.category.id %}"
+                           title="Список элементов в категории">{{ item.category.name }}</a>
+                    </td>
+                    <td>
                         <a href="{{ item.get_absolute_url }}"
-                           title="{{ item.get_absolute_url_title }}" class="fa fa-lg fa-eye"></a>
+                           title="{{ item.get_absolute_url_title }}">{{ item.name }}</a>
+                    </td>
+                    <td class="text-nowrap">
                         {% if perms.archive.change_item %}
                             <a href="{% url 'efsw.archive:item:edit' item.id %}" title="Редактировать элемент"
                                class="fa fa-lg fa-edit"></a>

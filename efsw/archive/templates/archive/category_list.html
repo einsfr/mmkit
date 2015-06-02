@@ -20,14 +20,16 @@
                 {% for cat in categories %}
                     <tr>
                         <td>{{ cat.id }}</td>
-                        <td>{{ cat.name }}</td>
-                        <td>{{ cat.items.count }}</td>
-                        <td class="text-nowrap">
+                        <td>
                             {% if cat.items.count > 0 %}
                                 <a href="{% url 'efsw.archive:category:show_items' cat.id %}"
-                                   title="Список элементов в категории"
-                                   class="fa fa-lg fa-folder-open-o"></a>
+                                   title="Список элементов в категории">{{ cat.name }}</a>
+                            {% else %}
+                                {{ cat.name }}
                             {% endif %}
+                        </td>
+                        <td>{{ cat.items.count }}</td>
+                        <td class="text-nowrap">
                             {% if perms.archive.change_itemcategory %}
                                 <a href="{% url 'efsw.archive:category:edit' cat.id %}"
                                    title="Редактировать категорию"

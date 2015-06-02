@@ -67,14 +67,13 @@
                     <tr data-id="{{ l.id }}">
                         <td>{{ l.id }}</td>
                         <td>{{ l.channel.name }}</td>
-                        <td>{{ l.name }}</td>
+                        <td><a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания">{{ l.name }}</a></td>
                         <td>{% if l.draft %}-{% else %}<span class="fa fa-lg fa-check"></span>{% endif %}</td>
                         <td class="text-nowrap">{% if l.active_since %}{{ l.active_since|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
                         <td class="text-nowrap">{% if l.active_until %}{{ l.active_until|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</td>
                         <td class="text-nowrap">{{ l.start_time|date:"H:i" }}</td>
                         <td class="text-nowrap">{{ l.end_time|date:"H:i" }}</td>
                         <td class="icon_actions_container text-nowrap">
-                            <a href="{{ l.get_absolute_url }}" title="Просмотр сетки вещания" class="fa fa-lg fa-eye"></a>
                             {% if perms.schedule.change_lineup %}
                                 {% if l.is_editable %}
                                     <a href="{% url 'efsw.schedule:lineup:edit' l.id %}" title="Редактирование сетки вещания" class="fa fa-lg fa-edit"></a>

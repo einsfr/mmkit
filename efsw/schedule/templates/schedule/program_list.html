@@ -19,9 +19,11 @@
                 {% for program in programs %}
                     <tr>
                         <td>{{ program.id }}</td>
-                        <td>{{ program.name }}</td>
+                        <td>
+                            <a href="{{ program.get_absolute_url }}" title="Описание программы">{{ program.name }}</a>
+                        </td>
                         <td class="text-nowrap">
-                            <a href="{{ program.get_absolute_url }}" title="Описание программы" class="fa fa-lg fa-eye"></a>
+                             &nbsp;
                         </td>
                     </tr>
                 {% endfor %}
