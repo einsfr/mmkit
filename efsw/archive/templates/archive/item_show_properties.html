@@ -3,13 +3,13 @@
 {% block title %}{{ block.super }} - Описание элемента - Свойства{% endblock %}
 
 {% block content %}
-    <h1>
+    <h2>
         {{ item.name }}
         {% if perms.archive.change_item %}
             <a href="{% url 'efsw.archive:item:edit_properties' item.id %}"
-               title="Редактирование элемента - Своёства" class="fa fa-edit"></a>
+               title="Редактирование элемента - Свойства" class="fa fa-edit"></a>
         {% endif %}
-    </h1>
+    </h2>
     {% include 'archive/_item_show_nav_tabs.html' with active='properties' %}
     <table class="table table-striped obj_properties">
         <tbody>

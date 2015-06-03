@@ -43,7 +43,12 @@ table.obj_properties th {
     text-align: right;
 }
 
-h1 .fa {
+h1 .fa, h2 .fa, h3 .fa, h4 .fa, h5 .fa, h6 .fa {
     vertical-align: super;
+    font-size: 70%;
+}
+
+h1 .h_sub, h2 .h_sub, h3 .h_sub, h4 .h_sub, h5 .h_sub, h6 .h_sub {
+    vertical-align: sub;
     font-size: 70%;
 }

@@ -3,13 +3,13 @@
 {% block title %}{{ block.super }} - Описание элемента - Размещение{% endblock %}
 
 {% block content %}
-    <h1>
+    <h2>
         {{ item.name }}
         {% if perms.archive.change_item %}
             <a href="{% url 'efsw.archive:item:edit_locations' item.id %}"
                title="Редактирование элемента - Размещение" class="fa fa-edit"></a>
         {% endif %}
-    </h1>
+    </h2>
     {% include 'archive/_item_show_nav_tabs.html' with active='locations' %}
     {% if item.locations.count %}
         <table class="table table-hover">

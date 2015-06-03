@@ -66,14 +66,14 @@ class AbstractSecurityTestCase(TestCase):
     def assertNotLoginRequired(self, response, condition):
         if response.status_code == 302:
             self.assertNotEqual(self._get_login_path().format(condition.url), response.redirect_chain[0][0])
-            self.assertNotContains(response, '<h1>Вход в систему</h1>')
+            self.assertNotContains(response, '<h2>Вход в систему</h2>')
 
     def assertLoginRequired(self, response, condition):
         if isinstance(response, HttpResponseRedirect):
             self.assertEqual(self._get_login_path().format(condition.url), response.url)
         elif isinstance(response, HttpResponse) and len(response.redirect_chain):
             self.assertEqual(self._get_login_path().format(condition.url), response.redirect_chain[0][0])
-            self.assertContains(response, '<h1>Вход в систему</h1>')
+            self.assertContains(response, '<h2>Вход в систему</h2>')
 
     def _test_anonymous_access(self):
         print('Проверка доступа анонимных пользователей...')

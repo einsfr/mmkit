@@ -5,7 +5,7 @@
 {% block title %}{{ block.super }} - Список элементов{% endblock %}
 
 {% block content %}
-    <h1>Список элементов</h1>
+    <h2>Список элементов</h2>
     {% include 'archive/_item_list_table.html' %}
     {% if items %}<nav class="text-center">{% pagination items 'efsw.archive:item:list_page' %}</nav>{% endif %}
 {% endblock %}

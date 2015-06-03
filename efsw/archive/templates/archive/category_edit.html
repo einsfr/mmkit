@@ -20,7 +20,10 @@
 {% endblock %}
 
 {% block content %}
-<h1>Редактирование категории</h1>
+<h2>
+    {{ category.name }}<span class="h_sub text-danger">
+    Редактирование</span>
+</h2>
 <div class="panel panel-default">
     <div class="panel-body">
         <form id="category_update_form">

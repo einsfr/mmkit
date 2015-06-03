@@ -40,11 +40,11 @@
 {% endblock %}
 
 {% block content %}
-    <h1>
-        {{ item.name }}<span style="vertical-align: sub; font-size: 50%; color: red;">
+    <h2>
+        {{ item.name }}<span class="h_sub text-danger">
         Редактирование</span><a href="{% url 'efsw.archive:item:show_links' item.id %}"
                                 title="Просмотр элемента - Размещение" class="fa fa-eye"></a>
-    </h1>
+    </h2>
     {% include 'archive/_item_edit_nav_tabs.html' with active='links' %}
     <div class="panel panel-default" style="margin-top: 0.5em;">
         <div class="panel-body">

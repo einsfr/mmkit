@@ -42,7 +42,10 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{{ lineup.name }} - Редактирование</h1>
+    <h2>
+        {{ lineup.name }}<span class="h_sub text-danger">
+            Редактирование</span>
+    </h2>
     <ul class="nav nav-tabs">
         <li class="active"><a href="#" title="Состав">Состав</a></li>
         <li><a href="{% url 'efsw.schedule:lineup:edit_properties' lineup.id %}" title="Свойства">Свойства</a></li>
