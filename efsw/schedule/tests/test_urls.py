@@ -109,5 +109,39 @@ class ScheduleUrlsTestCase(UrlsTestCase):
             ('efsw.schedule:pp:update_json', [],
              '/schedule/pps/update/json/', views.pp_update_json),
 
+            # ------------------------- Channel -------------------------
+
+            ('efsw.schedule:channel:list', [],
+             '/schedule/channels/list/', views.channel_list),
+
+            ('efsw.schedule:channel:list_page', [1],
+             '/schedule/channels/list/page/1/', views.channel_list),
+
+            ('efsw.schedule:channel:new', [],
+             '/schedule/channels/new/', views.channel_new),
+
+            ('efsw.schedule:channel:show_lineups', [1],
+             '/schedule/channels/1/show/lineups/', views.channel_show_lineups),
+
+            ('efsw.schedule:channel:show_lineups_page', [1, 2],
+             '/schedule/channels/1/show/lineups/page/2/', views.channel_show_lineups),
+
+            ('efsw.schedule:channel:edit', [1],
+             '/schedule/channels/1/edit/', views.channel_edit),
+
+            # ------------------------- Channel JSON -------------------------
+
+            ('efsw.schedule:channel:create_json', [],
+             '/schedule/channels/create/json/', views.channel_create_json),
+
+            ('efsw.schedule:channel:update_json', [],
+             '/schedule/channels/update/json/', views.channel_update_json),
+
+            ('efsw.schedule:channel:activate_json', [],
+             '/schedule/channels/activate/json/', views.channel_activate_json),
+
+            ('efsw.schedule:channel:deactivate_json', [],
+             '/schedule/channels/deactivate/json/', views.channel_deactivate_json),
+
         ]
         self.process_urls(urls)

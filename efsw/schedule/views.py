@@ -684,3 +684,36 @@ def pp_update_json(request):
                     )
                     append_pp.save()
     return JsonWithStatusResponse.ok()
+
+
+@http.require_GET
+def channel_list(request, page=1):
+    pass
+
+@http.require_GET
+def channel_new(request):
+    pass
+
+@http.require_GET
+def channel_show_lineups(request, channel_id, page=1):
+    pass
+
+@http.require_GET
+def channel_edit(request, channel_id):
+    pass
+
+@http.require_POST
+def channel_create_json(request):
+    pass
+
+@http.require_POST
+def channel_update_json(request):
+    pass
+
+@http.require_POST
+def channel_activate_json(request):
+    pass
+
+@http.require_POST
+def channel_deactivate_json(request):
+    pass

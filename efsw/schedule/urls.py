@@ -243,6 +243,90 @@ pp_patterns = [
     )
 ]
 
+# ------------------------- Channel -------------------------
+
+channel_patterns = [
+    # channels/list/ Список каналов
+    # Тесты: url sec
+    url(
+        r'list/$',
+        views.channel_list,
+        name='list'
+    ),
+    # channels/list/page/2/ Список каналов постранично
+    # Тесты: url sec
+    url(
+        r'list/page/(?P<page>\d+)/$',
+        views.channel_list,
+        name='list_page'
+    ),
+    # channels/new/ Создание нового канала (форма)
+    # Тесты: url sec
+    url(
+        r'new/$',
+        permission_required('schedule.add_channel')(views.channel_new),
+        name='new'
+    ),
+    # channels/1/...
+    url(
+        r'(?P<channel_id>\d+)/',
+        include([
+            # channels/1/show/lineups/ Список сеток вещания для этого канала
+            # Тесты: url sec
+            url(
+                r'show/lineups/$',
+                views.channel_show_lineups,
+                name='show_lineups'
+            ),
+            # channels/1/show/lineups/page/2/ Список сеток вещания для этого канала постранично
+            # Тесты: url sec
+            url(
+                r'show/lineups/page/(?P<page_id>\d+)/$',
+                views.channel_show_lineups,
+                name='show_lineups_page'
+            ),
+            # channels/1/edit/ Редактирование канала (форма)
+            # Тесты: url sec
+            url(
+                r'edit/$',
+                permission_required('schedule.change_channel')(views.channel_edit),
+                name='edit'
+            )
+        ])
+    ),
+
+    # ------------------------- Channel JSON -------------------------
+
+    # channels/create/json/ Создание нового канала (действие)
+    # Тесты: url sec
+    url(
+        r'create/json/$',
+        permission_required('schedule.add_channel')(views.channel_create_json),
+        name='create_json'
+    ),
+    # channels/update/json/?id=1 Обновление канала (действие)
+    # Тесты: url sec
+    url(
+        r'update/json/',
+        permission_required('schedule.change_channel')(views.channel_update_json),
+        name='update_json'
+    ),
+    # channels/deactivate/json/?id=1 Деактивация канала (действие)
+    # Тесты: url sec
+    url(
+        r'deactivate/json/',
+        permission_required('schedule.change_channel')(views.channel_deactivate_json),
+        name='deactivate_json'
+    ),
+    # channels/activate/json/?id=1 Активация канала (действие)
+    # Тесты: url sec
+    url(
+        r'activate/json/',
+        permission_required('schedule.change_channel')(views.channel_activate_json),
+        name='activate_json'
+    )
+]
+
 urlpatterns = [
     # lineups/...
     url(r'^lineups/', include((lineup_patterns, 'lineup', 'lineup'))),
@@ -250,4 +334,6 @@ urlpatterns = [
     url(r'^programs/', include((program_patterns, 'program', 'program'))),
     # pps/...
     url(r'^pps/', include((pp_patterns, 'pp', 'pp'))),
+    # channels/...
+    url(r'^channels/', include((channel_patterns, 'channel', 'channel')))
 ]

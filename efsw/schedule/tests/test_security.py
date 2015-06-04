@@ -142,6 +142,51 @@ class ScheduleSecurityTestCase(AbstractSecurityTestCase):
                 perm_codename='change_programposition',
                 method='post'
             ),
+
+            # ------------------------- Channel -------------------------
+
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.schedule:channel:list')),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.schedule:channel:list_page', args=(1, ))),
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:new'),
+                anonymous=False,
+                perm_codename='add_channel'
+            ),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.schedule:channel:show_lineups', args=(1, ))),
+            self.SecurityTestConditions(urlresolvers.reverse('efsw.schedule:channel:show_lineups_page', args=(1, 2, ))),
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:edit', args=(1, )),
+                anonymous=False,
+                perm_codename='change_channel'
+            ),
+
+            # ------------------------- Channel JSON -------------------------
+
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:create_json'),
+                anonymous=False,
+                perm_codename='add_channel',
+                method='post'
+            ),
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:update_json'),
+                anonymous=False,
+                perm_codename='change_channel',
+                method='post'
+            ),
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:deactivate_json'),
+                anonymous=False,
+                perm_codename='change_channel',
+                method='post'
+            ),
+            self.SecurityTestConditions(
+                urlresolvers.reverse('efsw.schedule:channel:activate_json'),
+                anonymous=False,
+                perm_codename='change_channel',
+                method='post'
+            ),
+
         ]
 
     def _get_app_label(self):
