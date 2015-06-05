@@ -708,3 +708,27 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
         )
         self.assertJsonOk(response)
         self.assertEqual(4, models.ProgramPosition.objects.get(pk=39).program_id)
+
+
+class ChannelShowLineupsTestCase(TestCase):
+    pass
+
+
+class ChannelEditTestCase(LoginRequiredTestCase):
+    pass
+
+
+class ChannelCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+    pass
+
+
+class ChannelUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+    pass
+
+
+class ChannelActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+    pass
+
+
+class ChannelDeactivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+    pass

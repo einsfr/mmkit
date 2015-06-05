@@ -175,6 +175,16 @@ def _get_channel_list_page(query_set, page):
     return pagination.get_page(query_set, page, per_page)
 
 
+def _get_json_channel_not_found(channel_id):
+    return JsonWithStatusResponse.error('Ошибка: не найден канал с ID "{0}"'.format(channel_id), 'channel_not_found')
+
+
+def _get_json_wrong_channel_id(channel_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор канала должен быть целым числом, предоставлено: "{0}"'.format(channel_id),
+        'id_not_int'
+    )
+
 # ------------------------- Lineup -------------------------
 
 
@@ -736,12 +746,52 @@ def channel_create_json(request):
 
 @http.require_POST
 def channel_update_json(request):
-    pass
+    channel_id = request.GET.get('id', None)
+    try:
+        channel = models.Channel.objects.get(pk=channel_id)
+    except models.Channel.DoesNotExist:
+        return _get_json_channel_not_found(channel_id)
+    except ValueError:
+        return _get_json_wrong_channel_id(channel_id)
+    form = forms.ChannelCreateForm(request.POST, instance=channel)
+    if form.is_valid():
+        form.save()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 @http.require_POST
 def channel_activate_json(request):
-    pass
+    channel_id = request.GET.get('id', None)
+    try:
+        channel = models.Channel.objects.get(pk=channel_id)
+    except models.Channel.DoesNotExist:
+        return _get_json_channel_not_found(channel_id)
+    except ValueError:
+        return _get_json_wrong_channel_id(channel_id)
+    if channel.active:
+        return JsonWithStatusResponse.error(
+            'Невозможно начать использование канала - он уже используется.',
+            'channel_already_active'
+        )
+    channel.active = True
+    channel.save()
+    return JsonWithStatusResponse.ok()
 
 @http.require_POST
 def channel_deactivate_json(request):
-    pass
+    channel_id = request.GET.get('id', None)
+    try:
+        channel = models.Channel.objects.get(pk=channel_id)
+    except models.Channel.DoesNotExist:
+        return _get_json_channel_not_found(channel_id)
+    except ValueError:
+        return _get_json_wrong_channel_id(channel_id)
+    if not channel.active:
+        return JsonWithStatusResponse.error(
+            'Невозможно прекратить использование канала - он уже не используется.',
+            'channel_already_not_active'
+        )
+    channel.active = False
+    channel.save()
+    return JsonWithStatusResponse.ok()

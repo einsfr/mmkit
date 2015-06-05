@@ -10,7 +10,12 @@
         require(['jquery', 'knockout', 'schedule/model_channel_list'], function($, ko, model) {
             $(document).ready(function() {
                 var view_model = new model({
-
+                    'channel_activate_json': function(channel_id) {
+                        return "{% url 'efsw.schedule:channel:activate_json' %}?id=" + channel_id;
+                    },
+                    'channel_deactivate_json': function(channel_id) {
+                        return "{% url 'efsw.schedule:channel:deactivate_json' %}?id=" + channel_id;
+                    }
                 });
                 ko.applyBindings(view_model);
                 var icon_containers = $('table td.icon_actions_container');
@@ -28,6 +33,7 @@
 {% block content %}
     <h2>Список каналов</h2>
     {% if channels %}
+        <div class="alert alert-danger" data-bind="visible: error_msg(), text: error_msg()" style="display: none;"></div>
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -39,7 +45,7 @@
             </thead>
             <tbody>
                 {% for channel in channels %}
-                    <tr>
+                    <tr data-id="{{ channel.id }}">
                         <td>{{ channel.id }}</td>
                         <td>
                             {% if not channel.active %}-{% else %}<span class="fa fa-lg fa-check"></span>{% endif %}
@@ -47,7 +53,7 @@
                         <td>
                             <a href="{% url 'efsw.schedule:channel:show_lineups' channel.id %}" title="Просмотр сеток вещания на этом канале">{{ channel.name }}</a>
                         </td>
-                        <td class="text-nowrap">
+                        <td class="text-nowrap icon_actions_container">
                             {% if perms.schedule.change_channel %}
                                 <a href="{% url 'efsw.schedule:channel:edit' channel.id %}" title="Редактирование канала" class="fa fa-lg fa-edit"></a>
                             {% endif %}

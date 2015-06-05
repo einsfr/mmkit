@@ -82,7 +82,9 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                 self.urls.pp_delete_json(self.pp().id),
                 { method: 'post', data: $('#repeat_select_container').find('input').serialize() },
                 self._process_change_result,
-                self.error_msg,
+                function(response) {
+                    self.error_msg(response.data);
+                },
                 alert
             );
         };
@@ -126,7 +128,9 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                     self.pp(o);
                     self.pp_loaded(true);
                 },
-                alert,
+                function(response) {
+                    alert(response.data);
+                },
                 alert
             );
         };
@@ -143,7 +147,9 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                     self.program(o);
                     self.program_loaded(true);
                 },
-                alert,
+                function(response) {
+                    alert(response.data);
+                },
                 alert
             );
         };

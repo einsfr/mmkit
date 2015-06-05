@@ -46,7 +46,9 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_
                     self.pp(o);
                     self.pp_loaded(true);
                 },
-                alert,
+                function(response) {
+                    alert(response.data);
+                },
                 alert
             );
         };

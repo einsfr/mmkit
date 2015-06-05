@@ -18,7 +18,9 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
                 function() {
                     window.location.reload();
                 },
-                self.non_field_errors,
+                function(response) {
+                    self.non_field_errors(response.data);
+                },
                 alert
             );
         };

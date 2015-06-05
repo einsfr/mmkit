@@ -9,7 +9,7 @@
             $(document).ready(function() {
                 ko.applyBindings(new model(
                     '#channel_update_form',
-                    "{% url 'efsw.schedule:channel:update_json' %}?id={{ lineup.id }}",
+                    "{% url 'efsw.schedule:channel:update_json' %}?id={{ channel.id }}",
                     function(response) {
                         window.location.href = response.data;
                     }
