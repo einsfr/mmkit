@@ -4,6 +4,27 @@
 
 {% block title %}{{ block.super }} - Список каналов{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'schedule/model_channel_list'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
+
+                });
+                ko.applyBindings(view_model);
+                var icon_containers = $('table td.icon_actions_container');
+                icon_containers.on('click', '.act_activate', function() {
+                    view_model.activate($(this).parents('tr').data('id'));
+                });
+                icon_containers.on('click', '.act_deactivate', function() {
+                    view_model.deactivate($(this).parents('tr').data('id'));
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
     <h2>Список каналов</h2>
     {% if channels %}
@@ -11,7 +32,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th style="min-width: 6em;">Активен</th>
+                    <th>Используется</th>
                     <th style="width: 100%">Название</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -27,7 +48,14 @@
                             <a href="{% url 'efsw.schedule:channel:show_lineups' channel.id %}" title="Просмотр сеток вещания на этом канале">{{ channel.name }}</a>
                         </td>
                         <td class="text-nowrap">
-                             &nbsp;
+                            {% if perms.schedule.change_channel %}
+                                <a href="{% url 'efsw.schedule:channel:edit' channel.id %}" title="Редактирование канала" class="fa fa-lg fa-edit"></a>
+                            {% endif %}
+                            {% if channel.active %}
+                                <a href="#" title="Прекратить использование" class="fa fa-lg fa-times act_deactivate"></a>
+                            {% else %}
+                                <a href="#" title="Начать использование" class="fa fa-lg fa-check-square-o act_activate"></a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

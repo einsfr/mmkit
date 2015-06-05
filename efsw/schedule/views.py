@@ -709,15 +709,30 @@ def channel_new(request):
 
 @http.require_GET
 def channel_show_lineups(request, channel_id, page=1):
-    pass
+    channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
+    return shortcuts.render(request, 'schedule/channel_show_lineups.html', {
+        'lineups': _get_lineup_list_page(channel.lineups.all(), page),
+        'channel': channel
+    })
 
 @http.require_GET
 def channel_edit(request, channel_id):
-    pass
+    channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
+    form = forms.ChannelCreateForm(instance=channel)
+    return shortcuts.render(request, 'schedule/channel_edit.html', {
+        'channel': channel,
+        'form': form
+    })
+
 
 @http.require_POST
 def channel_create_json(request):
-    pass
+    form = forms.ChannelCreateForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
+    else:
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
 @http.require_POST
 def channel_update_json(request):

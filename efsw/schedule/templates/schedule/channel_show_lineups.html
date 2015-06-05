@@ -2,7 +2,7 @@
 
 {% load pagination from pagination %}
 
-{% block title %}{{ block.super }} - Список сеток вещания{% endblock %}
+{% block title %}{{ block.super }} - Просмотр сеток вещания на канале {{ channel.name }}{% endblock %}
 
 {% block head %}
     {{ block.super }}
@@ -46,11 +46,11 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Список сеток вещания</h2>
+    <h2>Просмотр сеток вещания на канале &laquo;{{ channel.name }}&raquo;</h2>
     {% include 'schedule/_lineup_list_table.html' %}
     {% if lineups %}
         <nav class="text-center">
-            {% pagination lineups 'efsw.schedule:lineup:list_page' %}
+            {% pagination lineups 'efsw.schedule:channel:show_lineups_page' channel_id=channel.id %}
         </nav>
     {% endif %}
 {% endblock %}

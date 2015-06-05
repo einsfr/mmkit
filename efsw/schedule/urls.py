@@ -281,7 +281,7 @@ channel_patterns = [
             # channels/1/show/lineups/page/2/ Список сеток вещания для этого канала постранично
             # Тесты: url sec
             url(
-                r'show/lineups/page/(?P<page_id>\d+)/$',
+                r'show/lineups/page/(?P<page>\d+)/$',
                 views.channel_show_lineups,
                 name='show_lineups_page'
             ),
