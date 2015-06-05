@@ -166,6 +166,15 @@ def _pp_delete(program_position):
         program_position.save()
 
 
+def _get_channel_list_page(query_set, page):
+    per_page = getattr(
+        settings,
+        'EFSW_SCHED_CHANNEL_LIST_PER_PAGE',
+        schedule_default_settings.EFSW_SCHED_CHANNEL_LIST_PER_PAGE
+    )
+    return pagination.get_page(query_set, page, per_page)
+
+
 # ------------------------- Lineup -------------------------
 
 
@@ -688,11 +697,15 @@ def pp_update_json(request):
 
 @http.require_GET
 def channel_list(request, page=1):
-    pass
+    return shortcuts.render(request, 'schedule/channel_list.html', {
+        'channels': _get_channel_list_page(models.Channel.objects.all(), page)
+    })
 
 @http.require_GET
 def channel_new(request):
-    pass
+    return shortcuts.render(request, 'schedule/channel_new.html', {
+        'form': forms.ChannelCreateForm()
+    })
 
 @http.require_GET
 def channel_show_lineups(request, channel_id, page=1):

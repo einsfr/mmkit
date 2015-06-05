@@ -198,3 +198,16 @@ class ProgramPositionEditForm(ProgramPositionRepeatForm):
             'class': 'form-control'
         })
     )
+
+
+class ChannelCreateForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Channel
+        fields = ('name', )
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название для нового канала'
+            }),
+        }

@@ -93,6 +93,8 @@
         </table>
         <nav class="text-center">{% pagination lineups 'efsw.schedule:lineup:list_page' %}</nav>
     {% else %}
-        Сетки вещания не найдены
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Сетки вещания не найдены</div>
+        </div>
     {% endif %}
 {% endblock %}
