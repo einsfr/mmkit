@@ -711,24 +711,174 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
 
 
 class ChannelShowLineupsTestCase(TestCase):
-    pass
+
+    fixtures = []
+
+    def test_404(self):
+        response = self.client.get(urlresolvers.reverse('efsw.schedule:channel:show_lineups', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
 
 
 class ChannelEditTestCase(LoginRequiredTestCase):
-    pass
+
+    fixtures = []
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.schedule:channel:edit', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
 
 
 class ChannelCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
-    pass
+
+    fixtures = ['channel.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:channel:create_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_invalid(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.post(
+            self.url,
+            {
+                'name': 'Название для нового канала'
+            }
+        )
+        self.assertJsonOk(response)
+        self.assertEqual(
+            'Название для нового канала',
+            models.Channel.objects.get(pk=models.Channel.objects.count()).name
+        )
 
 
 class ChannelUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
-    pass
+
+    fixtures = ['channel.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:channel:update_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'channel_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'channel_not_found')
+
+    def test_invalid(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'form_invalid')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.post(
+            '{0}?id={1}'.format(self.url, 1),
+            {
+                'name': 'Обновлённое название для канала'
+            }
+        )
+        self.assertJsonOk(response)
+        self.assertEqual(
+            'Обновлённое название для канала',
+            models.Channel.objects.get(pk=1).name
+        )
 
 
 class ChannelActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
-    pass
+
+    fixtures = ['channel.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:channel:activate_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'channel_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'channel_not_found')
+
+    def test_already_active(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonError(response, 'channel_already_active')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 3))
+        self.assertJsonOk(response)
+        self.assertTrue(models.Channel.objects.get(pk=3).active)
 
 
 class ChannelDeactivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
-    pass
+
+    fixtures = ['channel.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.schedule:channel:deactivate_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_wrong_id(self):
+        self._login_user()
+        for i in ['', 'non-int']:
+            response = self.client.post('{0}?id={1}'.format(self.url, i))
+            self.assertJsonError(response, 'id_not_int')
+
+    def test_404(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'channel_not_found')
+        response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
+        self.assertJsonError(response, 'channel_not_found')
+
+    def test_already_active(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 3))
+        self.assertJsonError(response, 'channel_already_not_active')
+
+    def test_normal(self):
+        self._login_user()
+        response = self.client.post('{0}?id={1}'.format(self.url, 1))
+        self.assertJsonOk(response)
+        self.assertFalse(models.Channel.objects.get(pk=1).active)

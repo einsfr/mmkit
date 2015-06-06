@@ -742,7 +742,10 @@ def channel_create_json(request):
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 @http.require_POST
 def channel_update_json(request):
@@ -758,7 +761,10 @@ def channel_update_json(request):
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error(
+            {'errors': form.errors.as_json()},
+            'form_invalid'
+        )
 
 @http.require_POST
 def channel_activate_json(request):
