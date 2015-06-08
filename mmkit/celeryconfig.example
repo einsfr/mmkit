@@ -1,9 +1,0 @@
-CELERY_ACCEPT_CONTENT = ['json']
-
-CELERY_TASK_SERIALIZER = 'json'
-
-CELERY_RESULT_SERIALIZER = 'json'
-
-CELERY_TIMEZONE = 'Europe/Moscow'
-
-BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'

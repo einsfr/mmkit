@@ -21,3 +21,5 @@ EFSW_ELASTIC_HOSTS = [
     {'host': '127.0.0.1'},
 ]
 EFSW_ELASTIC_OPTIONS = {}
+
+BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'
