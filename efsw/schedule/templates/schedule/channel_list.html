@@ -69,6 +69,8 @@
         </table>
         <nav class="text-center">{% pagination channels 'efsw.schedule:channel:list_page' %}</nav>
     {% else %}
-        Каналы не найдены
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Каналы не найдены</div>
+        </div>
     {% endif %}
 {% endblock %}

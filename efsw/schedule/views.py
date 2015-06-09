@@ -213,7 +213,7 @@ def lineup_show_current(request, channel_id=None):
         try:
             channel = channels_list[0]
         except IndexError:
-            raise Http404('Не найдено ни одного активного канала')
+            return shortcuts.redirect(urlresolvers.reverse('efsw.schedule:lineup:list'))
     else:
         try:
             channel = [x for x in channels_list if x.id == int(channel_id)][0]

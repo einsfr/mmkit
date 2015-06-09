@@ -57,7 +57,7 @@ class LineupShowCurrentTestCase(TestCase):
         for ch in models.Channel.objects.all():
             ch.delete()
         response = self.client.get(urlresolvers.reverse('efsw.schedule:lineup:show_current'))
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(302, response.status_code)
         response = self.client.get(urlresolvers.reverse('efsw.schedule:lineup:show_current_channel', args=(1, )))
         self.assertEqual(404, response.status_code)
         call_command('loaddata', 'channel.json', verbosity=0)
