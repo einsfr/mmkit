@@ -10,7 +10,10 @@
             $(document).ready(function() {
                 ko.applyBindings(new model(
                         '#item_edit_form',
-                        "{% url 'efsw.archive:item:update_properties_json' %}?id={{ item.id }}"
+                        "{% url 'efsw.archive:item:update_properties_json' %}?id={{ item.id }}",
+                        function(response) {
+                            window.location.href = response.data;
+                        }
                 ));
                 $('#id_created').datepicker(
                     {
@@ -88,9 +91,6 @@
             </form>
             <div class="alert alert-danger"
                  data-bind="visible: error_msg(), text: error_msg()"
-                 style="display: none;"></div>
-            <div class="alert alert-success"
-                 data-bind="visible: success_msg(), text: success_msg()"
                  style="display: none;"></div>
         </div>
         <div class="panel-footer text-center">

@@ -791,7 +791,7 @@ class ChannelUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
     def test_invalid(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'channel_not_found')
 
     def test_normal(self):
         self._login_user()

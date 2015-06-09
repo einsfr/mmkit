@@ -174,7 +174,7 @@ def item_create_json(request):
     if form.is_valid():
         item = form.save()
         models.ItemLog.log_item_add(item, request)
-        return JsonWithStatusResponse.ok(item.get_absolute_url())
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(item.id, )))
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
@@ -335,7 +335,7 @@ def item_update_links_json(request):
     item.included_in.add(*adding_included_in_obj)
     log_inc_update = log_inc_update + adding_included_in_obj
     _log_inc_update(log_inc_update, request)
-    return JsonWithStatusResponse()
+    return JsonWithStatusResponse.ok()
 
 
 @http.require_GET
@@ -399,7 +399,7 @@ def item_update_locations_json(request):
         l_obj.item = item
         l_obj.location = l['location']
         l_obj.save()
-    return JsonWithStatusResponse.ok()
+    return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))
 
 
 @http.require_GET
@@ -481,7 +481,7 @@ def item_update_properties_json(request):
     if form.is_valid():
         item = form.save()
         models.ItemLog.log_item_update(item, request)
-        return JsonWithStatusResponse.ok()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(item.id, )))
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
 
