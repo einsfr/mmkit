@@ -28,7 +28,6 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
             var code = e.keyCode || e.which;
             if (code == 13) {
                 e.preventDefault();
-                self.submit_form();
                 return false;
             }
         });
