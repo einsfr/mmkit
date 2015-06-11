@@ -21,7 +21,6 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
     return function ItemEditLocationsViewModel(urls) {
         var self = this;
         self.urls = urls;
-        self.success_msg = ko.observable('');
         self.error_msg = ko.observable('');
         self.locations = ko.observableArray([]);
         self.locations_changed = ko.observable(false);
@@ -45,7 +44,6 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         self.remove_location = function(location) {
             self.locations.remove(location);
             self.locations_changed(true);
-            self.success_msg('');
             self.error_msg('');
         };
 
@@ -69,7 +67,6 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                 location: self.form_storage().disable_location ? '<<будет определено автоматически>>' : self.form_location()
             }));
             self.locations_changed(true);
-            self.success_msg('');
         };
 
         self.update_item = function() {
@@ -86,23 +83,11 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                         }))
                     }
                 },
-                function() {
-                    self.error_msg('');
-                    self.success_msg('Изменения сохранены.');
+                function(response) {
                     self.locations_changed(false);
-                    ajr.exec(
-                        self.urls.item_show_locations_json(),
-                        function(response) {
-                            self.locations($.map(response.data, function(data) {
-                                return new ItemLocation(data);
-                            }));
-                        },
-                        alert,
-                        alert
-                    );
+                    window.location.href = response.data;
                 },
                 function(response) {
-                    self.success_msg('');
                     self.error_msg(response.data);
                 },
                 alert

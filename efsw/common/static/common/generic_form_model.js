@@ -24,13 +24,8 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
         self.success_msg = ko.observable('');
 
         // http://stackoverflow.com/questions/11235622/jquery-disable-form-submit-on-enter
-        self.form.on('keyup keypress', function(e) {
-            var code = e.keyCode || e.which;
-            if (code == 13) {
-                e.preventDefault();
-                self.submit_form();
-                return false;
-            }
+        self.form.submit(function() {
+            return false;
         });
 
         self.submit_form = function() {
