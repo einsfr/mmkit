@@ -45,3 +45,15 @@ class OrderedModelTestCase(TestCase):
         self.assertObjectsValuesEqual([(6, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
         SimpleOrderedModel(order=3).save()
         self.assertObjectsValuesEqual([(6, 0), (1, 1), (2, 2), (7, 3), (3, 4), (4, 5), (5, 6)])
+
+    def test_pk_not_set_insert_below_min(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        SimpleOrderedModel(order=-3).save()
+        self.assertObjectsValuesEqual([(6, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
+
+    def test_pk_set_insert(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        SimpleOrderedModel(pk=6, order=3).save()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (3, 2), (6, 3), (4, 4), (5, 5)])
