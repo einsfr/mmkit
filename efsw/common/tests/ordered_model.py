@@ -8,6 +8,10 @@ class SimpleOrderedModel(OrderedModel):
     pass
 
 
+class AnotherOrderedModel(OrderedModel):
+    pass
+
+
 class OrderedModelTestCase(TestCase):
 
     def setUp(self):
@@ -57,3 +61,50 @@ class OrderedModelTestCase(TestCase):
             SimpleOrderedModel().save()
         SimpleOrderedModel(pk=6, order=3).save()
         self.assertObjectsValuesEqual([(1, 0), (2, 1), (3, 2), (6, 3), (4, 4), (5, 5)])
+
+    def test_move_order_not_set(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        obj = SimpleOrderedModel.objects.get(pk=3)
+        obj.order = None
+        obj.save()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (4, 2), (5, 3), (3, 4), ])
+
+    def test_move_right(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        obj = SimpleOrderedModel.objects.get(pk=3)
+        obj.order = 7
+        obj.save()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (4, 2), (5, 3), (3, 4), ])
+
+    def test_move_left(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        obj = SimpleOrderedModel.objects.get(pk=3)
+        obj.order = 1
+        obj.save()
+        self.assertObjectsValuesEqual([(1, 0), (3, 1), (2, 2), (4, 3), (5, 4), ])
+
+    def test_delete(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        SimpleOrderedModel.objects.get(pk=3).delete()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (4, 2), (5, 3), ])
+
+    def test_swap(self):
+        for i in range(0, 5):
+            SimpleOrderedModel().save()
+        obj = SimpleOrderedModel.objects.get(pk=3)
+        swap_obj = SimpleOrderedModel.objects.get(pk=5)
+        obj.order_swap(swap_obj)
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (5, 2), (4, 3), (3, 4), ])
+        swap_obj = AnotherOrderedModel()
+        with self.assertRaises(ValueError):
+            obj.order_swap(swap_obj)
+        swap_obj = SimpleOrderedModel()
+        with self.assertRaises(ValueError):
+            obj.order_swap(swap_obj)
+        swap_obj = SimpleOrderedModel(pk=6)
+        with self.assertRaises(ValueError):
+            obj.order_swap(swap_obj)
