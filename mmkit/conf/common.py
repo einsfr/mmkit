@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+from kombu import Queue
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
@@ -26,7 +28,8 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
     'efsw.archive',
     'efsw.common',
-    'efsw.schedule'
+    'efsw.schedule',
+    'efsw.conversion',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -101,4 +104,17 @@ CELERY_TASK_SERIALIZER = 'json'
 
 CELERY_RESULT_SERIALIZER = 'json'
 
-CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_DEFAULT_QUEUE = 'control'
+
+CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
+
+CELERY_DEFAULT_ROUTING_KEY = 'control.default'
+
+CELERY_DEFAULT_EXCHANGE = 'default'
+
+CELERY_QUEUES = (
+    Queue('control', routing_key='control.#'),
+    Queue('conversion', routing_key='conversion.#')
+)
