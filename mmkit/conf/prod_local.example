@@ -47,3 +47,5 @@ MANAGERS = (
 )
 
 BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'
+
+EFSW_FFMPEG_BIN = '/opt/ffmpeg/bin/ffmpeg'
