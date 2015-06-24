@@ -4,7 +4,7 @@ from collections import deque
 from efsw.conversion.utils import time_conv
 from efsw.conversion.converter.exceptions import ConvException, ConvConfException, ConvOutputFormatException
 
-class CliConverter:
+class Converter:
 
     MAX_LOG_LENGTH = 5
 
@@ -14,7 +14,7 @@ class CliConverter:
                 from django.conf import settings
                 settings_object = settings
             except ImportError:
-                raise ConvConfException('При использовании класса CliConverter без Django необходимо передавать '
+                raise ConvConfException('При использовании класса Converter без Django необходимо передавать '
                                         'конструктору аргумент settings_object, который содержит все настройки, '
                                         'относящиеся к этому экземпляру класса.')
         self.ffmpeg_bin = getattr(settings_object, 'EFSW_FFMPEG_BIN')
