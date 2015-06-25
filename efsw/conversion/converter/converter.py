@@ -150,30 +150,3 @@ class Converter:
             )
         result['libraries'] = libs
         return result
-
-    def get_formats(self):
-        output = subprocess.check_output(
-            [self.ffmpeg_bin] + ['-hide_banner', '-formats'],
-            stderr=subprocess.STDOUT,
-            timeout=self.INFO_CMDS_TIMEOUT
-        )
-        if self.debug:
-            print(output.decode())
-        output_list = output.split(b'\r\n')
-        formats = dict()
-        r = re.compile(r'^(.{3}) (\S+)\s+')
-        for line in output_list[4:]:
-            line_dec = line.decode()
-            match = r.match(line_dec)
-            if match is not None:
-                formats[match.group(2)] = (
-                    match.group(1)[1] == 'D',
-                    match.group(1)[2] == 'E',
-                )
-            else:
-                break
-        if not formats:
-            raise ConvOutputFormatException(
-                'Невозможно определить поддерживаемые форматы - возможно, изменился формат вывода.'
-            )
-        return formats
