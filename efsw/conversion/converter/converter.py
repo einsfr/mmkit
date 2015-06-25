@@ -36,7 +36,13 @@ class Converter:
         else:
             args = default_args + args_seq
         if self.debug:
-            print('Запуск: {0}'.format(' '.join(args)))
+            args_debug = []
+            for a in args:
+                if a.find(' ') > 0:
+                    args_debug.append('"{0}"'.format(a))
+                else:
+                    args_debug.append(a)
+            print('Запуск: {0}'.format(' '.join(args_debug)))
         log = deque(maxlen=self.MAX_LOG_LENGTH)
         proc = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines=True)
         try:
