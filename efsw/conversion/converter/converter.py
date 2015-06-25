@@ -1,5 +1,6 @@
 import subprocess
 from collections import deque
+import re
 
 from efsw.conversion.utils import time_conv
 from efsw.conversion.converter.exceptions import ConvException, ConvConfException, ConvOutputFormatException
@@ -7,6 +8,7 @@ from efsw.conversion.converter.exceptions import ConvException, ConvConfExceptio
 class Converter:
 
     MAX_LOG_LENGTH = 5
+    INFO_CMDS_TIMEOUT = 3
 
     def __init__(self, settings_object=None):
         if settings_object is None:
@@ -23,8 +25,8 @@ class Converter:
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
 
-    def convert(self, args_seq=None, progress_callback=None, success_callback=None, error_callback=None,
-                defaults_replace=None):
+    def convert(self, args_seq=None, start_callback=None, progress_callback=None, success_callback=None,
+                error_callback=None, defaults_replace=None):
         if self.debug:
             print('Инициализация процесса кодирования...')
         duration = None
@@ -45,6 +47,8 @@ class Converter:
             print('Запуск: {0}'.format(' '.join(args_debug)))
         log = deque(maxlen=self.MAX_LOG_LENGTH)
         proc = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines=True)
+        if start_callback is not None:
+            start_callback(proc)
         try:
             for line in proc.stderr:
                 log.append(line)
@@ -55,26 +59,31 @@ class Converter:
                             duration = time_conv.time_str_to_seconds(line[p + 10:p + 21])
                         except ValueError as e:
                             raise ConvOutputFormatException(
-                                'невозможно определить длительность файла - возможно, изменился формат вывода.'
+                                'Невозможно определить длительность файла - возможно, изменился формат вывода.'
                             ) from e
-                        if duration == 0:
-                            raise ConvOutputFormatException(
-                                'длительность не может быть равна 0.'
-                            )
+                        if duration == 0 and self.debug:
+                            print('Длительность равна нулю - возможно, это "живой" поток?')
                 else:
                     if line[0:6] == 'frame=':
                         p = line.find('time=')
                         time = line[p + 5:p + 16]
                         try:
-                            progress = time_conv.time_str_to_seconds(time) / duration
+                            time_sec = time_conv.time_str_to_seconds(time)
                         except ValueError as e:
                             raise ConvOutputFormatException(
-                                'невозможно определить текущее место кодирования - возможно, изменился формат вывода.'
+                                'Невозможно определить текущее место кодирования - возможно, изменился формат '
+                                'вывода.'
                             ) from e
-                        if self.debug:
-                            print('Выполнено: {0:.2%}'.format(progress))
+                        if duration != 0:
+                            progress = time_sec / duration
+                            if self.debug:
+                                print('Выполнено: {0:.2%}'.format(progress))
+                        else:
+                            progress = None
+                            if self.debug:
+                                print('Текущее место кодирования: {0}'.format(time))
                         if progress_callback is not None:
-                            progress_callback(progress)
+                            progress_callback(time_sec, progress)
         except ConvException as e:
             proc.terminate()
             conv_exception = e
@@ -99,3 +108,45 @@ class Converter:
                     print('Завершено без ошибок ({0}).'.format(return_code))
                 if success_callback is not None:
                     success_callback()
+
+    def get_version(self):
+        output = subprocess.check_output(
+            [self.ffmpeg_bin] + ['-version'],
+            stderr=subprocess.STDOUT,
+            timeout=self.INFO_CMDS_TIMEOUT
+        )
+        if self.debug:
+            print(output.decode())
+        output_list = output.split(b'\r\n')
+        result = dict()
+        if output_list[0][:14] != b'ffmpeg version':
+            raise ConvOutputFormatException(
+                'Невозможно определить версию ffmpeg - возможно, изменился формат вывода.'
+            )
+        result['version'] = output_list[0].split(b' ')[2].decode()
+        if output_list[2][:13] != b'configuration':
+            raise ConvOutputFormatException(
+                'Невозможно определить конфигурацию ffmpeg - возможно, изменился формат вывода.'
+            )
+        conf_list = output_list[2].decode().split(' ')
+        result['configuration'] = [i for i in map(lambda x: x[2:], conf_list[1:])]
+        libs = dict()
+        r = re.compile(r'^(\w+)\s+(\d+)\.\s*(\d+)\.\s*(\d+).*')
+        for line in output_list[3:]:
+            line_dec = line.decode()
+            match = r.match(line_dec)
+            if match is not None:
+                try:
+                    libs[match.group(1)] = (int(match.group(2)), int(match.group(3)), int(match.group(4)))
+                except ValueError:
+                    raise ConvOutputFormatException(
+                        'Невозможно определить версии библиотек - возможно, изменился формат вывода.'
+                    )
+            else:
+                break
+        if not libs:
+            raise ConvOutputFormatException(
+                'Невозможно определить версии библиотек - возможно, изменился формат вывода.'
+            )
+        result['libraries'] = libs
+        return result
