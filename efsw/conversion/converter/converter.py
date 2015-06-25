@@ -25,12 +25,10 @@ class Converter:
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
 
-    def convert(self, args_seq=None, start_callback=None, progress_callback=None, success_callback=None,
-                error_callback=None, defaults_replace=None):
+    def convert(self, args_seq=None, duration_limits=None, start_callback=None, progress_callback=None,
+                success_callback=None, error_callback=None, defaults_replace=None):
         if self.debug:
             print('Инициализация процесса кодирования...')
-        duration = None
-        conv_exception = None
         default_args = [self.ffmpeg_bin]
         default_args.extend(['-hide_banner', '-n', '-nostdin'] if defaults_replace is None else defaults_replace)
         if args_seq is None:
@@ -46,13 +44,17 @@ class Converter:
                     args_debug.append(a)
             print('Запуск: {0}'.format(' '.join(args_debug)))
         log = deque(maxlen=self.MAX_LOG_LENGTH)
+        conv_exception = None
+        inputs_count = args.count('-i')
+        durations_list = []
+        head_parsed = False
         proc = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines=True)
         if start_callback is not None:
             start_callback(proc)
         try:
             for line in proc.stderr:
                 log.append(line)
-                if duration is None:
+                if inputs_count > 0:
                     p = line.find('Duration: ')
                     if p >= 0:
                         try:
@@ -62,8 +64,17 @@ class Converter:
                                 'Невозможно определить длительность файла - возможно, изменился формат вывода.'
                             ) from e
                         if duration == 0 and self.debug:
-                            print('Длительность равна нулю - возможно, это "живой" поток?')
+                            print('#{0}: Длительность равна нулю - возможно, это "живой" поток?'.format(
+                                len(durations_list))
+                            )
+                        durations_list.append(duration)
+                        inputs_count -= 1
                 else:
+                    if inputs_count > 0:  # TODO: это неправильно, потому что такое же условие стоит выше
+                        raise ConvOutputFormatException(
+                            'В аргументах заявлено {0} входов, но длительность найдена только для {1} - возможно, '
+                            'изменился формат вывода.'.format(inputs_count + len(durations_list), len(durations_list))
+                        )
                     if line[0:6] == 'frame=':
                         p = line.find('time=')
                         time = line[p + 5:p + 16]
