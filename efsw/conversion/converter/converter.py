@@ -4,6 +4,7 @@ import re
 
 from efsw.conversion.utils import time_conv
 from efsw.conversion.converter.exceptions import ConvException, ConvConfException, ConvOutputFormatException
+from efsw.conversion.converter.args import ArgumentsBuilder
 
 class Converter:
 
@@ -25,16 +26,15 @@ class Converter:
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
 
-    def convert(self, args_seq=None, duration_limits=None, start_callback=None, progress_callback=None,
-                success_callback=None, error_callback=None, defaults_replace=None):
+    @staticmethod
+    def _calculate_duration(args_builder: ArgumentsBuilder, durations_list):
+        duration_mods = args_builder.get_duration_mods()
+
+    def convert(self, args_builder: ArgumentsBuilder, start_callback=None, progress_callback=None,
+                success_callback=None, error_callback=None):
         if self.debug:
             print('Инициализация процесса кодирования...')
-        default_args = [self.ffmpeg_bin]
-        default_args.extend(['-hide_banner', '-n', '-nostdin'] if defaults_replace is None else defaults_replace)
-        if args_seq is None:
-            args = default_args
-        else:
-            args = default_args + args_seq
+        args = [self.ffmpeg_bin] + args_builder.build()
         if self.debug:
             args_debug = []
             for a in args:
@@ -54,47 +54,56 @@ class Converter:
         try:
             for line in proc.stderr:
                 log.append(line)
-                if inputs_count > 0:
-                    p = line.find('Duration: ')
-                    if p >= 0:
-                        try:
-                            duration = time_conv.time_str_to_seconds(line[p + 10:p + 21])
-                        except ValueError as e:
+                if line[0:6] == 'frame=':
+                    if not head_parsed:
+                        # Переход от заголовка к кодированию
+                        head_parsed = True
+                        if inputs_count > 0:
                             raise ConvOutputFormatException(
-                                'Невозможно определить длительность файла - возможно, изменился формат вывода.'
-                            ) from e
-                        if duration == 0 and self.debug:
-                            print('#{0}: Длительность равна нулю - возможно, это "живой" поток?'.format(
-                                len(durations_list))
+                                'В аргументах заявлено {0} входов, но длительность найдена только для {1} - возможно, '
+                                'изменился формат вывода.'.format(
+                                    inputs_count + len(durations_list), len(durations_list)
+                                )
                             )
-                        durations_list.append(duration)
-                        inputs_count -= 1
-                else:
-                    if inputs_count > 0:  # TODO: это неправильно, потому что такое же условие стоит выше
+                        # определение длительности файла
+                        duration = self._calculate_duration(args_builder, durations_list)
+                    p = line.find('time=')
+                    time = line[p + 5:p + 16]
+                    try:
+                        time_sec = time_conv.time_str_to_seconds(time)
+                    except ValueError as e:
                         raise ConvOutputFormatException(
-                            'В аргументах заявлено {0} входов, но длительность найдена только для {1} - возможно, '
-                            'изменился формат вывода.'.format(inputs_count + len(durations_list), len(durations_list))
-                        )
-                    if line[0:6] == 'frame=':
-                        p = line.find('time=')
-                        time = line[p + 5:p + 16]
-                        try:
-                            time_sec = time_conv.time_str_to_seconds(time)
-                        except ValueError as e:
-                            raise ConvOutputFormatException(
-                                'Невозможно определить текущее место кодирования - возможно, изменился формат '
-                                'вывода.'
-                            ) from e
-                        if duration != 0:
-                            progress = time_sec / duration
-                            if self.debug:
-                                print('Выполнено: {0:.2%}'.format(progress))
-                        else:
-                            progress = None
-                            if self.debug:
-                                print('Текущее место кодирования: {0}'.format(time))
-                        if progress_callback is not None:
-                            progress_callback(time_sec, progress)
+                            'Невозможно определить текущее место кодирования - возможно, изменился формат '
+                            'вывода.'
+                        ) from e
+                    if duration != 0:
+                        progress = time_sec / duration
+                        if self.debug:
+                            print('Выполнено: {0:.2%}'.format(progress))
+                    else:
+                        progress = None
+                        if self.debug:
+                            print('Текущее место кодирования: {0}'.format(time))
+                    if progress_callback is not None:
+                        progress_callback(time_sec, progress)
+                else:
+                    if not head_parsed:
+                        # Обработка заголовка
+                        if inputs_count > 0:
+                            p = line.find('Duration: ')
+                            if p >= 0:
+                                try:
+                                    d = time_conv.time_str_to_seconds(line[p + 10:p + 21])
+                                except ValueError as e:
+                                    raise ConvOutputFormatException(
+                                        'Невозможно определить длительность входа - возможно, изменился формат вывода.'
+                                    ) from e
+                                if d == 0 and self.debug:
+                                    print('#{0}: Длительность равна нулю - возможно, это "живой" поток?'.format(
+                                        len(durations_list))
+                                    )
+                                durations_list.append(d)
+                                inputs_count -= 1
         except ConvException as e:
             proc.terminate()
             conv_exception = e

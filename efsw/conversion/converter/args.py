@@ -13,9 +13,13 @@ def _build_options(options):
 
 class ArgumentsBuilder:
 
+    DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin']
+
     def __init__(self):
         self._inputs_list = []
         self._outputs_list = []
+        self._global_options = []
+        self._override_defaults = False
 
     def add_input(self, in_obj):
         if not isinstance(in_obj, Input):
@@ -31,19 +35,28 @@ class ArgumentsBuilder:
         self._outputs_list.append(out_obj)
         return self
 
-    def build(self, global_options=None):
+    def set_global_options(self, options, override_defaults=False):
+        self._global_options = list(options)
+        self._override_defaults = override_defaults
+
+    def build(self):
         if not self._inputs_list:
             raise ConvArgsException('Не задано ни одного входа.')
         if not self._outputs_list:
             raise ConvArgsException('Не задано ни одного выхода.')
-        args = [] if global_options is None else list(global_options)
+        if self._global_options is None:
+            args = self.DEFAULT_CONVERT_ARGS
+        elif self._global_options is not None and not self._override_defaults:
+            args = self.DEFAULT_CONVERT_ARGS + self._global_options
+        else:
+            args = self._global_options
         for i in self._inputs_list:
             args.extend(i.build())
         for o in self._outputs_list:
             args.extend(o.build())
         return args
 
-    def get_duration_limits(self):
+    def get_duration_mods(self):
         pass
 
 
