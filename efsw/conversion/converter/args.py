@@ -1,5 +1,6 @@
 import re
 
+from efsw.conversion.converter.exceptions import ConvArgsException
 
 def _build_options(options):
     result = []
@@ -45,7 +46,6 @@ class ArgumentsBuilder(OptionsHandler):
         super().__init__(options)
         self._inputs_list = []
         self._outputs_list = []
-        self._override_defaults = False
 
     def add_input(self, in_obj):
         if not isinstance(in_obj, Input):
@@ -62,6 +62,10 @@ class ArgumentsBuilder(OptionsHandler):
         return self
 
     def build(self, override_defaults=False):
+        if not self._inputs_list:
+            raise ConvArgsException('Не задано ни одного входа.')
+        if not self._outputs_list:
+            raise ConvArgsException('Не задано ни одного выхода.')
         if self._options is None:
             args = self.DEFAULT_CONVERT_ARGS
         elif self._options is not None and not override_defaults:
