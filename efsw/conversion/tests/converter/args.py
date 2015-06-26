@@ -16,14 +16,6 @@ class ArgumentsBuilderTestCase(TestCase):
         with self.assertRaises(TypeError):
             ab.add_output(WrongClass())
 
-    def test_build_empty(self):
-        ab = ArgumentsBuilder()
-        with self.assertRaises(ConvArgsException):
-            ab.build()
-        ab.add_input(Input('path'))
-        with self.assertRaises(ConvArgsException):
-            ab.build()
-
     def test_empty_constructors(self):
         with self.assertRaises(ValueError):
             i = Input('')
@@ -39,13 +31,22 @@ class ArgumentsBuilderTestCase(TestCase):
     def test_simple(self):
         ab = ArgumentsBuilder()
         ab.add_input(Input('in_path')).add_output(Output('out_path'))
-        self.assertEqual(['-i', 'in_path', 'out_path'], ab.build())
+        self.assertEqual(
+            ['-hide_banner', '-n', '-nostdin', '-i', 'in_path', 'out_path'],
+            ab.build()
+        )
         ab = ArgumentsBuilder()
         ab.add_input(Input('in_path', [('-r', '25')]))
         ab.add_output(Output('out_path', [('-r', '25')]))
-        self.assertEqual(['-r', '25', '-i', 'in_path', '-r', '25', 'out_path'], ab.build())
+        self.assertEqual(
+            ['-hide_banner', '-n', '-nostdin', '-r', '25', '-i', 'in_path', '-r', '25', 'out_path'],
+            ab.build()
+        )
 
     def test_format(self):
         ab = ArgumentsBuilder()
-        ab.add_input(Input('in_path').format('test_format')).add_output(Output('out_path'))
-        self.assertEqual(['-f', 'test_format', '-i', 'in_path', 'out_path'], ab.build())
+        ab.add_input(Input('in_path').f('test_format')).add_output(Output('out_path'))
+        self.assertEqual(
+            ['-hide_banner', '-n', '-nostdin', '-f', 'test_format', '-i', 'in_path', 'out_path'],
+            ab.build()
+        )

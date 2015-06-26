@@ -7,6 +7,3 @@ class ConvConfException(ConvException):
 
 class ConvOutputFormatException(ConvException):
     pass
-
-class ConvArgsException(ConvException):
-    pass
