@@ -77,7 +77,7 @@ class Converter:
                     for l in log:
                         print(l)
                 if error_callback is not None:
-                    error_callback(log, conv_exception)
+                    error_callback(return_code, log, conv_exception)
             else:
                 if self.debug:
                     print('Завершено без ошибок ({0}).'.format(return_code))

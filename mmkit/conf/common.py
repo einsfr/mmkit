@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 
 from kombu import Queue
+from kombu.common import Broadcast
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -118,5 +119,6 @@ CELERY_DISABLE_RATE_LIMITS = True  # Если эта возможность не
 
 CELERY_QUEUES = (
     Queue('control', routing_key='control.#'),
-    Queue('conversion', routing_key='conversion.#')
+    Queue('conversion', routing_key='conversion.#'),
+    Broadcast('bc_conversion')
 )
