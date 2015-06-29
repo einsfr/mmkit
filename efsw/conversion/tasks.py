@@ -4,10 +4,11 @@ import signal
 
 from celery import shared_task
 from django.conf import settings
+from django.utils import timezone
 
 from efsw.conversion.converter.converter import Converter
 from efsw.conversion import default_settings
-from efsw.conversion.models import ConversionProcess
+from efsw.conversion.models import ConversionProcess, ConversionTask
 
 class ConvertCallbacksFactory:
 
@@ -101,19 +102,73 @@ def terminate_conversion(conv_id):
 
 @shared_task(queue='control', ignore_result=True)
 def notify_conversion_started(conv_id):
-    print('{0}: conversion started'.format(conv_id))
+    ct_status_list = ConversionTask.objects.filter(pk=conv_id).values_list('status', flat=True)
+    if ct_status_list:
+        if ct_status_list[0] in [
+            ConversionTask.STATUS_ENQUEUED, ConversionTask.STATUS_START_WAITING
+        ]:
+            ConversionTask.objects.filter(pk=conv_id).update(
+                status=ConversionTask.STATUS_STARTED,
+                updated=timezone.now()
+            )
+        elif ct_status_list[0] in [
+            ConversionTask.STATUS_COMPLETED, ConversionTask.STATUS_CANCELED, ConversionTask.STATUS_ERROR
+        ]:
+            terminate_conversion.delay(conv_id)
+    else:
+        terminate_conversion.delay(conv_id)
 
 
 @shared_task(queue='control', ignore_result=True)
 def notify_conversion_progress(conv_id, frame):
-    print('{0} progress: {1}'.format(conv_id, frame))
+    ct_status_list = ConversionTask.objects.filter(pk=conv_id).values_list(
+        'status', 'processed_frames'
+    )
+    if ct_status_list:
+        if ct_status_list[0][0] in [
+            ConversionTask.STATUS_ENQUEUED, ConversionTask.STATUS_START_WAITING, ConversionTask.STATUS_STARTED
+        ]:
+            ConversionTask.objects.filter(pk=conv_id).update(
+                status=ConversionTask.STATUS_IN_PROGRESS,
+                processed_frames=frame,
+                updated=timezone.now()
+            )
+        elif ct_status_list[0][0] == ConversionTask.STATUS_IN_PROGRESS:
+            if frame > ct_status_list[0][1]:
+                ConversionTask.objects.filter(pk=conv_id).update(
+                    processed_frames=frame,
+                    updated=timezone.now()
+                )
+        elif ct_status_list[0][0] in [
+            ConversionTask.STATUS_COMPLETED, ConversionTask.STATUS_CANCELED, ConversionTask.STATUS_ERROR
+        ]:
+            terminate_conversion.delay(conv_id)
+    else:
+        terminate_conversion.delay(conv_id)
 
 
 @shared_task(queue='control', ignore_result=True)
 def notify_conversion_error(conv_id, error_msg):
-    print('{0}: conversion error: {1}'.format(conv_id, error_msg))
+    ct_status_list = ConversionTask.objects.filter(pk=conv_id).values_list('status', flat=True)
+    if ct_status_list and ct_status_list[0] != ConversionTask.STATUS_CANCELED:
+        ConversionTask.objects.filter(pk=conv_id).update(
+            status=ConversionTask.STATUS_ERROR,
+            processed_frames=0,
+            error_msg=error_msg,
+            updated=timezone.now()
+        )
 
 
 @shared_task(queue='control', ignore_result=True)
 def notify_conversion_success(conv_id):
-    print('{0}: conversion complete'.format(conv_id))
+    ct_status_list = ConversionTask.objects.filter(pk=conv_id).values_list('status', flat=True)
+    if ct_status_list:
+        if ct_status_list[0] in [
+            ConversionTask.STATUS_ENQUEUED, ConversionTask.STATUS_START_WAITING, ConversionTask.STATUS_STARTED,
+            ConversionTask.STATUS_IN_PROGRESS
+        ]:
+            ConversionTask.objects.filter(pk=conv_id).update(
+                status=ConversionTask.STATUS_COMPLETED,
+                processed_frames=0,
+                updated=timezone.now()
+            )
