@@ -56,11 +56,11 @@
                         <td class="text-nowrap icon_actions_container">
                             {% if perms.schedule.change_channel %}
                                 <a href="{% url 'efsw.schedule:channel:edit' channel.id %}" title="Редактирование канала" class="fa fa-lg fa-edit"></a>
-                            {% endif %}
-                            {% if channel.active %}
-                                <a href="#" title="Прекратить использование" class="fa fa-lg fa-times act_deactivate"></a>
-                            {% else %}
-                                <a href="#" title="Начать использование" class="fa fa-lg fa-check-square-o act_activate"></a>
+                                {% if channel.active %}
+                                    <a href="#" title="Прекратить использование" class="fa fa-lg fa-times act_deactivate"></a>
+                                {% else %}
+                                    <a href="#" title="Начать использование" class="fa fa-lg fa-check-square-o act_activate"></a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>
