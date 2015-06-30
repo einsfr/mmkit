@@ -1,4 +1,5 @@
 import re
+import shlex
 
 from efsw.conversion.converter.exceptions import ConvArgsException
 
@@ -42,6 +43,15 @@ class ArgumentsBuilder(OptionsHandler):
 
     DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin']
 
+    INFO_OPTIONS = (
+        '-L', '-h', '-version', '-formats', '-devices', '-codecs', '-decoders', '-encoders', '-bsfs', '-protocols',
+        '-filters', '-pix_fmts', '-sample_fmts', '-layouts', '-colors', '-sources', '-sinks', '-opencl_bench'
+    )
+
+    GLOBAL_OPTIONS = (
+
+    )
+
     def __init__(self, options=None):
         super().__init__(options)
         self._inputs_list = []
@@ -77,6 +87,10 @@ class ArgumentsBuilder(OptionsHandler):
         for o in self._outputs_list:
             args.extend(o.build())
         return args
+
+    @classmethod
+    def from_string(cls, args_string):
+        args_list = shlex.split(args_string)
 
 
 class InputOutputAbstract(OptionsHandler):
