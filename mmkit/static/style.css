@@ -20,7 +20,7 @@ a.fa:hover, a.fa:active, a.fa:focus {
 }
 
 #lineup_table tbody td.locked {
-    background: #cccccc;
+    background: #dddddd;
 }
 
 #lineup_table tbody td small {
