@@ -13,6 +13,8 @@ from efsw.conversion.models import ConversionProcess, ConversionTask
 class ConvertCallbacksFactory:
 
     def __init__(self, conv_id):
+        if not conv_id:
+            raise ValueError('Аргумент conv_id не может иметь пустое значение.')
         self.conv_id = conv_id
         self.progress_call_interval = getattr(
             settings,
@@ -81,10 +83,21 @@ class ConvertCallbacksFactory:
 
 
 @shared_task(queue='conversion', ignore_result=True)
-def convert(conv_id, args_builder):
+def convert(conv_id, args_builder, io_path_conf):
     converter = Converter()
     cb_factory = ConvertCallbacksFactory(conv_id)
-    converter.convert(args_builder, **cb_factory.get_callback_dict())
+    converter.convert(args_builder, io_path_conf, **cb_factory.get_callback_dict())
+
+
+@shared_task(queue='conversion', ignore_result=True)
+def convert_task(conv_task: ConversionTask):
+    converter = Converter()
+    cb_factory = ConvertCallbacksFactory(conv_task.id)
+    converter.convert(
+        conv_task.args_builder if conv_task.conv_profile is None else conv_task.conv_profile.args_builder,
+        conv_task.io_conf,
+        **cb_factory.get_callback_dict()
+    )
 
 
 @shared_task(queue='bc_conversion', ignore_result=True)

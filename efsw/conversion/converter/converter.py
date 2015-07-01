@@ -3,7 +3,7 @@ from collections import deque
 import re
 
 from efsw.conversion.converter.exceptions import ConvException, ConvConfException, ConvOutputFormatException
-from efsw.conversion.converter.args import ArgumentsBuilder
+from efsw.conversion.converter.args import ArgumentsBuilder, IOPathConfiguration
 
 class Converter:
 
@@ -25,11 +25,11 @@ class Converter:
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
 
-    def convert(self, args_builder: ArgumentsBuilder, start_callback=None, progress_callback=None,
-                success_callback=None, error_callback=None):
+    def convert(self, args_builder: ArgumentsBuilder, io_path_conf: IOPathConfiguration, start_callback=None,
+                progress_callback=None, success_callback=None, error_callback=None):
         if self.debug:
             print('Инициализация процесса кодирования...')
-        args = [self.ffmpeg_bin] + args_builder.build()
+        args = [self.ffmpeg_bin] + args_builder.build(io_path_conf)
         if self.debug:
             args_debug = []
             for a in args:

@@ -1,5 +1,4 @@
 import re
-import shlex
 
 from efsw.conversion.converter.exceptions import ConvArgsException
 
@@ -43,61 +42,89 @@ class ArgumentsBuilder(OptionsHandler):
 
     DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin']
 
-    INFO_OPTIONS = (
-        '-L', '-h', '-version', '-formats', '-devices', '-codecs', '-decoders', '-encoders', '-bsfs', '-protocols',
-        '-filters', '-pix_fmts', '-sample_fmts', '-layouts', '-colors', '-sources', '-sinks', '-opencl_bench'
-    )
-
-    GLOBAL_OPTIONS = (
-
-    )
-
     def __init__(self, options=None):
         super().__init__(options)
-        self._inputs_list = []
-        self._outputs_list = []
+        self._inputs = []
+        self._outputs = []
 
-    def add_input(self, in_obj):
-        if not isinstance(in_obj, Input):
+    def add_input(self, in_obj=None):
+        if in_obj is not None and not isinstance(in_obj, Input):
             raise TypeError('Неправильный тип аргумента - передано: "{0}", ожидалось: '
                             '"efsw.conversion.converter.args.Input".'.format(type(in_obj)))
-        self._inputs_list.append(in_obj)
+        self._inputs.append(in_obj if in_obj is not None else Input())
         return self
 
-    def add_output(self, out_obj):
-        if not isinstance(out_obj, Output):
+    def add_output(self, out_obj=None):
+        if out_obj is not None and not isinstance(out_obj, Output):
             raise TypeError('Неправильный тип аргумента - передано: "{0}", ожидалось: '
                             '"efsw.conversion.converter.args.Output".'.format(type(out_obj)))
-        self._outputs_list.append(out_obj)
+        self._outputs.append(out_obj if out_obj is not None else Output())
         return self
 
-    def build(self, in_paths=(), out_paths=(), override_defaults=False):
-        if not self._inputs_list:
+    def build(self, io_path_conf, override_defaults=False):
+        if not self._inputs:
             raise ConvArgsException('Не задано ни одного входа.')
-        if not self._outputs_list:
+        if not self._outputs:
             raise ConvArgsException('Не задано ни одного выхода.')
+        if not isinstance(io_path_conf, IOPathConfiguration):
+            raise TypeError('Аргумент io_path_conf должен быть экземпляром класса IOPathConfiguration.')
         if self._options is None:
             args = self.DEFAULT_CONVERT_ARGS
         elif self._options is not None and not override_defaults:
             args = self.DEFAULT_CONVERT_ARGS + _build_options(self._options)
         else:
             args = _build_options(self._options)
-        for i in self._inputs_list:
-            args.extend(i.build())
-        for o in self._outputs_list:
-            args.extend(o.build())
+        in_paths, out_paths = io_path_conf.build()
+        if len(in_paths) != len(self._inputs):
+            raise ConvArgsException('Количество элементов аргумента in_paths ({0}) не совпадает с количеством входов '
+                                    '({1}).'.format(len(in_paths), len(self._inputs)))
+        for k, i in enumerate(self._inputs):
+            args.extend(i.build(in_paths[k]))
+        if len(out_paths) != len(self._outputs):
+            raise ConvArgsException('Количество элементов аргумента out_paths ({0}) не совпадает с количеством выходов '
+                                    '({1}).'.format(len(out_paths), len(self._outputs)))
+        for k, o in enumerate(self._outputs):
+            args.extend(o.build(out_paths[k]))
         return args
 
-    @classmethod
-    def from_string(cls, args_string):
-        args_list = shlex.split(args_string)
+
+class IOPathConfiguration:
+
+    def __init__(self, in_paths=None, out_paths=None):
+        self._inputs = [] if in_paths is None else in_paths
+        self._outputs = [] if out_paths is None else out_paths
+
+    def add_input_path(self, in_obj):
+        if type(in_obj) != str and not isinstance(in_obj, AbstractIOPathProvider):
+            raise TypeError('Аргумент in_obj должен быть либо строкой, либо экземпляром потомка класса '
+                            'AbstractIOPathProvider.')
+        self._inputs.append(in_obj)
+        return self
+
+    def add_output_path(self, out_obj):
+        if type(out_obj) != str and not isinstance(out_obj, AbstractIOPathProvider):
+            raise TypeError('Аргумент in_obj должен быть либо строкой, либо экземпляром потомка класса '
+                            'AbstractIOPathProvider.')
+        self._outputs.append(out_obj)
+        return self
+
+    def build(self):
+        return (
+            [i if type(i) == str else i.build() for i in self._inputs],
+            [o if type(o) == str else o.build() for o in self._outputs]
+        )
+
+
+class AbstractIOPathProvider:
+
+    def build(self):
+        raise NotImplementedError
 
 
 class InputOutputAbstract(OptionsHandler):
 
-    def __init__(self, path=None, options=None):
+    def __init__(self, options=None):
         super().__init__(options)
-        self.path = path
 
     def f(self, format_str):
         return self.set_option_value('-f', format_str)
@@ -163,10 +190,8 @@ class InputOutputAbstract(OptionsHandler):
 
 class Input(InputOutputAbstract):
 
-    def build(self, path=None):
-        if not self.path and not path:
-            raise ValueError('Необходимо предоставить либо аргумент path, либо поле path.')
-        return _build_options(self._options) + ['-i', path if path else self.path]
+    def build(self, path):
+        return _build_options(self._options) + ['-i', path]
 
     def itsoffset(self, offset):
         if re.match(r'^-?(?:\d{2}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', offset) is None \
@@ -177,7 +202,5 @@ class Input(InputOutputAbstract):
 
 class Output(InputOutputAbstract):
 
-    def build(self, path=None):
-        if not self.path and not path:
-            raise ValueError('Необходимо предоставить либо аргумент path, либо поле path.')
-        return _build_options(self._options) + [path if path else self.path]
+    def build(self, path):
+        return _build_options(self._options) + [path]

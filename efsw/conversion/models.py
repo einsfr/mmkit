@@ -17,6 +17,37 @@ class ConversionProcess(models.Model):
         editable=False
     )
 
+
+class ConversionProfile(models.Model):
+
+    name = models.CharField(
+        verbose_name='название',
+        unique=True,
+        max_length=255
+    )
+
+    description = models.TextField(
+        verbose_name='описание',
+        blank=True
+    )
+
+    args_builder = models.BinaryField(
+        editable=False
+    )
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance.args_builder = pickle.loads(instance.args_builder)
+        return instance
+
+    def save(self, *args, **kwargs):
+        args_builder = self.args_builder
+        self.args_builder = pickle.dumps(self.args_builder)
+        super().save(*args, **kwargs)
+        self.args_builder = args_builder
+
+
 class ConversionTask(OrderedModel):
 
     STATUS_UNKNOWN = 0
@@ -50,11 +81,19 @@ class ConversionTask(OrderedModel):
         editable=False
     )
 
-    args_builder = models.BinaryField()
+    args_builder = models.BinaryField(
+        null=True,
+        editable=False
+    )
+
+    io_conf = models.BinaryField(
+        editable=False
+    )
 
     status = models.IntegerField(
         editable=False,
-        choices=STATUSES.items()
+        choices=STATUSES.items(),
+        default=STATUS_ENQUEUED
     )
 
     added = models.DateTimeField(
@@ -78,12 +117,25 @@ class ConversionTask(OrderedModel):
         max_length=ERROR_MAX_LENGTH
     )
 
+    conv_profile = models.ForeignKey(
+        ConversionProfile,
+        null=True,
+        related_name='+',
+        editable=False
+    )
+
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super().from_db(db, field_names, values)
         instance.args_builder = pickle.loads(instance.args_builder)
+        instance.io_conf = pickle.loads(instance.io_conf)
         return instance
 
     def save(self, *args, **kwargs):
+        args_builder = self.args_builder
+        io_conf = self.io_conf
         self.args_builder = pickle.dumps(self.args_builder)
+        self.io_conf = pickle.dumps(self.io_conf)
         super().save(*args, **kwargs)
+        self.args_builder = args_builder
+        self.io_conf = io_conf
