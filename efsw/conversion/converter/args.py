@@ -71,7 +71,7 @@ class ArgumentsBuilder(OptionsHandler):
         self._outputs_list.append(out_obj)
         return self
 
-    def build(self, override_defaults=False):
+    def build(self, in_paths=(), out_paths=(), override_defaults=False):
         if not self._inputs_list:
             raise ConvArgsException('Не задано ни одного входа.')
         if not self._outputs_list:
@@ -95,10 +95,8 @@ class ArgumentsBuilder(OptionsHandler):
 
 class InputOutputAbstract(OptionsHandler):
 
-    def __init__(self, path, options=None):
+    def __init__(self, path=None, options=None):
         super().__init__(options)
-        if not path:
-            raise ValueError('Путь в аргументе path не может быть пустым.')
         self.path = path
 
     def f(self, format_str):
@@ -159,14 +157,16 @@ class InputOutputAbstract(OptionsHandler):
             raise ValueError('Позиция в потоке должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
         return self.set_option_value('-ss', position)
 
-    def build(self):
+    def build(self, path):
         raise NotImplementedError
 
 
 class Input(InputOutputAbstract):
 
-    def build(self):
-        return _build_options(self._options) + ['-i', self.path]
+    def build(self, path=None):
+        if not self.path and not path:
+            raise ValueError('Необходимо предоставить либо аргумент path, либо поле path.')
+        return _build_options(self._options) + ['-i', path if path else self.path]
 
     def itsoffset(self, offset):
         if re.match(r'^-?(?:\d{2}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', offset) is None \
@@ -177,5 +177,7 @@ class Input(InputOutputAbstract):
 
 class Output(InputOutputAbstract):
 
-    def build(self):
-        return _build_options(self._options) + [self.path]
+    def build(self, path=None):
+        if not self.path and not path:
+            raise ValueError('Необходимо предоставить либо аргумент path, либо поле path.')
+        return _build_options(self._options) + [path if path else self.path]
