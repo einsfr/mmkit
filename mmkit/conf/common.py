@@ -122,3 +122,5 @@ CELERY_QUEUES = (
     Queue('conversion', routing_key='conversion.#'),
     Broadcast('bc_conversion')
 )
+
+CELERYBEAT_SCHEDULE = {}
