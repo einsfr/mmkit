@@ -185,3 +185,7 @@ def notify_conversion_success(conv_id):
                 processed_frames=0,
                 updated=timezone.now()
             )
+
+@shared_task(queue='control', ignore_result=True)
+def process_conversion_queue():
+    pass

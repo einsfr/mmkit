@@ -108,3 +108,6 @@ class OrderedModelTestCase(TestCase):
         swap_obj = SimpleOrderedModel(pk=6)
         with self.assertRaises(ValueError):
             obj.order_swap(swap_obj)
+
+    def test_order_check(self):
+        disorder_list = [0, 1, 2, 2, 2, 3, 4, 6, 7, 7, 8, 8, 9, 10, 13, 14, 16, 20, 21, 22, 22]
