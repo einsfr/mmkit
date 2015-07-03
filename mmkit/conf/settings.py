@@ -3,12 +3,32 @@ import os
 import re
 
 CONF_ROOT = str(__name__)[:str(__name__).rfind('.')]
+
 CONF_INCLUDES_DIR = 'includes'
+
 APP_ENV = os.environ.get('APP_ENV', 'dev')
+
 APP_DEFAULT_SETTINGS_MODULE = 'default_settings'
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-modules = ('common', APP_ENV, 'local', r'@efsw\.')
+# Application definition
+
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.postgres',
+    'efsw.archive',
+    'efsw.common',
+    'efsw.schedule',
+    'efsw.conversion',
+)
+
+modules = (r'@efsw\.', 'common', 'celery', APP_ENV, 'local')
 merge = ('INSTALLED_APPS', 'STATICFILES_DIRS', 'EFSW_ELASTIC_INIT_INDICES', 'CELERY_QUEUES')
 
 def recursive_merge(from_dict, to_dict, root=True):
@@ -18,6 +38,8 @@ def recursive_merge(from_dict, to_dict, root=True):
                 recursive_merge(v, to_dict[k], False)
             elif root and k in merge:
                 to_dict[k] = to_dict[k] + v
+            else:
+                to_dict[k] = v
         else:
             to_dict[k] = v
 
@@ -47,14 +69,14 @@ for module_name in modules:
                 continue
             m_settings = {}
             for setting in dir(m):
-                if setting == setting.upper():
+                if setting.isupper():
                     m_settings[setting] = getattr(m, setting)
             recursive_merge(m_settings, globals())
             loaded_modules.append(full_name)
     else:
         installed_apps = globals().get('INSTALLED_APPS')
         if not installed_apps:
-            raise RuntimeError('Использовать @ для загрузки конфигураций из приложений можно только загрузки основной '
+            raise RuntimeError('Использовать @ для загрузки конфигураций из приложений можно только загрузки '
                                'части конфигурации, содержащей переменную INSTALLED_APPS.')
         r = re.compile(module_name)
         import_list = ['{0}.{1}'.format(app, APP_DEFAULT_SETTINGS_MODULE) for app in installed_apps if r.match(app)]
@@ -71,7 +93,9 @@ for module_name in modules:
                     m = importlib.import_module(i)
                 if m is None:
                     continue
+                m_settings = {}
                 for setting in dir(m):
-                    if setting == setting.upper() and setting not in globals():
-                        globals()[setting] = getattr(m, setting)
+                    if setting.isupper():
+                        m_settings[setting] = getattr(m, setting)
+                recursive_merge(m_settings, globals())
                 loaded_modules.append(i)

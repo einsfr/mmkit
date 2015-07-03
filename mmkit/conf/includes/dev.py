@@ -29,6 +29,10 @@ LOGGING = {
         'django.db.backends': {
             'handlers': ['console'],
             'level': 'DEBUG',
+        },
+        'efsw': {
+            'handlers': ['console'],
+            'level': 'DEBUG'
         }
     },
 }

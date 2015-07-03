@@ -1,5 +1,11 @@
 import os
 
+from mmkit.conf.settings import BASE_DIR
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'efsw', 'archive', 'static'),
+]
+
 # Количество элементов на одной странице списка
 EFSW_ARCH_ITEM_LIST_PER_PAGE = 20
 
@@ -20,3 +26,7 @@ EFSW_ARCH_FILE_MODE = 0o664
 
 # Количество записей в логе элемента архива, показываемых сразу на детальной странице
 EFSW_ARCH_ITEM_DETAIL_LOG_MESSAGES_COUNT = 3
+
+EFSW_ELASTIC_INIT_INDICES = (
+    os.path.join(BASE_DIR, 'efsw', 'archive', 'search', 'indices'),
+)

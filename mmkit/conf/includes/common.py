@@ -11,27 +11,8 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-from kombu import Queue
-from kombu.common import Broadcast
-
 from mmkit.conf.settings import BASE_DIR
 
-
-# Application definition
-
-INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.postgres',
-    'efsw.archive',
-    'efsw.common',
-    'efsw.schedule',
-    'efsw.conversion',
-)
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,14 +50,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mmkit', 'static'),
-    os.path.join(BASE_DIR, 'efsw', 'common', 'static'),
-    os.path.join(BASE_DIR, 'efsw', 'archive', 'static'),
-    os.path.join(BASE_DIR, 'efsw', 'schedule', 'static')
 ]
-
-EFSW_ELASTIC_INIT_INDICES = (
-    os.path.join(BASE_DIR, 'efsw', 'archive', 'search', 'indices'),
-)
 
 TEMPLATES = [
     {
@@ -98,29 +72,3 @@ TEMPLATES = [
         }
     }
 ]
-
-CELERY_ACCEPT_CONTENT = ['pickle']
-
-CELERY_TASK_SERIALIZER = 'pickle'
-
-CELERY_RESULT_SERIALIZER = 'pickle'
-
-CELERY_TIMEZONE = TIME_ZONE
-
-CELERY_DEFAULT_QUEUE = 'control'
-
-CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
-
-CELERY_DEFAULT_ROUTING_KEY = 'control.default'
-
-CELERY_DEFAULT_EXCHANGE = 'default'
-
-CELERY_DISABLE_RATE_LIMITS = True  # Если эта возможность не используется, то лучше её отключить - это улучшает производительность
-
-CELERY_QUEUES = (
-    Queue('control', routing_key='control.#'),
-    Queue('conversion', routing_key='conversion.#'),
-    Broadcast('bc_conversion')
-)
-
-CELERYBEAT_SCHEDULE = {}

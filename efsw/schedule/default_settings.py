@@ -1,3 +1,10 @@
+import os
+
+from mmkit.conf.settings import BASE_DIR
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'efsw', 'schedule', 'static')
+]
 
 # Количество программ на одной странице списка
 EFSW_SCHED_PROGRAM_LIST_PER_PAGE = 20
