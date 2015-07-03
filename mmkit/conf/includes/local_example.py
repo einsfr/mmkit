@@ -1,19 +1,22 @@
-# Файл надо переименовать в dev_local.py или test_local.py в зависимости от того, какая конфигурация настраивается.
+import os
 
-from mmkit.conf.common import *
+from mmkit.conf.settings import BASE_DIR, APP_ENV
 
-SECRET_KEY = 'my-very-secret-key'
+SECRET_KEY = 'my-secret-key'
 
 # Подключения к базам данных
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mmkit',
+        'USER': 'mmkit',
+        'PASSWORD': 'mmkit',
+        'HOST': '127.0.0.1',
     }
 }
 
 # Корневая папка хранилища
-EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_dev')
+EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_{0}'.format(APP_ENV))
 
 # Подключения к Elasticsearch и их опции (http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch)
 # Elasticsearch(EFSW_ELASTIC_HOSTS, **EFSW_ELASTIC_OPTIONS)

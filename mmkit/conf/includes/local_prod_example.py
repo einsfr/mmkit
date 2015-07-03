@@ -1,4 +1,6 @@
-from mmkit.conf.prod import *
+import os
+
+from mmkit.conf.settings import BASE_DIR
 
 SECRET_KEY = 'my-really-secret-production-key-and-i-will-not-show-it-to-anybody'
 

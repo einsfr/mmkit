@@ -1,5 +1,3 @@
-from mmkit.conf.common import *
-
 DEBUG = True
 
 ALLOWED_HOSTS = []

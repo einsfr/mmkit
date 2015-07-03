@@ -14,7 +14,7 @@ import os
 from kombu import Queue
 from kombu.common import Broadcast
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+from mmkit.conf.settings import BASE_DIR
 
 
 # Application definition

@@ -4,7 +4,8 @@ import os
 
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mmkit.conf.dev_local')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mmkit.conf.settings')
+os.environ.setdefault('APP_ENV', 'dev')
 
 from django.conf import settings
 
