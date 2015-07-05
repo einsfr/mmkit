@@ -110,4 +110,10 @@ class OrderedModelTestCase(TestCase):
             obj.order_swap(swap_obj)
 
     def test_order_check(self):
-        disorder_list = [0, 1, 2, 2, 2, 3, 4, 6, 7, 7, 8, 8, 9, 10, 13, 14, 16, 20, 21, 22, 22]
+        disorder_list = [1, 1, 2, 2, 2, 3, 4, 6, 7, 7, 8, 8, 9, 10, 13, 14, 16, 20, 21, 22, 22]
+        SimpleOrderedModel.objects.bulk_create([SimpleOrderedModel(order=o) for o in disorder_list])
+        SimpleOrderedModel.order_check()
+        self.assertEqual(
+            list(SimpleOrderedModel.objects.order_by('order').values_list('order', flat=True)),
+            list(range(0, len(disorder_list)))
+        )

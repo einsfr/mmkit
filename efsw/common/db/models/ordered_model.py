@@ -109,33 +109,9 @@ class OrderedModel(models.Model):
 
     @classmethod
     def order_check(cls):
-        order_list = list(cls.objects.order_by('order', 'id').values_list('id', 'order'))
+        order_list = list(cls.objects.order_by('order', '-id').values_list('id', 'order'))
         if not order_list or len(order_list) == 1:
             return
-        # Сдвигаем очередь, если порядок первого элемента в ней больше, чем минимальный порядок очереди
-        min_order = order_list[0][1]
-        if min_order > cls.MIN_ORDER_VALUE:
-            cls.objects.update(order=F('order') - (min_order - cls.MIN_ORDER_VALUE))
-        # Проверяем, есть ли в очереди дубли
-        order_list = list(cls.objects.order_by('order', 'id').values_list('id', 'order'))
-        for k, v in enumerate(order_list[:-1]):
-            next_v = order_list[k + 1]
-            if v[1] == next_v[1]:
-                try:
-                    next_next_v = order_list[k + 2]
-                except IndexError:
-                    cls.objects.filter(pk=next_v[0]).update(order=next_v[1] + 1)
-                    break
-                if next_next_v[1] - next_v[1] <= 1:
-                    cls.objects.filter(order__gte=next_v[1]).exclude(pk__in=[v[0], next_v[0]]).update(
-                        order=F('order') + 2
-                    )
-                next_v[1] += 1
-                cls.objects.filter(pk=next_v[0]).update(order=next_v[1])
-        # Проверяем, есть ли в очереди "окна" - пропущенные номера
-        order_list = list(cls.objects.order_by('order', 'id').values_list('id', 'order'))
-        for k, v in enumerate(order_list[:-1]):
-            next_v = order_list[k + 1]
-            order_delta = next_v[1] - v[1]
-            if order_delta > 1:
-                cls.objects.filter(order__gt=v[1]).update(order=F('order') - (order_delta - 1))
+        for k, v in enumerate(order_list):
+            if k + cls.MIN_ORDER_VALUE != v[1]:
+                cls.objects.filter(pk=v[0]).update(order=k + cls.MIN_ORDER_VALUE)
