@@ -27,4 +27,4 @@ EFSW_ELASTIC_OPTIONS = {}
 
 BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'
 
-EFSW_FFMPEG_BIN = 'E:\\ffmpeg-20150107-git-919e038-win64-static\\bin\\ffmpeg.exe'
+EFSW_FFMPEG_BIN = 'D:\\ffmpeg-20150619-git-bb3703a-win64-static\\bin\\ffmpeg.exe'

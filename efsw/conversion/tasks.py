@@ -188,4 +188,37 @@ def notify_conversion_success(conv_id):
 
 @shared_task(queue='control', ignore_result=True)
 def process_conversion_queue():
-    pass
+    # Отправляем ещё задания, если есть свободные места
+    add_count = settings.EFSW_CONVERTER_MAX_START_WAITING_COUNT - ConversionTask.objects.filter(
+        status=ConversionTask.STATUS_START_WAITING
+    ).count()
+    if add_count > 0:
+        add_tasks = ConversionTask.objects.filter(status=ConversionTask.STATUS_ENQUEUED).order_by('order')[:add_count]
+        if add_tasks:
+            ConversionTask.objects.filter(
+                pk__in=[t.pk for t in add_tasks]
+            ).update(status=ConversionTask.STATUS_START_WAITING)
+            for t in add_tasks:
+                convert_task.delay(t)
+    # Удаляем успешно выполненные задания, для которых истёк срок хранения
+    if settings.EFSW_CONVERTER_MAX_SUCCESS_LIFETIME:
+        ConversionTask.objects.filter(
+            status=ConversionTask.STATUS_COMPLETED,
+            updated__lt=timezone.now() - settings.EFSW_CONVERTER_MAX_SUCCESS_LIFETIME
+        ).delete()
+    # Удаляем задания с ошибками, для которых истёк срок хранения
+    if settings.EFSW_CONVERTER_MAX_ERROR_LIFETIME:
+        ConversionTask.objects.filter(
+            status=ConversionTask.STATUS_ERROR,
+            updated__lt=timezone.now() - settings.EFSW_CONVERTER_MAX_ERROR_LIFETIME
+        ).delete()
+    # Удаляем отменённые задания, для которых истёк срок хранения
+    if settings.EFSW_CONVERTER_MAX_CANCELED_LIFETIME:
+        ConversionTask.objects.filter(
+            status=ConversionTask.STATUS_CANCELED,
+            updated__lt=timezone.now() - settings.EFSW_CONVERTER_MAX_CANCELED_LIFETIME
+        ).delete()
+
+@shared_task(queue='control', ignore_result=True)
+def reorder_conversion_queue():
+    ConversionTask.order_check()
