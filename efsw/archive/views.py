@@ -4,7 +4,6 @@ from django import shortcuts
 from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
-from django.db import IntegrityError, transaction
 
 from efsw.archive import models
 from efsw.archive import forms
