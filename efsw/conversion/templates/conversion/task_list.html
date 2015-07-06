@@ -1,0 +1,131 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Список заданий{% endblock %}
+
+{% block content %}
+    <h2>Список заданий</h2>
+    {% if tasks_unknown %}
+        <h3>Задания с неизвестным статусом</h3>
+        <table id="tasks_unknown_table" class="table table-hover" style="margin-top: 0.5em;">
+            <thead>
+                <tr>
+                    <th style="min-width: 3em;">&nbsp;</th>
+                    <th style="width: 100%;">Название</th>
+                    <th>Добавлено</th>
+                    <th>Обновлено</th>
+                    <th>Обр.&nbsp;кадров</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% include 'conversion/_task_list_table_body.html' with tasks=tasks_unknown %}
+            </tbody>
+            {% if tasks_unknown_more %}
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <a href="{% url 'efsw.conversion:task:list_unknown' %}"
+                               title="Показать все задания c неизвестным статусом">Показать все</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            {% endif %}
+        </table>
+    {% endif %}
+    <h3>Завершившиеся задания</h3>
+    {% if tasks_finished %}
+        <table id="tasks_finished_table" class="table table-hover" style="margin-top: 0.5em;">
+            <thead>
+                <tr>
+                    <th style="min-width: 3em;">&nbsp;</th>
+                    <th style="width: 100%;">Название</th>
+                    <th>Добавлено</th>
+                    <th>Обновлено</th>
+                    <th>Обр.&nbsp;кадров</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% include 'conversion/_task_list_table_body.html' with tasks=tasks_finished %}
+            </tbody>
+            {% if tasks_finished_more %}
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <a href="{% url 'efsw.conversion:task:list_finished' %}"
+                               title="Показать все завершившиеся задания">Показать все</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            {% endif %}
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Завершившиеся задания отсутствуют</div>
+        </div>
+    {% endif %}
+    <h3>Задания в процессе выполнения</h3>
+    {% if tasks_in_progress %}
+        <table id="tasks_in_progress_table" class="table table-hover" style="margin-top: 0.5em;">
+            <thead>
+                <tr>
+                    <th style="min-width: 3em;">&nbsp;</th>
+                    <th style="width: 100%;">Название</th>
+                    <th>Добавлено</th>
+                    <th>Обновлено</th>
+                    <th>Обр.&nbsp;кадров</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% include 'conversion/_task_list_table_body.html' with tasks=tasks_in_progress %}
+            </tbody>
+            {% if tasks_in_progress_more %}
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <a href="{% url 'efsw.conversion:task:list_in_progress' %}"
+                               title="Показать все задания в процессе выполнения">Показать все</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            {% endif %}
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Задания в процессе выполнения отсутствуют</div>
+        </div>
+    {% endif %}
+    <h3>Задания, ожидающие выполнения</h3>
+    {% if tasks_enqueued %}
+        <table id="tasks_enqueued_table" class="table table-hover" style="margin-top: 0.5em;">
+            <thead>
+                <tr>
+                    <th style="min-width: 3em;">&nbsp;</th>
+                    <th style="width: 100%;">Название</th>
+                    <th>Добавлено</th>
+                    <th>Обновлено</th>
+                    <th>Обр.&nbsp;кадров</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% include 'conversion/_task_list_table_body.html' with tasks=tasks_enqueued %}
+            </tbody>
+            {% if tasks_enqueued_more %}
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <a href="{% url 'efsw.conversion:task:list_enqueued' %}"
+                               title="Показать все задания, ожидающие выполнения">Показать все</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            {% endif %}
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Задания, ожидающие выполнения, отсутствуют</div>
+        </div>
+    {% endif %}
+{% endblock %}

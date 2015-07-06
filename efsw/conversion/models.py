@@ -69,6 +69,7 @@ class ConversionTask(OrderedModel):
         STATUS_STARTED: 'запущено',
         STATUS_IN_PROGRESS: 'выполняется',
         STATUS_COMPLETED: 'завершено',
+        STATUS_CANCELED: 'отменено',
 
         STATUS_ERROR: 'ошибка'
     }
@@ -79,6 +80,10 @@ class ConversionTask(OrderedModel):
         primary_key=True,
         default=uuid.uuid4,
         editable=False
+    )
+
+    name = models.CharField(
+        max_length=255
     )
 
     args_builder = models.BinaryField(

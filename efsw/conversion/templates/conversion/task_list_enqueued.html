@@ -1,0 +1,28 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Список заданий, ожидающих выполнения{% endblock %}
+
+{% block content %}
+    <h2>Список заданий, ожидающих выполнения</h2>
+    {% if tasks_enqueued %}
+        <table id="tasks_enqueued_table" class="table table-hover" style="margin-top: 0.5em;">
+            <thead>
+                <tr>
+                    <th style="min-width: 3em;">&nbsp;</th>
+                    <th style="width: 100%;">Название</th>
+                    <th>Добавлено</th>
+                    <th>Обновлено</th>
+                    <th>Обр.&nbsp;кадров</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% include 'conversion/_task_list_table_body.html' with tasks=tasks_enqueued %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Задания, ожидающие выполнения, отсутствуют</div>
+        </div>
+    {% endif %}
+{% endblock %}

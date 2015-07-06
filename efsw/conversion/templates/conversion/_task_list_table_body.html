@@ -1,0 +1,30 @@
+{% for t in tasks %}
+    <tr>
+        <td>
+            {% if t.status == t.STATUS_UNKNOWN %}
+                <span title="Неизвестно" class="fa fa-question-circle text-warning"></span>
+            {% elif t.status == t.STATUS_ENQUEUED %}
+                <span title="В очереди" class="fa fa-stop"></span>
+            {% elif t.status == t.STATUS_START_WAITING %}
+                <span title="Ожидает запуска" class="fa fa-pause"></span>
+            {% elif t.status == t.STATUS_STARTED %}
+                <span title="Запущено" class="fa fa-play"></span>
+            {% elif t.status == t.STATUS_IN_PROGRESS %}
+                <span title="Выполняется" class="fa fa-forward"></span>
+            {% elif t.status == t.STATUS_COMPLETED %}
+                <span title="Завершено успешно" class="fa fa-check-circle text-success"></span>
+            {% elif t.status == t.STATUS_ERROR %}
+                <span title="Завершено с ошибкой" class="fa fa-exclamation-circle text-danger"></span>
+            {% elif t.status == t.STATUS_CANCELED %}
+                <span title="Отменено" class="fa fa-times-circle text-warning"></span>
+            {% endif %}
+        </td>
+        <td><a href="{% url 'efsw.conversion:task:show' t.id %}" title="Описание задания">{{ t.name }}</a></td>
+        <td class="text-nowrap">{{ t.added|date:"SHORT_DATETIME_FORMAT" }}</td>
+        <td class="text-nowrap">{{ t.updated|date:"SHORT_DATETIME_FORMAT" }}</td>
+        <td>{% if t.processed_frames %}{{ t.processed_frames }}{% else %}-{% endif %}</td>
+        <td class="text-nowrap">
+            &nbsp;
+        </td>
+    </tr>
+{% endfor %}

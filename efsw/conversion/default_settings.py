@@ -16,6 +16,8 @@ EFSW_CONVERTER_MAX_ERROR_LIFETIME = None
 
 EFSW_CONVERTER_MAX_CANCELED_LIFETIME = timedelta(weeks=1)
 
+EFSW_CONVERTER_TASKS_SHORT_LIST_COUNT = 10
+
 CELERY_QUEUES = (
     Queue('conversion', routing_key='conversion.#'),
     Broadcast('bc_conversion')

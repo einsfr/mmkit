@@ -1,0 +1,73 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание задания{% endblock %}
+
+{% block content %}
+    <h2>{{ task.name }}</h2>
+    <table class="table table-striped obj_properties">
+        <tbody>
+            {% if task.status == task.STATUS_ERROR %}
+                <tr class="danger">
+                    <th>Ошибка кодирования</th>
+                    <td>{{ task.error_msg }}</td>
+                </tr>
+            {% endif %}
+            <tr>
+                <th style="width: 14em;">ID</th>
+                <td>{{ task.id }}</td>
+            </tr>
+            <tr>
+                <th>Статус</th>
+                <td>
+                    {% if task.status == task.STATUS_UNKNOWN %}
+                        <span class="fa fa-question-circle text-warning"></span>&nbsp;Неизвестно
+                    {% elif task.status == task.STATUS_ENQUEUED %}
+                        <span class="fa fa-stop"></span>&nbsp;В очереди
+                    {% elif task.status == task.STATUS_START_WAITING %}
+                        <span class="fa fa-pause"></span>&nbsp;Ожидает запуска
+                    {% elif task.status == task.STATUS_STARTED %}
+                        <span class="fa fa-play"></span>&nbsp;Запущено
+                    {% elif task.status == task.STATUS_IN_PROGRESS %}
+                        <span class="fa fa-forward"></span>&nbsp;Выполняется
+                    {% elif task.status == task.STATUS_COMPLETED %}
+                        <span class="fa fa-check-circle text-success"></span>&nbsp;Завершено успешно
+                    {% elif task.status == task.STATUS_ERROR %}
+                        <span class="fa fa-exclamation-circle text-danger"></span>&nbsp;Завершено с ошибкой
+                    {% elif task.status == task.STATUS_CANCELED %}
+                        <span class="fa fa-times-circle text-warning"></span>&nbsp;Отменено
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Добавлено</th>
+                <td>{{ task.added|date:"SHORT_DATETIME_FORMAT" }}</td>
+            </tr>
+            <tr>
+                <th>Обновлено</th>
+                <td>{{ task.updated|date:"SHORT_DATETIME_FORMAT" }}</td>
+            </tr>
+            {% if task.status == task.STATUS_IN_PROGRESS %}
+                <tr>
+                    <th>Обработано кадров</th>
+                    <td>{{ task.processed_frames }}</td>
+                </tr>
+            {% endif %}
+            {% if task.args_builder %}
+                <tr>
+                    <th>Параметры кодирования</th>
+                    <td>{{ task.args_builder }}</td>
+                </tr>
+            {% endif %}
+            {% if task.conv_profile %}
+                <tr>
+                    <th>Профиль кодирования</th>
+                    <td>{{ task.conv_profile }}</td>
+                </tr>
+            {% endif %}
+            <tr>
+                <th>Конфигурация входов и выходов</th>
+                <td>{{ task.io_conf }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

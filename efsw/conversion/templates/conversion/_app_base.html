@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block title %}{{ block.super }} - Конвертер{% endblock %}
+
+{% block app_navigation %}
+    <ul class="nav nav-pills">
+        <li role="presentation" class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+                Задания <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu">
+                <li role="presentation">
+                    <a href="{% url 'efsw.conversion:task:list' %}" title="Список заданий">Список</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+{% endblock %}
