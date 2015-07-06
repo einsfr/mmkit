@@ -123,8 +123,9 @@ class AbstractIOPathProvider:
 
 class InputOutputAbstract(OptionsHandler):
 
-    def __init__(self, options=None):
+    def __init__(self, options=None, comment=None):
         super().__init__(options)
+        self.comment = comment
 
     def f(self, format_str):
         return self.set_option_value('-f', format_str)
