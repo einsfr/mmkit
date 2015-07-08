@@ -1,3 +1,4 @@
-from efsw.common.storage.storage import AbstractStorage, AbstractPublicStorage, AbstractFilesystemStorage
+from efsw.common.storage.storage import AbstractMetaStorage, AbstractFileStorage, AbstractPublicStorage, \
+    AbstractFilesystemStorage
 
-__all__ = ['AbstractStorage', 'AbstractPublicStorage', 'AbstractFilesystemStorage']
+__all__ = ['AbstractMetaStorage', 'AbstractFileStorage', 'AbstractPublicStorage', 'AbstractFilesystemStorage']

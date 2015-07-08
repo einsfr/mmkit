@@ -1,7 +1,7 @@
 import os
 
 
-class AbstractStorage:
+class AbstractMetaStorage:
 
     def get_verbose_name(self):
         raise NotImplementedError('Метод get_verbose_name должен быть реализован в дочерних классах.')
@@ -9,8 +9,20 @@ class AbstractStorage:
     def get_name(self):
         raise NotImplementedError('Метод get_name должен быть реализован в дочерних классах.')
 
-    def get_path(self, element_id):
-        raise NotImplementedError('Метод get_path должен быть реализован в дочерних классах.')
+    def get_location(self, element_id):
+        raise NotImplementedError('Метод get_location должен быть реализован в дочерних классах.')
+
+
+class AbstractFileStorage:
+
+    def get_verbose_name(self):
+        raise NotImplementedError('Метод get_verbose_name должен быть реализован в дочерних классах.')
+
+    def get_name(self):
+        raise NotImplementedError('Метод get_name должен быть реализован в дочерних классах.')
+
+    def is_read_only(self):
+        raise NotImplementedError('Метод is_read_only должен быть реализован в дочерних классах.')
 
 
 class AbstractPublicStorage:
@@ -22,7 +34,7 @@ class AbstractPublicStorage:
         raise NotImplementedError('Метод get_access_url должен быть реализован в дочерних классах.')
 
 
-class AbstractFilesystemStorage(AbstractStorage):
+class AbstractFilesystemStorage(AbstractFileStorage):
 
     def __init__(self, name, verbose_name, base_dir):
         self._name = name
