@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from efsw.archive import default_settings
 from efsw.common.search.models import IndexableModel
 from efsw.common.utils import urlformatter
+from efsw.common import models as common_models
 
 
 class ItemCategory(models.Model):
@@ -45,12 +46,15 @@ class Item(IndexableModel, models.Model):
         max_length=255,
         verbose_name='название'
     )
+
     description = models.TextField(
         verbose_name='описание'
     )
+
     created = models.DateField(
         verbose_name='дата создания'
     )
+
     author = models.CharField(
         max_length=255,
         verbose_name='автор'
@@ -61,10 +65,21 @@ class Item(IndexableModel, models.Model):
         related_name='items',
         verbose_name='категория'
     )
+
     includes = models.ManyToManyField(
         'self',
         symmetrical=False,
         related_name='included_in'
+    )
+
+    file_storage_objects = models.ManyToManyField(
+        common_models.FileStorageObject,
+        related_name='+'
+    )
+
+    meta_storage_objects = models.ManyToManyField(
+        common_models.MetaStorageObject,
+        related_name='+'
     )
 
     def __str__(self):
