@@ -47,26 +47,6 @@ class ItemUpdatePropertiesForm(forms.ModelForm):
         self.fields['category'].empty_label = None
 
 
-class ItemUpdateLocationsForm(forms.ModelForm):
-    class Meta:
-        model = models.ItemLocation
-        fields = ('storage', 'location')
-        widgets = {
-            'storage': widgets.Select(attrs={
-                'class': 'form-control',
-                'data-bind': 'value: form_storage().id, event: { change: storage_changed }',
-            }),
-            'location': widgets.TextInput(attrs={
-                'class': 'form-control',
-                'data-bind': 'value: form_location, disable: form_storage().disable_location'
-            }),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['storage'].empty_label = None
-
-
 class ItemCategoryForm(forms.ModelForm):
     class Meta:
         model = models.ItemCategory

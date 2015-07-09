@@ -60,7 +60,6 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
                 perm_codename='change_item',
                 method='post'
             ),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_locations_json')),
             self.SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_locations_json'),
                 anonymous=False,

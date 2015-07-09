@@ -1,14 +1,15 @@
 import uuid
 
 from django.db import models
-from django.contrib.postgres.fields import HStoreField
+from django.contrib.postgres.fields import HStoreField, ArrayField
 
 
-class AbstractStorage(models.Model):
+class FileStorage(models.Model):
 
     class Meta:
         app_label = 'common'
-        abstract = True
+        verbose_name = 'файловое хранилище'
+        verbose_name_plural = 'файловые хранилища'
 
     id = models.UUIDField(
         primary_key=True,
@@ -20,22 +21,6 @@ class AbstractStorage(models.Model):
         verbose_name='имя',
         max_length=255
     )
-
-
-class MetaStorage(AbstractStorage):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'хранилище метаданных'
-        verbose_name_plural = 'хранилища метаданных'
-
-
-class FileStorage(AbstractStorage):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'файловое хранилище'
-        verbose_name_plural = 'файловые хранилища'
 
     base_dir = models.CharField(
         max_length=255,
@@ -51,26 +36,24 @@ class FileStorage(AbstractStorage):
         default=True
     )
 
+    allowed_usage = ArrayField(
+        models.CharField(max_length=16)
+    )
 
-class AbstractStorageObject(models.Model):
+
+class FileStorageObject(models.Model):
 
     class Meta:
         app_label = 'common'
-        abstract = True
+        verbose_name = 'объект в файловом хранилище'
+        verbose_name_plural = 'объекты в файловом хранилище'
+        unique_together = ('storage', 'id')
 
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False
     )
-
-
-class FileStorageObject(AbstractStorageObject):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'объект в файловом хранилище'
-        verbose_name_plural = 'объекты в файловом хранилище'
 
     storage = models.ForeignKey(
         FileStorage,
@@ -80,22 +63,4 @@ class FileStorageObject(AbstractStorageObject):
     path = models.CharField(
         max_length=255,
         verbose_name='путь к объекту'
-    )
-
-
-class MetaStorageObject(AbstractStorageObject):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'объект в хранилище метаданных'
-        verbose_name_plural = 'объекты в хранилище метаданных'
-
-    storage = models.ForeignKey(
-        MetaStorage,
-        related_name='stored_objects'
-    )
-
-    location = models.CharField(
-        max_length=255,
-        verbose_name='место хранения объекта'
     )

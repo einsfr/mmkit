@@ -15,6 +15,7 @@ from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.utils import urlformatter
 from efsw.common.db import pagination
+from efsw.common import models as common_models
 
 
 def _get_item_list_page(items, page):
@@ -40,13 +41,6 @@ def _get_json_item_wrong_id(item_id):
     )
 
 
-def _get_json_storage_wrong_id(item_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор хранилища должен быть целым числом, предоставлено: "{0}".'.format(item_id),
-        'id_not_int'
-    )
-
-
 def _get_json_wrong_format():
     return JsonWithStatusResponse.error('Неверный формат запроса.', 'wrong_format')
 
@@ -57,13 +51,6 @@ def _format_item_dict(i):
         'name': i.name,
         'url': i.get_absolute_url(),
     }
-
-
-def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id),
-        'storage_not_found'
-    )
 
 
 def _check_include(item, include):
@@ -197,7 +184,9 @@ def item_show_properties(request, item_id):
 @http.require_GET
 def item_show_locations(request, item_id):
     item = shortcuts.get_object_or_404(
-        models.Item.objects.prefetch_related('locations', 'locations__storage'),
+        models.Item.objects.prefetch_related(
+            'file_locations', 'file_locations__file_object', 'file_locations__file_object__storage',
+        ),
         pk=item_id
     )
     return shortcuts.render(request, 'archive/item_show_locations.html', {
@@ -337,29 +326,8 @@ def item_update_links_json(request):
     return JsonWithStatusResponse.ok()
 
 
-@http.require_GET
-def item_show_locations_json(request):
-    item_id = request.GET.get('id', None)
-    try:
-        item = models.Item.objects.get(pk=item_id)
-    except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    except ValueError:
-        return _get_json_item_wrong_id(item_id)
-    locations_list = [
-        _prepare_location_for_ui(l)
-        for l in item.locations.all().select_related('storage')
-    ]
-    return JsonWithStatusResponse.ok(locations_list)
-
-
 @http.require_POST
 def item_update_locations_json(request):
-
-    def _clean_location(loc):
-        loc['storage_id'] = int(loc['storage_id'])
-        return loc
-
     item_id = request.GET.get('id', None)
     try:
         item = models.Item.objects.get(pk=item_id)
@@ -367,37 +335,7 @@ def item_update_locations_json(request):
         return _get_json_item_not_found(item_id)
     except ValueError:
         return _get_json_item_wrong_id(item_id)
-    post_locations = request.POST.get('locations', None)
-    if post_locations is None:
-        return _get_json_wrong_format()
-    try:
-        locations = list(map(_clean_location, json.loads(post_locations)))
-    except ValueError:
-        return _get_json_wrong_format()
-    if len(locations) == 0:
-        models.ItemLocation.objects.filter(item=item).delete()
-        return JsonWithStatusResponse.ok()
-    storage_ids_list = [l['storage_id'] for l in locations]
-    storage_ids = set(storage_ids_list)
-    if len(storage_ids_list) > len(storage_ids):
-        return JsonWithStatusResponse.error(
-            'Элемент не может иметь несколько расположений в одном хранилище.',
-            'item_storage_twice'
-        )
-    storages = models.Storage.objects.filter(id__in=storage_ids)
-    if len(storage_ids) != len(storages):
-        return JsonWithStatusResponse.error('Используется несуществующее хранилище.', 'storage_not_found')
-    storages_dict = dict([(s.id, s) for s in storages])
-    leftover_locations = [l['id'] for l in locations if l['id']]
-    models.ItemLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
-    for l in locations:
-        if l['id'] != 0:
-            continue
-        l_obj = models.ItemLocation()
-        l_obj.storage = storages_dict[l['storage_id']]
-        l_obj.item = item
-        l_obj.location = l['location']
-        l_obj.save()
+
     return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))
 
 
@@ -416,43 +354,17 @@ def item_edit_properties(request, item_id):
     })
 
 
-def _prepare_location_for_ui(l):
-    r = {
-        'id': l.id,
-        'storage_id': l.storage_id,
-        'storage_name': l.storage.name,
-    }
-    if l.storage.is_online_type():
-        r['location'] = l.get_url().format_win()
-    else:
-        r['location'] = l.location
-    return r
-
-
-def _prepare_storage_for_ui(s):
-    r = {
-        'id': s.id,
-        'name': s.name,
-        'disable_location': s.is_online_master_type(),
-    }
-    if s.is_online_type():
-        base_url = s.base_url if s.base_url[-1] == '/' else '{0}/'.format(s.base_url)
-        r['base_url'] = urlformatter.format_url(base_url).format_win()
-    else:
-        r['base_url'] = ''
-    return r
-
-
 @http.require_GET
 def item_edit_locations(request, item_id):
-    item = shortcuts.get_object_or_404(models.Item, pk=item_id)
-    locations = list(map(_prepare_location_for_ui, item.locations.select_related('storage').order_by('pk').all()))
-    storage_qs = models.Storage.objects.all()[0:1]
+    item = shortcuts.get_object_or_404(
+        models.Item.objects.prefetch_related(
+            'file_locations', 'file_locations__file_object', 'file_locations__file_object__storage',
+        ),
+        pk=item_id
+    )
     return shortcuts.render(request, 'archive/item_edit_locations.html', {
         'item': item,
-        'locations': locations,
-        'init_storage': (_prepare_storage_for_ui(storage_qs[0]) if storage_qs else None),
-        'form': forms.ItemUpdateLocationsForm()
+        'storages': common_models.FileStorage.objects.filter(allowed_usage__contains=['archive'])
     })
 
 
@@ -553,18 +465,3 @@ def category_update_json(request):
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:category:list'))
     else:
         return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
-
-
-# ------------------------- Storage -------------------------
-
-
-@http.require_GET
-def storage_show_json(request):
-    storage_id = request.GET.get('id', None)
-    try:
-        storage = models.Storage.objects.get(pk=storage_id)
-    except models.Storage.DoesNotExist:
-        return _get_json_storage_not_found(storage_id)
-    except ValueError:
-        return _get_json_storage_wrong_id(storage_id)
-    return JsonWithStatusResponse(_prepare_storage_for_ui(storage))

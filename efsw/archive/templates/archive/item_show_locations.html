@@ -11,7 +11,7 @@
         {% endif %}
     </h2>
     {% include 'archive/_item_show_nav_tabs.html' with active='locations' %}
-    {% if item.locations.count %}
+    {% if item.file_locations.count %}
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -20,16 +20,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for location in item.locations.all %}
+                {% for location in item.file_locations.all %}
                     <tr>
-                        <td>{{ location.storage.name }}</td>
-                        <td>
-                            {% if location.storage.is_online_type %}
-                                {{ location.get_url.format_win }}
-                            {% else %}
-                                {{ location.location }}
-                            {% endif %}
-                        </td>
+                        <td>{{ location.file_object.storage.name }}</td>
+                        <td>{{ location.file_object.path }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

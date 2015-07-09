@@ -103,11 +103,6 @@ crashlytics-build.properties
 # База данных проекта
 /db.sqlite3
 
-# Папки с хранилищами для нужд разработки и тестирования
-/_storage*
-# Папка с хранилищем приложения, установленная по-умолчанию
-/storage
-
 # Файлы, использующиеся Celery для периодических заданий
 /celerybeat.pid
 /celerybeat-schedule.bak

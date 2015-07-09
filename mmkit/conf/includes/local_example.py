@@ -15,8 +15,8 @@ DATABASES = {
     }
 }
 
-# Корневая папка хранилища
-EFSW_ARCH_STORAGE_ROOT = os.path.join(BASE_DIR, '_storage_{0}'.format(APP_ENV))
+# Корневая папка для монтирования ВСЕХ хранилищ
+EFSW_STORAGE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'storage_{0}'.format(APP_ENV))
 
 # Подключения к Elasticsearch и их опции (http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch)
 # Elasticsearch(EFSW_ELASTIC_HOSTS, **EFSW_ELASTIC_OPTIONS)

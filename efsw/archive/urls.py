@@ -111,13 +111,6 @@ item_patterns = [
         permission_required('archive.change_item')(views.item_update_links_json),
         name='update_links_json'
     ),
-    # items/show/locations/json/?id=12 Положение этого элемента в хранилищах (JSON)
-    # Тесты: url sec
-    url(
-        r'^show/locations/json/$',
-        views.item_show_locations_json,
-        name='show_locations_json'
-    ),
     # items/update/locations/json/?id=12 Положение этого элемента в хранилищах - обновление (JSON, POST)
     # Тесты: url sec
     url(
@@ -208,18 +201,6 @@ category_patterns = [
     ),
 ]
 
-# ------------------------- Storage -------------------------
-storage_patterns = [
-    # ------------------------- Storage JSON -------------------------
-    # storages/show/json/?id=12 Описание одного хранилища (JSON)
-    # Тесты: url sec
-    url(
-        r'^show/json/$',
-        views.storage_show_json,
-        name='show_json'
-    ),
-]
-
 urlpatterns = [
     # search/... Поиск по архиву
     # Тесты: url sec
@@ -228,6 +209,4 @@ urlpatterns = [
     url(r'^items/', include((item_patterns, 'item', 'item'))),
     # categories/...
     url(r'^categories/', include((category_patterns, 'category', 'category'))),
-    # storages/
-    url(r'^storages/', include((storage_patterns, 'storage', 'storage'))),
 ]

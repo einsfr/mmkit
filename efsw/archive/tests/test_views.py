@@ -456,35 +456,6 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
 
 
-class ItemShowLocationsJsonTestCase(TestCase):
-
-    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlocation.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:item:show_locations_json')
-
-    def test_nonexist(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_not_found', json_content['status_ext'])
-
-    def test_normal(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 8))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        locations = json_content['data']
-        self.assertEqual(2, len(locations))
-        for l in locations:
-            self.assertEqual(4, len(l))
-            for _ in ['id', 'storage_name', 'storage_id', 'location']:
-                self.assertIn(_, l)
-        self.assertEqual([9, 10], sorted([l['id'] for l in locations]))
-
-
 class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase):
 
     fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json', 'itemlocation.json']

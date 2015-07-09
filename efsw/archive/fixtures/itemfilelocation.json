@@ -1,0 +1,16 @@
+[
+  {
+    "model": "archive.ItemFileLocation",
+    "fields": {
+      "file_object": "604041e3-7aaa-4c8a-b25c-8d287cc0f36d",
+      "item": 1
+    }
+  },
+  {
+    "model": "archive.ItemFileLocation",
+    "fields": {
+      "file_object": "0ece49e1-858f-4d65-9486-3c68ef1a2390",
+      "item": 1
+    }
+  }
+]

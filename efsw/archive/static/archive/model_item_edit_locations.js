@@ -1,32 +1,11 @@
 define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_loader'], function($, ko, ajr, jol) {
 
-    function ItemLocation(data) {
-        var default_values = { 'id': 0, 'storage_id': 0, 'storage_name': '', 'location': '', 'base_url': '' };
-        if (typeof data == 'undefined') {
-            $.extend(true, this, default_values);
-        } else {
-            $.extend(true, this, default_values, data);
-        }
-    }
-
-    function ItemStorage(data) {
-        var default_values = {'id': 0, 'name': '', 'base_url': '', 'disable_location': false };
-        if (typeof data == 'undefined') {
-            $.extend(true, this, default_values);
-        } else {
-            $.extend(true, this, default_values, data);
-        }
-    }
-
     return function ItemEditLocationsViewModel(urls) {
         var self = this;
         self.urls = urls;
         self.error_msg = ko.observable('');
-        self.locations = ko.observableArray([]);
         self.locations_changed = ko.observable(false);
         self.errors = ko.observable({});
-        self.form_storage = ko.observable();
-        self.form_location = ko.observable('');
 
         $(window).bind('beforeunload', function() {
             if (self.locations_changed()) {
@@ -35,80 +14,13 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
         });
 
         self.init = function(initial_data) {
-            self.locations($.map(initial_data.locations, function(l) {
-                return new ItemLocation(l);
-            }));
-            self.form_storage(new ItemStorage(initial_data.storage));
-        };
 
-        self.remove_location = function(location) {
-            self.locations.remove(location);
-            self.locations_changed(true);
-            self.error_msg('');
-        };
-
-        self.add_location = function() {
-            var errors = {};
-            if (!self.form_storage().id || isNaN(self.form_storage().id)) {
-                errors.storage = 'Не выбрано хранилище.';
-            }
-            if (!self.form_storage().disable_location && (self.form_location() === undefined || self.form_location().length == 0)) {
-                errors.location = 'Не указано положение в хранилище.';
-            }
-            self.errors(errors);
-            if (errors.storage || errors.location) {
-                return;
-            }
-            self.locations.push(new ItemLocation({
-                id: 0,
-                storage_name: self.form_storage().name,
-                storage_id: self.form_storage().id,
-                base_url: self.form_storage().base_url,
-                location: self.form_storage().disable_location ? '<<будет определено автоматически>>' : self.form_location()
-            }));
-            self.locations_changed(true);
         };
 
         self.update_item = function() {
-            ajr.exec(
-                self.urls.item_update_locations_json(),
-                {
-                    'method': 'post',
-                    'data':
-                    {
-                        'locations': ko.toJSON(self.locations().map(function(l) {
-                            delete l.storage_name;
-                            delete l.base_url;
-                            return l;
-                        }))
-                    }
-                },
-                function(response) {
-                    self.locations_changed(false);
-                    window.location.href = response.data;
-                },
-                function(response) {
-                    self.error_msg(response.data);
-                },
-                alert
-            );
+
         };
 
-        self.storage_changed = function() {
-            var id = self.form_storage().id;
-            if (!id || isNaN(id)) {
-                return;
-            }
-            self.form_location('');
-            jol.load(
-                self.urls.storage_show_json(id),
-                {},
-                ItemStorage,
-                self.form_storage,
-                alert,
-                alert
-            );
-        };
     }
 
 });

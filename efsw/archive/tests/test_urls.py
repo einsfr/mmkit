@@ -53,9 +53,6 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:item:update_links_json', [],
              '/archive/items/update/links/json/', views.item_update_links_json),
 
-            ('efsw.archive:item:show_locations_json', [],
-             '/archive/items/show/locations/json/', views.item_show_locations_json),
-
             ('efsw.archive:item:update_locations_json', [],
              '/archive/items/update/locations/json/', views.item_update_locations_json),
 

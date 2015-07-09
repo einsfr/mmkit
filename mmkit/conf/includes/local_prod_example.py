@@ -18,7 +18,8 @@ DATABASES = {
     }
 }
 
-EFSW_ARCH_STORAGE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'storage')
+# Корневая папка для монтирования ВСЕХ хранилищ
+EFSW_STORAGE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'storage')
 
 EFSW_ELASTIC_HOSTS = [
     {'host': '127.0.0.1'},
