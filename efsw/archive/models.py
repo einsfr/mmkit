@@ -72,16 +72,6 @@ class Item(IndexableModel, models.Model):
         related_name='included_in'
     )
 
-    file_storage_objects = models.ManyToManyField(
-        common_models.FileStorageObject,
-        related_name='+'
-    )
-
-    meta_storage_objects = models.ManyToManyField(
-        common_models.MetaStorageObject,
-        related_name='+'
-    )
-
     def __str__(self):
         return self.name
 
@@ -104,6 +94,40 @@ class Item(IndexableModel, models.Model):
             'author': self.author,
             'category': self.category.id,
         }
+
+
+class ItemMetaLocation(models.Model):
+
+    class Meta:
+        app_label = 'archive'
+        default_permissions = ()
+
+    meta_object = models.OneToOneField(
+        common_models.MetaStorageObject,
+        primary_key=True
+    )
+
+    item = models.ForeignKey(
+        Item,
+        related_name='meta_locations'
+    )
+
+
+class ItemFileLocation(models.Model):
+
+    class Meta:
+        app_label = 'archive'
+        default_permissions = ()
+
+    file_object = models.OneToOneField(
+        common_models.FileStorageObject,
+        primary_key=True
+    )
+
+    item = models.ForeignKey(
+        Item,
+        related_name='file_locations'
+    )
 
 
 class Storage(models.Model):
