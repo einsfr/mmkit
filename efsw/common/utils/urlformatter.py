@@ -1,12 +1,15 @@
 import re
 
+# За идею регулярного выражения спасибо сюда:
+# http://stackoverflow.com/questions/441739/regex-for-url-validation-with-parts-capturing
+url_re = re.compile(
+    "^(?P<scheme>\w+)://(?:(?P<username>.*?)(?::(?P<password>.*?)|)@)?(?P<host>[^:/@\s]+)(?:/|$)(?P<path>.*)$"
+)
+
 
 def format_url(url: str):
     url = url.replace('\\', '/')
-    # За идею регулярного выражения спасибо сюда:
-    # http://stackoverflow.com/questions/441739/regex-for-url-validation-with-parts-capturing
-    r = re.compile("^(?P<scheme>\w+)://(?:(?P<username>.*?)(?::(?P<password>.*?)|)@)?(?P<host>[^:/@\s]+)(?:/|$)(?P<path>.*)$")
-    m = r.match(url)
+    m = url_re.match(url)
     if m is None:
         raise WrongUrlFormatException(url)
     match_dict = m.groupdict()
@@ -29,7 +32,7 @@ class WrongUrlFormatException(ValueError):
         super().__init__(self.msg.format(url))
 
 
-class UrlFormatResult():
+class UrlFormatResult:
 
     def __init__(self, scheme, username, password, host, path):
         self.scheme = scheme
