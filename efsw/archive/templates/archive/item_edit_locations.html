@@ -13,7 +13,15 @@
                     }
                 });
                 view_model.init({
-
+                    'locations': [{% for l in item.file_locations.all %}
+                        {
+                            'id': '{{ l.file_object_id|escapejs }}',
+                            'path': '{{ l.file_object.path|escapejs }}',
+                            'storage_id': '{{ l.file_object.storage_id|escapejs }}',
+                            'storage_name': '{{ l.file_object.storage.name|escapejs }}'
+                        }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}]
                 });
                 ko.applyBindings(view_model);
             });
@@ -30,6 +38,57 @@
     {% include 'archive/_item_edit_nav_tabs.html' with active='locations' %}
     <div class="panel panel-default" style="margin-top: 0.5em;">
         <div class="panel-body">
+            <table class="table table-hover" data-bind="visible: locations().length > 0" style="display: none;">
+                <thead>
+                    <tr>
+                        <th style="min-width: 20em;">Хранилище</th>
+                        <th style="width: 100%;">Размещение</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: locations">
+                    <tr>
+                        <td data-bind="text: storage_name"></td>
+                        <td>/<span data-bind="text: path"></span></td>
+                        <td><a href="#" title="Удалить" class="fa fa-lg fa-trash-o"
+                               data-bind="click: $parent.remove_location "></a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="panel panel-warning" style="margin-top: 0.5em; display: none;"
+                 data-bind="visible: locations().length == 0">
+                <div class="panel-body text-center">Элемент не найден ни в одном хранилище</div>
+            </div>
+            <div class="row">
+                <form id="location_add_form">
+                    <div class="col-md-3 form-group" data-bind="css: { 'has-error': errors().storage }">
+                        {{ form.storage.label_tag }}
+                        <div>
+                            {{ form.storage }}
+                        </div>
+                        <span class="help-block"
+                          data-bind="visible: errors().storage, text: errors().storage"
+                          style="display: none;"></span>
+                    </div>
+                    <div class="col-md-9 form-group" data-bind="css: { 'has-error': errors().path }">
+                        {{ form.path.label_tag }}
+                        <div>
+                            <div class="input-group">
+                                <span class="input-group-addon">/</span>
+                                {{ form.path }}
+                                <span class="input-group-btn">
+                                    <button type="button"
+                                            class="btn btn-success"
+                                            data-bind="click: add_location ">Добавить</button>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="help-block"
+                          data-bind="visible: errors().path, text: errors().path"
+                          style="display: none;"></span>
+                    </div>
+                </form>
+            </div>
             <div class="alert alert-danger"
                  data-bind="visible: error_msg(), text: error_msg()"
                  style="display: none;"></div>

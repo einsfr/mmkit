@@ -23,7 +23,14 @@
                 {% for location in item.file_locations.all %}
                     <tr>
                         <td>{{ location.file_object.storage.name }}</td>
-                        <td>{{ location.file_object.path }}</td>
+                        <td>
+                            <ul>
+                                {% for url in location.file_object.get_url %}
+                                    {% if url.scheme_is_win_share %}<li>{{ url.format_win }}</li>{% endif %}
+                                    <li>{{ url }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

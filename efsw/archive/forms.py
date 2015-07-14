@@ -2,6 +2,7 @@ from django import forms
 from django.forms import widgets
 
 from efsw.archive import models
+from efsw.common import models as common_models
 
 from efsw.common.datetime.period import DatePeriod
 
@@ -45,6 +46,28 @@ class ItemUpdatePropertiesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].empty_label = None
+
+
+class ItemUpdateLocationsForm(forms.Form):
+
+    storage = forms.ModelChoiceField(
+        queryset=common_models.FileStorage.objects.filter(allowed_usage__contains=['archive']),
+        label='Хранилище',
+        empty_label=None,
+        widget=widgets.Select(attrs={
+            'class': 'form-control',
+            'data-bind': 'value: form_storage',
+        })
+    )
+
+    path = forms.CharField(
+        max_length=255,
+        label='Путь к файлу',
+        widget=widgets.TextInput(attrs={
+            'class': 'form-control',
+            'data-bind': 'textInput: form_path',
+        })
+    )
 
 
 class ItemCategoryForm(forms.ModelForm):

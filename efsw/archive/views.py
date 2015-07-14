@@ -364,7 +364,7 @@ def item_edit_locations(request, item_id):
     )
     return shortcuts.render(request, 'archive/item_edit_locations.html', {
         'item': item,
-        'storages': common_models.FileStorage.objects.filter(allowed_usage__contains=['archive'])
+        'form': forms.ItemUpdateLocationsForm()
     })
 
 

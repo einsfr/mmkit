@@ -1,7 +1,11 @@
 import uuid
+import os
 
 from django.db import models
 from django.contrib.postgres.fields import HStoreField, ArrayField
+from django.conf import settings
+
+from efsw.common.utils import urlformatter
 
 
 class FileStorage(models.Model):
@@ -10,6 +14,9 @@ class FileStorage(models.Model):
         app_label = 'common'
         verbose_name = 'файловое хранилище'
         verbose_name_plural = 'файловые хранилища'
+
+    def __str__(self):
+        return self.name
 
     id = models.UUIDField(
         primary_key=True,
@@ -40,6 +47,26 @@ class FileStorage(models.Model):
         models.CharField(max_length=16)
     )
 
+    def get_url(self, fs_object, protocol=None):
+        if protocol is not None:
+            try:
+                base_url = self.access_protocols[protocol]
+            except KeyError:
+                return None
+            return urlformatter.format_url('{0}/{1}'.format(base_url, fs_object.path)),
+        else:
+            return (
+                urlformatter.format_url('{0}/{1}'.format(base_url, fs_object.path))
+                for p, base_url in self.access_protocols.items()
+            )
+
+    def get_path(self, fs_object):
+        return os.path.normpath(os.path.join(
+            settings.EFSW_STORAGE_ROOT,
+            self.base_dir,
+            fs_object.path
+        ))
+
 
 class FileStorageObject(models.Model):
 
@@ -64,3 +91,9 @@ class FileStorageObject(models.Model):
         max_length=255,
         verbose_name='путь к объекту'
     )
+
+    def get_url(self, protocol=None):
+        return self.storage.get_url(self, protocol)
+
+    def get_path(self):
+        return self.storage.get_path(self)
