@@ -5,7 +5,7 @@ from efsw.common.search.exceptions import WrongParametersException,\
 from efsw.common import default_settings
 
 
-class EsSearchQuery():
+class EsSearchQuery:
 
     BOOL_MUST = 1
     BOOL_SHOULD = 2
@@ -16,6 +16,12 @@ class EsSearchQuery():
 
     DEFAULT_FROM = 0
     DEFAULT_SIZE = 10
+
+    MULTI_MATCH_QUERY_TYPE_BEST_FIELDS = 1
+    MULTI_MATCH_QUERY_TYPE_MOST_FIELDS = 2
+    MULTI_MATCH_QUERY_TYPE_CROSS_FIELDS = 3
+    MULTI_MATCH_QUERY_TYPE_PHRASE = 4
+    MULTI_MATCH_QUERY_TYPE_PHRASE_PREFIX = 5
 
     def __init__(self, es_cm, index_name=None, doc_type=None, bool_default=None):
         self._es_cm = es_cm
@@ -136,18 +142,29 @@ class EsSearchQuery():
         )
         return self
 
-    def query_multi_match(self, query, fields, bool_type=None):
+    def query_multi_match(self, query, fields, bool_type=None, query_type=None):
         if self._executed:
             raise ExecutedQueryChangeException()
-        if not bool_type:
-            bool_type = self._bool_default
+        bool_type = bool_type if bool_type is not None else self._bool_default
+        query_body = {
+            'query': query,
+            'fields': fields,
+        }
+        if query_type is not None:
+            if query_type == self.MULTI_MATCH_QUERY_TYPE_BEST_FIELDS:
+                query_body['type'] = 'best_fields'
+            elif query_type == self.MULTI_MATCH_QUERY_TYPE_MOST_FIELDS:
+                query_body['type'] = 'most_fields'
+            elif query_type == self.MULTI_MATCH_QUERY_TYPE_CROSS_FIELDS:
+                query_body['type'] = 'cross_fields'
+            elif query_type == self.MULTI_MATCH_QUERY_TYPE_PHRASE:
+                query_body['type'] = 'phrase'
+            elif query_type == self.MULTI_MATCH_QUERY_TYPE_PHRASE_PREFIX:
+                query_body['type'] = 'phrase_prefix'
         self._queries.append(
             (
                 {
-                    'multi_match': {
-                        'query': query,
-                        'fields': fields,
-                    }
+                    'multi_match': query_body
                 },
                 bool_type
             )
@@ -175,8 +192,7 @@ class EsSearchQuery():
     def filter_terms(self, field, values_list, bool_type=None):
         if self._executed:
             raise ExecutedQueryChangeException()
-        if not bool_type:
-            bool_type = self._bool_default
+        bool_type = bool_type if bool_type is not None else self._bool_default
         self._filters.append(
             (
                 {
@@ -192,8 +208,7 @@ class EsSearchQuery():
     def filter_range(self, field, bool_type=None, **kwargs):
         if self._executed:
             raise ExecutedQueryChangeException()
-        if not bool_type:
-            bool_type = self._bool_default
+        bool_type = bool_type if bool_type is not None else self._bool_default
         if kwargs.get('gte') and kwargs.get('gt'):
             msg = 'Одно поле в фильтре range не может одновремнено иметь ограничения >= и >'
             raise WrongParametersException(msg)

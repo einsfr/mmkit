@@ -129,3 +129,7 @@ class ArchiveSearchForm(forms.Form):
             'class': 'form-control',
         })
     )
+    ph = forms.BooleanField(
+        required=False,
+        label='Искать фразу'
+    )

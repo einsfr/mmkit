@@ -19,13 +19,23 @@
                         {{ form.c }}
                         <span class="help-block">Удерживайте <code>Ctrl</code> для выбора нескольких вариантов</span>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="{{ form.o.id_for_label }}">Порядок сортировки</label>
-                        {{ form.o }}
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.o.id_for_label }}">Порядок сортировки</label>
+                            {{ form.o }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.p.id_for_label }}">Период</label>
+                            {{ form.p }}
+                        </div>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="{{ form.p.id_for_label }}">Период</label>
-                        {{ form.p }}
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Дополнительные параметры</label>
+                            <div class="checkbox">
+                                <label>{{ form.ph }} Искать точную фразу</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
