@@ -67,6 +67,19 @@ class FileStorage(models.Model):
             fs_object.path
         ))
 
+    def get_or_create_file_object(self, path):
+        try:
+            file_object = self.stored_objects.get(path__iexact=path)
+        except FileStorageObject.DoesNotExist:
+            file_object = FileStorageObject(
+                path=path,
+                storage=self
+            )
+            file_object.save()
+        except FileStorageObject.MultipleObjectsReturned:
+            raise  # TODO: здесь должно быть удаление лишнего и каскад по связанным моделям
+        return file_object
+
 
 class FileStorageObject(models.Model):
 
@@ -89,7 +102,8 @@ class FileStorageObject(models.Model):
 
     path = models.CharField(
         max_length=255,
-        verbose_name='путь к объекту'
+        verbose_name='путь к объекту',
+        unique=True,
     )
 
     def get_url(self, protocol=None):

@@ -7,24 +7,12 @@ from django.core import urlresolvers
 
 from efsw.archive import models
 from efsw.archive import forms
-from efsw.archive import default_settings as archive_default_settings
-from efsw.common import default_settings as common_default_settings
 from efsw.common.search import elastic
 from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
-from efsw.common.utils import urlformatter
 from efsw.common.db import pagination
 from efsw.common import models as common_models
-
-
-def _get_item_list_page(items, page):
-    per_page = getattr(
-        settings,
-        'EFSW_ARCH_ITEM_LIST_PER_PAGE',
-        archive_default_settings.EFSW_ARCH_ITEM_LIST_PER_PAGE
-    )
-    return pagination.get_page(items, page, per_page)
 
 
 def _get_json_item_not_found(item_id):
@@ -51,6 +39,13 @@ def _format_item_dict(i):
         'name': i.name,
         'url': i.get_absolute_url(),
     }
+
+
+def _get_json_storage_not_found(storage_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id),
+        'storage_not_found'
+    )
 
 
 def _check_include(item, include):
@@ -107,11 +102,7 @@ def search(request):
             sq.filter_terms('category', [x.id for x in categories])
         if date_period:
             sq.filter_range('created', gte=date_period[0].isoformat(), lte=date_period[1].isoformat())
-        search_size = getattr(
-            settings,
-            'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
-            common_default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
-        )
+        search_size = settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
         sq.from_size(size_param=search_size)
         result = sq.get_result()
         hits = result['hits']
@@ -144,7 +135,7 @@ def search(request):
 @http.require_GET
 def item_list(request, page='1'):
     items_all = models.Item.objects.all().order_by('-pk').select_related('category')
-    items_page = _get_item_list_page(items_all, page)
+    items_page = pagination.get_page(items_all, page, settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
     return shortcuts.render(request, 'archive/item_list.html', {'items': items_page})
 
 
@@ -335,7 +326,33 @@ def item_update_locations_json(request):
         return _get_json_item_not_found(item_id)
     except ValueError:
         return _get_json_item_wrong_id(item_id)
-
+    post_locations = request.POST.get('locations', None)
+    if post_locations is None:
+        return _get_json_wrong_format()
+    try:
+        locations = json.loads(post_locations)
+    except ValueError:
+        return _get_json_wrong_format()
+    if len(locations) == 0:
+        models.ItemFileLocation.objects.filter(item=item).delete()
+        return JsonWithStatusResponse.ok()
+    storage_ids_list = [l['storage_id'] for l in locations]
+    storage_ids = set(storage_ids_list)
+    storages = common_models.FileStorage.objects.filter(id__in=storage_ids)
+    if len(storage_ids) != len(storages):
+        return JsonWithStatusResponse.error('Используется несуществующее хранилище.', 'storage_not_found')
+    storages_dict = dict([(str(s.id), s) for s in storages])
+    leftover_locations = [l['id'] for l in locations if l['id']]
+    models.ItemFileLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
+    for l in locations:
+        if l['id']:
+            continue
+        storage = storages_dict[l['storage_id']]
+        l_obj = models.ItemFileLocation(
+            item=item,
+            file_object=storage.get_or_create_file_object(l['path'])
+        )
+        l_obj.save()
     return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))
 
 
@@ -402,14 +419,9 @@ def item_update_properties_json(request):
 
 @http.require_GET
 def category_list(request, page='1'):
-    per_page = getattr(
-        settings,
-        'EFSW_ARCH_CATEGORY_LIST_PER_PAGE',
-        archive_default_settings.EFSW_ARCH_CATEGORY_LIST_PER_PAGE
-    )
     categories = models.ItemCategory.objects.all().order_by('name')
     return shortcuts.render(request, 'archive/category_list.html', {
-        'categories': pagination.get_page(categories, page, per_page),
+        'categories': pagination.get_page(categories, page, settings.EFSW_ARCH_CATEGORY_LIST_PER_PAGE),
     })
 
 
@@ -433,7 +445,7 @@ def category_create_json(request):
 def category_show_items(request, category_id, page='1'):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     items_all = cat.items.all().order_by('-pk')
-    items_page = _get_item_list_page(items_all, page)
+    items_page = pagination.get_page(items_all, page, settings.EFSW_ARCH_ITEM_LIST_PER_PAGE)
     return shortcuts.render(request, 'archive/category_show_items.html', {
         'items': items_page,
         'category': cat

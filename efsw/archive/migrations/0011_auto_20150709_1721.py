@@ -35,11 +35,6 @@ class Migration(migrations.Migration):
             model_name='storage',
             name='items',
         ),
-        migrations.AlterField(
-            model_name='itemlog',
-            name='action',
-            field=models.CharField(max_length=3, choices=[('UPD', 'Обновление'), ('ADD', 'Добавление'), ('IUP', 'Обновление связей')]),
-        ),
         migrations.DeleteModel(
             name='ItemLocation',
         ),

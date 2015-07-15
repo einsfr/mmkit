@@ -1,13 +1,8 @@
-import os
-
 from django.db import models
 from django.core import urlresolvers
-from django.conf import settings
 from django.contrib.auth.models import User
 
-from efsw.archive import default_settings
 from efsw.common.search.models import IndexableModel
-from efsw.common.utils import urlformatter
 from efsw.common import models as common_models
 
 

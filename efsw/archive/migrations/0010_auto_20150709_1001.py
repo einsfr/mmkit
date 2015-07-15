@@ -27,11 +27,6 @@ class Migration(migrations.Migration):
             new_name='meta_object',
         ),
         migrations.AlterField(
-            model_name='itemlog',
-            name='action',
-            field=models.CharField(max_length=3, choices=[('ADD', 'Добавление'), ('UPD', 'Обновление'), ('IUP', 'Обновление связей')]),
-        ),
-        migrations.AlterField(
             model_name='storage',
             name='type',
             field=models.CharField(max_length=3, verbose_name='тип', choices=[('ONS', 'Онлайн (без управления ФС)'), ('ONM', 'Онлайн (с управлением ФС)'), ('OFF', 'Оффлайн')]),

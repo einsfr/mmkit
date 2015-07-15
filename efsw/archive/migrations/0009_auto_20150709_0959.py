@@ -38,11 +38,6 @@ class Migration(migrations.Migration):
             model_name='item',
             name='meta_storage_objects',
         ),
-        migrations.AlterField(
-            model_name='itemlog',
-            name='action',
-            field=models.CharField(choices=[('IUP', 'Обновление связей'), ('UPD', 'Обновление'), ('ADD', 'Добавление')], max_length=3),
-        ),
         migrations.AddField(
             model_name='itemmetalocation',
             name='item_id',
