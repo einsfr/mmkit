@@ -341,6 +341,9 @@ def item_update_locations_json(request):
     storages = common_models.FileStorage.objects.filter(id__in=storage_ids)
     if len(storage_ids) != len(storages):
         return JsonWithStatusResponse.error('Используется несуществующее хранилище.', 'storage_not_found')
+    if list(filter(lambda s: 'archive' not in s.allowed_usage, storages)):
+        return JsonWithStatusResponse.error('Одно или несколько хранилищ не имеют отметки, позволяющей использовать их '
+                                            'как архивные.', 'storage_not_allowed')
     storages_dict = dict([(str(s.id), s) for s in storages])
     leftover_locations = [l['id'] for l in locations if l['id']]
     models.ItemFileLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
