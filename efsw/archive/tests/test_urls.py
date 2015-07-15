@@ -90,11 +90,6 @@ class ArchiveUrlsTestCase(UrlsTestCase):
             ('efsw.archive:category:update_json', [],
              '/archive/categories/update/json/', views.category_update_json),
 
-            # ------------------------- Storage JSON -------------------------
-
-            ('efsw.archive:storage:show_json', [],
-             '/archive/storages/show/json/', views.storage_show_json),
-
             # ------------------------- Общие -------------------------
 
             ('efsw.archive:search', [],

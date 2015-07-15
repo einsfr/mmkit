@@ -5,7 +5,8 @@ from efsw.common.utils.testcases import AbstractSecurityTestCase
 
 class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'storage.json', 'itemlog.json', 'itemlocation.json']
+    fixtures = ['item.json', 'itemcategory.json', 'filestorageobject.json', 'filestorage.json', 'itemlog.json',
+                'itemfilelocation.json']
 
     def _get_login_path(self):
         return 'http://testserver/accounts/login/?next={0}'
@@ -63,7 +64,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
             self.SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_locations_json'),
                 anonymous=False,
-                perm_codename='change_itemlocation',
+                perm_codename='change_itemfilelocation',
                 method='post'
             ),
             self.SecurityTestConditions(
@@ -110,10 +111,6 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
                 perm_codename='change_itemcategory',
                 method='post'
             ),
-
-            # ------------------------- Storage JSON -------------------------
-
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:storage:show_json')),
 
             # ------------------------- Общие -------------------------
 

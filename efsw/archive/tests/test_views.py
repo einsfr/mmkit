@@ -7,7 +7,7 @@ from django.core import urlresolvers
 from django.core.management import call_command
 
 from efsw.archive import models
-from efsw.common.utils.testcases import LoginRequiredTestCase
+from efsw.common.utils.testcases import LoginRequiredTestCase, JsonResponseTestCase
 from efsw.common.http.response import JsonWithStatusResponse
 
 
@@ -59,6 +59,34 @@ class SearchViewTestCase(TestCase):
             response = self.client.get(self.request_url, get_data)
         items = response.context['items']
         self.assertEqual(len(items), 2)
+        self.assertEqual(items[0].id, 4)
+
+    def test_search_phrase_match(self):
+        get_data = {'q': 'пятничные новости', 'ph': 'on'}
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(self.request_url, get_data)
+        items = response.context['items']
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].id, 4)
+
+    def test_search_custom_period(self):
+        get_data = {'q': 'новость', 'p': 'custom'}
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(self.request_url, get_data)
+        items = response.context['items']
+        self.assertEqual(len(items), 3)
+        self.assertEqual(items[0].id, 4)
+        get_data = {'q': 'новость', 'p': 'custom', 'p_s': '01.02.2015'}
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(self.request_url, get_data)
+        items = response.context['items']
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].id, 8)
+        get_data = {'q': 'новость', 'p': 'custom', 'p_e': '01.02.2015'}
+        with self.settings(EFSW_ELASTIC_DISABLE=False):
+            response = self.client.get(self.request_url, get_data)
+        items = response.context['items']
+        self.assertEqual(len(items), 1)
         self.assertEqual(items[0].id, 4)
 
 
@@ -456,9 +484,10 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         call_command('loaddata', 'item.json', 'itemlog.json', verbosity=0)
 
 
-class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase):
+class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
 
-    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'storage.json', 'itemlocation.json']
+    fixtures = ['item.json', 'itemcategory.json', 'itemlog.json', 'itemfilelocation.json', 'filestorage.json',
+                'filestorageobject.json']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -504,75 +533,61 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase):
         self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
         self.assertEqual('', json_content['data'])
         item = models.Item.objects.get(pk=4)
-        self.assertEqual([], list(item.locations.all()))
-        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
+        self.assertEqual([], list(item.file_locations.all()))
+        call_command('loaddata', 'itemlog.json', 'itemfilelocation.json', 'filestorage.json', 'filestorageobject.json',
+                     verbosity=0)
 
-    def test_nonexist_storage(self):
+    def test_unknown_storage(self):
         self._login_user()
         post_data = {
             'locations': json.dumps([
                 {
-                    'id': 0,
-                    'storage_id': 1000000,
-                    'location': 'location'
+                    'id': '',
+                    'path': 'test/path',
+                    'storage_id': 'f3b58e61-6846-4a12-aa53-e7300bba8989'
                 }
             ])
         }
         response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('storage_not_found', json_content['status_ext'])
+        self.assertJsonError(response, status_ext='storage_not_found')
 
-    def test_already_in_storage(self):
+    def test_forbidden_storage(self):
         self._login_user()
         post_data = {
             'locations': json.dumps([
                 {
-                    'id': 4,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
-                },
-                {
-                    'id': 0,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
+                    'id': '',
+                    'path': 'test/path',
+                    'storage_id': '1ac9873a-8cf0-49e1-8a9a-7709930cc8bf'
                 }
             ])
         }
         response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_storage_twice', json_content['status_ext'])
+        self.assertJsonError(response, status_ext='storage_not_allowed')
 
     def test_normal(self):
         self._login_user()
         post_data = {
             'locations': json.dumps([
                 {
-                    'id': 4,
-                    'storage_id': 1,
-                    'location': '00/00/00/04'
+                    'id': '604041e3-7aaa-4c8a-b25c-8d287cc0f36d',
+                    'path': '60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f36d',
+                    'storage_id': '1ac9873a-8cf0-49e1-8a9a-7709930aa8af'
                 },
                 {
-                    'id': 0,
-                    'storage_id': 2,
-                    'location': '00/00/00/04'
-                },
+                    'id': '',
+                    'path': 'test/path/normal',
+                    'storage_id': '11e00904-0f3d-4bfa-a3a9-9c716f87bc01'
+                }
             ])
         }
-        response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('/archive/items/4/edit/links/', json_content['data'])
-        item = models.Item.objects.get(pk=4)
-        locations = list(item.locations.all().order_by('-pk'))
-        self.assertEqual(2, len(locations))
-        self.assertEqual(2, locations[0].storage.id)
-        self.assertEqual('00/00/00/04', locations[0].location)
-        call_command('loaddata', 'itemlog.json', 'itemlocation.json', verbosity=0)
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1), post_data)
+        self.assertJsonOk(response)
+        item = models.Item.objects.get(pk=1)
+        self.assertEqual(2, len(item.file_locations.all()))
+        paths = [l.file_object.path for l in item.file_locations.all()]
+        self.assertIn('60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f36d', paths)
+        self.assertIn('test/path/normal', paths)
 
 
 class ItemEditTestCase(LoginRequiredTestCase):
@@ -895,32 +910,3 @@ class CategoryUpdateJsonTestCase(LoginRequiredTestCase):
         self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
         self.assertEqual('Отредактированное название', models.ItemCategory.objects.get(pk=3).name)
         call_command('loaddata', 'itemcategory.json', verbosity=0)
-
-
-class StorageShowJsonTestCase(TestCase):
-
-    fixtures = ['storage.json']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request_url = urlresolvers.reverse('efsw.archive:storage:show_json')
-
-    def test_nonexist(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1000000))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('storage_not_found', json_content['status_ext'])
-
-    def test_normal(self):
-        response = self.client.get('{0}?id={1}'.format(self.request_url, 1))
-        self.assertIsInstance(response, JsonWithStatusResponse)
-        json_content = json.loads(response.content.decode())
-        self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        storage_data = json_content['data']
-        self.assertEqual(4, len(storage_data))
-        for _ in ['id', 'name', 'disable_location', 'base_url']:
-            self.assertIn(_, storage_data)
-        self.assertEqual('Онлайн хранилище №1', storage_data['name'])
-        self.assertTrue(storage_data['disable_location'])
-        self.assertEqual('\\\\192.168.100.1\\', storage_data['base_url'])

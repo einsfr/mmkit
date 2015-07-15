@@ -115,7 +115,7 @@ item_patterns = [
     # Тесты: url sec
     url(
         r'^update/locations/json/$',
-        permission_required('archive.change_itemlocation')(views.item_update_locations_json),
+        permission_required('archive.change_itemfilelocation')(views.item_update_locations_json),
         name='update_locations_json'
     ),
     # items/create/json/ Добавление нового элемента - операция с БД (POST)

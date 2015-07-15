@@ -95,7 +95,7 @@ class ItemFileLocation(models.Model):
 
     class Meta:
         app_label = 'archive'
-        default_permissions = ()
+        default_permissions = ('change', )
 
     file_object = models.OneToOneField(
         common_models.FileStorageObject,
