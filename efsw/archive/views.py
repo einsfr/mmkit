@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django import shortcuts
 from django.views.decorators import http
@@ -100,10 +101,21 @@ def search(request):
         elif order == forms.ArchiveSearchForm.ORDER_BY_CREATED_DESC:
             sq.sort_field('created', sq.ORDER_DESC)
         categories = form.cleaned_data['c']
-        try:
-            date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
-        except (period.PeriodDoesNotExist, ValueError):
-            date_period = None
+        if form.cleaned_data['p'] == 'custom':
+            if not form.cleaned_data['p_s'] and not form.cleaned_data['p_e']:
+                date_period = None
+            else:
+                p_s = form.cleaned_data['p_s']
+                p_e = form.cleaned_data['p_e']
+                date_period = (
+                    p_s if p_s else datetime.date.min,
+                    p_e if p_e else datetime.date.today()
+                )
+        else:
+            try:
+                date_period = period.DatePeriod.get(int(form.cleaned_data['p']), strict=True)
+            except (period.PeriodDoesNotExist, ValueError):
+                date_period = None
         if categories:
             sq.filter_terms('category', [x.id for x in categories])
         if date_period:

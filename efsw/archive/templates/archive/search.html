@@ -4,6 +4,34 @@
 
 {% block title %}{{ block.super }} - Поиск по архиву{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'jquery_ui', 'vendor/jquery-ui/i18n/datepicker-ru'], function($, ko) {
+            $(document).ready(function() {
+                var datepicker_params = {
+                    'changeMonth': true,
+                    'changeYear': true,
+                    'yearRange': '1990:c',
+                    'maxDate': new Date()
+                };
+                var period_selector_id = '#{{ form.p.id_for_label }}';
+                var start_id = '#{{ form.p_s.id_for_label }}';
+                var end_id = '#{{ form.p_e.id_for_label }}';
+                $(start_id).datepicker(datepicker_params, $.datepicker.regional['ru']);
+                $(end_id).datepicker(datepicker_params, $.datepicker.regional['ru']);
+                ko.applyBindings(new function() {
+                    var self = this;
+                    self.selected_period = ko.observable($(period_selector_id).val());
+                    self.custom_period_selected = ko.computed(function() {
+                        return self.selected_period() == 'custom';
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
     <h2>Поиск по архиву</h2>
     <form action="" method="get">
@@ -27,6 +55,14 @@
                         <div class="form-group">
                             <label for="{{ form.p.id_for_label }}">Период</label>
                             {{ form.p }}
+                        </div>
+                        <div class="row" style="display: none;" data-bind="visible: custom_period_selected">
+                            <div class="col-xs-6">
+                                {{ form.p_s }}
+                            </div>
+                            <div class="col-xs-6">
+                                {{ form.p_e }}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-4">

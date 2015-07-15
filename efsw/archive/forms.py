@@ -122,12 +122,31 @@ class ArchiveSearchForm(forms.Form):
         })
     )
     p = forms.ChoiceField(
-        choices=[('', 'За всё время')] + [(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()],
+        choices=[('', 'За всё время')] +
+                [(x[0], str(x[1]).capitalize()) for x in DATE_CHOICES.items()] +
+                [('custom', 'Указать особый')],
         label='Дата записи',
         required=False,
         widget=widgets.Select(attrs={
             'class': 'form-control',
+            'data-bind': 'value: selected_period'
         })
+    )
+    p_s = forms.DateField(
+        required=False,
+        label='Начало периода',
+        widget=widgets.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': '01.01.2015'
+        }),
+    )
+    p_e = forms.DateField(
+        required=False,
+        label='Конец периода',
+        widget=widgets.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': '01.01.2015'
+        }),
     )
     ph = forms.BooleanField(
         required=False,
