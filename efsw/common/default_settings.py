@@ -33,3 +33,6 @@ EFSW_ELASTIC_MAX_SEARCH_RESULTS = 50
 
 # Префикс ко всем названиям индексов
 EFSW_ELASTIC_INDEX_PREFIX = ''
+
+# Права доступа к базовой директории хранилища, если она создаётся автоматически
+EFSW_STORAGE_BASE_DIR_MODE = 0o755

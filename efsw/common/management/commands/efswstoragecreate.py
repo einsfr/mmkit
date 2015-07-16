@@ -40,6 +40,13 @@ class Command(BaseCommand):
             help='If set, nonexistent base_dir directory will be created. If not and base_dir directory doesn\'t exist,'
                  ' an exception will be thrown.'
         )
+        parser.add_argument(
+            '-t', '--test-run',
+            action='store_true',
+            dest='test_run',
+            default=False,
+            help='If set, no file system or database operations will be performed. Use this flag for testing purposes.'
+        )
 
     @classmethod
     def _is_subdir(cls, parent_dir, subdir):
@@ -59,11 +66,36 @@ class Command(BaseCommand):
             options['base_dir']
         ))
         storage_root = os.path.realpath(settings.EFSW_STORAGE_ROOT)
+        if verbosity >= 1:
+            print('Base_dir absolute path: {0}'.format(base_dir_abs))
+            print('Root absolute path: {0}'.format(storage_root))
+            if verbosity > 1:
+                print('Check if storage root exists...')
         if not os.path.isdir(storage_root):
             raise CommandError('EFSW_STORAGE_ROOT directory ({0}) doesn\'t exist.'.format(storage_root))
+        if verbosity > 1:
+            print('Check if base_dir is a subdirectory of storage root...')
         if not self._is_subdir(storage_root, base_dir_abs):
             raise CommandError(
                 'Directory in base_dir argument ({0}) is not a subdirectory of EFSW_STORAGE_ROOT ({1}).'.format(
                     base_dir_abs, storage_root
                 )
             )
+        if verbosity > 1:
+            print('Check if base_dir exists...')
+        if not os.path.isdir(base_dir_abs):
+            if verbosity >= 1:
+                print('Base_dir directory doesn\'t exist.')
+            if not options['create_dir']:
+                raise CommandError(
+                    'Base_dir directory doesn\'t exist. If you want it to be created automatically, '
+                    'use -c (--create-dir) flag.'
+                )
+            else:
+                if verbosity >= 1:
+                    print('-c (--create-dir) flag was set - creating base_dir directory...')
+                if not options['test_run']:
+                    os.makedirs(base_dir_abs, settings.EFSW_STORAGE_BASE_DIR_MODE)
+                else:
+                    if verbosity >= 1:
+                        print('-t (--test-run) flag was set - skipping file system operation.')
