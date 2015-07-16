@@ -47,6 +47,13 @@ class ArgumentsBuilder(OptionsHandler):
         self._inputs = []
         self._outputs = []
 
+    def __str__(self):
+        io_path_conf = IOPathConfiguration(
+            ['<input{0}>'.format(x) for x in range(0, len(self._inputs))],
+            ['<output{0}>'.format(x) for x in range(0, len(self._outputs))]
+        )
+        return ' '.join(self.build(io_path_conf))
+
     def add_input(self, in_obj=None):
         if in_obj is not None and not isinstance(in_obj, Input):
             raise TypeError('Неправильный тип аргумента - передано: "{0}", ожидалось: '
@@ -93,6 +100,12 @@ class IOPathConfiguration:
     def __init__(self, in_paths=None, out_paths=None):
         self._inputs = [] if in_paths is None else in_paths
         self._outputs = [] if out_paths is None else out_paths
+
+    def __str__(self):
+        return '{0}\r\n{1}'.format(
+            '\r\n'.join(['<input{0}> {1}'.format(k, v) for k, v in enumerate(self._inputs)]),
+            '\r\n'.join(['<output{0}> {1}'.format(k, v) for k, v in enumerate(self._outputs)])
+        )
 
     def add_input_path(self, in_obj):
         if type(in_obj) != str and not isinstance(in_obj, AbstractIOPathProvider):
