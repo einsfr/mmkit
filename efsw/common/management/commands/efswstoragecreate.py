@@ -102,14 +102,16 @@ class Command(BaseCommand):
                     os.makedirs(base_dir_abs, settings.EFSW_STORAGE_BASE_DIR_MODE)
         if verbosity > 1:
             print('Check if storage with same base_dir already exists...')
-        # TODO Нужно приводить base_dir из опций к чистому виду - как в абсолютном пути и использовать уже таким
+        base_dir = os.path.relpath(base_dir_abs, storage_root)
+        if FileStorage.objects.filter(base_dir=base_dir).exists():
+            raise CommandError('Storage with base_dir {0} already exists.'.format(base_dir))
         if verbosity > 1:
             print('Creating storage model instance...')
         fs = FileStorage()
         if options['id']:
             fs.id = options['id']
         fs.name = options['name']
-        fs.base_dir = options['base_dir']
+        fs.base_dir = base_dir
         fs.read_only = not options['read_write']
         if verbosity > 1:
             print('Validating storage model instance...')
