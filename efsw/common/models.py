@@ -20,8 +20,7 @@ class FileStorage(models.Model):
 
     id = models.UUIDField(
         primary_key=True,
-        default=uuid.uuid4,
-        editable=False
+        default=uuid.uuid4
     )
 
     name = models.CharField(
@@ -31,11 +30,13 @@ class FileStorage(models.Model):
 
     base_dir = models.CharField(
         max_length=255,
-        verbose_name='корневая директория'
+        verbose_name='корневая директория',
+        unique=True
     )
 
     access_protocols = HStoreField(
-        editable=False
+        blank=True,
+        default={}
     )
 
     read_only = models.BooleanField(
@@ -44,7 +45,9 @@ class FileStorage(models.Model):
     )
 
     allowed_usage = ArrayField(
-        models.CharField(max_length=16)
+        models.CharField(max_length=16),
+        blank=True,
+        default=[]
     )
 
     def get_url(self, fs_object, protocol=None):

@@ -3,6 +3,8 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
+from efsw.common.models import FileStorage
+
 
 class Command(BaseCommand):
 
@@ -71,6 +73,8 @@ class Command(BaseCommand):
             print('Root absolute path: {0}'.format(storage_root))
             if verbosity > 1:
                 print('Check if storage root exists...')
+            if options['test_run']:
+                print('-t (--test-run) flag was set - THIS IS A TEST RUN, NO CHANGES WILL BE MADE.')
         if not os.path.isdir(storage_root):
             raise CommandError('EFSW_STORAGE_ROOT directory ({0}) doesn\'t exist.'.format(storage_root))
         if verbosity > 1:
@@ -96,6 +100,28 @@ class Command(BaseCommand):
                     print('-c (--create-dir) flag was set - creating base_dir directory...')
                 if not options['test_run']:
                     os.makedirs(base_dir_abs, settings.EFSW_STORAGE_BASE_DIR_MODE)
-                else:
-                    if verbosity >= 1:
-                        print('-t (--test-run) flag was set - skipping file system operation.')
+        if verbosity > 1:
+            print('Check if storage with same base_dir already exists...')
+        # TODO Нужно приводить base_dir из опций к чистому виду - как в абсолютном пути и использовать уже таким
+        if verbosity > 1:
+            print('Creating storage model instance...')
+        fs = FileStorage()
+        if options['id']:
+            fs.id = options['id']
+        fs.name = options['name']
+        fs.base_dir = options['base_dir']
+        fs.read_only = not options['read_write']
+        if verbosity > 1:
+            print('Validating storage model instance...')
+        fs.full_clean()
+        if verbosity > 1:
+            print('Model instance is valid.')
+        if fs.id:
+            if verbosity > 1:
+                print('ID was set - check if storage with same ID already exists...')
+            if FileStorage.objects.filter(id=fs.id).exists():
+                raise CommandError('Storage with ID {0} already exists - use efswstoragemod command.'.format(fs.id))
+        if not options['test_run']:
+            fs.save(force_insert=True)
+        if verbosity >= 1:
+            print('Storage model instance saved.')
