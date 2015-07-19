@@ -1,6 +1,7 @@
 import re
 
-from efsw.conversion.converter.exceptions import ConvArgsException
+from efsw.conversion.converter.exceptions import ConvArgsException, IOPathResolveException
+
 
 def _build_options(options):
     result = []
@@ -98,8 +99,16 @@ class ArgumentsBuilder(OptionsHandler):
 class IOPathConfiguration:
 
     def __init__(self, in_paths=None, out_paths=None):
-        self._inputs = [] if in_paths is None else in_paths
-        self._outputs = [] if out_paths is None else out_paths
+
+        def _check_item_type(i):
+            if type(i) != str and not isinstance(i, AbstractIOPathProvider):
+                raise TypeError('Все элементы, входящие в аргументы in_paths и out_paths должны быть либо '
+                                'строками, указывающими конкретный путь в файловой системе, или экземпляром класса '
+                                'AbstractIOPathProvider.')
+            return i
+
+        self._inputs = [] if in_paths is None else list(map(_check_item_type, in_paths))
+        self._outputs = [] if out_paths is None else list(map(_check_item_type, out_paths))
 
     def __str__(self):
         return '{0}\r\n{1}'.format(
@@ -122,9 +131,19 @@ class IOPathConfiguration:
         return self
 
     def build(self):
+
+        def _process_item(i):
+            if type(i) == str:
+                return i
+            else:
+                path = i.build()
+                if not path:
+                    raise IOPathResolveException('Невозможно определить путь для {0}.'.format(i))
+                return path
+
         return (
-            [i if type(i) == str else i.build() for i in self._inputs],
-            [o if type(o) == str else o.build() for o in self._outputs]
+            list(map(_process_item, self._inputs)),
+            list(map(_process_item, self._outputs))
         )
 
 
