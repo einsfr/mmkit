@@ -63,11 +63,25 @@ class FileStorage(models.Model):
                 for p, base_url in self.access_protocols.items()
             )
 
-    def get_path(self, fs_object):
+    def get_object_path(self, fs_object, inner_path=None):
+        if inner_path is None:
+            return os.path.normpath(os.path.join(
+                settings.EFSW_STORAGE_ROOT,
+                self.base_dir,
+                fs_object.path
+            ))
+        else:
+            return os.path.normpath(os.path.join(
+                settings.EFSW_STORAGE_ROOT,
+                self.base_dir,
+                fs_object.path,
+                inner_path
+            ))
+
+    def get_root_path(self):
         return os.path.normpath(os.path.join(
             settings.EFSW_STORAGE_ROOT,
-            self.base_dir,
-            fs_object.path
+            self.base_dir
         ))
 
     def get_or_create_file_object(self, path):
@@ -90,7 +104,6 @@ class FileStorageObject(models.Model):
         app_label = 'common'
         verbose_name = 'объект в файловом хранилище'
         verbose_name_plural = 'объекты в файловом хранилище'
-        unique_together = ('storage', 'id')
 
     id = models.UUIDField(
         primary_key=True,
@@ -112,5 +125,11 @@ class FileStorageObject(models.Model):
     def get_url(self, protocol=None):
         return self.storage.get_url(self, protocol)
 
-    def get_path(self):
-        return self.storage.get_path(self)
+    def get_relative_path(self, inner_path=None):
+        if inner_path is None:
+            return os.path.normpath(self.path)
+        else:
+            return os.path.normpath(os.path.join(self.path, inner_path))
+
+    def get_absolute_path(self, inner_path=None):
+        return self.storage.get_object_path(self, inner_path)

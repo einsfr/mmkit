@@ -1,9 +1,11 @@
 import subprocess
 from collections import deque
 import re
+import os
 
 from efsw.conversion.converter.exceptions import ConvException, ConvConfException, ConvOutputFormatException
 from efsw.conversion.converter.args import ArgumentsBuilder, IOPathConfiguration
+
 
 class Converter:
 
@@ -22,6 +24,10 @@ class Converter:
         self.ffmpeg_bin = getattr(settings_object, 'EFSW_FFMPEG_BIN')
         if self.ffmpeg_bin is None:
             raise ConvConfException('В конфигурации не найден путь к исполняемому файлу ffmpeg (EFSW_FFMPEG_BIN).')
+        if not os.path.isfile(self.ffmpeg_bin):
+            raise ConvConfException(
+                'Исполняемый файл ffmpeg {0} не найден - проверьте правильность указания пути.'.format(self.ffmpeg_bin)
+            )
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
 

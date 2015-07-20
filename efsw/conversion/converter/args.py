@@ -159,8 +159,8 @@ class InputOutputAbstract(OptionsHandler):
         super().__init__(options)
         self.comment = comment
 
-    def f(self, format_str):
-        return self.set_option_value('-f', format_str)
+    def build(self, path):
+        raise NotImplementedError
 
     @staticmethod
     def _check_stream_id(stream_id):
@@ -194,6 +194,8 @@ class InputOutputAbstract(OptionsHandler):
                 return True
         return False
 
+    # Методы, повторяющие опции ffmpeg в алфавитном порядке
+
     def c(self, codec_str, stream_id=None):
         if stream_id is not None and not self._check_stream_id(stream_id):
             raise ValueError('Неправильный формат идентификатора потока.')
@@ -205,11 +207,8 @@ class InputOutputAbstract(OptionsHandler):
     def codec(self, *args, **kwargs):
         return self.c(*args, **kwargs)
 
-    def t(self, duration):
-        if re.match(r'^(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', duration) is None \
-                and re.match(r'^\d+(?:\.\d+)?$', duration) is None:
-            raise ValueError('Длительность потока должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
-        return self.set_option_value('-t', duration)
+    def f(self, format_str):
+        return self.set_option_value('-f', format_str)
 
     def ss(self, position):
         if re.match(r'^(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', position) is None \
@@ -217,14 +216,19 @@ class InputOutputAbstract(OptionsHandler):
             raise ValueError('Позиция в потоке должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
         return self.set_option_value('-ss', position)
 
-    def build(self, path):
-        raise NotImplementedError
+    def t(self, duration):
+        if re.match(r'^(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', duration) is None \
+                and re.match(r'^\d+(?:\.\d+)?$', duration) is None:
+            raise ValueError('Длительность потока должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
+        return self.set_option_value('-t', duration)
 
 
 class Input(InputOutputAbstract):
 
     def build(self, path):
         return _build_options(self._options) + ['-i', path]
+
+    # Методы, повторяющие опции ffmpeg в алфавитном порядке
 
     def itsoffset(self, offset):
         if re.match(r'^-?(?:\d{2}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', offset) is None \
@@ -237,3 +241,5 @@ class Output(InputOutputAbstract):
 
     def build(self, path):
         return _build_options(self._options) + [path]
+
+    # Методы, повторяющие опции ffmpeg в алфавитном порядке
