@@ -12,15 +12,7 @@ class Converter:
     MAX_LOG_LENGTH = 5
     INFO_CMDS_TIMEOUT = 3
 
-    def __init__(self, settings_object=None):
-        if settings_object is None:
-            try:
-                from django.conf import settings
-                settings_object = settings
-            except ImportError:
-                raise ConvConfException('При использовании класса Converter без Django необходимо передавать '
-                                        'конструктору аргумент settings_object, который содержит все настройки, '
-                                        'относящиеся к этому экземпляру класса.')
+    def __init__(self, settings_object):
         self.ffmpeg_bin = getattr(settings_object, 'EFSW_FFMPEG_BIN')
         if self.ffmpeg_bin is None:
             raise ConvConfException('В конфигурации не найден путь к исполняемому файлу ffmpeg (EFSW_FFMPEG_BIN).')
@@ -30,6 +22,8 @@ class Converter:
             )
         debug = getattr(settings_object, 'DEBUG')
         self.debug = False if debug is None else debug
+        self._version = None
+        self._codecs = None
 
     def convert(self, args_builder: ArgumentsBuilder, io_path_conf: IOPathConfiguration, start_callback=None,
                 progress_callback=None, success_callback=None, error_callback=None):
@@ -91,6 +85,8 @@ class Converter:
                     success_callback()
 
     def get_version(self):
+        if self._version is not None:
+            return self._version
         output = subprocess.check_output(
             [self.ffmpeg_bin] + ['-version'],
             stderr=subprocess.STDOUT,
@@ -98,7 +94,7 @@ class Converter:
         )
         if self.debug:
             print(output.decode())
-        output_list = output.split(b'\r\n')
+        output_list = output.splitlines()
         result = dict()
         if output_list[0][:14] != b'ffmpeg version':
             raise ConvOutputFormatException(
@@ -130,4 +126,72 @@ class Converter:
                 'Невозможно определить версии библиотек - возможно, изменился формат вывода.'
             )
         result['libraries'] = libs
+        self._version = result
+        return result
+
+    def get_codecs(self):
+        """
+        Returns codecs, supported by current ffmpeg instance (parsed result of "ffmpeg -codecs").
+
+        Output format:
+            {
+                'video': {
+                    '<codec name>': (
+                        <True, if supports decoding, else False>,
+                        <True, if supports encoding, else False>,
+                        <codec description>
+                    )
+                },
+                'audio': { . . . },
+                'data': { . . . },
+                'subtitle': { . . . }
+            }
+        """
+        if self._codecs is not None:
+            return self._codecs
+        output = subprocess.check_output(
+            [self.ffmpeg_bin] + ['-hide_banner', '-codecs'],
+            stderr=subprocess.STDOUT,
+            timeout=self.INFO_CMDS_TIMEOUT
+        )
+        if self.debug:
+            print(output.decode())
+        output_lines = output.splitlines()
+        if output_lines[0] != b'Codecs:':
+            raise ConvOutputFormatException(
+                'Первая строка вывода ffmpeg должна быть "Codecs:", но получено: "{0}" - изменился формат '
+                'вывода?'.format(
+                    output_lines[0].decode()
+                )
+            )
+        result = {
+            'video': {},
+            'audio': {},
+            'data': {},
+            'subtitle': {}
+        }
+        for line in output_lines[10:]:
+            splitted_line = line.decode().split(maxsplit=2)
+            if not splitted_line:
+                break
+            codec_tuple = (
+                splitted_line[0][0] == 'D',
+                splitted_line[0][1] == 'E',
+                splitted_line[2]
+            )
+            codec_type = splitted_line[0][2]
+            if codec_type == 'V':
+                dict_key = 'video'
+            elif codec_type == 'A':
+                dict_key = 'audio'
+            elif codec_type == 'D':
+                dict_key = 'data'
+            elif codec_type == 'S':
+                dict_key = 'subtitle'
+            else:
+                raise ConvOutputFormatException(
+                    'Неизвестный тип кодека: {0} в строке {1} - изменился формат вывода?'.format(codec_type, line)
+                )
+            result[dict_key][splitted_line[1]] = codec_tuple
+        self._codecs = result
         return result

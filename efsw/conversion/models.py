@@ -20,6 +20,9 @@ class ConversionProcess(models.Model):
 
 class ConversionProfile(models.Model):
 
+    def __str__(self):
+        return self.name
+
     name = models.CharField(
         verbose_name='название',
         unique=True,

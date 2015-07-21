@@ -3,6 +3,7 @@ from django.conf import settings
 from django.views.decorators import http
 
 from efsw.conversion import models
+from efsw.common.db import pagination
 
 
 @http.require_GET
@@ -93,4 +94,8 @@ def task_show(request, task_id):
 
 @http.require_GET
 def profile_list(request, page=1):
-    pass
+    profiles = models.ConversionProfile.objects.all().order_by('name')
+    profiles_page = pagination.get_page(profiles, page, settings.EFSW_CONVERTER_PROFILES_PER_PAGE)
+    return shortcuts.render(request, 'conversion/profile_list.html', {
+        'profiles': profiles_page
+    })

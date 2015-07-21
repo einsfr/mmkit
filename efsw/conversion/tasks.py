@@ -6,9 +6,9 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 
-from efsw.conversion.converter.converter import Converter
-from efsw.conversion import default_settings
+from efsw import conversion
 from efsw.conversion.models import ConversionProcess, ConversionTask
+
 
 class ConvertCallbacksFactory:
 
@@ -16,18 +16,10 @@ class ConvertCallbacksFactory:
         if not conv_id:
             raise ValueError('Аргумент conv_id не может иметь пустое значение.')
         self.conv_id = conv_id
-        self.progress_call_interval = getattr(
-            settings,
-            'EFSW_CONVERTER_PROGRESS_NOTIFY_INTERVAL',
-            default_settings.EFSW_CONVERTER_PROGRESS_NOTIFY_INTERVAL
-        )
+        self.progress_call_interval = settings.EFSW_CONVERTER_PROGRESS_NOTIFY_INTERVAL
         self.last_progress_call_ts = 0.0
         self.convert_proc = None
-        self.process_result_timeout = getattr(
-            settings,
-            'EFSW_CONVERTER_PROCESS_PROGRESS_RESULT_TIMEOUT',
-            default_settings.EFSW_CONVERTER_PROCESS_PROGRESS_RESULT_TIMEOUT
-        )
+        self.process_result_timeout = settings.EFSW_CONVERTER_PROCESS_PROGRESS_RESULT_TIMEOUT
 
     def get_start_callback(self):
 
@@ -84,14 +76,14 @@ class ConvertCallbacksFactory:
 
 @shared_task(queue='conversion', ignore_result=True)
 def convert(conv_id, args_builder, io_path_conf):
-    converter = Converter()
+    converter = conversion.get_converter()
     cb_factory = ConvertCallbacksFactory(conv_id)
     converter.convert(args_builder, io_path_conf, **cb_factory.get_callback_dict())
 
 
 @shared_task(queue='conversion', ignore_result=True)
 def convert_task(conv_task: ConversionTask):
-    converter = Converter()
+    converter = conversion.get_converter()
     cb_factory = ConvertCallbacksFactory(conv_task.id)
     converter.convert(
         conv_task.args_builder if conv_task.conv_profile is None else conv_task.conv_profile.args_builder,
@@ -186,6 +178,7 @@ def notify_conversion_success(conv_id):
                 updated=timezone.now()
             )
 
+
 @shared_task(queue='control', ignore_result=True)
 def process_conversion_queue():
     # Отправляем ещё задания, если есть свободные места
@@ -218,6 +211,7 @@ def process_conversion_queue():
             status=ConversionTask.STATUS_CANCELED,
             updated__lt=timezone.now() - settings.EFSW_CONVERTER_MAX_CANCELED_LIFETIME
         ).delete()
+
 
 @shared_task(queue='control', ignore_result=True)
 def reorder_conversion_queue():

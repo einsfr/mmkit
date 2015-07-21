@@ -99,7 +99,8 @@ class ItemFileLocation(models.Model):
 
     file_object = models.OneToOneField(
         common_models.FileStorageObject,
-        primary_key=True
+        primary_key=True,
+        related_name='+'
     )
 
     item = models.ForeignKey(
