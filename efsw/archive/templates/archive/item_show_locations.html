@@ -2,6 +2,32 @@
 
 {% block title %}{{ block.super }} - Описание элемента - Размещение{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+    require(['jquery'], function($) {
+        $(document).ready(function () {
+            $('.item_url_container').on('click', '.fa-copy', function() {
+                window.getSelection().removeAllRanges();
+                var url = $(this).siblings('.url').get(0);
+                var range = document.createRange();
+                range.selectNode(url);
+                window.getSelection().addRange(range);
+                try {
+                    var result = document.execCommand('copy');
+                    if (!result) {
+                        alert('Ошибка при копировании в буфер обмена.');
+                    }
+                } catch(err) {
+                    alert('Ошибка при копировании в буфер обмена.');
+                }
+                window.getSelection().removeAllRanges();
+            });
+        });
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
     <h2>
         {{ item.name }}
@@ -24,10 +50,18 @@
                     <tr>
                         <td>{{ location.file_object.storage.name }}</td>
                         <td>
-                            <ul>
+                            <ul class="item_url_container">
                                 {% for url in location.file_object.get_url %}
-                                    {% if url.scheme_is_win_share %}<li>{{ url.format_win }}</li>{% endif %}
-                                    <li>{{ url }}</li>
+                                    {% if url.scheme_is_win_share %}
+                                        <li>
+                                            <span class="url">{{ url.format_win }}</span>
+                                            <a href="#" title="Скопировать ссылку" class="fa fa-copy"></a>
+                                        </li>
+                                    {% endif %}
+                                    <li>
+                                        <span class="url">{{ url }}</span>
+                                        <a href="#" title="Скопировать ссылку" class="fa fa-copy"></a>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </td>
