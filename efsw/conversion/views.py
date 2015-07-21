@@ -37,6 +37,7 @@ def task_list(request):
         'tasks_enqueued_more': tasks_enqueued_more,
     })
 
+
 @http.require_GET
 def task_list_finished(request):
     tasks_finished = models.ConversionTask.objects.filter(
@@ -47,6 +48,7 @@ def task_list_finished(request):
         'tasks_finished': tasks_finished
     })
 
+
 @http.require_GET
 def task_list_unknown(request):
     tasks_unknown = models.ConversionTask.objects.filter(
@@ -55,6 +57,7 @@ def task_list_unknown(request):
     return shortcuts.render(request, 'conversion/task_list_unknown.html', {
         'tasks_unknown': tasks_unknown
     })
+
 
 @http.require_GET
 def task_list_in_progress(request):
@@ -66,6 +69,7 @@ def task_list_in_progress(request):
         'tasks_in_progress': tasks_in_progress
     })
 
+
 @http.require_GET
 def task_list_enqueued(request):
     tasks_enqueued = models.ConversionTask.objects.filter(
@@ -74,6 +78,7 @@ def task_list_enqueued(request):
     return shortcuts.render(request, 'conversion/task_list_enqueued.html', {
         'tasks_enqueued': tasks_enqueued
     })
+
 
 @http.require_GET
 def task_show(request, task_id):
@@ -84,3 +89,8 @@ def task_show(request, task_id):
     return shortcuts.render(request, 'conversion/task_show.html', {
         'task': task
     })
+
+
+@http.require_GET
+def profile_list(request, page=1):
+    pass

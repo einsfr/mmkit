@@ -54,6 +54,24 @@ task_patterns = [
     )
 ]
 
+profile_patterns = [
+    # profiles/list/ Список профилей
+    # Тесты:
+    url(
+        r'^list/$',
+        views.profile_list,
+        name='list'
+    ),
+    # profiles/list/page/2/ Список профилей (постранично)
+    # Тесты:
+    url(
+        r'^list/page/(?P<page>\d+)/$',
+        views.profile_list,
+        name='list_page'
+    ),
+]
+
 urlpatterns = [
-    url(r'^tasks/', include((task_patterns, 'task', 'task')))
+    url(r'^tasks/', include((task_patterns, 'task', 'task'))),
+    url(r'^profiles/', include((profile_patterns, 'profile', 'profile'))),
 ]
