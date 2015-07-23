@@ -1,0 +1,35 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% load pagination from pagination %}
+
+{% block title %}{{ block.super }} - Список профилей{% endblock %}
+
+{% block content %}
+    <h2>Список профилей</h2>
+    {% if profiles %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in profiles %}
+                    <tr>
+                        <td>{{ profile.id }}</td>
+                        <td style="min-width: 20em;">{{ profile.name }}</td>
+                        <td style="width: 100%;">{{ profile.description }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav class="text-center">{% pagination profiles 'efsw.conversion:profile:list_page' %}</nav>
+    {% else %}
+        <div class="panel panel-warning" style="margin-top: 0.5em;">
+            <div class="panel-body text-center">Профили не найдены</div>
+        </div>
+    {% endif %}
+{% endblock %}
