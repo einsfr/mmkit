@@ -43,10 +43,23 @@ class ArgumentsBuilder(OptionsHandler):
 
     DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin']
 
-    def __init__(self, options=None):
+    def __init__(self, in_objects=None, out_objects=None, options=None):
+
+        def _check_in_type(i):
+            if not isinstance(i, Input):
+                raise TypeError('Все элементы, входящие в состав аргумента in_objects должны быть экземплярами класса '
+                                'Input.')
+            return i
+
+        def _check_out_type(o):
+            if not isinstance(o, Output):
+                raise TypeError('Все элементы, входящие в состав аргумента out_objects должны быть экземплярами класса '
+                                'Output.')
+            return o
+
         super().__init__(options)
-        self._inputs = []
-        self._outputs = []
+        self._inputs = [] if in_objects is None else list(map(_check_in_type, in_objects))
+        self._outputs = [] if out_objects is None else list(map(_check_out_type, out_objects))
 
     def __str__(self):
         io_path_conf = IOPathConfiguration(

@@ -11,7 +11,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Название</th>
+                    <th style="min-width: 25em;">Название</th>
                     <th>Описание</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -20,7 +20,10 @@
                 {% for profile in profiles %}
                     <tr>
                         <td>{{ profile.id }}</td>
-                        <td style="min-width: 20em;">{{ profile.name }}</td>
+                        <td>
+                            <a href="{% url 'efsw.conversion:profile:show' profile.id %}"
+                               title="Описание профиля">{{ profile.name }}</a>
+                        </td>
                         <td style="width: 100%;">{{ profile.description }}</td>
                     </tr>
                 {% endfor %}

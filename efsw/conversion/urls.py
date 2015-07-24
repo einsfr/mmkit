@@ -69,6 +69,19 @@ profile_patterns = [
         views.profile_list,
         name='list_page'
     ),
+    # profiles/2/...
+    url(
+        r'^(?P<profile_id>\d+)/',
+        include([
+            # profiles/2/show/ Описание одного профиля
+            # Тесты:
+            url(
+                r'^show/$',
+                views.profile_show,
+                name='show'
+            )
+        ])
+    )
 ]
 
 urlpatterns = [

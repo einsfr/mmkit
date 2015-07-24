@@ -16,6 +16,8 @@ EFSW_SCHED_LINEUP_LIST_PER_PAGE = 2
 
 EFSW_SCHED_CHANNEL_LIST_PER_PAGE = 2
 
+EFSW_CONVERTER_PROFILES_PER_PAGE = 2
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

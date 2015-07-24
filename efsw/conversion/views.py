@@ -99,3 +99,10 @@ def profile_list(request, page=1):
     return shortcuts.render(request, 'conversion/profile_list.html', {
         'profiles': profiles_page
     })
+
+@http.require_GET
+def profile_show(request, profile_id):
+    profile = shortcuts.get_object_or_404(models.ConversionProfile, pk=profile_id)
+    return shortcuts.render(request, 'conversion/profile_show.html', {
+        'profile': profile
+    })

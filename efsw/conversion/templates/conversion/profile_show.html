@@ -1,0 +1,27 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Описание профиля{% endblock %}
+
+{% block content %}
+    <h2>Описание профиля</h2>
+    <table class="table table-striped obj_properties">
+        <tbody>
+            <tr>
+                <th style="width: 12em;">ID</th>
+                <td>{{ profile.id }}</td>
+            </tr>
+            <tr>
+                <th>Название</th>
+                <td>{{ profile.name }}</td>
+            </tr>
+            <tr>
+                <th>Описание</th>
+                <td>{{ profile.description }}</td>
+            </tr>
+            <tr>
+                <th>Параметры</th>
+                <td>{{ profile.args_builder }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
