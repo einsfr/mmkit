@@ -2,7 +2,7 @@ from django import shortcuts
 from django.conf import settings
 from django.views.decorators import http
 
-from efsw.conversion import models
+from efsw.conversion import models, forms
 from efsw.common.db import pagination
 
 
@@ -78,6 +78,14 @@ def task_list_enqueued(request):
     ).order_by('order')
     return shortcuts.render(request, 'conversion/task_list_enqueued.html', {
         'tasks_enqueued': tasks_enqueued
+    })
+
+
+@http.require_GET
+def task_new(request):
+    form = forms.TaskCreateForm()
+    return shortcuts.render(request, 'conversion/task_new.html', {
+        'form': form
     })
 
 

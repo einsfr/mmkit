@@ -39,6 +39,13 @@ task_patterns = [
         views.task_list_enqueued,
         name='list_enqueued'
     ),
+    # tasks/new/
+    # Тесты:
+    url(
+        r'^new/$',
+        permission_required('conversion.add_conversiontask')(views.task_new),
+        name='new'
+    ),
     # tasks/e0593092-fbc5-4b20-99f4-677f8954220f/...
     url(
         r'^(?P<task_id>[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/',
@@ -51,7 +58,7 @@ task_patterns = [
                 name='show'
             )
         ])
-    )
+    ),
 ]
 
 profile_patterns = [

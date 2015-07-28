@@ -12,6 +12,11 @@
                 <li role="presentation">
                     <a href="{% url 'efsw.conversion:task:list' %}" title="Список заданий">Список</a>
                 </li>
+                {% if perms.conversion.add_conversiontask %}
+                    <li role="presentation">
+                        <a href="{% url 'efsw.conversion:task:new' %}" title="Создать задание">Создать</a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
         <li role="presentation" class="dropdown">
