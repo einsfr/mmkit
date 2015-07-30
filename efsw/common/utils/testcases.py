@@ -137,7 +137,7 @@ class AbstractSecurityTestCase(TestCase):
                     'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
                         c.url,
                         response.status_code,
-                        ', '.join(c.status_codes)
+                        ', '.join([str(code) for code in c.status_codes])
                     )
                 )
             if c.anonymous:

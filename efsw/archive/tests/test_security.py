@@ -9,7 +9,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
                 'itemfilelocation.json']
 
     def _get_login_path(self):
-        return 'http://testserver/accounts/login/?next={0}'
+        return 'http://testserver/common/accounts/login/?next={0}'
 
     def _get_app_label(self):
         return 'archive'

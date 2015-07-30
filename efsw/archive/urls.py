@@ -128,7 +128,7 @@ item_patterns = [
     # items/update/properties/json/ Обновление существующего элемента (POST)
     # Тесты: url sec
     url(
-        r'^update/properties/json/',
+        r'^update/properties/json/$',
         permission_required('archive.change_item')(views.item_update_properties_json),
         name='update_properties_json'
     ),
@@ -164,7 +164,7 @@ category_patterns = [
             # categories/3/show/items/ Список элементов, входящих в категорию
             # Тесты: url sec
             url(
-                r'show/items/$',
+                r'^show/items/$',
                 views.category_show_items,
                 name='show_items'
             ),
@@ -195,7 +195,7 @@ category_patterns = [
     # categories/update/json/?id=3 Редактирование существующей категории - действие (POST)
     # Тесты: url sec
     url(
-        r'^update/json/',
+        r'^update/json/$',
         permission_required('archive.change_itemcategory')(views.category_update_json),
         name='update_json'
     ),

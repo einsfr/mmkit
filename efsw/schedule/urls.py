@@ -44,21 +44,21 @@ lineup_patterns = [
     # lineups/copy/part/modal/ Содержимое модального окна для копирования сетки вещания
     # Тесты: url sec
     url(
-        r'copy/part/modal/$',
+        r'^copy/part/modal/$',
         permission_required('schedule.add_lineup')(views.lineup_copy_part_modal),
         name='copy_part_modal'
     ),
     # lineups/activate/part/modal/ Содержимое модального окна для перевода сетки из разряда черновиков
     # Тесты: url
     url(
-        r'activate/part/modal/$',
+        r'^activate/part/modal/$',
         permission_required('schedule.change_lineup')(views.lineup_activate_part_modal),
         name='activate_part_modal'
     ),
     # lineups/make_draft/part/modal/ Содержимое модального окна для перевода сетки снова в разряд черновиков
     # Тесты: url
     url(
-        r'make_draft/part/modal/$',
+        r'^make_draft/part/modal/$',
         permission_required('schedule.change_lineup')(views.lineup_make_draft_part_modal),
         name='make_draft_part_modal'
     ),
@@ -107,21 +107,21 @@ lineup_patterns = [
     # lineups/copy/json/?id=1 Копирование сетки вещания, POST
     # Тесты: url sec
     url(
-        r'copy/json/',
+        r'^copy/json/$',
         permission_required('schedule.add_lineup')(views.lineup_copy_json),
         name='copy_json'
     ),
     # lineups/activate/json/?id=1 Активация сетки вещания, POST
     # Тесты: url sec
     url(
-        r'activate/json/',
+        r'^activate/json/$',
         permission_required('schedule.change_lineup')(views.lineup_activate_json),
         name='activate_json'
     ),
     # lineups/make_draft/json/?id=1 Возврат сетки вещания в состояние черновика
     # Тесты: url sec
     url(
-        r'make_draft/json/',
+        r'^make_draft/json/$',
         permission_required('schedule.change_lineup')(views.lineup_make_draft_json),
         name='make_draft_json'
     ),
@@ -181,7 +181,7 @@ program_patterns = [
     # programs/show/json/?id=5 Сведения о программе
     # Тесты: url sec
     url(
-        r'^show/json/',
+        r'^show/json/$',
         views.program_show_json,
         name='show_json'
     ),
@@ -199,14 +199,14 @@ pp_patterns = [
     # pps/show/part/modal/ Модальное окно для просмотра положения программы в сетке
     # Тесты: url sec
     url(
-        r'^show/part/modal/',
+        r'^show/part/modal/$',
         views.pp_show_part_modal,
         name='show_part_modal'
     ),
     # pps/edit/part/modal/ Модальное окно для редактирования положения программы в сетке
     # Тесты: url sec
     url(
-        r'^edit/part/modal/',
+        r'^edit/part/modal/$',
         permission_required('schedule.change_programposition')(views.pp_edit_part_modal),
         name='edit_part_modal'
     ),
@@ -216,28 +216,28 @@ pp_patterns = [
     # pps/show/json/?id=12 Сведения о положении программы в сетке
     # Тесты: url sec
     url(
-        r'^show/json/',
+        r'^show/json/$',
         views.pp_show_json,
         name='show_json'
     ),
     # pps/edit/json/?id=12 Редактирование положения программы, POST
     # Тесты: url sec
     url(
-        r'^edit/json/',
+        r'^edit/json/$',
         permission_required('schedule.change_programposition')(views.pp_edit_json),
         name='edit_json'
     ),
     # pps/delete/json/?id=5 Удаление положения программы, POST
     # Тесты: url sec
     url(
-        r'delete/json/',
+        r'^delete/json/$',
         permission_required('schedule.change_programposition')(views.pp_delete_json),
         name='delete_json'
     ),
     # pps/update/json/?id=5 Обновление положения программы, POST
     # Тесты: url sec
     url(
-        r'update/json/',
+        r'^update/json/$',
         permission_required('schedule.change_programposition')(views.pp_update_json),
         name='update_json'
     )
@@ -249,46 +249,46 @@ channel_patterns = [
     # channels/list/ Список каналов
     # Тесты: url sec
     url(
-        r'list/$',
+        r'^list/$',
         views.channel_list,
         name='list'
     ),
     # channels/list/page/2/ Список каналов постранично
     # Тесты: url sec
     url(
-        r'list/page/(?P<page>\d+)/$',
+        r'^list/page/(?P<page>\d+)/$',
         views.channel_list,
         name='list_page'
     ),
     # channels/new/ Создание нового канала (форма)
     # Тесты: url sec
     url(
-        r'new/$',
+        r'^new/$',
         permission_required('schedule.add_channel')(views.channel_new),
         name='new'
     ),
     # channels/1/...
     url(
-        r'(?P<channel_id>\d+)/',
+        r'^(?P<channel_id>\d+)/',
         include([
             # channels/1/show/lineups/ Список сеток вещания для этого канала
             # Тесты: url sec
             url(
-                r'show/lineups/$',
+                r'^show/lineups/$',
                 views.channel_show_lineups,
                 name='show_lineups'
             ),
             # channels/1/show/lineups/page/2/ Список сеток вещания для этого канала постранично
             # Тесты: url sec
             url(
-                r'show/lineups/page/(?P<page>\d+)/$',
+                r'^show/lineups/page/(?P<page>\d+)/$',
                 views.channel_show_lineups,
                 name='show_lineups_page'
             ),
             # channels/1/edit/ Редактирование канала (форма)
             # Тесты: url sec
             url(
-                r'edit/$',
+                r'^edit/$',
                 permission_required('schedule.change_channel')(views.channel_edit),
                 name='edit'
             )
@@ -300,28 +300,28 @@ channel_patterns = [
     # channels/create/json/ Создание нового канала (действие)
     # Тесты: url sec
     url(
-        r'create/json/$',
+        r'^create/json/$',
         permission_required('schedule.add_channel')(views.channel_create_json),
         name='create_json'
     ),
     # channels/update/json/?id=1 Обновление канала (действие)
     # Тесты: url sec
     url(
-        r'update/json/',
+        r'^update/json/$',
         permission_required('schedule.change_channel')(views.channel_update_json),
         name='update_json'
     ),
     # channels/deactivate/json/?id=1 Деактивация канала (действие)
     # Тесты: url sec
     url(
-        r'deactivate/json/',
+        r'^deactivate/json/$',
         permission_required('schedule.change_channel')(views.channel_deactivate_json),
         name='deactivate_json'
     ),
     # channels/activate/json/?id=1 Активация канала (действие)
     # Тесты: url sec
     url(
-        r'activate/json/',
+        r'^activate/json/$',
         permission_required('schedule.change_channel')(views.channel_activate_json),
         name='activate_json'
     )
