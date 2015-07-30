@@ -93,8 +93,6 @@ class FileStorage(models.Model):
                 storage=self
             )
             file_object.save()
-        except FileStorageObject.MultipleObjectsReturned:
-            raise  # TODO: здесь должно быть удаление лишнего и каскад по связанным моделям
         return file_object
 
 

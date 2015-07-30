@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
 from efsw.common.models import FileStorage
+from efsw.common.storage import utils as storage_utils
 
 
 class Command(BaseCommand):
@@ -50,17 +51,6 @@ class Command(BaseCommand):
             help='If set, no file system or database operations will be performed. Use this flag for testing purposes.'
         )
 
-    @classmethod
-    def _is_subdir(cls, parent_dir, subdir):
-        if parent_dir == subdir:
-            return False
-        head, tail = os.path.split(subdir)
-        if not tail:
-            return False
-        if head == parent_dir:
-            return True
-        return cls._is_subdir(parent_dir, head)
-
     def handle(self, *args, **options):
         verbosity = int(options['verbosity'])
         base_dir_abs = os.path.realpath('{0}/{1}'.format(
@@ -79,7 +69,7 @@ class Command(BaseCommand):
             raise CommandError('EFSW_STORAGE_ROOT directory ({0}) doesn\'t exist.'.format(storage_root))
         if verbosity > 1:
             print('Check if base_dir is a subdirectory of storage root...')
-        if not self._is_subdir(storage_root, base_dir_abs):
+        if not storage_utils.is_subdir(storage_root, base_dir_abs):
             raise CommandError(
                 'Directory in base_dir argument ({0}) is not a subdirectory of EFSW_STORAGE_ROOT ({1}).'.format(
                     base_dir_abs, storage_root
