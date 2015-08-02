@@ -1,6 +1,7 @@
 from django import shortcuts
 from django.conf import settings
 from django.views.decorators import http
+from django.forms.formsets import formset_factory
 
 from efsw.conversion import models, forms
 from efsw.common.db import pagination
@@ -83,9 +84,12 @@ def task_list_enqueued(request):
 
 @http.require_GET
 def task_new(request):
-    form = forms.TaskCreateForm()
+    input_formset_class = formset_factory(forms.InputLocationForm)
+    output_formset_class = formset_factory(forms.OutputLocationForm)
     return shortcuts.render(request, 'conversion/task_new.html', {
-        'form': form
+        'form': forms.TaskCreateForm(),
+        'input_formset': input_formset_class(prefix='inputs'),
+        'output_formset': output_formset_class(prefix='outputs'),
     })
 
 
@@ -107,6 +111,7 @@ def profile_list(request, page=1):
     return shortcuts.render(request, 'conversion/profile_list.html', {
         'profiles': profiles_page
     })
+
 
 @http.require_GET
 def profile_show(request, profile_id):
