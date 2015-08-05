@@ -5,6 +5,21 @@ from django.forms.formsets import formset_factory
 
 from efsw.conversion import models, forms
 from efsw.common.db import pagination
+from efsw.common.http.response import JsonWithStatusResponse
+
+
+def _get_json_profile_not_found(profile_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: профиль с ID "{0}" не существует.'.format(profile_id),
+        'profile_not_found'
+    )
+
+
+def _get_json_profile_wrong_id(profile_id):
+    return JsonWithStatusResponse.error(
+        'Ошибка: идентификатор профиля должен быть целым числом, предоставлено: "{0}".'.format(profile_id),
+        'id_not_int'
+    )
 
 
 @http.require_GET
@@ -118,4 +133,19 @@ def profile_show(request, profile_id):
     profile = shortcuts.get_object_or_404(models.ConversionProfile, pk=profile_id)
     return shortcuts.render(request, 'conversion/profile_show.html', {
         'profile': profile
+    })
+
+
+@http.require_GET
+def profile_show_json(request):
+    profile_id = request.GET.get('id', None)
+    try:
+        profile = models.ConversionProfile.objects.get(pk=profile_id)
+    except models.ConversionProfile.DoesNotExist:
+        return _get_json_profile_not_found(profile_id)
+    except ValueError:
+        return _get_json_profile_wrong_id(profile_id)
+    return JsonWithStatusResponse.ok({
+        'name': profile.name,
+        'description': profile.description,
     })

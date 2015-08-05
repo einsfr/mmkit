@@ -88,6 +88,13 @@ profile_patterns = [
                 name='show'
             )
         ])
+    ),
+    # profiles/show/json/?id=2 Описание одного профиля в формате JSON
+    # Тесты:
+    url(
+        r'^show/json/$',
+        views.profile_show_json,
+        name='show_json'
     )
 ]
 
