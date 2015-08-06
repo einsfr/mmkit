@@ -43,6 +43,7 @@ class InputLocationForm(IOLocationForm):
     storage = forms.ModelChoiceField(
         queryset=FileStorage.objects.filter(allowed_usage__contains=['conversion_in']).order_by('name'),
         label='Хранилище',
+        empty_label=None,
         widget=widgets.Select(attrs={
             'class': 'form-control',
         })
@@ -56,6 +57,7 @@ class OutputLocationForm(IOLocationForm):
             allowed_usage__contains=['conversion_out'], read_only=False
         ).order_by('name'),
         label='Хранилище',
+        empty_label=None,
         widget=widgets.Select(attrs={
             'class': 'form-control',
         })

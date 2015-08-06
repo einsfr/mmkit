@@ -99,8 +99,8 @@ def task_list_enqueued(request):
 
 @http.require_GET
 def task_new(request):
-    input_formset_class = formset_factory(forms.InputLocationForm)
-    output_formset_class = formset_factory(forms.OutputLocationForm)
+    input_formset_class = formset_factory(forms.InputLocationForm, min_num=0, max_num=0, extra=0)
+    output_formset_class = formset_factory(forms.OutputLocationForm, min_num=0, max_num=0, extra=0)
     return shortcuts.render(request, 'conversion/task_new.html', {
         'form': forms.TaskCreateForm(),
         'input_formset': input_formset_class(prefix='inputs'),
