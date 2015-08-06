@@ -6,7 +6,13 @@
     {{ block.super }}
     <script type="text/html" id="template_input_form">
         <div class="panel panel-default">
-            <div class="panel-heading">Вход 1 (комментарий ко входу)</div>
+            <div class="panel-heading">
+                Вход
+                <span data-bind="text: $index"></span>
+                <span data-bind="if: comment">
+                    (<span data-bind="text: comment"></span>)
+                </span>
+            </div>
             <div class="panel-body">
                 <div class="row">
                     <div class="form-group col-md-4">
@@ -30,7 +36,13 @@
     </script>
     <script type="text/html" id="template_output_form">
         <div class="panel panel-default">
-            <div class="panel-heading">Выход 1 (комментарий к выходу)</div>
+            <div class="panel-heading">
+                Выход
+                <span data-bind="text: $index"></span>
+                <span data-bind="if: comment">
+                    (<span data-bind="text: comment"></span>)
+                </span>
+            </div>
             <div class="panel-body">
                 <div class="row">
                     <div class="form-group col-md-4">
@@ -51,6 +63,16 @@
                 </div>
             </div>
         </div>
+    </script>
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'conversion/model_task_new'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
+
+                });
+                ko.applyBindings(view_model);
+            });
+        });
     </script>
 {% endblock %}
 
@@ -77,6 +99,14 @@
                               style="display: none;"></span>
                     </div>
                 </div>
+                <h4>Конфигурация входов</h4>
+                <div id="inputs_container"
+                     data-bind="template: { name: 'template_input_form', foreach: inputs }"></div>
+                {{ input_formset.management_form }}
+                <h4>Конфигурация выходов</h4>
+                <div id="outputs_container"
+                     data-bind="template: { name: 'template_output_form', foreach: outputs }"></div>
+                {{ output_formset.management_form }}
             </form>
         </div>
     </div>

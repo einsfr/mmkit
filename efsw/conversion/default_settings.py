@@ -1,8 +1,10 @@
+import os
 from datetime import timedelta
-
 from kombu import Queue
 from kombu.common import Broadcast
 from celery.schedules import crontab
+
+from mmkit.conf.settings import BASE_DIR
 
 EFSW_CONVERTER_PROGRESS_NOTIFY_INTERVAL = 10
 
@@ -35,3 +37,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=3, minute=0)
     }
 }
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'efsw', 'conversion', 'static')
+]
