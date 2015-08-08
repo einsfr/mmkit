@@ -148,4 +148,18 @@ def profile_show_json(request):
     return JsonWithStatusResponse.ok({
         'name': profile.name,
         'description': profile.description,
+        'inputs': [
+            {
+                'position': p,
+                'comment': i.comment
+            }
+            for p, i in enumerate(profile.args_builder.inputs)
+        ],
+        'outputs': [
+            {
+                'position': p,
+                'comment': o.comment
+            }
+            for p, o in enumerate(profile.args_builder.outputs)
+        ]
     })

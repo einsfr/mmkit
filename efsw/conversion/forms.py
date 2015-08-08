@@ -23,6 +23,7 @@ class TaskCreateForm(forms.Form):
         label='Профиль',
         widget=widgets.Select(attrs={
             'class': 'form-control',
+            'data-bind': 'event: { change: profile_changed }',
         })
     )
 

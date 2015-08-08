@@ -1,4 +1,5 @@
 import re
+import copy
 
 from efsw.conversion.converter.exceptions import ConvArgsException, IOPathResolveException
 
@@ -75,12 +76,20 @@ class ArgumentsBuilder(OptionsHandler):
         self._inputs.append(in_obj if in_obj is not None else Input())
         return self
 
+    @property
+    def inputs(self):
+        return copy.deepcopy(self._inputs)
+
     def add_output(self, out_obj=None):
         if out_obj is not None and not isinstance(out_obj, Output):
             raise TypeError('Неправильный тип аргумента - передано: "{0}", ожидалось: '
                             '"efsw.conversion.converter.args.Output".'.format(type(out_obj)))
         self._outputs.append(out_obj if out_obj is not None else Output())
         return self
+
+    @property
+    def outputs(self):
+        return copy.deepcopy(self._outputs)
 
     def build(self, io_path_conf, override_defaults=False):
         if not self._inputs:

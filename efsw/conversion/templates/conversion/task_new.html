@@ -68,7 +68,9 @@
         require(['jquery', 'knockout', 'conversion/model_task_new'], function($, ko, model) {
             $(document).ready(function() {
                 var view_model = new model({
-
+                    'profile_show_json': function() {
+                        return "{% url 'efsw.conversion:profile:show_json' %}";
+                    }
                 });
                 ko.applyBindings(view_model);
             });
@@ -95,19 +97,34 @@
                     <div>
                         {{ form.profile }}
                         <span class="help-block"
+                              data-bind="visible: profile_description, text: profile_description"
+                              style="display: none;"></span>
+                        <span class="help-block"
                               data-bind="visible: errors().profile, text: errors().profile"
                               style="display: none;"></span>
                     </div>
                 </div>
-                <h4>Конфигурация входов</h4>
+                <h4 data-bind="visible: inputs().length > 0" style="display: none;">Входы</h4>
                 <div id="inputs_container"
-                     data-bind="template: { name: 'template_input_form', foreach: inputs }"></div>
-                {{ input_formset.management_form }}
-                <h4>Конфигурация выходов</h4>
+                     data-bind="template: { name: 'template_input_form', foreach: inputs, afterRender: replace_prefix }"></div>
+                <div id="inputs_management_form_container" style="display: none;">
+                    {{ input_formset.management_form }}
+                </div>
+                <h4 data-bind="visible: outputs().length > 0" style="display: none;">Выходы</h4>
                 <div id="outputs_container"
-                     data-bind="template: { name: 'template_output_form', foreach: outputs }"></div>
-                {{ output_formset.management_form }}
+                     data-bind="template: { name: 'template_output_form', foreach: outputs, afterRender: replace_prefix }"></div>
+                <div id="outputs_management_form_container" style="display: none;">
+                    {{ output_formset.management_form }}
+                </div>
             </form>
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bind="event: { click: submit_form }">Создать</button>
         </div>
     </div>
 {% endblock %}
