@@ -15,70 +15,65 @@
                         return "{% url 'efsw.conversion:task:create_json' %}";
                     }
                 });
-                ko.components.register('input_form', {
-                    'template': 'template_input_form'
+                ko.components.register('io_form', {
+                    'template': { 'element': 'template_io_form' }
                 });
-                ko.components.register('output_form', {
-                    'template': 'template_output_form'
-                });
+                ko.bindingHandlers.replace_prefix = {
+                    init: function(element, value_accessor) {
+                        var value = value_accessor();
+                        element.innerHTML = element.innerHTML.replace(/__prefix__/g, value);
+                    }
+                };
                 ko.applyBindings(view_model);
             });
         });
     </script>
-    <script type="text/html" id="template_input_form">
+    <script type="text/html" id="template_io_form">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Вход
+                <span data-bind="text: ( io_type == 'i' ? 'Вход' : 'Выход' )"></span>
                 <span data-bind="text: position"></span>
-                <span data-bind="if: comment">
-                    (<span data-bind="text: comment"></span>)
-                </span>
+                <span data-bind="if: comment">(<span data-bind="text: comment"></span>)</span>
             </div>
-            <div class="panel-body">
+            <div class="panel-body" data-bind="replace_prefix: position">
                 <div class="row">
-                    <div class="form-group col-md-4">
-                        <label for="{{ input_formset.empty_form.storage.id_for_label }}">Хранилище</label>
-                        <div>
-                            {{ input_formset.empty_form.storage }}
-                        </div>
+                    <div class="form-group col-md-4" data-bind="css: { 'has-error': errors().storage }">
+                        <!-- ko if: io_type == 'i' -->
+                            <label for="{{ input_formset.empty_form.storage.id_for_label }}">Хранилище</label>
+                            <div>
+                                {{ input_formset.empty_form.storage }}
+                            </div>
+                        <!-- /ko -->
+                        <!-- ko if: io_type == 'o' -->
+                            <label for="{{ output_formset.empty_form.storage.id_for_label }}">Хранилище</label>
+                            <div>
+                                {{ output_formset.empty_form.storage }}
+                            </div>
+                        <!-- /ko -->
+                        <span class="help-block"
+                              data-bind="visible: errors().storage, text: errors().storage"
+                              style="display: none;"></span>
                     </div>
-                    <div class="form-group col-md-8">
-                        <label for="{{ input_formset.empty_form.path.id_for_label }}">Путь</label>
+                    <div class="form-group col-md-8" data-bind="css: { 'has-error': errors().path }">
+                        <!-- ko if: io_type == 'i' -->
+                            <label for="{{ input_formset.empty_form.path.id_for_label }}">Путь</label>
+                        <!-- /ko -->
+                        <!-- ko if: io_type == 'o' -->
+                            <label for="{{ output_formset.empty_form.path.id_for_label }}">Путь</label>
+                        <!-- /ko -->
                         <div>
                             <div class="input-group">
                                 <span class="input-group-addon">/</span>
-                                {{ input_formset.empty_form.path }}
+                                <!-- ko if: io_type == 'i' -->
+                                    {{ input_formset.empty_form.path }}
+                                <!-- /ko -->
+                                <!-- ko if: io_type == 'o' -->
+                                    {{ output_formset.empty_form.path }}
+                                <!-- /ko -->
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-    <script type="text/html" id="template_output_form">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Выход
-                <span data-bind="text: position"></span>
-                <span data-bind="if: comment">
-                    (<span data-bind="text: comment"></span>)
-                </span>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="form-group col-md-4">
-                        <label for="{{ output_formset.empty_form.storage.id_for_label }}">Хранилище</label>
-                        <div>
-                            {{ output_formset.empty_form.storage }}
-                        </div>
-                    </div>
-                    <div class="form-group col-md-8">
-                        <label for="{{ output_formset.empty_form.path.id_for_label }}">Путь</label>
-                        <div>
-                            <div class="input-group">
-                                <span class="input-group-addon">/</span>
-                                {{ output_formset.empty_form.path }}
-                            </div>
+                            <span class="help-block"
+                                  data-bind="visible: errors().path, text: errors().path"
+                                  style="display: none;"></span>
                         </div>
                     </div>
                 </div>
@@ -115,16 +110,16 @@
                 </div>
                 <h4 data-bind="visible: inputs().length > 0" style="display: none;">Входы</h4>
                 <div id="inputs_container"
-                     data-bind="foreach: { data: inputs, afterRender: replace_prefix }">
-                    <div data-bind="component: { name: 'input_form', params: {} }"></div>
+                     data-bind="foreach: inputs">
+                    <div data-bind="component: { name: 'io_form', params: $data }"></div>
                 </div>
                 <div id="inputs_management_form_container" style="display: none;">
                     {{ input_formset.management_form }}
                 </div>
                 <h4 data-bind="visible: outputs().length > 0" style="display: none;">Выходы</h4>
                 <div id="outputs_container"
-                     data-bind="foreach: { data: outputs, afterRender: replace_prefix }">
-                    <div data-bind="component: { name: 'output_form', params: {} }"></div>
+                     data-bind="foreach: outputs">
+                    <div data-bind="component: { name: 'io_form', params: $data }"></div>
                 </div>
                 <div id="outputs_management_form_container" style="display: none;">
                     {{ output_formset.management_form }}

@@ -1,10 +1,13 @@
 define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_request'], function($, ko, jol, ajr) {
 
     function InputOutputViewModel(data) {
-        var self = this;
-        self.position = (typeof data.position != 'undefined' ? data.position : 0);
-        self.comment = (typeof data.comment != 'undefined' ? data.comment : '');
-        self.errors = ko.observable({});
+        var default_values = { 'position': 0, 'comment': '', 'io_type': '' };
+        if (typeof data == 'undefined') {
+            $.extend(true, this, default_values);
+        } else {
+            $.extend(true, this, default_values, data);
+        }
+        this.errors = ko.observable({});
     }
 
     function Profile(data) {
@@ -29,15 +32,6 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
         self.task_form.submit(function() {
             return false;
         });
-
-        self.replace_prefix = function(elements, item) {
-            var position = item.position;
-            elements.forEach(function(e) {
-                if (e.nodeType == 1) {
-                    e.innerHTML = e.innerHTML.replace(/__prefix__/g, position);
-                }
-            });
-        };
 
         self._set_inputs_mf_values = function() {
             var inputs_mf_fields = $('#inputs_management_form_container').find('input').toArray();
@@ -90,10 +84,12 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                     function(profile) {
                         self.profile_description(profile.description);
                         self.inputs($.map(profile.inputs, function(data) {
+                            data.io_type = 'i';
                             return new InputOutputViewModel(data);
                         }));
                         self._set_inputs_mf_values();
                         self.outputs($.map(profile.outputs, function(data) {
+                            data.io_type = 'o';
                             return new InputOutputViewModel(data);
                         }));
                         self._set_outputs_mf_values();
@@ -118,7 +114,6 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                 inputs[i].errors(errors[i]);
             }
             self.inputs(inputs);
-            console.log(self.inputs());
         };
 
         self._set_output_errors = function(errors) {
