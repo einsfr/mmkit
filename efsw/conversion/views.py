@@ -1,3 +1,5 @@
+import json
+
 from django import shortcuts
 from django.conf import settings
 from django.views.decorators import http
@@ -121,11 +123,19 @@ def task_create_json(request):
         if input_formset.is_valid() and output_formset.is_valid():
             pass
         else:
+            errors = {}
+            if input_formset.errors:
+                errors['inputs'] = input_formset.errors
+            if output_formset.errors:
+                errors['outputs'] = output_formset.errors
+            inputs_nf_errors = input_formset.non_form_errors()
+            if inputs_nf_errors:
+                errors['inputs__all__'] = inputs_nf_errors
+            outputs_nf_errors = output_formset.non_form_errors()
+            if outputs_nf_errors:
+                errors['outputs__all__'] = outputs_nf_errors
             return JsonWithStatusResponse.error({
-                'errors': {
-                    'inputs': input_formset.errors,
-                    'outputs': output_formset.errors,
-                }
+                'errors': json.dumps(errors)
             })
     else:
         return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()})

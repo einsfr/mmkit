@@ -15,6 +15,12 @@
                         return "{% url 'efsw.conversion:task:create_json' %}";
                     }
                 });
+                ko.components.register('input_form', {
+                    'template': 'template_input_form'
+                });
+                ko.components.register('output_form', {
+                    'template': 'template_output_form'
+                });
                 ko.applyBindings(view_model);
             });
         });
@@ -23,7 +29,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 Вход
-                <span data-bind="text: $index"></span>
+                <span data-bind="text: position"></span>
                 <span data-bind="if: comment">
                     (<span data-bind="text: comment"></span>)
                 </span>
@@ -53,7 +59,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 Выход
-                <span data-bind="text: $index"></span>
+                <span data-bind="text: position"></span>
                 <span data-bind="if: comment">
                     (<span data-bind="text: comment"></span>)
                 </span>
@@ -109,13 +115,17 @@
                 </div>
                 <h4 data-bind="visible: inputs().length > 0" style="display: none;">Входы</h4>
                 <div id="inputs_container"
-                     data-bind="template: { name: 'template_input_form', foreach: inputs, afterRender: replace_prefix }"></div>
+                     data-bind="foreach: { data: inputs, afterRender: replace_prefix }">
+                    <div data-bind="component: { name: 'input_form', params: {} }"></div>
+                </div>
                 <div id="inputs_management_form_container" style="display: none;">
                     {{ input_formset.management_form }}
                 </div>
                 <h4 data-bind="visible: outputs().length > 0" style="display: none;">Выходы</h4>
                 <div id="outputs_container"
-                     data-bind="template: { name: 'template_output_form', foreach: outputs, afterRender: replace_prefix }"></div>
+                     data-bind="foreach: { data: outputs, afterRender: replace_prefix }">
+                    <div data-bind="component: { name: 'output_form', params: {} }"></div>
+                </div>
                 <div id="outputs_management_form_container" style="display: none;">
                     {{ output_formset.management_form }}
                 </div>

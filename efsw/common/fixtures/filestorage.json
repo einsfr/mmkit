@@ -10,7 +10,7 @@
       },
       "read_only": false,
       "allowed_usage": [
-        "archive"
+        "archive", "conversion_out"
       ]
     }
   },
@@ -25,7 +25,7 @@
       },
       "read_only": true,
       "allowed_usage": [
-        "archive"
+        "archive", "conversion_in"
       ]
     }
   },

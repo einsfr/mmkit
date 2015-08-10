@@ -1,12 +1,10 @@
 define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_request'], function($, ko, jol, ajr) {
 
-    function InputOutput(data) {
-        var default_values = { 'position': 0, 'comment': '' };
-        if (typeof data == 'undefined') {
-            $.extend(true, this, default_values);
-        } else {
-            $.extend(true, this, default_values, data);
-        }
+    function InputOutputViewModel(data) {
+        var self = this;
+        self.position = (typeof data.position != 'undefined' ? data.position : 0);
+        self.comment = (typeof data.comment != 'undefined' ? data.comment : '');
+        self.errors = ko.observable({});
     }
 
     function Profile(data) {
@@ -27,6 +25,7 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
         self.inputs = ko.observableArray([]);
         self.outputs = ko.observableArray([]);
         self.task_form = $('#task_new_form');
+
         self.task_form.submit(function() {
             return false;
         });
@@ -60,14 +59,24 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             ];
             outputs_mf_fields.forEach(function(f) {
                 if (outputs_fields_names.indexOf(f.getAttribute('name')) >= 0) {
-                    f.setAttribute('value', self.inputs().length);
+                    f.setAttribute('value', self.outputs().length);
                 }
             });
         };
 
-        self.profile_changed = function(data, event) {
+        self._clear_errors = function() {
             self.errors({});
             self.error_msg('');
+            var clear_errors = function(e) {
+                e.errors({});
+                return e;
+            };
+            self.inputs($.map(self.inputs(), clear_errors));
+            self.outputs($.map(self.outputs(), clear_errors));
+        };
+
+        self.profile_changed = function(data, event) {
+            self._clear_errors();
             var profile_id = event.currentTarget.value;
             if (profile_id) {
                 jol.load(
@@ -81,11 +90,11 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                     function(profile) {
                         self.profile_description(profile.description);
                         self.inputs($.map(profile.inputs, function(data) {
-                            return new InputOutput(data);
+                            return new InputOutputViewModel(data);
                         }));
                         self._set_inputs_mf_values();
                         self.outputs($.map(profile.outputs, function(data) {
-                            return new InputOutput(data);
+                            return new InputOutputViewModel(data);
                         }));
                         self._set_outputs_mf_values();
                     },
@@ -103,9 +112,29 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             }
         };
 
+        self._set_input_errors = function(errors) {
+            var inputs = self.inputs();
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].errors(errors[i]);
+            }
+            self.inputs(inputs);
+            console.log(self.inputs());
+        };
+
+        self._set_output_errors = function(errors) {
+            var outputs = self.outputs();
+            for (var i = 0; i < outputs.length; i++) {
+                outputs[i].errors(errors[i]);
+            }
+            self.outputs(outputs);
+        };
+
+        self._append_error_msg = function (msg) {
+            self.error_msg(self.error_msg() + ' ' + msg);
+        };
+
         self.submit_form = function() {
-            self.error_msg('');
-            self.errors({});
+            self._clear_errors();
             ajr.exec(
                 self.urls.task_create_json(),
                 { 'method': 'post', 'data': self.task_form.serialize() },
@@ -115,6 +144,12 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                 function(response) {
                     require(['common/form_error_parser'], function(parser) {
                         parser.parse(response.data, self.errors, self.error_msg, alert);
+                        parser.parse_formset(
+                            response.data, 'inputs', self._set_input_errors, self._append_error_msg, alert
+                        );
+                        parser.parse_formset(
+                            response.data, 'outputs', self._set_output_errors, self._append_error_msg, alert
+                        );
                     });
                 },
                 alert
