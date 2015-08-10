@@ -46,7 +46,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
                 },
                 alert
             );
-        }
+        };
 
     };
 

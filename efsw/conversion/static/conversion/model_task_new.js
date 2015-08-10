@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, jol) {
+define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_request'], function($, ko, jol, ajr) {
 
     function InputOutput(data) {
         var default_values = { 'position': 0, 'comment': '' };
@@ -26,6 +26,10 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, jol)
         self.profile_description = ko.observable('');
         self.inputs = ko.observableArray([]);
         self.outputs = ko.observableArray([]);
+        self.task_form = $('#task_new_form');
+        self.task_form.submit(function() {
+            return false;
+        });
 
         self.replace_prefix = function(elements, item) {
             var position = item.position;
@@ -100,7 +104,21 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, jol)
         };
 
         self.submit_form = function() {
-
+            self.error_msg('');
+            self.errors({});
+            ajr.exec(
+                self.urls.task_create_json(),
+                { 'method': 'post', 'data': self.task_form.serialize() },
+                function(response) {
+                    // ok
+                },
+                function(response) {
+                    require(['common/form_error_parser'], function(parser) {
+                        parser.parse(response.data, self.errors, self.error_msg, alert);
+                    });
+                },
+                alert
+            );
         };
     };
 

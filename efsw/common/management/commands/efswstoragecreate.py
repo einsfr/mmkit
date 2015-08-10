@@ -69,7 +69,7 @@ class Command(BaseCommand):
             raise CommandError('EFSW_STORAGE_ROOT directory ({0}) doesn\'t exist.'.format(storage_root))
         if verbosity > 1:
             print('Check if base_dir is a subdirectory of storage root...')
-        if not storage_utils.is_subdir(storage_root, base_dir_abs):
+        if not storage_utils.in_path(storage_root, base_dir_abs):
             raise CommandError(
                 'Directory in base_dir argument ({0}) is not a subdirectory of EFSW_STORAGE_ROOT ({1}).'.format(
                     base_dir_abs, storage_root

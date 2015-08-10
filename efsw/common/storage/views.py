@@ -48,7 +48,7 @@ def nav_ls_json(request):
     dirs_only = request.GET.get('d', False)
     storage_root = storage.get_root_path()
     abs_path = os.path.normpath(os.path.join(storage_root, path))
-    if not storage_utils.is_subdir(storage_root, abs_path) and storage_root != abs_path:
+    if not storage_utils.in_path(storage_root, abs_path) and storage_root != abs_path:
         return _get_json_path_not_in_storage(path, storage.name)
     if not os.path.exists(abs_path):
         return _get_json_path_not_exists(path, storage.name)

@@ -59,6 +59,13 @@ task_patterns = [
             )
         ])
     ),
+    # tasks/create/json/
+    # Тесты:
+    url(
+        r'^create/json/$',
+        permission_required('conversion.add_conversiontask')(views.task_create_json),
+        name='create_json'
+    ),
 ]
 
 profile_patterns = [

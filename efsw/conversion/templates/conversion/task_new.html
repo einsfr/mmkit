@@ -4,6 +4,21 @@
 
 {% block head %}
     {{ block.super }}
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'conversion/model_task_new'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
+                    'profile_show_json': function() {
+                        return "{% url 'efsw.conversion:profile:show_json' %}";
+                    },
+                    'task_create_json': function() {
+                        return "{% url 'efsw.conversion:task:create_json' %}";
+                    }
+                });
+                ko.applyBindings(view_model);
+            });
+        });
+    </script>
     <script type="text/html" id="template_input_form">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -63,18 +78,6 @@
                 </div>
             </div>
         </div>
-    </script>
-    <script type="text/javascript">
-        require(['jquery', 'knockout', 'conversion/model_task_new'], function($, ko, model) {
-            $(document).ready(function() {
-                var view_model = new model({
-                    'profile_show_json': function() {
-                        return "{% url 'efsw.conversion:profile:show_json' %}";
-                    }
-                });
-                ko.applyBindings(view_model);
-            });
-        });
     </script>
 {% endblock %}
 

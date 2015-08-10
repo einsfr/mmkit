@@ -1,12 +1,12 @@
 import os
 
 
-def is_subdir(parent_dir, subdir):
-        if parent_dir == subdir:
-            return False
-        head, tail = os.path.split(subdir)
-        if not tail:
-            return False
-        if head == parent_dir:
-            return True
-        return is_subdir(parent_dir, head)
+def in_path(parent, child):
+    if parent == child:
+        return False
+    head, tail = os.path.split(child)
+    if not tail:
+        return False
+    if head == parent:
+        return True
+    return in_path(parent, head)
