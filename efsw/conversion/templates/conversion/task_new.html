@@ -72,6 +72,8 @@
                                 <!-- /ko -->
                             </div>
                             <span class="help-block"
+                                  data-bind="visible: allowed_ext.length, text: allowed_ext.join(', ')"></span>
+                            <span class="help-block"
                                   data-bind="visible: errors().path, text: errors().path"
                                   style="display: none;"></span>
                         </div>

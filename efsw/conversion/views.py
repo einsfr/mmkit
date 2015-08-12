@@ -184,14 +184,16 @@ def profile_show_json(request):
         'inputs': [
             {
                 'position': p,
-                'comment': i.comment
+                'comment': i.comment,
+                'allowed_ext': i.allowed_ext
             }
             for p, i in enumerate(profile.args_builder.inputs)
         ],
         'outputs': [
             {
                 'position': p,
-                'comment': o.comment
+                'comment': o.comment,
+                'allowed_ext': o.allowed_ext
             }
             for p, o in enumerate(profile.args_builder.outputs)
         ]

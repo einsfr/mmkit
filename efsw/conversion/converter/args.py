@@ -177,9 +177,10 @@ class AbstractIOPathProvider:
 
 class InputOutputAbstract(OptionsHandler):
 
-    def __init__(self, options=None, comment=None):
+    def __init__(self, options=None, comment=None, allowed_ext=None):
         super().__init__(options)
         self.comment = comment
+        self.allowed_ext = allowed_ext if allowed_ext is not None else []
 
     def build(self, path):
         raise NotImplementedError

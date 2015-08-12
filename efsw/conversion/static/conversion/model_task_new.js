@@ -1,13 +1,16 @@
 define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_request'], function($, ko, jol, ajr) {
 
     function InputOutputViewModel(data) {
-        var default_values = { 'position': 0, 'comment': '', 'io_type': '' };
+        var default_values = { 'position': 0, 'comment': '', 'io_type': '', 'allowed_ext': [] };
         if (typeof data == 'undefined') {
             $.extend(true, this, default_values);
         } else {
             $.extend(true, this, default_values, data);
         }
         this.errors = ko.observable({});
+        this.allowed_ext = (this.allowed_ext.length ? $.map(this.allowed_ext, function(e) {
+            return '*.' + e;
+        }) : ['*.*']);
     }
 
     function Profile(data) {
@@ -134,7 +137,7 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
                 self.urls.task_create_json(),
                 { 'method': 'post', 'data': self.task_form.serialize() },
                 function(response) {
-                    // ok
+                    window.location.href = response.data;
                 },
                 function(response) {
                     require(['common/form_error_parser'], function(parser) {
