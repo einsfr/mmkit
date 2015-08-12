@@ -18,6 +18,10 @@ def format_url(url: str):
     return UrlFormatResult(**match_dict)
 
 
+def is_url(url: str):
+    return url_re.match(url.replace('\\', '/')) is not None
+
+
 def _required_part_is_missing(match_dict):
     try:
         return not match_dict['scheme'] or not match_dict['host']
