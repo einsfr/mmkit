@@ -116,10 +116,12 @@ def task_create_json(request):
     if task_form.is_valid():
         inputs_count = len(task_form.cleaned_data['profile'].args_builder.inputs)
         outputs_count = len(task_form.cleaned_data['profile'].args_builder.outputs)
-        input_formset = formset_factory(forms.InputLocationForm, max_num=inputs_count, min_num=inputs_count,
-                                        validate_max=True, validate_min=True)(request.POST, prefix='inputs')
-        output_formset = formset_factory(forms.OutputLocationForm, max_num=outputs_count, min_num=outputs_count,
-                                         validate_max=True, validate_min=True)(request.POST, prefix='outputs')
+        input_formset = formset_factory(forms.InputLocationForm, formset=forms.BaseInputLocationFormSet,
+                                        max_num=inputs_count, min_num=inputs_count, validate_max=True,
+                                        validate_min=True)(request.POST, prefix='inputs')
+        output_formset = formset_factory(forms.OutputLocationForm, formset=forms.BaseOutputLocationFormSet,
+                                         max_num=outputs_count, min_num=outputs_count, validate_max=True,
+                                         validate_min=True)(request.POST, prefix='outputs')
         if input_formset.is_valid() and output_formset.is_valid():
             pass
         else:

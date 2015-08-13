@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import widgets
+from django.forms.formsets import BaseFormSet
 
 from efsw.conversion import models
 from efsw.common.models import FileStorage
@@ -63,3 +64,18 @@ class OutputLocationForm(IOLocationForm):
             'class': 'form-control',
         })
     )
+
+
+class BaseInputLocationFormSet(BaseFormSet):
+
+    def clean(self):
+        if any(self.errors):
+            return
+        for form in self.forms:
+            pass
+
+
+class BaseOutputLocationFormSet(BaseFormSet):
+
+    def clean(self):
+        pass

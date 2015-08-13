@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import HStoreField, ArrayField
 from django.conf import settings
 
 from efsw.common.utils import urlformatter
+from efsw.common.storage.utils import in_path
 
 
 class FileStorage(models.Model):
@@ -94,6 +95,11 @@ class FileStorage(models.Model):
             )
             file_object.save()
         return file_object
+
+    def contains(self, path, check_existence=True):
+        root = self.get_root_path()
+        full_path = os.path.normpath(os.path.join(root, path))
+        return in_path(root, full_path) and (check_existence or os.path.exists(full_path))
 
 
 class FileStorageObject(models.Model):
