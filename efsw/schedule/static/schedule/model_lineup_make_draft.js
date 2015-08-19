@@ -13,7 +13,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
 
         self.lineup_make_draft = function() {
             ajr.exec(
-                self.urls.lineup_make_draft_json(self.lineup_id),
+                self.urls['lineup_make_draft_json'](self.lineup_id),
                 { 'method': 'post' },
                 function() {
                     window.location.reload();

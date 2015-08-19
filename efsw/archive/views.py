@@ -144,7 +144,7 @@ def item_create_json(request):
         models.ItemLog.log_item_add(item, request)
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(item.id, )))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @http.require_GET
@@ -395,7 +395,7 @@ def item_update_properties_json(request):
         models.ItemLog.log_item_update(item, request)
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_locations', args=(item.id, )))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 # ------------------------- ItemCategory -------------------------
@@ -423,7 +423,7 @@ def category_create_json(request):
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:category:list'))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @http.require_GET
@@ -463,4 +463,4 @@ def category_update_json(request):
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:category:list'))
     else:
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()})
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')

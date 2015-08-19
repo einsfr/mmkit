@@ -77,7 +77,7 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
             var profile_id = event.currentTarget.value;
             if (profile_id) {
                 jol.load(
-                    self.urls.profile_show_json(),
+                    self.urls['profile_show_json'],
                     {
                         'data': {
                             'id': profile_id
@@ -134,7 +134,7 @@ define(['jquery', 'knockout', 'common/json_object_loader', 'common/ajax_json_req
         self.submit_form = function() {
             self._clear_errors();
             ajr.exec(
-                self.urls.task_create_json(),
+                self.urls['task_create_json'],
                 { 'method': 'post', 'data': self.task_form.serialize() },
                 function(response) {
                     window.location.href = response.data;

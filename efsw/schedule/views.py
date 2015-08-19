@@ -9,13 +9,12 @@ from django.http import Http404
 from django.db.models import Q
 from django.core import urlresolvers
 
-from efsw.schedule import models
-from efsw.schedule import default_settings as schedule_default_settings
-from efsw.schedule import forms
+from efsw.schedule import models, forms, errors
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.schedule import lineops
 from efsw.common.db import pagination
 from efsw.common.http.decorators import require_ajax
+from efsw.common.utils import params
 
 
 def _get_current_lineup(channel, date=None):
@@ -31,15 +30,6 @@ def _get_current_lineup(channel, date=None):
     except models.Lineup.DoesNotExist:
         lineup = None
     return lineup
-
-
-def _get_program_list_page(query_set, page):
-    per_page = getattr(
-        settings,
-        'EFSW_SCHED_PROGRAM_LIST_PER_PAGE',
-        schedule_default_settings.EFSW_SCHED_PROGRAM_LIST_PER_PAGE
-    )
-    return pagination.get_page(query_set, page, per_page)
 
 
 def _get_lineup_table_data(lineup):
@@ -76,15 +66,6 @@ def _get_lineup_table_data(lineup):
         'lineup_start_time': lineup.start_time,
         'lineup_end_time': lineup.end_time,
     }
-
-
-def _get_lineup_list_page(query_set, page):
-    per_page = getattr(
-        settings,
-        'EFSW_SCHED_LINEUP_LIST_PER_PAGE',
-        schedule_default_settings.EFSW_SCHED_LINEUP_LIST_PER_PAGE
-    )
-    return pagination.get_page(query_set, page, per_page)
 
 
 def _get_json_lineup_not_found(lineup_id):
@@ -167,15 +148,6 @@ def _pp_delete(program_position):
         program_position.save()
 
 
-def _get_channel_list_page(query_set, page):
-    per_page = getattr(
-        settings,
-        'EFSW_SCHED_CHANNEL_LIST_PER_PAGE',
-        schedule_default_settings.EFSW_SCHED_CHANNEL_LIST_PER_PAGE
-    )
-    return pagination.get_page(query_set, page, per_page)
-
-
 def _get_json_channel_not_found(channel_id):
     return JsonWithStatusResponse.error('Ошибка: не найден канал с ID "{0}"'.format(channel_id), 'channel_not_found')
 
@@ -193,7 +165,7 @@ def _get_json_wrong_channel_id(channel_id):
 def lineup_list(request, page=1):
     lineups = models.Lineup.objects.all().order_by('-id')
     return shortcuts.render(request, 'schedule/lineup_list.html', {
-        'lineups': _get_lineup_list_page(lineups, page),
+        'lineups': pagination.get_page(lineups, page, settings.EFSW_SCHED_LINEUP_LIST_PER_PAGE),
     })
 
 
@@ -256,22 +228,22 @@ def lineup_edit_structure(request, lineup_id):
 @require_ajax
 @http.require_POST
 def lineup_update_json(request):
-    lineup_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    lineup_id = int(p_result['id'])
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
     except models.Lineup.DoesNotExist:
-        return _get_json_lineup_not_found(lineup_id)
+        return JsonWithStatusResponse.error(errors.LINEUP_NOT_FOUND.format(lineup_id), 'LINEUP_NOT_FOUND')
     if not lineup.is_editable():
-        return _get_json_lineup_edit_forbidden(lineup_id)
+        return JsonWithStatusResponse.error(errors.LINEUP_EDIT_FORBIDDEN.format(lineup_id), 'LINEUP_EDIT_FORBIDDEN')
     form = forms.LineupUpdateForm(request.POST, instance=lineup)
     if form.is_valid():
         updated_lineup = form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:edit', args=(updated_lineup.id, )))
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @http.require_GET
@@ -298,22 +270,20 @@ def lineup_create_json(request):
         ])
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax
 @http.require_POST
 def lineup_copy_json(request):
-    lineup_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    lineup_id = int(p_result['id'])
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
-    except ValueError:
-        return _get_json_wrong_lineup_id(lineup_id)
     except models.Lineup.DoesNotExist:
-        return _get_json_lineup_not_found(lineup_id)
+        return JsonWithStatusResponse.error(errors.LINEUP_NOT_FOUND.format(lineup_id), 'LINEUP_NOT_FOUND')
     orig_pp = lineup.program_positions.all()
     lineup.pk = None
     lineup.draft = True
@@ -330,10 +300,7 @@ def lineup_copy_json(request):
         models.ProgramPosition.objects.bulk_create(list(map(remove_pk, orig_pp)))
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:lineup:show', args=(lineup.id, )))
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax
@@ -355,19 +322,17 @@ def lineup_activate_part_modal(request):
 @require_ajax
 @http.require_POST
 def lineup_activate_json(request):
-    lineup_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    lineup_id = int(p_result['id'])
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
-    except ValueError:
-        return _get_json_wrong_lineup_id(lineup_id)
     except models.Lineup.DoesNotExist:
-        return _get_json_lineup_not_found(lineup_id)
+        return JsonWithStatusResponse.error(errors.LINEUP_NOT_FOUND.format(lineup_id), 'LINEUP_NOT_FOUND')
     if not lineup.draft:
-        return JsonWithStatusResponse.error(
-            'Ошибка: сетка вещания с ID "{0}" не имеет статуса черновика '
-            'и не может быть активирована'.format(lineup_id),
-            'lineup_not_draft'
-        )
+        return JsonWithStatusResponse.error(errors.LINEUP_CANT_ACTIVATE_NON_DRAFT.format(lineup_id),
+                                            'LINEUP_CANT_ACTIVATE_NON_DRAFT')
     lineup.draft = False
     form = forms.LineupActivateForm(request.POST, instance=lineup)
     if form.is_valid():
@@ -378,10 +343,7 @@ def lineup_activate_json(request):
         current_active_lineup.save()
         return JsonWithStatusResponse.ok()
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax
@@ -393,18 +355,16 @@ def lineup_make_draft_part_modal(request):
 @require_ajax
 @http.require_POST
 def lineup_make_draft_json(request):
-    lineup_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    lineup_id = int(p_result['id'])
     try:
         lineup = models.Lineup.objects.get(pk=lineup_id)
-    except ValueError:
-        return _get_json_wrong_lineup_id(lineup_id)
     except models.Lineup.DoesNotExist:
-        return _get_json_lineup_not_found(lineup_id)
+        return JsonWithStatusResponse.error(errors.LINEUP_NOT_FOUND.format(lineup_id), 'LINEUP_NOT_FOUND')
     if lineup.draft:
-        return JsonWithStatusResponse.error(
-            'Ошибка: сетка вещания с ID "{0}" уже имеет статуса черновика'.format(lineup_id),
-            'lineup_not_active'
-        )
+        return JsonWithStatusResponse.error(errors.LINEUP_ALREADY_DRAFT.format(lineup_id), 'LINEUP_ALREADY_DRAFT')
     try:
         previous_lineup = models.Lineup.objects.get(
             channel=lineup.channel,
@@ -438,7 +398,7 @@ def program_list(request, page=1):
         request,
         'schedule/program_list.html',
         {
-            'programs': _get_program_list_page(programs, page)
+            'programs': pagination.get_page(programs, page, settings.EFSW_SCHED_PROGRAM_LIST_PER_PAGE)
         }
     )
 
@@ -457,10 +417,7 @@ def program_create_json(request):
         program = form.save()
         return JsonWithStatusResponse.ok(program.get_absolute_url())
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @http.require_GET
@@ -484,13 +441,14 @@ def program_show_json(request):
             'age_limit': p.format_age_limit()
         }
 
-    program_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    program_id = int(p_result['id'])
     try:
         program = models.Program.objects.get(pk=program_id)
-    except ValueError:
-        return _get_json_wrong_program_id(program_id)
     except models.Program.DoesNotExist:
-        return _get_json_program_not_found(program_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_NOT_FOUND.format(program_id), 'PROGRAM_NOT_FOUND')
     return JsonWithStatusResponse(format_program_dict(program))
 
 
@@ -521,13 +479,15 @@ def pp_show_json(request):
             return_dict['program_age_limit'] = pp.program.format_age_limit()
         return return_dict
 
-    pp_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    pp_id = int(p_result['id'])
     try:
         program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
-    except ValueError:
-        return _get_json_wrong_pp_id(pp_id)
     except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_POSITION_NOT_FOUND.format(pp_id),
+                                            'PROGRAM_POSITION_NOT_FOUND')
     return JsonWithStatusResponse(format_pp_dict(program_position))
 
 
@@ -561,41 +521,43 @@ def pp_edit_json(request):
             return_dict['program_id'] = 0
         return return_dict
 
-    pp_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    pp_id = int(p_result['id'])
     try:
-        program_position = models.ProgramPosition.objects.get(pk=pp_id)
-    except ValueError:
-        return _get_json_wrong_pp_id(pp_id)
+        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_POSITION_NOT_FOUND.format(pp_id),
+                                            'PROGRAM_POSITION_NOT_FOUND')
     return JsonWithStatusResponse(format_pp_dict(program_position))
 
 
 @require_ajax
 @http.require_POST
 def pp_delete_json(request):
-    pp_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    pp_id = int(p_result['id'])
     try:
-        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
-    except ValueError:
-        return _get_json_wrong_pp_id(pp_id)
+        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_POSITION_NOT_FOUND.format(pp_id),
+                                            'PROGRAM_POSITION_NOT_FOUND')
     lineup = program_position.lineup
     if not lineup.is_editable():
-        return _get_json_lineup_edit_forbidden(lineup.id)
+        return JsonWithStatusResponse.error(errors.LINEUP_EDIT_FORBIDDEN.format(lineup.id), 'LINEUP_EDIT_FORBIDDEN')
     if not program_position.program:
-        return _get_json_delete_empty_pp(pp_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_POSITION_CANT_DELETE_EMPTY.format(pp_id),
+                                            'PROGRAM_POSITION_CANT_DELETE_EMPTY')
     if request.POST.get('r', None) is not None:
         form = forms.ProgramPositionRepeatForm(request.POST)
         if form.is_valid():
             for pp in [x for x in lineops.get_similar_pp(program_position) if str(x.dow) in form.cleaned_data.get('r')]:
                 _pp_delete(pp)
         else:
-            return JsonWithStatusResponse.error(
-                'Неправильный формат списка повторов',
-                'form_invalid'
-            )
+            return JsonWithStatusResponse.error('Неправильный формат списка повторов', 'FORM_INVALID')
     _pp_delete(program_position)
     return JsonWithStatusResponse.ok()
 
@@ -603,19 +565,21 @@ def pp_delete_json(request):
 @require_ajax
 @http.require_POST
 def pp_update_json(request):
-    pp_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    pp_id = int(p_result['id'])
     try:
-        program_position = models.ProgramPosition.objects.select_related('lineup').get(pk=pp_id)
-    except ValueError:
-        return _get_json_wrong_pp_id(pp_id)
+        program_position = models.ProgramPosition.objects.select_related('program').get(pk=pp_id)
     except models.ProgramPosition.DoesNotExist:
-        return _get_json_pp_not_found(pp_id)
+        return JsonWithStatusResponse.error(errors.PROGRAM_POSITION_NOT_FOUND.format(pp_id),
+                                            'PROGRAM_POSITION_NOT_FOUND')
     lineup = program_position.lineup
     if not lineup.is_editable():
-        return _get_json_lineup_edit_forbidden(lineup.id)
+        return JsonWithStatusResponse.error(errors.LINEUP_EDIT_FORBIDDEN.format(lineup.id), 'LINEUP_EDIT_FORBIDDEN')
     form = forms.ProgramPositionEditForm(request.POST)
     if not form.is_valid():
-        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'form_invalid')
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
     repeat_for = [
         x
         for x in lineops.get_similar_pp(program_position)
@@ -631,7 +595,7 @@ def pp_update_json(request):
     try:
         program_position.full_clean()
     except ValidationError as e:
-        return JsonWithStatusResponse.error({'errors': json.dumps(e.message_dict)}, 'pp_model_invalid')
+        return JsonWithStatusResponse.error({'errors': json.dumps(e.message_dict)}, 'MODEL_INVALID')
     if old_start_time == program_position.start_time and old_end_time == program_position.end_time:
         # Если фрагмент не меняет свою длительность
         if not lineops.pp_is_empty(program_position):
@@ -653,14 +617,10 @@ def pp_update_json(request):
             return JsonWithStatusResponse.error(
                 {
                     'errors': json.dumps(
-                        {
-                            '__all__': [
-                                'Нельзя изменить длительность элемента, при этом сделав (или оставив) его пустым.'
-                            ]
-                        }
+                        {'__all__': [errors.PROGRAM_POSITION_CANT_RESIZE_EMPTY.format(program_position.id)]}
                     )
                 },
-                'pp_resize_empty'
+                'PROGRAM_POSITION_CANT_RESIZE_EMPTY'
             )
         start_time = program_position.start_time
         end_time = program_position.end_time
@@ -672,14 +632,10 @@ def pp_update_json(request):
             return JsonWithStatusResponse.error(
                 {
                     'errors': json.dumps(
-                        {
-                            '__all__': [
-                                'Новый элемент должен находиться в границах старого.'
-                            ]
-                        }
+                        {'__all__': [errors.PROGRAM_POSITION_NEW_OUT_OF_OLD_BOUNDS]}
                     )
                 },
-                'pp_out_of_bounds'
+                'PROGRAM_POSITION_NEW_OUT_OF_OLD_BOUNDS'
             )
         program_position.save()
         for pp in repeat_for:
@@ -725,7 +681,7 @@ def pp_update_json(request):
 @http.require_GET
 def channel_list(request, page=1):
     return shortcuts.render(request, 'schedule/channel_list.html', {
-        'channels': _get_channel_list_page(models.Channel.objects.all(), page)
+        'channels': pagination.get_page(models.Channel.objects.all(), page, settings.EFSW_SCHED_CHANNEL_LIST_PER_PAGE)
     })
 
 
@@ -740,7 +696,7 @@ def channel_new(request):
 def channel_show_lineups(request, channel_id, page=1):
     channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
     return shortcuts.render(request, 'schedule/channel_show_lineups.html', {
-        'lineups': _get_lineup_list_page(channel.lineups.all(), page),
+        'lineups': pagination.get_page(channel.lineups.all(), page, settings.EFSW_SCHED_LINEUP_LIST_PER_PAGE),
         'channel': channel
     })
 
@@ -763,48 +719,41 @@ def channel_create_json(request):
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax
 @http.require_POST
 def channel_update_json(request):
-    channel_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    channel_id = int(p_result['id'])
     try:
         channel = models.Channel.objects.get(pk=channel_id)
     except models.Channel.DoesNotExist:
-        return _get_json_channel_not_found(channel_id)
-    except ValueError:
-        return _get_json_wrong_channel_id(channel_id)
+        return JsonWithStatusResponse.error(errors.CHANNEL_NOT_FOUND.format(channel_id), 'CHANNEL_NOT_FOUND')
     form = forms.ChannelCreateForm(request.POST, instance=channel)
     if form.is_valid():
         form.save()
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.schedule:channel:list'))
     else:
-        return JsonWithStatusResponse.error(
-            {'errors': form.errors.as_json()},
-            'form_invalid'
-        )
+        return JsonWithStatusResponse.error({'errors': form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax
 @http.require_POST
 def channel_activate_json(request):
-    channel_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    channel_id = int(p_result['id'])
     try:
         channel = models.Channel.objects.get(pk=channel_id)
     except models.Channel.DoesNotExist:
-        return _get_json_channel_not_found(channel_id)
-    except ValueError:
-        return _get_json_wrong_channel_id(channel_id)
+        return JsonWithStatusResponse.error(errors.CHANNEL_NOT_FOUND.format(channel_id), 'CHANNEL_NOT_FOUND')
     if channel.active:
-        return JsonWithStatusResponse.error(
-            'Невозможно начать использование канала - он уже используется.',
-            'channel_already_active'
-        )
+        return JsonWithStatusResponse.error(errors.CHANNEL_ALREADY_ACTIVE.format(channel_id), 'CHANNEL_ALREADY_ACTIVE')
     channel.active = True
     channel.save()
     return JsonWithStatusResponse.ok()
@@ -813,18 +762,17 @@ def channel_activate_json(request):
 @require_ajax
 @http.require_POST
 def channel_deactivate_json(request):
-    channel_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
+    if type(p_result) != dict:
+        return p_result
+    channel_id = int(p_result['id'])
     try:
         channel = models.Channel.objects.get(pk=channel_id)
     except models.Channel.DoesNotExist:
-        return _get_json_channel_not_found(channel_id)
-    except ValueError:
-        return _get_json_wrong_channel_id(channel_id)
+        return JsonWithStatusResponse.error(errors.CHANNEL_NOT_FOUND.format(channel_id), 'CHANNEL_NOT_FOUND')
     if not channel.active:
-        return JsonWithStatusResponse.error(
-            'Невозможно прекратить использование канала - он уже не используется.',
-            'channel_already_not_active'
-        )
+        return JsonWithStatusResponse.error(errors.CHANNEL_ALREADY_NOT_ACTIVE.format(channel_id),
+                                            'CHANNEL_ALREADY_NOT_ACTIVE')
     channel.active = False
     channel.save()
     return JsonWithStatusResponse.ok()

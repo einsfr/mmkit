@@ -12,7 +12,7 @@ define(['jquery', 'knockout', 'tinycolor', 'common/ajax_json_request'], function
 
         self.create_program = function() {
             ajr.exec(
-                self.urls.program_create_json(),
+                self.urls['program_create_json'](),
                 { 'method': 'post', 'data': self.form.serialize() },
                 function(response) {
                     window.location.href = response.data;

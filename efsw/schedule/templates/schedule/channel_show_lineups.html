@@ -10,21 +10,15 @@
         require(['jquery', 'knockout', 'schedule/model_lineup_list'], function($, ko, model) {
             $(document).ready(function() {
                 var view_model = new model({
-                    'lineup_copy_part_modal': function() {
-                        return '{% url 'efsw.schedule:lineup:copy_part_modal' %}';
-                    },
+                    'lineup_copy_part_modal': "{% url 'efsw.schedule:lineup:copy_part_modal' %}",
                     'lineup_copy_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:copy_json' %}?id=' + lineup_id;
                     },
-                    'lineup_activate_part_modal': function() {
-                        return '{% url 'efsw.schedule:lineup:activate_part_modal' %}';
-                    },
+                    'lineup_activate_part_modal': "{% url 'efsw.schedule:lineup:activate_part_modal' %}",
                     'lineup_activate_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:activate_json' %}?id=' + lineup_id;
                     },
-                    'lineup_make_draft_part_modal': function() {
-                        return '{% url 'efsw.schedule:lineup:make_draft_part_modal' %}';
-                    },
+                    'lineup_make_draft_part_modal': "{% url 'efsw.schedule:lineup:make_draft_part_modal' %}",
                     'lineup_make_draft_json': function(lineup_id) {
                         return '{% url 'efsw.schedule:lineup:make_draft_json' %}?id=' + lineup_id;
                     }

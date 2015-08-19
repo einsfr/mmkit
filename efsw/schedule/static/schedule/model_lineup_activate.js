@@ -27,7 +27,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'jquery_ui', 'vendor/j
 
         self.activate_lineup = function() {
             ajr.exec(
-                self.urls.lineup_activate_json(self.lineup_id),
+                self.urls['lineup_activate_json'](self.lineup_id),
                 { 'method': 'post', 'data': self.form.serialize() },
                 function() {
                     window.location.reload();

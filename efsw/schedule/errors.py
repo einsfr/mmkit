@@ -1,0 +1,13 @@
+LINEUP_NOT_FOUND = 'Сетка(и) вещания с ID {0} не существует(ют).'
+LINEUP_EDIT_FORBIDDEN = 'Сетка вещания с ID {0} закрыта для редактирования.'
+LINEUP_CANT_ACTIVATE_NON_DRAFT = 'Сетка вещания с ID {0} не имеет статуса черновика и не может быть активирована.'
+LINEUP_ALREADY_DRAFT = 'Сетка вещания с ID {0} уже имеет статуса черновика.'
+PROGRAM_NOT_FOUND = 'Программа(ы) с ID {0} не существует(ют).'
+PROGRAM_POSITION_NOT_FOUND = 'Фрагмент(ы) сетки вещания с ID {0} не существует(ют).'
+PROGRAM_POSITION_CANT_DELETE_EMPTY = 'Невозможно удалить пустой фрагмент с ID {0}.'
+PROGRAM_POSITION_CANT_RESIZE_EMPTY = 'Нельзя изменить длительность элемента с ID {0}, при этом сделав (или оставив) ' \
+                                     'его пустым.'
+PROGRAM_POSITION_NEW_OUT_OF_OLD_BOUNDS = 'Новый элемент должен находиться в границах старого.'
+CHANNEL_NOT_FOUND = 'Канал(ы) с ID {0} не существует(ют).'
+CHANNEL_ALREADY_ACTIVE = 'Невозможно начать использование канала с ID {0} - он уже используется.'
+CHANNEL_ALREADY_NOT_ACTIVE = 'Невозможно прекратить использование канала с ID {0} - он уже не используется.'

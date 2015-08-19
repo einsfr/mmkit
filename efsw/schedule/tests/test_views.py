@@ -99,12 +99,12 @@ class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
     def test_not_found(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
 
     def test_not_editable(self):
         self._login_user()
         response = self.client.post('{0}{1}'.format(self.url, '?id=1'))
-        self.assertJsonError(response, 'lineup_edit_forbidden')
+        self.assertJsonError(response, 'LINEUP_EDIT_FORBIDDEN')
 
     def test_invalid(self):
         self._login_user()
@@ -112,7 +112,7 @@ class LineupUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
             '{0}{1}'.format(self.url, '?id=2'),
             {'name': ''}
         )
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_valid(self):
         self._login_user()
@@ -142,7 +142,7 @@ class LineupCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
     def test_invalid(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_valid(self):
         self._login_user()
@@ -180,19 +180,19 @@ class LineupCopyJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'LINEUP_NOT_FOUND')
 
     def test_invalid(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 1))
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_valid(self):
         self._login_user()
@@ -230,24 +230,24 @@ class LineupActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'LINEUP_NOT_FOUND')
 
     def test_non_draft(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 1))
-        self.assertJsonError(response, 'lineup_not_draft')
+        self.assertJsonError(response, 'LINEUP_CANT_ACTIVATE_NON_DRAFT')
 
     def test_invalid(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 2))
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
 
 class LineupMakeDraftJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
@@ -267,19 +267,19 @@ class LineupMakeDraftJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'lineup_not_found')
+        self.assertJsonError(response, 'LINEUP_NOT_FOUND')
 
     def test_draft(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 2))
-        self.assertJsonError(response, 'lineup_not_active')
+        self.assertJsonError(response, 'LINEUP_ALREADY_DRAFT')
 
     def test_normal(self):
         self._login_user()
@@ -308,7 +308,7 @@ class ProgramCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
     def test_invalid_form(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_valid(self):
         self._login_user()
@@ -342,13 +342,13 @@ class ProgramShowJsonTestCase(JsonResponseTestCase):
     def test_wrong_id(self):
         for i in ['', 'non-int']:
             response = self.client.get('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         response = self.client.get(self.url)
-        self.assertJsonError(response, 'program_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'program_not_found')
+        self.assertJsonError(response, 'PROGRAM_NOT_FOUND')
 
     def test_normal(self):
         response = self.client.get('{0}?id={1}'.format(self.url, 1))
@@ -368,13 +368,13 @@ class ProgramPositionShowJsonTestCase(JsonResponseTestCase):
     def test_wrong_id(self):
         for i in ['', 'non-int']:
             response = self.client.get('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         response = self.client.get(self.url)
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'PROGRAM_POSITION_NOT_FOUND')
 
     def test_normal(self):
         response = self.client.get('{0}?id={1}'.format(self.url, 1))
@@ -396,14 +396,14 @@ class ProgramPositionEditJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.get('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.get(self.url)
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.get('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'PROGRAM_POSITION_NOT_FOUND')
 
     def test_normal(self):
         self._login_user()
@@ -433,24 +433,24 @@ class ProgramPositionDeleteJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'PROGRAM_POSITION_NOT_FOUND')
 
     def test_edit_forbidden(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 1))
-        self.assertJsonError(response, 'lineup_edit_forbidden')
+        self.assertJsonError(response, 'LINEUP_EDIT_FORBIDDEN')
 
     def test_delete_empty(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 34))
-        self.assertJsonError(response, 'pp_delete_empty')
+        self.assertJsonError(response, 'PROGRAM_POSITION_CANT_DELETE_EMPTY')
 
     def test_delete_repeat_invalid(self):
         self._login_user()
@@ -458,7 +458,7 @@ class ProgramPositionDeleteJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
             '{0}?id={1}'.format(self.url, 32),
             {'r': 'invalid_repeat_data'}
         )
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_delete_single_expand_previous(self):
         self._login_user()
@@ -538,24 +538,24 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'pp_not_found')
+        self.assertJsonError(response, 'PROGRAM_POSITION_NOT_FOUND')
 
     def test_edit_forbidden(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 1))
-        self.assertJsonError(response, 'lineup_edit_forbidden')
+        self.assertJsonError(response, 'LINEUP_EDIT_FORBIDDEN')
 
     def test_form_invalid(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 32))
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_model_invalid(self):
         self._login_user()
@@ -575,7 +575,7 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
             data['st_h'] = d[1]
             data['et_h'] = d[2]
             response = self.client.post('{0}?id={1}'.format(self.url, d[0]), data)
-            self.assertJsonError(response, 'pp_model_invalid')
+            self.assertJsonError(response, 'MODEL_INVALID')
 
     def test_resize_empty(self):
         self._login_user()
@@ -591,7 +591,7 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
                 'p': ''
             }
         )
-        self.assertJsonError(response, 'pp_resize_empty')
+        self.assertJsonError(response, 'PROGRAM_POSITION_CANT_RESIZE_EMPTY')
 
     def test_out_of_bounds(self):
         self._login_user()
@@ -610,7 +610,7 @@ class ProgramPositionUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestC
             data['st_h'] = d[1]
             data['et_h'] = d[2]
             response = self.client.post('{0}?id={1}'.format(self.url, d[0]), data)
-            self.assertJsonError(response, 'pp_out_of_bounds')
+            self.assertJsonError(response, 'PROGRAM_POSITION_NEW_OUT_OF_OLD_BOUNDS')
 
     def test_normal_expand_previous(self):
         self._login_user()
@@ -745,7 +745,7 @@ class ChannelCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
     def test_invalid(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'form_invalid')
+        self.assertJsonError(response, 'FORM_INVALID')
 
     def test_normal(self):
         self._login_user()
@@ -779,19 +779,19 @@ class ChannelUpdateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'CHANNEL_NOT_FOUND')
 
     def test_invalid(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
 
     def test_normal(self):
         self._login_user()
@@ -825,19 +825,19 @@ class ChannelActivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'CHANNEL_NOT_FOUND')
 
     def test_already_active(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 1))
-        self.assertJsonError(response, 'channel_already_active')
+        self.assertJsonError(response, 'CHANNEL_ALREADY_ACTIVE')
 
     def test_normal(self):
         self._login_user()
@@ -863,19 +863,19 @@ class ChannelDeactivateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase)
         self._login_user()
         for i in ['', 'non-int']:
             response = self.client.post('{0}?id={1}'.format(self.url, i))
-            self.assertJsonError(response, 'id_not_int')
+            self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
 
     def test_404(self):
         self._login_user()
         response = self.client.post(self.url)
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
         response = self.client.post('{0}?id={1}'.format(self.url, 1000000))
-        self.assertJsonError(response, 'channel_not_found')
+        self.assertJsonError(response, 'CHANNEL_NOT_FOUND')
 
     def test_already_active(self):
         self._login_user()
         response = self.client.post('{0}?id={1}'.format(self.url, 3))
-        self.assertJsonError(response, 'channel_already_not_active')
+        self.assertJsonError(response, 'CHANNEL_ALREADY_NOT_ACTIVE')
 
     def test_normal(self):
         self._login_user()

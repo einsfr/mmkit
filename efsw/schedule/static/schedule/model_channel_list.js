@@ -8,7 +8,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
 
         self.activate = function(channel_id) {
             ajr.exec(
-                self.urls.channel_activate_json(channel_id),
+                self.urls['channel_activate_json'](channel_id),
                 { 'method': 'post' },
                 function() {
                     window.location.reload();
@@ -22,7 +22,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
 
         self.deactivate = function(channel_id) {
             ajr.exec(
-                self.urls.channel_deactivate_json(channel_id),
+                self.urls['channel_deactivate_json'](channel_id),
                 { 'method': 'post' },
                 function() {
                     window.location.reload();

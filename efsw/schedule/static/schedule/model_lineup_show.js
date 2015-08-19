@@ -39,7 +39,7 @@ define(['jquery', 'knockout', 'common/json_object_loader'], function($, ko, obj_
                 return;
             }
             obj_loader.load(
-                self.urls.pp_show_json(pp_id),
+                self.urls['pp_show_json'](pp_id),
                 {},
                 ProgramPosition,
                 function(o) {

@@ -5,24 +5,11 @@ from django.conf import settings
 from django.views.decorators import http
 from django.forms.formsets import formset_factory
 
-from efsw.conversion import models, forms
+from efsw.conversion import models, forms, errors
 from efsw.common.db import pagination
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.http.decorators import require_ajax
-
-
-def _get_json_profile_not_found(profile_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: профиль с ID "{0}" не существует.'.format(profile_id),
-        'profile_not_found'
-    )
-
-
-def _get_json_profile_wrong_id(profile_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор профиля должен быть целым числом, предоставлено: "{0}".'.format(profile_id),
-        'id_not_int'
-    )
+from efsw.common.utils import params
 
 
 @http.require_GET
@@ -142,7 +129,7 @@ def task_create_json(request):
                 'errors': json.dumps(errors)
             })
     else:
-        return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()})
+        return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()}, 'FORM_INVALID')
 
 
 @http.require_GET
@@ -176,13 +163,14 @@ def profile_show(request, profile_id):
 @require_ajax
 @http.require_GET
 def profile_show_json(request):
-    profile_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    profile_id = p_result['id']
     try:
         profile = models.ConversionProfile.objects.get(pk=profile_id)
     except models.ConversionProfile.DoesNotExist:
-        return _get_json_profile_not_found(profile_id)
-    except ValueError:
-        return _get_json_profile_wrong_id(profile_id)
+        return JsonWithStatusResponse.error(errors.PROFILE_NOT_FOUND.format(profile_id), 'PROFILE_NOT_FOUND')
     return JsonWithStatusResponse.ok({
         'name': profile.name,
         'description': profile.description,

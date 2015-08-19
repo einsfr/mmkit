@@ -8,12 +8,8 @@
         require(['jquery', 'knockout', 'conversion/model_task_new'], function($, ko, model) {
             $(document).ready(function() {
                 var view_model = new model({
-                    'profile_show_json': function() {
-                        return "{% url 'efsw.conversion:profile:show_json' %}";
-                    },
-                    'task_create_json': function() {
-                        return "{% url 'efsw.conversion:task:create_json' %}";
-                    }
+                    'profile_show_json': "{% url 'efsw.conversion:profile:show_json' %}",
+                    'task_create_json': "{% url 'efsw.conversion:task:create_json' %}"
                 });
                 ko.components.register('io_form', {
                     'template': { 'element': 'template_io_form' }

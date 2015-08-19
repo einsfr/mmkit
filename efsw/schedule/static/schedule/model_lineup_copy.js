@@ -16,7 +16,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request'], function($, ko, ajr) 
 
         self.copy_lineup = function() {
             ajr.exec(
-                self.urls.lineup_copy_json(self.lineup_id),
+                self.urls['lineup_copy_json'](self.lineup_id),
                 { 'method': 'post', 'data': self.form.serialize() },
                 function(response) {
                     window.location.href = response.data;
