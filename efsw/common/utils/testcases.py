@@ -39,16 +39,17 @@ class LoginRequiredTestCase(TestCase):
         self.client.login(username='_test', password='_test')
 
 
+class SecurityTestConditions:
+
+    def __init__(self, url, anonymous=True, method='get', perm_codename=None, status_codes=None):
+        self.url = url
+        self.anonymous = anonymous
+        self.method = method
+        self.perm_codename = perm_codename
+        self.status_codes = status_codes if status_codes is not None else [200, 302]
+
+
 class AbstractSecurityTestCase(TestCase):
-
-    class SecurityTestConditions:
-
-        def __init__(self, url, anonymous=True, method='get', perm_codename=None, status_codes=None):
-            self.url = url
-            self.anonymous = anonymous
-            self.method = method
-            self.perm_codename = perm_codename
-            self.status_codes = status_codes if status_codes is not None else [200, 302]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -89,7 +90,7 @@ class AbstractSecurityTestCase(TestCase):
                     'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
                         c.url,
                         response.status_code,
-                        ', '.join(c.status_codes)
+                        ', '.join(map(str, c.status_codes))
                     )
                 )
             if c.anonymous:
@@ -115,7 +116,7 @@ class AbstractSecurityTestCase(TestCase):
                     'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
                         c.url,
                         response.status_code,
-                        ', '.join(c.status_codes)
+                        ', '.join(map(str, c.status_codes))
                     )
                 )
             self.assertNotLoginRequired(response, c)
@@ -137,7 +138,7 @@ class AbstractSecurityTestCase(TestCase):
                     'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
                         c.url,
                         response.status_code,
-                        ', '.join([str(code) for code in c.status_codes])
+                        ', '.join(map(str, c.status_codes))
                     )
                 )
             if c.anonymous:
@@ -168,7 +169,7 @@ class AbstractSecurityTestCase(TestCase):
                     'При обращении по адресу "{0}" получен код ответа {1}, ожидалось: {2}'.format(
                         c.url,
                         response.status_code,
-                        ', '.join(c.status_codes)
+                        ', '.join(map(str, c.status_codes))
                     )
                 )
             self.assertNotLoginRequired(response, c)

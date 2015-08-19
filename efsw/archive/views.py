@@ -14,6 +14,7 @@ from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.db import pagination
 from efsw.common import models as common_models
+from efsw.common.http.decorators import require_ajax
 
 
 def _get_json_item_not_found(item_id):
@@ -163,6 +164,7 @@ def item_new(request):
     return shortcuts.render(request, 'archive/item_new.html', {'form': form})
 
 
+@require_ajax
 @http.require_POST
 def item_create_json(request):
     form = forms.ItemCreateForm(request.POST)
@@ -227,6 +229,7 @@ LINK_TYPE_INCLUDED_IN = 1
 LINK_TYPE_INCLUDES = 2
 
 
+@require_ajax
 @http.require_GET
 def item_check_links_json(request):
     item_id = request.GET.get('id', None)
@@ -279,6 +282,7 @@ def _log_inc_update(inc_list, request):
     models.ItemLog.log_item_include_update(obj_list, request)
 
 
+@require_ajax
 @http.require_POST
 def item_update_links_json(request):
     item_id = request.GET.get('id', None)
@@ -335,6 +339,7 @@ def item_update_links_json(request):
     return JsonWithStatusResponse.ok()
 
 
+@require_ajax
 @http.require_POST
 def item_update_locations_json(request):
     item_id = request.GET.get('id', None)
@@ -417,6 +422,7 @@ def item_edit_links(request, item_id):
     })
 
 
+@require_ajax
 @http.require_POST
 def item_update_properties_json(request):
     item_id = request.GET.get('id', None)
@@ -452,6 +458,7 @@ def category_new(request):
     return shortcuts.render(request, 'archive/category_new.html', {'form': form})
 
 
+@require_ajax
 @http.require_POST
 def category_create_json(request):
     form = forms.ItemCategoryForm(request.POST)
@@ -483,6 +490,7 @@ def category_edit(request, category_id):
     })
 
 
+@require_ajax
 @http.require_POST
 def category_update_json(request):
     cat_id = request.GET.get('id', None)

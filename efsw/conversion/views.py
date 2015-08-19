@@ -8,6 +8,7 @@ from django.forms.formsets import formset_factory
 from efsw.conversion import models, forms
 from efsw.common.db import pagination
 from efsw.common.http.response import JsonWithStatusResponse
+from efsw.common.http.decorators import require_ajax
 
 
 def _get_json_profile_not_found(profile_id):
@@ -110,6 +111,7 @@ def task_new(request):
     })
 
 
+@require_ajax
 @http.require_POST
 def task_create_json(request):
     task_form = forms.TaskCreateForm(request.POST)
@@ -171,6 +173,7 @@ def profile_show(request, profile_id):
     })
 
 
+@require_ajax
 @http.require_GET
 def profile_show_json(request):
     profile_id = request.GET.get('id', None)

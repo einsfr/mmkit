@@ -1,6 +1,6 @@
 from django.core import urlresolvers
 
-from efsw.common.utils.testcases import AbstractSecurityTestCase
+from efsw.common.utils.testcases import AbstractSecurityTestCase, SecurityTestConditions
 
 
 class ArchiveSecurityTestCase(AbstractSecurityTestCase):
@@ -19,34 +19,34 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- Item -------------------------
 
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:list')),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:list_page', args=(1, ))),
-            self.SecurityTestConditions(
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:list')),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:list_page', args=(1, ))),
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:new'),
                 anonymous=False,
                 perm_codename='add_item'
             ),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show', args=(1,))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_properties', args=(1,))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1,))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_links', args=(1,))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_log', args=(1,))),
-            self.SecurityTestConditions(
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show', args=(1,))),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_properties', args=(1,))),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_locations', args=(1,))),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_links', args=(1,))),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:show_log', args=(1,))),
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit', args=(1, )),
                 anonymous=False,
                 perm_codename='change_item'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit_properties', args=(1, )),
                 anonymous=False,
                 perm_codename='change_item'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit_locations', args=(1, )),
                 anonymous=False,
                 perm_codename='change_item'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit_links', args=(1, )),
                 anonymous=False,
                 perm_codename='change_item'
@@ -54,26 +54,26 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- Item JSON -------------------------
 
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:check_links_json')),
-            self.SecurityTestConditions(
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:check_links_json')),
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_links_json'),
                 anonymous=False,
                 perm_codename='change_item',
                 method='post'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_locations_json'),
                 anonymous=False,
                 perm_codename='change_itemfilelocation',
                 method='post'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:create_json'),
                 anonymous=False,
                 perm_codename='add_item',
                 method='post'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_properties_json'),
                 anonymous=False,
                 perm_codename='change_item',
@@ -82,16 +82,16 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- ItemCategory -------------------------
 
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list')),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list_page', args=(1, ))),
-            self.SecurityTestConditions(
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list')),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:list_page', args=(1, ))),
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:category:new'),
                 anonymous=False,
                 perm_codename='add_itemcategory',
             ),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:show_items', args=(1, ))),
-            self.SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:show_items_page', args=(1, 1))),
-            self.SecurityTestConditions(
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:show_items', args=(1, ))),
+            SecurityTestConditions(urlresolvers.reverse('efsw.archive:category:show_items_page', args=(1, 1))),
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:category:edit', args=(1, )),
                 anonymous=False,
                 perm_codename='change_itemcategory'
@@ -99,13 +99,13 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- ItemCategory JSON -------------------------
 
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:category:create_json'),
                 anonymous=False,
                 perm_codename='add_itemcategory',
                 method='post'
             ),
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:category:update_json'),
                 anonymous=False,
                 perm_codename='change_itemcategory',
@@ -114,7 +114,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- Общие -------------------------
 
-            self.SecurityTestConditions(
+            SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:search'),
                 status_codes=[500]
             )

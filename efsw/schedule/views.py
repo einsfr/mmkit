@@ -15,6 +15,7 @@ from efsw.schedule import forms
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.schedule import lineops
 from efsw.common.db import pagination
+from efsw.common.http.decorators import require_ajax
 
 
 def _get_current_lineup(channel, date=None):
@@ -252,6 +253,7 @@ def lineup_edit_structure(request, lineup_id):
     })
 
 
+@require_ajax
 @http.require_POST
 def lineup_update_json(request):
     lineup_id = request.GET.get('id', None)
@@ -279,6 +281,7 @@ def lineup_new(request):
     })
 
 
+@require_ajax
 @http.require_POST
 def lineup_create_json(request):
     form = forms.LineupCreateForm(request.POST)
@@ -301,6 +304,7 @@ def lineup_create_json(request):
         )
 
 
+@require_ajax
 @http.require_POST
 def lineup_copy_json(request):
     lineup_id = request.GET.get('id', None)
@@ -332,6 +336,7 @@ def lineup_copy_json(request):
         )
 
 
+@require_ajax
 @http.require_GET
 def lineup_copy_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_copy_modal.html', {
@@ -339,6 +344,7 @@ def lineup_copy_part_modal(request):
     })
 
 
+@require_ajax
 @http.require_GET
 def lineup_activate_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_activate_modal.html', {
@@ -346,6 +352,7 @@ def lineup_activate_part_modal(request):
     })
 
 
+@require_ajax
 @http.require_POST
 def lineup_activate_json(request):
     lineup_id = request.GET.get('id', None)
@@ -377,11 +384,13 @@ def lineup_activate_json(request):
         )
 
 
+@require_ajax
 @http.require_GET
 def lineup_make_draft_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_make_draft_modal.html')
 
 
+@require_ajax
 @http.require_POST
 def lineup_make_draft_json(request):
     lineup_id = request.GET.get('id', None)
@@ -440,6 +449,7 @@ def program_new(request):
     return shortcuts.render(request, 'schedule/program_new.html', {'form': form})
 
 
+@require_ajax
 @http.require_POST
 def program_create_json(request):
     form = forms.ProgramCreateForm(request.POST)
@@ -462,6 +472,7 @@ def program_show(request, program_id):
     return shortcuts.render(request, 'schedule/program_show.html', {'program': program})
 
 
+@require_ajax
 @http.require_GET
 def program_show_json(request):
 
@@ -483,11 +494,13 @@ def program_show_json(request):
     return JsonWithStatusResponse(format_program_dict(program))
 
 
+@require_ajax
 @http.require_GET
 def pp_show_part_modal(request):
     return shortcuts.render(request, 'schedule/_pp_show_modal.html')
 
 
+@require_ajax
 @http.require_GET
 def pp_show_json(request):
 
@@ -518,6 +531,7 @@ def pp_show_json(request):
     return JsonWithStatusResponse(format_pp_dict(program_position))
 
 
+@require_ajax
 @http.require_GET
 def pp_edit_part_modal(request):
     return shortcuts.render(request, 'schedule/_pp_edit_modal.html', {
@@ -525,6 +539,7 @@ def pp_edit_part_modal(request):
     })
 
 
+@require_ajax
 @http.require_GET
 def pp_edit_json(request):
 
@@ -556,6 +571,7 @@ def pp_edit_json(request):
     return JsonWithStatusResponse(format_pp_dict(program_position))
 
 
+@require_ajax
 @http.require_POST
 def pp_delete_json(request):
     pp_id = request.GET.get('id', None)
@@ -584,6 +600,7 @@ def pp_delete_json(request):
     return JsonWithStatusResponse.ok()
 
 
+@require_ajax
 @http.require_POST
 def pp_update_json(request):
     pp_id = request.GET.get('id', None)
@@ -711,11 +728,13 @@ def channel_list(request, page=1):
         'channels': _get_channel_list_page(models.Channel.objects.all(), page)
     })
 
+
 @http.require_GET
 def channel_new(request):
     return shortcuts.render(request, 'schedule/channel_new.html', {
         'form': forms.ChannelCreateForm()
     })
+
 
 @http.require_GET
 def channel_show_lineups(request, channel_id, page=1):
@@ -724,6 +743,7 @@ def channel_show_lineups(request, channel_id, page=1):
         'lineups': _get_lineup_list_page(channel.lineups.all(), page),
         'channel': channel
     })
+
 
 @http.require_GET
 def channel_edit(request, channel_id):
@@ -735,6 +755,7 @@ def channel_edit(request, channel_id):
     })
 
 
+@require_ajax
 @http.require_POST
 def channel_create_json(request):
     form = forms.ChannelCreateForm(request.POST)
@@ -747,6 +768,8 @@ def channel_create_json(request):
             'form_invalid'
         )
 
+
+@require_ajax
 @http.require_POST
 def channel_update_json(request):
     channel_id = request.GET.get('id', None)
@@ -766,6 +789,8 @@ def channel_update_json(request):
             'form_invalid'
         )
 
+
+@require_ajax
 @http.require_POST
 def channel_activate_json(request):
     channel_id = request.GET.get('id', None)
@@ -784,6 +809,8 @@ def channel_activate_json(request):
     channel.save()
     return JsonWithStatusResponse.ok()
 
+
+@require_ajax
 @http.require_POST
 def channel_deactivate_json(request):
     channel_id = request.GET.get('id', None)

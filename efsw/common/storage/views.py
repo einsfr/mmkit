@@ -7,6 +7,7 @@ from django.views.decorators import http
 from efsw.common import models
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.storage import utils as storage_utils
+from efsw.common.http.decorators import require_ajax
 
 
 def _get_json_storage_not_found(storage_id):
@@ -37,6 +38,7 @@ def _get_json_path_not_directory(path, storage_name):
     )
 
 
+@require_ajax
 @http.require_GET
 def nav_ls_json(request):
     storage_id = request.GET.get('s', None)
