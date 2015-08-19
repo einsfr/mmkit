@@ -14,24 +14,23 @@ class WrongParameterValue(Exception):
 
 
 def parse_params(params_dict: dict, **params_criteria):
-    result = []
+    result = {}
     for n, c in params_criteria.items():
         if c is None:
             # Значит, этот параметр может быть, а может и не быть, но если он есть, его значение нужно получить
-            result.append(params_dict.get(n, None))
+            result[n] = params_dict.get(n, '')
         elif type(c) is str:
             # Значит, там строка, которая будет рассматриваться как регулярное выражение
-            value = params_dict.get(n, '')
-            if not value:
+            if n not in params_dict:
                 raise RequiredParameterIsMissing('Required parameter {0} is missing.'.format(n))
-            if re.match(c, value) is None:
-                raise WrongParameterValue('Parameter {0} has wrong value: {1}.'.format(n, value))
-            result.append(value)
+            if re.match(c, params_dict[n]) is None:
+                raise WrongParameterValue('Parameter {0} has wrong value: {1}.'.format(n, params_dict[n]))
+            result[n] = params_dict[n]
         elif callable(c):
             # Значит, там какая-то функция, True - значение параметра верное, False - нет
             value = params_dict.get(n, None)
             if c(value):
-                result.append(value)
+                result[n] = value
             else:
                 raise WrongParameterValue('Parameter {0} has wrong value: {1}.'.format(n, value))
         else:
