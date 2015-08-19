@@ -8,12 +8,8 @@
         require(['jquery', 'knockout', 'archive/model_item_edit_links'], function($, ko, model) {
             $(document).ready(function() {
                 var view_model = new model({
-                    'item_update_links_json': function() {
-                        return "{% url 'efsw.archive:item:update_links_json' %}?id={{ item.id }}";
-                    },
-                    'item_check_links_json': function() {
-                        return "{% url 'efsw.archive:item:check_links_json' %}?id={{ item.id }}";
-                    }
+                    'item_update_links_json': "{% url 'efsw.archive:item:update_links_json' %}?id={{ item.id }}",
+                    'item_check_links_json': "{% url 'efsw.archive:item:check_links_json' %}?id={{ item.id }}"
                 });
                 view_model.init({
                     'includes': [{% for i in item.includes.all %}

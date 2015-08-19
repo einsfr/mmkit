@@ -84,7 +84,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
                 return;
             }
             jol.load(
-                self.urls.item_check_links_json(),
+                self.urls['item_check_links_json'],
                 {
                     'data': {
                         'include_id': self.form_item(),
@@ -113,7 +113,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
 
         self.update_item = function() {
             ajr.exec(
-                self.urls.item_update_links_json(),
+                self.urls['item_update_links_json'],
                 {
                     'data': {
                         'includes': ko.toJSON(

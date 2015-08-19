@@ -6,33 +6,15 @@ from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
 
-from efsw.archive import models
-from efsw.archive import forms
+from efsw.archive import models, forms, errors
 from efsw.common.search import elastic
 from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.db import pagination
-from efsw.common import models as common_models
+from efsw.common import models as common_models, errors as common_errors
 from efsw.common.http.decorators import require_ajax
-
-
-def _get_json_item_not_found(item_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: элемент с ID "{0}" не существует.'.format(item_id),
-        'item_not_found'
-    )
-
-
-def _get_json_item_wrong_id(item_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор элемента должен быть целым числом, предоставлено: "{0}".'.format(item_id),
-        'id_not_int'
-    )
-
-
-def _get_json_wrong_format():
-    return JsonWithStatusResponse.error('Неверный формат запроса.', 'wrong_format')
+from efsw.common.utils import params
 
 
 def _format_item_dict(i):
@@ -43,13 +25,6 @@ def _format_item_dict(i):
     }
 
 
-def _get_json_storage_not_found(storage_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: хранилище с ID "{0}" не существует.'.format(storage_id),
-        'storage_not_found'
-    )
-
-
 def _check_include(item, include):
     return None
 
@@ -58,18 +33,14 @@ def _check_include_in(item, include_in):
     return None
 
 
-def _get_json_category_not_found(item_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: категория с ID "{0}" не существует.'.format(item_id),
-        'category_not_found'
-    )
-
-
-def _get_json_category_wrong_id(item_id):
-    return JsonWithStatusResponse.error(
-        'Ошибка: идентификатор категории должен быть целым числом, предоставлено: "{0}".'.format(item_id),
-        'id_not_int'
-    )
+def _log_inc_update(inc_list, request):
+    obj_ids_list = []
+    obj_list = []
+    for i in inc_list:
+        if i.id not in obj_ids_list:
+            obj_ids_list.append(i.id)
+            obj_list.append(i)
+    models.ItemLog.log_item_include_update(obj_list, request)
 
 
 # ------------------------- Общие -------------------------
@@ -232,75 +203,53 @@ LINK_TYPE_INCLUDES = 2
 @require_ajax
 @http.require_GET
 def item_check_links_json(request):
-    item_id = request.GET.get('id', None)
-    inc_id = request.GET.get('include_id', None)
-    try:
-        inc_type = int(request.GET.get('type', None))
-    except ValueError:
-        return JsonWithStatusResponse.error('Неизвестный тип связи.', 'unknown_link_type')
-    except TypeError:
-        return JsonWithStatusResponse.error(
-            'Проверьте строку запроса - возможно, не установлен параметр type.',
-            'link_type_is_missed'
-        )
-    try:
-        if int(item_id) == int(inc_id):
-            return JsonWithStatusResponse.error('Элемент не может быть включён сам в себя.', 'self_self_link')
-    except ValueError:
-        return JsonWithStatusResponse.error('Идентификатор должен быть целым числом.', 'id_not_int')
-    except TypeError:
-        return JsonWithStatusResponse.error(
-            'Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.',
-            'id_is_missed'
-        )
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+', include_id=r'\d+', type=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    item_id = int(p_result['id'])
+    inc_id = int(p_result['include_id'])
+    inc_type = int(p_result['type'])
+    if item_id == inc_id:
+        return JsonWithStatusResponse.error(errors.ITEM_LINK_SELF_SELF, 'ITEM_LINK_SELF_SELF')
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
+        return JsonWithStatusResponse.error(errors.ITEM_NOT_FOUND.format(item_id), 'ITEM_NOT_FOUND')
     try:
         inc_item = models.Item.objects.get(pk=inc_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(inc_id)
+        return JsonWithStatusResponse.error(errors.ITEM_NOT_FOUND.format(inc_id), 'ITEM_NOT_FOUND')
     if inc_type == LINK_TYPE_INCLUDED_IN:
         check_result = _check_include_in(item, inc_item)
     elif inc_type == LINK_TYPE_INCLUDES:
         check_result = _check_include(item, inc_item)
     else:
-        return JsonWithStatusResponse.error('Неизвестный тип связи.', 'unknown_link_type')
+        return JsonWithStatusResponse.error(errors.ITEM_LINK_TYPE_UNKNOWN.format(inc_type), 'ITEM_LINK_TYPE_UNKNOWN')
     if check_result is not None:
-        return JsonWithStatusResponse.error(check_result)
+        return JsonWithStatusResponse.error(check_result, 'ITEM_LINK_CHECK_FAILED')
     return JsonWithStatusResponse.ok(_format_item_dict(inc_item))
-
-
-def _log_inc_update(inc_list, request):
-    obj_ids_list = []
-    obj_list = []
-    for i in inc_list:
-        if i.id not in obj_ids_list:
-            obj_ids_list.append(i.id)
-            obj_list.append(i)
-    models.ItemLog.log_item_include_update(obj_list, request)
 
 
 @require_ajax
 @http.require_POST
 def item_update_links_json(request):
-    item_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    item_id = int(p_result['id'])
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    except ValueError:
-        return _get_json_item_wrong_id(item_id)
+        return JsonWithStatusResponse.error(errors.ITEM_NOT_FOUND.format(item_id), 'ITEM_NOT_FOUND')
     post_includes = request.POST.get('includes', None)
     post_included_in = request.POST.get('included_in', None)
     if post_includes is None or post_included_in is None:
-        return _get_json_wrong_format()
+        return JsonWithStatusResponse.error(common_errors.JSON_REQUEST_WRONG_FORMAT, 'JSON_REQUEST_WRONG_FORMAT')
     try:
         includes_ids = set(json.loads(post_includes))
         included_in_ids = set(json.loads(post_included_in))
     except ValueError:
-        return _get_json_wrong_format()
+        return JsonWithStatusResponse.error(common_errors.JSON_REQUEST_WRONG_FORMAT, 'JSON_REQUEST_WRONG_FORMAT')
     log_inc_update = [item]
     old_includes_ids = set([i.id for i in item.includes.all()])
     old_included_in_ids = set([i.id for i in item.included_in.all()])
@@ -342,20 +291,21 @@ def item_update_links_json(request):
 @require_ajax
 @http.require_POST
 def item_update_locations_json(request):
-    item_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    item_id = int(p_result['id'])
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    except ValueError:
-        return _get_json_item_wrong_id(item_id)
+        return JsonWithStatusResponse.error(errors.ITEM_NOT_FOUND.format(item_id), 'ITEM_NOT_FOUND')
     post_locations = request.POST.get('locations', None)
     if post_locations is None:
-        return _get_json_wrong_format()
+        return JsonWithStatusResponse.error(common_errors.JSON_REQUEST_WRONG_FORMAT, 'JSON_REQUEST_WRONG_FORMAT')
     try:
         locations = json.loads(post_locations)
     except ValueError:
-        return _get_json_wrong_format()
+        return JsonWithStatusResponse.error(common_errors.JSON_REQUEST_WRONG_FORMAT, 'JSON_REQUEST_WRONG_FORMAT')
     if len(locations) == 0:
         models.ItemFileLocation.objects.filter(item=item).delete()
         return JsonWithStatusResponse.ok()
@@ -363,10 +313,16 @@ def item_update_locations_json(request):
     storage_ids = set(storage_ids_list)
     storages = common_models.FileStorage.objects.filter(id__in=storage_ids)
     if len(storage_ids) != len(storages):
-        return JsonWithStatusResponse.error('Используется несуществующее хранилище.', 'storage_not_found')
-    if list(filter(lambda s: 'archive' not in s.allowed_usage, storages)):
-        return JsonWithStatusResponse.error('Одно или несколько хранилищ не имеют отметки, позволяющей использовать их '
-                                            'как архивные.', 'storage_not_allowed')
+        missing_ids = storage_ids - set(s.id for s in storages)
+        return JsonWithStatusResponse.error(
+            errors.STORAGE_NOT_FOUND.format(', '.join(map(str, missing_ids))), 'STORAGE_NOT_FOUND'
+        )
+    not_archive_storages = list(filter(lambda s: 'archive' not in s.allowed_usage, storages))
+    if not_archive_storages:
+        return JsonWithStatusResponse.error(
+            errors.STORAGE_NOT_ALLOWED_AS_ARCHIVE.format(', '.join(map(str, not_archive_storages))),
+            'STORAGE_NOT_ALLOWED_AS_ARCHIVE'
+        )
     storages_dict = dict([(str(s.id), s) for s in storages])
     leftover_locations = [l['id'] for l in locations if l['id']]
     models.ItemFileLocation.objects.filter(item=item).exclude(pk__in=leftover_locations).delete()
@@ -425,13 +381,14 @@ def item_edit_links(request, item_id):
 @require_ajax
 @http.require_POST
 def item_update_properties_json(request):
-    item_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    item_id = int(p_result['id'])
     try:
         item = models.Item.objects.get(pk=item_id)
     except models.Item.DoesNotExist:
-        return _get_json_item_not_found(item_id)
-    except ValueError:
-        return _get_json_item_wrong_id(item_id)
+        return JsonWithStatusResponse.error(errors.ITEM_NOT_FOUND.format(item_id), 'ITEM_NOT_FOUND')
     form = forms.ItemUpdatePropertiesForm(request.POST, instance=item)
     if form.is_valid():
         item = form.save()
@@ -493,13 +450,14 @@ def category_edit(request, category_id):
 @require_ajax
 @http.require_POST
 def category_update_json(request):
-    cat_id = request.GET.get('id', None)
+    p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
+    if type(p_result) != dict:
+        return p_result
+    cat_id = int(p_result['id'])
     try:
         cat = models.ItemCategory.objects.get(pk=cat_id)
     except models.ItemCategory.DoesNotExist:
-        return _get_json_category_not_found(cat_id)
-    except ValueError:
-        return _get_json_category_wrong_id(cat_id)
+        return JsonWithStatusResponse.error(errors.CATEGORY_NOT_FOUND.format(cat_id), 'CATEGORY_NOT_FOUND')
     form = forms.ItemCategoryForm(request.POST, instance=cat)
     if form.is_valid():
         form.save()

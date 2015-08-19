@@ -61,7 +61,7 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
 
         self.update_item = function() {
             ajr.exec(
-                self.urls.item_update_locations_json(),
+                self.urls['item_update_locations_json'],
                 {
                     'method': 'post',
                     'data':

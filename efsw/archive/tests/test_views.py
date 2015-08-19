@@ -317,62 +317,62 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('link_type_is_missed', json_content['status_ext'])
+        self.assertEqual('REQUIRED_REQUEST_PARAMETER_IS_MISSING', json_content['status_ext'])
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1, 2, 'non-int'))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('unknown_link_type', json_content['status_ext'])
+        self.assertEqual('UNEXPECTED_REQUEST_PARAMETER_VALUE', json_content['status_ext'])
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1, 2, 3))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('unknown_link_type', json_content['status_ext'])
+        self.assertEqual('ITEM_LINK_TYPE_UNKNOWN', json_content['status_ext'])
 
     def test_include_self(self):
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 4, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('self_self_link', json_content['status_ext'])
+        self.assertEqual('ITEM_LINK_SELF_SELF', json_content['status_ext'])
 
     def test_include_non_int(self):
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 'non-int', 3, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('id_not_int', json_content['status_ext'])
+        self.assertEqual('UNEXPECTED_REQUEST_PARAMETER_VALUE', json_content['status_ext'])
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 'non-int', 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('id_not_int', json_content['status_ext'])
+        self.assertEqual('UNEXPECTED_REQUEST_PARAMETER_VALUE', json_content['status_ext'])
 
     def test_id_not_set(self):
         response = self.client.get('{0}?id={1}&type={2}'.format(self.request_url, 1, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('Проверьте строку запроса - возможно, не установлен один из параметров id или inc_id.', json_content['data'])
+        self.assertEqual('REQUIRED_REQUEST_PARAMETER_IS_MISSING', json_content['status_ext'])
         response = self.client.get('{0}?include_id={1}&type={2}'.format(self.request_url, 1, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('id_is_missed', json_content['status_ext'])
+        self.assertEqual('REQUIRED_REQUEST_PARAMETER_IS_MISSING', json_content['status_ext'])
 
     def test_nonexist_item(self):
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1000000, 8, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_not_found', json_content['status_ext'])
+        self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_nonexist_include(self):
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 1000000, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_not_found', json_content['status_ext'])
+        self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_normal(self):
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 8, 2))
@@ -404,7 +404,7 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_not_found', json_content['status_ext'])
+        self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_wrong_id(self):
         self._login_user()
@@ -412,7 +412,7 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('id_not_int', json_content['status_ext'])
+        self.assertEqual('UNEXPECTED_REQUEST_PARAMETER_VALUE', json_content['status_ext'])
 
     def test_wrong_format(self):
         self._login_user()
@@ -420,7 +420,7 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('wrong_format', json_content['status_ext'])
+        self.assertEqual('JSON_REQUEST_WRONG_FORMAT', json_content['status_ext'])
         post_data = {
             'includes': 'not-a-json-list',
             'included_in': 'not-a-json-list'
@@ -429,7 +429,7 @@ class ItemUpdateLinksJsonTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('wrong_format', json_content['status_ext'])
+        self.assertEqual('JSON_REQUEST_WRONG_FORMAT', json_content['status_ext'])
 
     def test_clear(self):
         self._login_user()
@@ -504,7 +504,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('item_not_found', json_content['status_ext'])
+        self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_wrong_format(self):
         self._login_user()
@@ -512,7 +512,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('wrong_format', json_content['status_ext'])
+        self.assertEqual('JSON_REQUEST_WRONG_FORMAT', json_content['status_ext'])
         post_data = {
             'locations': 'not-a-json-list'
         }
@@ -520,7 +520,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('wrong_format', json_content['status_ext'])
+        self.assertEqual('JSON_REQUEST_WRONG_FORMAT', json_content['status_ext'])
 
     def test_remove_all(self):
         self._login_user()
@@ -549,7 +549,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
             ])
         }
         response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertJsonError(response, status_ext='storage_not_found')
+        self.assertJsonError(response, status_ext='STORAGE_NOT_FOUND')
 
     def test_forbidden_storage(self):
         self._login_user()
@@ -563,7 +563,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
             ])
         }
         response = self.client.post('{0}?id={1}'.format(self.request_url, 4), post_data)
-        self.assertJsonError(response, status_ext='storage_not_allowed')
+        self.assertJsonError(response, status_ext='STORAGE_NOT_ALLOWED_AS_ARCHIVE')
 
     def test_normal(self):
         self._login_user()
@@ -897,7 +897,7 @@ class CategoryUpdateJsonTestCase(LoginRequiredTestCase):
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_ERROR, json_content['status'])
-        self.assertEqual('category_not_found', json_content['status_ext'])
+        self.assertEqual('CATEGORY_NOT_FOUND', json_content['status_ext'])
 
     def test_normal(self):
         self._login_user()
