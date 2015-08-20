@@ -75,7 +75,7 @@ class SearchViewTestCase(TestCase):
             response = self.client.get(self.request_url, get_data)
         items = response.context['items']
         self.assertEqual(len(items), 3)
-        self.assertEqual(items[0].id, 4)
+        self.assertEqual(items[0].id, 8)
         get_data = {'q': 'новость', 'p': 'custom', 'p_s': '01.02.2015'}
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             response = self.client.get(self.request_url, get_data)
@@ -86,7 +86,7 @@ class SearchViewTestCase(TestCase):
         with self.settings(EFSW_ELASTIC_DISABLE=False):
             response = self.client.get(self.request_url, get_data)
         items = response.context['items']
-        self.assertEqual(len(items), 1)
+        self.assertEqual(len(items), 2)
         self.assertEqual(items[0].id, 4)
 
 
