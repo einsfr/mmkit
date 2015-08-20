@@ -59,6 +59,8 @@ define(['jquery', 'knockout', 'common/ajax_json_request', 'common/json_object_lo
 
         self.add_item = function() {
             self.errors({});
+            self.success_msg('');
+            self.error_msg('');
             if (self.form_type() != '1' || self.form_type() != '2') {
                 self._set_error('type', 'Неизвестный тип связи.');
             }

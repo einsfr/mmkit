@@ -308,7 +308,7 @@ def item_update_locations_json(request):
         return JsonWithStatusResponse.error(common_errors.JSON_REQUEST_WRONG_FORMAT, 'JSON_REQUEST_WRONG_FORMAT')
     if len(locations) == 0:
         models.ItemFileLocation.objects.filter(item=item).delete()
-        return JsonWithStatusResponse.ok()
+        return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))
     storage_ids_list = [l['storage_id'] for l in locations]
     storage_ids = set(storage_ids_list)
     storages = common_models.FileStorage.objects.filter(id__in=storage_ids)

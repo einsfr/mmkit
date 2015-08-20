@@ -125,9 +125,7 @@ def task_create_json(request):
             outputs_nf_errors = output_formset.non_form_errors()
             if outputs_nf_errors:
                 errors['outputs__all__'] = outputs_nf_errors
-            return JsonWithStatusResponse.error({
-                'errors': json.dumps(errors)
-            })
+            return JsonWithStatusResponse.error({'errors': json.dumps(errors)}, 'FORM_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()}, 'FORM_INVALID')
 
