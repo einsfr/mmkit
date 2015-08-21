@@ -147,3 +147,8 @@ class ConversionTask(OrderedModel):
         super().save(*args, **kwargs)
         self.args_builder = args_builder
         self.io_conf = io_conf
+
+    def clean(self):
+        # - Проверка соответствия количества входов-выходов профиля конфигурации входов-выходов
+        # - Проверка соответствия файлов в путях разрешённым расширениям
+        pass

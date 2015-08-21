@@ -1,4 +1,6 @@
 import json
+import uuid
+import datetime
 
 from django import shortcuts
 from django.conf import settings
@@ -6,6 +8,8 @@ from django.views.decorators import http
 from django.forms.formsets import formset_factory
 
 from efsw.conversion import models, forms, errors
+from efsw.conversion.converter import args
+from efsw.conversion.storage.iopathprovider import FileStorageIOPathProvider
 from efsw.common.db import pagination
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.http.decorators import require_ajax
@@ -112,7 +116,20 @@ def task_create_json(request):
                                          max_num=outputs_count, min_num=outputs_count, validate_max=True,
                                          validate_min=True)(request.POST, prefix='outputs')
         if input_formset.is_valid() and output_formset.is_valid():
-            pass
+            ct = models.ConversionTask()
+            name = task_form.cleaned_data['name']
+            ct.name = name if name else '{0}: создано {1}'.format(uuid.uuid4(), datetime.datetime.today())
+
+            def _parse_io_form(f):
+                return FileStorageIOPathProvider(f.cleaned_data['storage'].id, f.cleaned_data['path'])
+
+            ct.io_conf = args.IOPathConfiguration(
+                list(map(_parse_io_form, input_formset.forms)),
+                list(map(_parse_io_form, output_formset.forms))
+            )
+            ct.conv_profile = task_form.cleaned_data['profile']
+            ct.save()
+            # Нужно ещё что-то вернуть же...
         else:
             errors = {}
             if input_formset.errors:
