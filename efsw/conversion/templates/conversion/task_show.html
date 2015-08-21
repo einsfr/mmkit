@@ -61,7 +61,10 @@
             {% if task.conv_profile %}
                 <tr>
                     <th>Профиль кодирования</th>
-                    <td>{{ task.conv_profile }}</td>
+                    <td>
+                        <a href="{% url 'efsw.conversion:profile:show' task.conv_profile_id %}"
+                           title="Описание профиля">{{ task.conv_profile }}</a>
+                    </td>
                 </tr>
             {% endif %}
             <tr>

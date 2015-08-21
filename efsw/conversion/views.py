@@ -6,6 +6,7 @@ from django import shortcuts
 from django.conf import settings
 from django.views.decorators import http
 from django.forms.formsets import formset_factory
+from django.core import urlresolvers
 
 from efsw.conversion import models, forms, errors
 from efsw.conversion.converter import args
@@ -118,7 +119,9 @@ def task_create_json(request):
         if input_formset.is_valid() and output_formset.is_valid():
             ct = models.ConversionTask()
             name = task_form.cleaned_data['name']
-            ct.name = name if name else '{0}: создано {1}'.format(uuid.uuid4(), datetime.datetime.today())
+            ct.name = name if name else '{0}: создано {1}'.format(
+                uuid.uuid4(), datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            )
 
             def _parse_io_form(f):
                 return FileStorageIOPathProvider(f.cleaned_data['storage'].id, f.cleaned_data['path'])
@@ -129,19 +132,19 @@ def task_create_json(request):
             )
             ct.conv_profile = task_form.cleaned_data['profile']
             ct.save()
-            # Нужно ещё что-то вернуть же...
+            return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.conversion:task:show', args=(ct.id, )))
         else:
-            errors = {}
+            form_errors = {}
             if input_formset.errors:
-                errors['inputs'] = input_formset.errors
+                form_errors['inputs'] = input_formset.errors
             if output_formset.errors:
-                errors['outputs'] = output_formset.errors
+                form_errors['outputs'] = output_formset.errors
             inputs_nf_errors = input_formset.non_form_errors()
             if inputs_nf_errors:
-                errors['inputs__all__'] = inputs_nf_errors
+                form_errors['inputs__all__'] = inputs_nf_errors
             outputs_nf_errors = output_formset.non_form_errors()
             if outputs_nf_errors:
-                errors['outputs__all__'] = outputs_nf_errors
+                form_errors['outputs__all__'] = outputs_nf_errors
             return JsonWithStatusResponse.error({'errors': json.dumps(errors)}, 'FORM_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()}, 'FORM_INVALID')
