@@ -145,12 +145,20 @@ class IOPathConfiguration:
         self._inputs.append(in_obj)
         return self
 
+    @property
+    def input_paths(self):
+        return copy.deepcopy(self._inputs)
+
     def add_output_path(self, out_obj):
         if type(out_obj) != str and not isinstance(out_obj, AbstractIOPathProvider):
             raise TypeError('Аргумент in_obj должен быть либо строкой, либо экземпляром потомка класса '
                             'AbstractIOPathProvider.')
         self._outputs.append(out_obj)
         return self
+
+    @property
+    def output_paths(self):
+        return copy.deepcopy(self._outputs)
 
     def build(self):
 

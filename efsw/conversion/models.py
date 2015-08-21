@@ -2,8 +2,10 @@ import uuid
 import pickle
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from efsw.common.db.models.ordered_model import OrderedModel
+from efsw.conversion.converter import args
 
 
 class ConversionProcess(models.Model):
@@ -135,20 +137,42 @@ class ConversionTask(OrderedModel):
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super().from_db(db, field_names, values)
-        instance.args_builder = pickle.loads(instance.args_builder)
-        instance.io_conf = pickle.loads(instance.io_conf)
+        if instance.args_builder:
+            instance.args_builder = pickle.loads(instance.args_builder)
+        if instance.io_conf:
+            instance.io_conf = pickle.loads(instance.io_conf)
         return instance
 
     def save(self, *args, **kwargs):
         args_builder = self.args_builder
         io_conf = self.io_conf
-        self.args_builder = pickle.dumps(self.args_builder)
-        self.io_conf = pickle.dumps(self.io_conf)
+        if self.args_builder:
+            self.args_builder = pickle.dumps(self.args_builder)
+        if self.io_conf:
+            self.io_conf = pickle.dumps(self.io_conf)
         super().save(*args, **kwargs)
         self.args_builder = args_builder
         self.io_conf = io_conf
 
     def clean(self):
-        # - Проверка соответствия количества входов-выходов профиля конфигурации входов-выходов
-        # - Проверка соответствия файлов в путях разрешённым расширениям
+        if self.args_builder is None and self.conv_profile is None:
+            raise ValidationError('Не заданы настройки конвертирования. Необходимо установить поля self.args_builder '
+                                  'или self.conv_profile.')
+        if self.args_builder is not None and self.conv_profile is not None:
+            raise ValidationError('Модель не может одновременно иметь установленные поля self.args_builder '
+                                  'и self.conv_profile.')
+        if self.args_builder is not None and not isinstance(self.args_builder, args.ArgumentsBuilder):
+            raise ValidationError('Поле модели args_builder должно содержать экземпляр класса ArgumentsBuilder '
+                                  'или его потомка.')
+        if not isinstance(self.io_conf, args.IOPathConfiguration):
+            raise ValidationError('Поле модели io_conf должно содержать экземпляр класса IOPathConfiguration '
+                                  'или его потомка.')
+        # Проверка соответствия количества входов-выходов профиля (или args_builder'а) конфигурации входов-выходов
+        args_builder = self.args_builder if self.args_builder is not None else self.conv_profile.args_builder
+        if len(args_builder.inputs) != len(self.io_conf.input_paths):
+            raise ValidationError('Количество входов не совпадает с количеством заданных путей.')
+        if len(args_builder.outputs) != len(self.io_conf.output_paths):
+            raise ValidationError('Количество выходов не совпадает с количеством заданных путей.')
+        # Проверка соответствия файлов в путях разрешённым расширениям
+        # Проверка хранилищ на предмет разрешённых действий с ними
         pass
