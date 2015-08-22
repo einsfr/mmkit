@@ -169,10 +169,9 @@ class ConversionTask(OrderedModel):
                                   'или его потомка.')
         # Проверка соответствия количества входов-выходов профиля (или args_builder'а) конфигурации входов-выходов
         args_builder = self.args_builder if self.args_builder is not None else self.conv_profile.args_builder
-        if len(args_builder.inputs) != len(self.io_conf.input_paths):
-            raise ValidationError('Количество входов не совпадает с количеством заданных путей.')
-        if len(args_builder.outputs) != len(self.io_conf.output_paths):
-            raise ValidationError('Количество выходов не совпадает с количеством заданных путей.')
-        # Проверка соответствия файлов в путях разрешённым расширениям
-        # Проверка хранилищ на предмет разрешённых действий с ними
-        pass
+        io_inputs = self.io_conf.input_paths
+        if len(args_builder.inputs) != len(io_inputs):
+            raise ValidationError('Количество входов ({0}) не совпадает с количеством заданных путей ({1}).')
+        io_outputs = self.io_conf.output_paths
+        if len(args_builder.outputs) != len(io_outputs):
+            raise ValidationError('Количество выходов ({0}) не совпадает с количеством заданных путей ({1}).')
