@@ -1,11 +1,13 @@
 import uuid
 import pickle
+import os.path
 
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from efsw.common.db.models.ordered_model import OrderedModel
 from efsw.conversion.converter import args
+from efsw.conversion.converter.exceptions import IOPathResolveException
 
 
 class ConversionProcess(models.Model):
@@ -169,9 +171,24 @@ class ConversionTask(OrderedModel):
                                   'или его потомка.')
         # Проверка соответствия количества входов-выходов профиля (или args_builder'а) конфигурации входов-выходов
         args_builder = self.args_builder if self.args_builder is not None else self.conv_profile.args_builder
-        io_inputs = self.io_conf.input_paths
-        if len(args_builder.inputs) != len(io_inputs):
+        ab_inputs = args_builder.inputs
+        if len(ab_inputs) != len(self.io_conf.input_paths):
             raise ValidationError('Количество входов ({0}) не совпадает с количеством заданных путей ({1}).')
-        io_outputs = self.io_conf.output_paths
-        if len(args_builder.outputs) != len(io_outputs):
+        ab_outputs = args_builder.outputs
+        if len(ab_outputs) != len(self.io_conf.output_paths):
             raise ValidationError('Количество выходов ({0}) не совпадает с количеством заданных путей ({1}).')
+        # Проверка на соответствие заданных путей разрешённым расширениям
+        try:
+            in_paths, out_paths = self.io_conf.build()
+        except IOPathResolveException as e:
+            raise ValidationError(str(e))
+        io_paths = in_paths + out_paths
+        for k, io in enumerate(ab_inputs + ab_outputs):
+            if io.allowed_ext:
+                ext = os.path.splitext(io_paths[k])[1]
+                if not ext:
+                    raise ValidationError('Файл {0} не имеет расширения.'.format(io_paths[k]))
+                if ext[1:] not in io.allowed_ext:
+                    raise ValidationError('Файл {0} имеет недопустимое расширение ({1}, допустимы: {2}).'.format(
+                        io_paths[k], ext, io.allowed_ext
+                    ))
