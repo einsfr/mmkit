@@ -7,6 +7,7 @@ from django.conf import settings
 from django.views.decorators import http
 from django.forms.formsets import formset_factory
 from django.core import urlresolvers
+from django.core.exceptions import ValidationError
 
 from efsw.conversion import models, forms, errors
 from efsw.conversion.converter import args
@@ -145,7 +146,7 @@ def task_create_json(request):
             outputs_nf_errors = output_formset.non_form_errors()
             if outputs_nf_errors:
                 form_errors['outputs__all__'] = outputs_nf_errors
-            return JsonWithStatusResponse.error({'errors': json.dumps(errors)}, 'FORM_INVALID')
+            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORM_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()}, 'FORM_INVALID')
 
