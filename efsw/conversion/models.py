@@ -187,8 +187,10 @@ class ConversionTask(OrderedModel):
             if io.allowed_ext:
                 ext = os.path.splitext(io_paths[k])[1]
                 if not ext:
-                    raise ValidationError('Файл {0} не имеет расширения.'.format(io_paths[k]))
+                    raise ValidationError('Файл "{0}" не имеет расширения.'.format(os.path.split(io_paths[k])[1]))
                 if ext[1:] not in io.allowed_ext:
-                    raise ValidationError('Файл {0} имеет недопустимое расширение ({1}, допустимы: {2}).'.format(
-                        io_paths[k], ext, io.allowed_ext
-                    ))
+                    raise ValidationError(
+                        'Файл "{0}" имеет недопустимое расширение (допустимы: {1}).'.format(
+                            os.path.split(io_paths[k])[1], ', '.join(io.allowed_ext)
+                        )
+                    )

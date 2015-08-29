@@ -132,6 +132,10 @@ def task_create_json(request):
                 list(map(_parse_io_form, output_formset.forms))
             )
             ct.conv_profile = task_form.cleaned_data['profile']
+            try:
+                ct.full_clean()
+            except ValidationError as e:
+                return JsonWithStatusResponse.error({'errors': json.dumps(e.message_dict)})
             ct.save()
             return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.conversion:task:show', args=(ct.id, )))
         else:
