@@ -4,6 +4,7 @@ from django.forms.formsets import BaseFormSet
 
 from efsw.conversion import models
 from efsw.common.models import FileStorage
+from efsw.common.storage import errors
 
 
 class TaskCreateForm(forms.Form):
@@ -57,7 +58,7 @@ class InputLocationForm(IOLocationForm):
         storage = self.cleaned_data['storage']
         path = self.cleaned_data['path']
         if not storage.contains(path):
-            self.add_error('path', 'В хранилище "{0}" отсутствует файл "{1}".'.format(storage.name, path))
+            self.add_error('path', errors.FILE_DOES_NOT_EXIST_IN_STORAGE.format(storage.name, path))
 
 
 class OutputLocationForm(IOLocationForm):
@@ -79,9 +80,9 @@ class OutputLocationForm(IOLocationForm):
         storage = self.cleaned_data['storage']
         path = self.cleaned_data['path']
         if not storage.contains(path, False):
-            self.add_error('path', 'Файл "{0}" не принадлежит хранилищу "{1}".'.format(path, storage.name))
+            self.add_error('path', errors.STORAGE_DOES_NOT_CONTAIN_FILE.format(path, storage.name))
         if storage.contains(path):
-            self.add_error('path', 'Файл "{0}" уже существует в хранилище "{1}".'.format(path, storage.name))
+            self.add_error('path', errors.FILE_ALREADY_EXISTS_IN_STORAGE.format(path, storage.name))
 
 
 class BaseInputLocationFormSet(BaseFormSet):

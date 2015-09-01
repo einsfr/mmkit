@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from efsw.common.db.models.ordered_model import OrderedModel
 from efsw.conversion.converter import args
 from efsw.conversion.converter.exceptions import IOPathResolveException
+from efsw.conversion import errors
 
 
 class ConversionProcess(models.Model):
@@ -158,25 +159,25 @@ class ConversionTask(OrderedModel):
 
     def clean(self):
         if self.args_builder is None and self.conv_profile is None:
-            raise ValidationError('Не заданы настройки конвертирования. Необходимо установить поля self.args_builder '
-                                  'или self.conv_profile.')
+            raise ValidationError(errors.CONVERSION_TASK_NO_AB_NO_CP)
         if self.args_builder is not None and self.conv_profile is not None:
-            raise ValidationError('Модель не может одновременно иметь установленные поля self.args_builder '
-                                  'и self.conv_profile.')
+            raise ValidationError(errors.CONVERSION_TASK_BOTH_AB_AND_CP)
         if self.args_builder is not None and not isinstance(self.args_builder, args.ArgumentsBuilder):
-            raise ValidationError('Поле модели args_builder должно содержать экземпляр класса ArgumentsBuilder '
-                                  'или его потомка.')
+            raise ValidationError(errors.CONVERSION_TASK_AB_WRONG_CLASS)
         if not isinstance(self.io_conf, args.IOPathConfiguration):
-            raise ValidationError('Поле модели io_conf должно содержать экземпляр класса IOPathConfiguration '
-                                  'или его потомка.')
+            raise ValidationError(errors.CONVERSION_TASK_IO_CONF_WRONG_CLASS)
         # Проверка соответствия количества входов-выходов профиля (или args_builder'а) конфигурации входов-выходов
         args_builder = self.args_builder if self.args_builder is not None else self.conv_profile.args_builder
         ab_inputs = args_builder.inputs
         if len(ab_inputs) != len(self.io_conf.input_paths):
-            raise ValidationError('Количество входов ({0}) не совпадает с количеством заданных путей ({1}).')
+            raise ValidationError(
+                errors.CONVERSION_TASK_IN_COUNT_MISMATCH.format(len(ab_inputs), len(self.io_conf.input_paths))
+            )
         ab_outputs = args_builder.outputs
         if len(ab_outputs) != len(self.io_conf.output_paths):
-            raise ValidationError('Количество выходов ({0}) не совпадает с количеством заданных путей ({1}).')
+            raise ValidationError(
+                errors.CONVERSION_TASK_OUT_COUNT_MISMATCH.format(len(ab_outputs), len(self.io_conf.output_paths))
+            )
         # Проверка на соответствие заданных путей разрешённым расширениям
         try:
             in_paths, out_paths = self.io_conf.build()
@@ -187,10 +188,12 @@ class ConversionTask(OrderedModel):
             if io.allowed_ext:
                 ext = os.path.splitext(io_paths[k])[1]
                 if not ext:
-                    raise ValidationError('Файл "{0}" не имеет расширения.'.format(os.path.split(io_paths[k])[1]))
+                    raise ValidationError(
+                        errors.CONVERSION_TASK_FILE_EXT_REQUIRED.format(os.path.split(io_paths[k])[1])
+                    )
                 if ext[1:] not in io.allowed_ext:
                     raise ValidationError(
-                        'Файл "{0}" имеет недопустимое расширение (допустимы: {1}).'.format(
+                        errors.CONVERSION_TASK_FILE_EXT_INVALID.format(
                             os.path.split(io_paths[k])[1], ', '.join(io.allowed_ext)
                         )
                     )
