@@ -99,7 +99,7 @@ class FileStorage(models.Model):
     def contains(self, path, check_existence=True):
         root = self.get_root_path()
         full_path = os.path.normpath(os.path.join(root, path))
-        return in_path(root, full_path) and (check_existence or os.path.exists(full_path))
+        return in_path(root, full_path) and (not check_existence or os.path.exists(full_path))
 
 
 class FileStorageObject(models.Model):
