@@ -194,36 +194,58 @@ class InputOutputAbstract(OptionsHandler):
         raise NotImplementedError
 
     @staticmethod
-    def _check_stream_id(stream_id):
+    def _is_int(i):
+        try:
+            int(i)
+            return True
+        except ValueError:
+            return False
 
-        def _is_int(i):
-            try:
-                int(i)
-                return True
-            except ValueError:
-                return False
+    @classmethod
+    def _check_stream_id(cls, stream_id):
 
-        if _is_int(stream_id):
+        if cls._is_int(stream_id):
             return True
         splitted_id = str(stream_id).split(':')
         l = len(splitted_id)
         if l == 1:
             if splitted_id[0] in ['v', 'a', 's', 'd', 't', 'u']:
                 return True
-            if splitted_id[0][0] == '#' and len(splitted_id[0]) > 1 and _is_int(splitted_id[0][1:]):
+            if splitted_id[0][0] == '#' and len(splitted_id[0]) > 1 and cls._is_int(splitted_id[0][1:]):
                 return True
             return False
         elif l == 2:
-            if splitted_id[0] in ['v', 'a', 's', 'd', 't', 'p', 'i'] and _is_int(splitted_id[1]):
+            if splitted_id[0] in ['v', 'a', 's', 'd', 't', 'p', 'i'] and cls._is_int(splitted_id[1]):
                 return True
             if splitted_id[0] == 'm':
                 return True
         elif l == 3:
-            if splitted_id[0] == 'p' and _is_int(splitted_id[1]) and _is_int(splitted_id[2]):
+            if splitted_id[0] == 'p' and cls._is_int(splitted_id[1]) and cls._is_int(splitted_id[2]):
                 return True
             if splitted_id[0] == 'm':
                 return True
         return False
+
+    DURATION_POS_ONLY = 0
+    DURATION_NEG_ALLOWED = 1
+    DURATION_NEG_ONLY = 2
+
+    @classmethod
+    def _check_duration_format(cls, duration, neg_mode=None):
+        if neg_mode is None:
+            neg_mode = cls.DURATION_POS_ONLY
+        base_re1 = r'^{0}(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$'
+        base_re2 = r'^{0}\d+(?:\.\d+)?$'
+        if neg_mode == cls.DURATION_POS_ONLY:
+            base_re1 = base_re1.format('')
+            base_re2 = base_re2.format('')
+        elif neg_mode == cls.DURATION_NEG_ALLOWED:
+            base_re1 = base_re1.format('-?')
+            base_re2 = base_re2.format('-?')
+        elif neg_mode == cls.DURATION_NEG_ONLY:
+            base_re1 = base_re1.format('-')
+            base_re2 = base_re2.format('-')
+        return re.match(base_re1, duration) is not None or re.match(base_re2, duration) is not None
 
     # Методы, повторяющие опции ffmpeg в алфавитном порядке
 
@@ -242,14 +264,17 @@ class InputOutputAbstract(OptionsHandler):
         return self.set_option_value('-f', format_str)
 
     def ss(self, position):
-        if re.match(r'^(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', position) is None \
-                and re.match(r'^\d+(?:\.\d+)?$', position) is None:
+        if not self._check_duration_format(position, self.DURATION_POS_ONLY):
             raise ValueError('Позиция в потоке должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
         return self.set_option_value('-ss', position)
 
+    def sseof(self, position):
+        if not self._check_duration_format(position, self.DURATION_NEG_ONLY) or str(position) != '0':
+            raise ValueError('Position must be "0" or must be formatted as "-[HH:]MM:SS[.mmm]" or "-S+[.mmm]".')
+        return self.set_option_value('-sseof', position)
+
     def t(self, duration):
-        if re.match(r'^(?:\d{2,}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', duration) is None \
-                and re.match(r'^\d+(?:\.\d+)?$', duration) is None:
+        if not self._check_duration_format(duration):
             raise ValueError('Длительность потока должна быть указана в формате "[HH:]MM:SS[.mmm]" или "S+[.mmm]".')
         return self.set_option_value('-t', duration)
 
@@ -262,8 +287,7 @@ class Input(InputOutputAbstract):
     # Методы, повторяющие опции ffmpeg в алфавитном порядке
 
     def itsoffset(self, offset):
-        if re.match(r'^-?(?:\d{2}:)?[0-5][0-9]:[0-5][0-9](?:\.\d+)?$', offset) is None \
-                and re.match(r'^-?\d+(?:\.\d+)?$', offset) is None:
+        if self._check_duration_format(offset, self.DURATION_NEG_ALLOWED):
             raise ValueError('Смещение должно быть указано в формате "[-][HH:]MM:SS[.mmm]" или "[-]S+[.mmm]".')
         return self.set_option_value('-itsoffset', offset)
 
@@ -274,3 +298,43 @@ class Output(InputOutputAbstract):
         return _build_options(self._options) + [path]
 
     # Методы, повторяющие опции ffmpeg в алфавитном порядке
+
+    def dframes(self, frame_count):
+        return self.frames(frame_count, 'd')
+
+    def frames(self, frame_count, stream_id=None):
+        if stream_id is not None and not self._check_stream_id(stream_id):
+            raise ValueError('Wrong stream id.')
+        if not self._is_int(frame_count) or int(frame_count) < 0:
+            raise ValueError('Frame count must be a positive integer.')
+        return self.set_option_value(
+            '-frames' if stream_id is None else '-frames:{0}'.format(stream_id),
+            frame_count
+        )
+
+    def fs(self, limit_size):
+        raise NotImplementedError()
+
+    def metadata(self, meta_dict, meta_specifier):
+        raise NotImplementedError()
+
+    def target(self, target_type: str):
+        splitted_type = target_type.split('-')
+        if len(splitted_type) > 1:
+            if splitted_type[0] not in ['pal', 'ntsc', 'film']:
+                raise ValueError('Wrong type prefix. Allowed values: "pal-", "ntsc-", "film-".')
+            target_prefix = splitted_type[0]
+            target_type = splitted_type[1]
+        else:
+            target_prefix = None
+        if target_type not in ['vcd', 'svcd', 'dvd', 'dv', 'dv50']:
+            raise ValueError('Wrong type. Allowed values: "vcd", "svcd", "dvd", "dv", "dv50".')
+        return self.set_option_value(
+            '-target', "{0}-{1}".format(target_prefix, target_type) if target_prefix is not None else target_type
+        )
+
+    def timestamp(self, date):
+        raise NotImplementedError()
+
+    def to(self, position):
+        raise NotImplementedError()
