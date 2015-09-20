@@ -1,5 +1,5 @@
 // Инициализация базовой части приложения, необходимой всегда и везде
-define(['jquery', 'bootstrap'], function($) {
+define(['jquery', 'knockout', 'bootstrap'], function($, ko) {
 
     function getCookie(name) {
         var cookieValue = null;
@@ -32,5 +32,12 @@ define(['jquery', 'bootstrap'], function($) {
             }
         }
     });
+
+    ko.bindingHandlers.replace_prefix = {
+        init: function(element, value_accessor) {
+            var value = value_accessor();
+            element.innerHTML = element.innerHTML.replace(/__prefix__/g, value);
+        }
+    };
 
 });

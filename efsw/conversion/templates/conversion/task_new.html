@@ -14,12 +14,6 @@
                 ko.components.register('io_form', {
                     'template': { 'element': 'template_io_form' }
                 });
-                ko.bindingHandlers.replace_prefix = {
-                    init: function(element, value_accessor) {
-                        var value = value_accessor();
-                        element.innerHTML = element.innerHTML.replace(/__prefix__/g, value);
-                    }
-                };
                 ko.applyBindings(view_model);
             });
         });

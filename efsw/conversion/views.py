@@ -95,8 +95,10 @@ def task_list_enqueued(request):
 
 @http.require_GET
 def task_new(request):
-    input_formset_class = formset_factory(forms.InputLocationForm, min_num=0, max_num=0, extra=0)
-    output_formset_class = formset_factory(forms.OutputLocationForm, min_num=0, max_num=0, extra=0)
+    input_formset_class = formset_factory(forms.InputLocationForm, formset=forms.BaseIOFormSet,
+                                          min_num=0, max_num=0, extra=0)
+    output_formset_class = formset_factory(forms.OutputLocationForm, formset=forms.BaseIOFormSet,
+                                           min_num=0, max_num=0, extra=0)
     return shortcuts.render(request, 'conversion/task_new.html', {
         'form': forms.TaskCreateForm(),
         'input_formset': input_formset_class(prefix='inputs'),
@@ -185,8 +187,14 @@ def profile_show(request, profile_id):
 
 @http.require_GET
 def profile_new(request):
+    input_formset_class = formset_factory(forms.IOForm, formset=forms.BaseIOFormSet,
+                                          min_num=1, max_num=None, extra=0)
+    output_formset_class = formset_factory(forms.IOForm, formset=forms.BaseIOFormSet,
+                                           min_num=1, max_num=None, extra=0)
     return shortcuts.render(request, 'conversion/profile_new.html', {
         'form': forms.ProfileCreateForm(),
+        'input_formset': input_formset_class(prefix='inputs'),
+        'output_formset': output_formset_class(prefix='outputs'),
     })
 
 

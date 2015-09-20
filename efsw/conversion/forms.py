@@ -114,3 +114,41 @@ class ProfileCreateForm(forms.Form):
             'placeholder': 'Описание профиля (необязательно)'
         })
     )
+
+
+class IOForm(forms.Form):
+
+    comment = forms.CharField(
+        max_length=255,
+        label='Комментарий',
+        required=False,
+        widget=widgets.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Комментарий (необязательно)'
+        })
+    )
+
+    allowed_ext = forms.CharField(
+        max_length=255,
+        label='Допустимые расширения файлов',
+        required=False,
+        widget=widgets.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Допустимые расширеня файлов (через пробел, необязательно)'
+        })
+    )
+
+    options = forms.CharField(
+        label='Опции',
+        required=False,
+        widget=widgets.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Опции (необязательно)',
+            'style': 'resize: vertical;',
+            'rows': 2
+        })
+    )
+
+
+class BaseIOFormSet(BaseFormSet):
+    pass
