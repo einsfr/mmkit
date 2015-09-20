@@ -27,6 +27,11 @@
                 <li role="presentation">
                     <a href="{% url 'efsw.conversion:profile:list' %}" title="Список профилей">Список</a>
                 </li>
+                {% if perms.convesion.add_conversionprofile %}
+                    <li role="presentation">
+                        <a href="{% url 'efsw.conversion:profile:new' %}" title="Создать профиль">Создать</a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
     </ul>

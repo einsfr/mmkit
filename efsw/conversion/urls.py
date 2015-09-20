@@ -83,6 +83,13 @@ profile_patterns = [
         views.profile_list,
         name='list_page'
     ),
+    # profiles/new/ Создание нового профиля (форма)
+    # Тесты:
+    url(
+        r'^new/$',
+        permission_required('conversion.add_conversionprofile')(views.profile_new),
+        name='new'
+    ),
     # profiles/2/...
     url(
         r'^(?P<profile_id>\d+)/',
@@ -102,7 +109,14 @@ profile_patterns = [
         r'^show/json/$',
         views.profile_show_json,
         name='show_json'
-    )
+    ),
+    # profiles/create/json/
+    # Тесты:
+    url(
+        r'^create/json/$',
+        permission_required('conversion.add_profiletask')(views.profile_create_json),
+        name='create_json'
+    ),
 ]
 
 urlpatterns = [

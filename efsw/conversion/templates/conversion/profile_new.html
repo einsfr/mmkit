@@ -1,0 +1,53 @@
+{% extends 'conversion/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Создание профиля{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'conversion/model_profile_new'], function($, ko, model) {
+            $(document).ready(function() {
+                var view_model = new model({
+                    'profile_create_json': "{% url 'efsw.conversion:profile:create_json' %}"
+                });
+                ko.applyBindings(view_model);
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h2>Создание профиля</h2>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form id="profile_new_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().name }">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    <div>
+                        {{ form.name }}
+                        <span class="help-block"
+                              data-bind="visible: errors().name, text: errors().name"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="form-group" data-bind="css: { 'has-error': errors().description }">
+                    <label for="{{ form.description.id_for_label }}">Описание</label>
+                    <div>
+                        {{ form.description }}
+                        <span class="help-block"
+                              data-bind="visible: errors().description, text: errors().description"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+            </form>
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bind="event: { click: submit_form }">Создать</button>
+        </div>
+    </div>
+{% endblock %}

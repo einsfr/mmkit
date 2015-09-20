@@ -91,3 +91,26 @@ class BaseInputLocationFormSet(BaseFormSet):
 
 class BaseOutputLocationFormSet(BaseFormSet):
     pass
+
+
+class ProfileCreateForm(forms.Form):
+
+    name = forms.CharField(
+        min_length=3,
+        max_length=255,
+        label='Название',
+        required=True,
+        widget=widgets.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Название для профиля'
+        })
+    )
+
+    description = forms.CharField(
+        label='Описание',
+        required=False,
+        widget=widgets.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Описание профиля (необязательно)'
+        })
+    )

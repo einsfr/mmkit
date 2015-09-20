@@ -183,6 +183,19 @@ def profile_show(request, profile_id):
     })
 
 
+@http.require_GET
+def profile_new(request):
+    return shortcuts.render(request, 'conversion/profile_new.html', {
+        'form': forms.ProfileCreateForm(),
+    })
+
+
+@require_ajax
+@http.require_POST
+def profile_create_json(request):
+    pass
+
+
 @require_ajax
 @http.require_GET
 def profile_show_json(request):
