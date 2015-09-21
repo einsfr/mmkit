@@ -201,7 +201,22 @@ def profile_new(request):
 @require_ajax
 @http.require_POST
 def profile_create_json(request):
-    pass
+    profile_form = forms.ProfileCreateForm(request.POST)
+    if profile_form.is_valid():
+        input_formset = formset_factory(
+            forms.IOForm, formset=forms.BaseIOFormSet, min_num=1, validate_min=True)(request.POST, prefix='inputs')
+        output_formset = formset_factory(
+            forms.IOForm, formset=forms.BaseIOFormSet, min_num=1, validate_min=True)(request.POST, prefix='outputs')
+        if input_formset.is_valid() and output_formset.is_valid():
+            profile = models.ConversionProfile()
+            profile.name = profile_form.cleaned_data['name']
+            profile.description = profile_form.cleaned_data['description']
+            profile.save()
+            return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.conversion:profile:show', args=(profile.id, )))
+        else:
+            pass
+    else:
+        return JsonWithStatusResponse.error({'errors': profile_form.errors.as_json()}, 'FORM_INVALID')
 
 
 @require_ajax

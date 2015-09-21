@@ -20,47 +20,57 @@
     <script type="text/html" id="template_io_form">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <span data-bind="text: ( io_type == 'i' ? 'Вход' : 'Выход' )"></span>
-                <span data-bind="text: position"></span>
-            </div>
-            <div class="panel-body" data-bind="replace_prefix: position">
-                <div class="form-group" data-bind="css: { 'has-error': errors().comment }">
-                    <!-- ko if: io_type == 'i' -->
-                        <label for="{{ input_formset.empty_form.comment.id_for_label }}">Комментарий</label>
-                        <div>
-                            {{ input_formset.empty_form.comment }}
-                        </div>
-                    <!-- /ko -->
-                    <!-- ko if: io_type == 'o' -->
-                        <label for="{{ output_formset.empty_form.comment.id_for_label }}">Комментарий</label>
-                        <div>
-                            {{ output_formset.empty_form.comment }}
-                        </div>
-                    <!-- /ko -->
-                    <span class="help-block"
-                          data-bind="visible: errors().comment, text: errors().comment"
-                          style="display: none;"></span>
+                <div class="row">
+                    <div class="col-xs-11">
+                        <span data-bind="text: ( io_type == 'i' ? 'Вход' : 'Выход' )"></span>
+                        <span data-bind="text: position"></span>
+                    </div>
+                    <div class="col-xs-1 text-right" data-bind="if: position() > 0">
+                        <a href="#" title="Удалить" class="fa fa-lg fa-trash-o"
+                           data-bind="event: { click: $root.remove_io }"></a>
+                    </div>
                 </div>
-                <div class="form-group" data-bind="css: { 'has-error': errors().allowed_ext }">
-                    <!-- ko if: io_type == 'i' -->
-                        <label for="{{ input_formset.empty_form.allowed_ext.id_for_label }}">
-                            Допустимые расширения файлов
-                        </label>
-                        <div>
-                            {{ input_formset.empty_form.allowed_ext }}
-                        </div>
-                    <!-- /ko -->
-                    <!-- ko if: io_type == 'o' -->
-                        <label for="{{ output_formset.empty_form.allowed_ext.id_for_label }}">
-                            Допустимые расширения файлов
-                        </label>
-                        <div>
-                            {{ output_formset.empty_form.allowed_ext }}
-                        </div>
-                    <!-- /ko -->
-                    <span class="help-block"
-                          data-bind="visible: errors().allowed_ext, text: errors().allowed_ext"
-                          style="display: none;"></span>
+            </div>
+            <div class="panel-body" data-bind="replace_prefix: position()">
+                <div class="row">
+                    <div class="form-group col-md-6" data-bind="css: { 'has-error': errors().comment }">
+                        <!-- ko if: io_type == 'i' -->
+                            <label for="{{ input_formset.empty_form.comment.id_for_label }}">Комментарий</label>
+                            <div>
+                                {{ input_formset.empty_form.comment }}
+                            </div>
+                        <!-- /ko -->
+                        <!-- ko if: io_type == 'o' -->
+                            <label for="{{ output_formset.empty_form.comment.id_for_label }}">Комментарий</label>
+                            <div>
+                                {{ output_formset.empty_form.comment }}
+                            </div>
+                        <!-- /ko -->
+                        <span class="help-block"
+                              data-bind="visible: errors().comment, text: errors().comment"
+                              style="display: none;"></span>
+                    </div>
+                    <div class="form-group col-md-6" data-bind="css: { 'has-error': errors().allowed_ext }">
+                        <!-- ko if: io_type == 'i' -->
+                            <label for="{{ input_formset.empty_form.allowed_ext.id_for_label }}">
+                                Допустимые расширения файлов
+                            </label>
+                            <div>
+                                {{ input_formset.empty_form.allowed_ext }}
+                            </div>
+                        <!-- /ko -->
+                        <!-- ko if: io_type == 'o' -->
+                            <label for="{{ output_formset.empty_form.allowed_ext.id_for_label }}">
+                                Допустимые расширения файлов
+                            </label>
+                            <div>
+                                {{ output_formset.empty_form.allowed_ext }}
+                            </div>
+                        <!-- /ko -->
+                        <span class="help-block"
+                              data-bind="visible: errors().allowed_ext, text: errors().allowed_ext"
+                              style="display: none;"></span>
+                    </div>
                 </div>
                 <div class="form-group" data-bind="css: { 'has-error': errors().options }">
                     <!-- ko if: io_type == 'i' -->
@@ -107,11 +117,23 @@
                               style="display: none;"></span>
                     </div>
                 </div>
+                <div class="form-group" data-bind="css: { 'has-error': errors().global_options }">
+                    <label for="{{ form.global_options.id_for_label }}">Глобальные опции</label>
+                    <div>
+                        {{ form.global_options }}
+                        <span class="help-block"
+                              data-bind="visible: errors().global_options, text: errors().global_options"
+                              style="display: none;"></span>
+                    </div>
+                </div>
                 <h4>Входы</h4>
                 <div id="inputs_container"
                      data-bind="foreach: inputs">
                     <div data-bind="component: { name: 'io_form', params: $data }"></div>
                 </div>
+                <button type="button" class="btn btn-default" data-bind="event: { click: add_input }">
+                    <span class="fa fa-plus-circle"></span> Добавить вход
+                </button>
                 <div id="inputs_management_form_container" style="display: none;">
                     {{ input_formset.management_form }}
                 </div>
@@ -120,6 +142,9 @@
                      data-bind="foreach: outputs">
                     <div data-bind="component: { name: 'io_form', params: $data }"></div>
                 </div>
+                <button type="button" class="btn btn-default" data-bind="event: { click: add_output }">
+                    <span class="fa fa-plus-circle"></span> Добавить выход
+                </button>
                 <div id="outputs_management_form_container" style="display: none;">
                     {{ output_formset.management_form }}
                 </div>

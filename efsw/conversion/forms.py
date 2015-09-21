@@ -111,9 +111,25 @@ class ProfileCreateForm(forms.Form):
         required=False,
         widget=widgets.Textarea(attrs={
             'class': 'form-control',
-            'placeholder': 'Описание профиля (необязательно)'
+            'placeholder': 'Описание профиля (необязательно)',
+            'rows': 3,
+            'style': 'resize: vertical;',
         })
     )
+
+    global_options = forms.CharField(
+        label='Глобальные опции',
+        required=False,
+        widget=widgets.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Глобальные опции конвертера (необязательно)',
+            'rows': 2,
+            'style': 'resize: vertical;',
+        })
+    )
+
+    def clean_name(self):
+        pass  # Здесь должна быть проверка уникальности имени профиля
 
 
 class IOForm(forms.Form):
