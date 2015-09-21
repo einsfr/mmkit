@@ -1,6 +1,7 @@
 import json
 import uuid
 import datetime
+import shlex
 
 from django import shortcuts
 from django.conf import settings
@@ -211,10 +212,41 @@ def profile_create_json(request):
             profile = models.ConversionProfile()
             profile.name = profile_form.cleaned_data['name']
             profile.description = profile_form.cleaned_data['description']
+            ab = args.ArgumentsBuilder(
+                [
+                    args.Input(
+                        shlex.split(f.cleaned_data['options']),
+                        f.cleaned_data['comment'],
+                        f.cleaned_data['allowed_ext'].split(' ')
+                    )
+                    for f in input_formset.forms
+                ],
+                [
+                    args.Output(
+                        shlex.split(f.cleaned_data['options']),
+                        f.cleaned_data['comment'],
+                        f.cleaned_data['allowed_ext'].split(' ')
+                    )
+                    for f in output_formset.forms
+                ],
+                shlex.split(profile_form.cleaned_data['global_options'])
+            )
+            profile.args_builder = ab
             profile.save()
             return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.conversion:profile:show', args=(profile.id, )))
         else:
-            pass
+            form_errors = {}
+            if input_formset.errors:
+                form_errors['inputs'] = input_formset.errors
+            if output_formset.errors:
+                form_errors['outputs'] = output_formset.errors
+            inputs_nf_errors = input_formset.non_form_errors()
+            if inputs_nf_errors:
+                form_errors['inputs__all__'] = inputs_nf_errors
+            outputs_nf_errors = output_formset.non_form_errors()
+            if outputs_nf_errors:
+                form_errors['outputs__all__'] = outputs_nf_errors
+            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORM_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': profile_form.errors.as_json()}, 'FORM_INVALID')
 

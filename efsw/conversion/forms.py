@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import widgets
 from django.forms.formsets import BaseFormSet
+from django.core.exceptions import ValidationError
 
 from efsw.conversion import models
 from efsw.common.models import FileStorage
@@ -129,7 +130,9 @@ class ProfileCreateForm(forms.Form):
     )
 
     def clean_name(self):
-        pass  # Здесь должна быть проверка уникальности имени профиля
+        if models.ConversionProfile.objects.filter(name=self.cleaned_data['name']).exists():
+            raise ValidationError('Название профиля должно быть уникальным.')
+        return self.cleaned_data['name']
 
 
 class IOForm(forms.Form):

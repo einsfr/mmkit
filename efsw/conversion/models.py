@@ -13,6 +13,11 @@ from efsw.conversion import errors
 
 class ConversionProcess(models.Model):
 
+    class Meta:
+        verbose_name = 'процесс конвертирования'
+        verbose_name_plural = 'процессы конвертирования'
+        app_label = 'conversion'
+
     conv_id = models.UUIDField(
         unique=True,
         editable=False
@@ -24,6 +29,12 @@ class ConversionProcess(models.Model):
 
 
 class ConversionProfile(models.Model):
+
+    class Meta:
+        verbose_name = 'профиль конвертирования'
+        verbose_name_plural = 'профили конвертирования'
+        app_label = 'conversion'
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
@@ -57,6 +68,12 @@ class ConversionProfile(models.Model):
 
 
 class ConversionTask(OrderedModel):
+
+    class Meta:
+        verbose_name = 'задание конвертирования'
+        verbose_name_plural = 'задания конвертирования'
+        app_label = 'conversion'
+        ordering = ['-added']
 
     STATUS_UNKNOWN = 0
 
