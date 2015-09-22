@@ -65,16 +65,20 @@ class AbstractSecurityTestCase(TestCase):
         User.objects.filter(id__in=users_to_remove).delete()
 
     def assertNotLoginRequired(self, response, condition):
-        if response.status_code == 302:
-            self.assertNotEqual(self._get_login_path().format(condition.url), response.redirect_chain[0][0])
-            self.assertNotContains(response, '<h2>Вход в систему</h2>')
+        if isinstance(response, HttpResponseRedirect):
+            self.assertNotEqual(self._get_login_path().format(condition.url), response.url)
+        else:
+            redirect_chain = getattr(response, 'redirect_chain', None)
+            if isinstance(response, HttpResponse) and redirect_chain is not None and len(redirect_chain):
+                self.assertNotEqual(self._get_login_path().format(condition.url), redirect_chain[0][0])
 
     def assertLoginRequired(self, response, condition):
         if isinstance(response, HttpResponseRedirect):
             self.assertEqual(self._get_login_path().format(condition.url), response.url)
-        elif isinstance(response, HttpResponse) and len(response.redirect_chain):
-            self.assertEqual(self._get_login_path().format(condition.url), response.redirect_chain[0][0])
-            self.assertContains(response, '<h2>Вход в систему</h2>')
+        else:
+            redirect_chain = getattr(response, 'redirect_chain', None)
+            if isinstance(response, HttpResponse) and redirect_chain is not None and len(redirect_chain):
+                self.assertEqual(self._get_login_path().format(condition.url), redirect_chain[0][0])
 
     def _test_anonymous_access(self):
         print('Проверка доступа анонимных пользователей...')
