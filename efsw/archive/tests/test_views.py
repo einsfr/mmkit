@@ -531,7 +531,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
         self.assertEqual(JsonWithStatusResponse.STATUS_OK, json_content['status'])
-        self.assertEqual('', json_content['data'])
+        self.assertEqual('/archive/items/4/edit/links/', json_content['data'])
         item = models.Item.objects.get(pk=4)
         self.assertEqual([], list(item.file_locations.all()))
         call_command('loaddata', 'itemlog.json', 'itemfilelocation.json', 'filestorage.json', 'filestorageobject.json',

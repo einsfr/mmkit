@@ -5,42 +5,42 @@ from efsw.conversion import views
 
 task_patterns = [
     # tasks/list/ Список заданий конвертирования (краткий)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/$',
         views.task_list,
         name='list'
     ),
     # tasks/list/finished/ Список заданий конвертирования (завершившиеся)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/finished/$',
         views.task_list_finished,
         name='list_finished'
     ),
     # tasks/list/unknown/ Список заданий конвертирования (статус неизвестен)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/unknown/$',
         views.task_list_unknown,
         name='list_unknown'
     ),
     # tasks/list/in_progress/ Список заданий конвертирования (в процессе выполнения)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/in_progress/$',
         views.task_list_in_progress,
         name='list_in_progress'
     ),
     # tasks/list/enqueued/ Список заданий конвертирования (ожидающие выполнения)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/enqueued/$',
         views.task_list_enqueued,
         name='list_enqueued'
     ),
     # tasks/new/
-    # Тесты:
+    # Тесты: sec
     url(
         r'^new/$',
         permission_required('conversion.add_conversiontask')(views.task_new),
@@ -51,7 +51,7 @@ task_patterns = [
         r'^(?P<task_id>[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/',
         include([
             # tasks/e0593092-fbc5-4b20-99f4-677f8954220f/show/ Описание одного задания
-            # Тесты:
+            # Тесты: sec
             url(
                 r'^show/$',
                 views.task_show,
@@ -60,7 +60,7 @@ task_patterns = [
         ])
     ),
     # tasks/create/json/
-    # Тесты:
+    # Тесты: sec
     url(
         r'^create/json/$',
         permission_required('conversion.add_conversiontask')(views.task_create_json),
@@ -70,21 +70,21 @@ task_patterns = [
 
 profile_patterns = [
     # profiles/list/ Список профилей
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/$',
         views.profile_list,
         name='list'
     ),
     # profiles/list/page/2/ Список профилей (постранично)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^list/page/(?P<page>\d+)/$',
         views.profile_list,
         name='list_page'
     ),
     # profiles/new/ Создание нового профиля (форма)
-    # Тесты:
+    # Тесты: sec
     url(
         r'^new/$',
         permission_required('conversion.add_conversionprofile')(views.profile_new),
@@ -95,7 +95,7 @@ profile_patterns = [
         r'^(?P<profile_id>\d+)/',
         include([
             # profiles/2/show/ Описание одного профиля
-            # Тесты:
+            # Тесты: sec
             url(
                 r'^show/$',
                 views.profile_show,
@@ -104,14 +104,14 @@ profile_patterns = [
         ])
     ),
     # profiles/show/json/?id=2 Описание одного профиля в формате JSON
-    # Тесты:
+    # Тесты: sec
     url(
         r'^show/json/$',
         views.profile_show_json,
         name='show_json'
     ),
     # profiles/create/json/
-    # Тесты:
+    # Тесты: sec
     url(
         r'^create/json/$',
         permission_required('conversion.add_profiletask')(views.profile_create_json),
