@@ -120,7 +120,11 @@ def task_create_json(request):
         output_formset = formset_factory(forms.OutputLocationForm, formset=forms.BaseOutputLocationFormSet,
                                          max_num=outputs_count, min_num=outputs_count, validate_max=True,
                                          validate_min=True)(request.POST, prefix='outputs')
-        if input_formset.is_valid() and output_formset.is_valid():
+        try:
+            formsets_are_valid = input_formset.is_valid() and output_formset.is_valid()
+        except ValidationError as e:
+            return JsonWithStatusResponse.error(e.message, 'FORMSET_ERROR')
+        if formsets_are_valid:
             ct = models.ConversionTask()
             name = task_form.cleaned_data['name']
             ct.name = name if name else '{0}: создано {1}'.format(
@@ -153,7 +157,7 @@ def task_create_json(request):
             outputs_nf_errors = output_formset.non_form_errors()
             if outputs_nf_errors:
                 form_errors['outputs__all__'] = outputs_nf_errors
-            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORM_INVALID')
+            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORMSET_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': task_form.errors.as_json()}, 'FORM_INVALID')
 
@@ -208,7 +212,11 @@ def profile_create_json(request):
             forms.IOForm, formset=forms.BaseIOFormSet, min_num=1, validate_min=True)(request.POST, prefix='inputs')
         output_formset = formset_factory(
             forms.IOForm, formset=forms.BaseIOFormSet, min_num=1, validate_min=True)(request.POST, prefix='outputs')
-        if input_formset.is_valid() and output_formset.is_valid():
+        try:
+            formsets_are_valid = input_formset.is_valid() and output_formset.is_valid()
+        except ValidationError as e:
+            return JsonWithStatusResponse.error(e.message, 'FORMSET_ERROR')
+        if formsets_are_valid:
             profile = models.ConversionProfile()
             profile.name = profile_form.cleaned_data['name']
             profile.description = profile_form.cleaned_data['description']
@@ -246,7 +254,7 @@ def profile_create_json(request):
             outputs_nf_errors = output_formset.non_form_errors()
             if outputs_nf_errors:
                 form_errors['outputs__all__'] = outputs_nf_errors
-            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORM_INVALID')
+            return JsonWithStatusResponse.error({'errors': json.dumps(form_errors)}, 'FORMSET_INVALID')
     else:
         return JsonWithStatusResponse.error({'errors': profile_form.errors.as_json()}, 'FORM_INVALID')
 

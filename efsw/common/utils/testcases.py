@@ -214,3 +214,10 @@ class JsonResponseTestCase(TestCase):
 
     def assertJsonError(self, response, status_ext=None, data=None):
         self.assertJsonStatus(response, JsonWithStatusResponse.STATUS_ERROR, status_ext, data)
+
+    def get_json_content(self, response):
+        return json.loads(response.content.decode())
+
+    def get_json_errors(self, response):
+        return self.get_json_content(response)['data']['errors']
+

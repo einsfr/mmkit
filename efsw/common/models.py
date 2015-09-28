@@ -1,5 +1,6 @@
 import uuid
 import os
+import shutil
 
 from django.db import models
 from django.contrib.postgres.fields import HStoreField, ArrayField
@@ -7,6 +8,8 @@ from django.conf import settings
 
 from efsw.common.utils import urlformatter
 from efsw.common.storage.utils import in_path
+from efsw.common.storage.exceptions import StorageRootNotFound, StorageBaseDirNotFound
+from efsw.common.storage import errors as storage_errors
 
 
 class FileStorage(models.Model):
@@ -79,7 +82,7 @@ class FileStorage(models.Model):
                 inner_path
             ))
 
-    def get_root_path(self):
+    def get_base_path(self):
         return os.path.normpath(os.path.join(
             settings.EFSW_STORAGE_ROOT,
             self.base_dir
@@ -97,9 +100,51 @@ class FileStorage(models.Model):
         return file_object
 
     def contains(self, path, check_existence=True):
-        root = self.get_root_path()
-        full_path = os.path.normpath(os.path.join(root, path))
-        return in_path(root, full_path) and (not check_existence or os.path.exists(full_path))
+        if not os.path.exists(self.get_base_path()):
+            raise StorageBaseDirNotFound(self.id, self.get_base_path())
+        base_dir = self.get_base_path()
+        full_path = os.path.normpath(os.path.join(base_dir, path))
+        return in_path(base_dir, full_path) and (not check_existence or os.path.exists(full_path))
+
+    INIT_MODE_SKIP_IF_EXISTS = 0
+    INIT_MODE_REWRITE_IF_EXISTS = 1
+
+    @classmethod
+    def initiate_storage_root(cls, init_mode=None):
+        storage_root = os.path.normpath(settings.EFSW_STORAGE_ROOT)
+        init_mode = init_mode if init_mode is not None else cls.INIT_MODE_SKIP_IF_EXISTS
+        storage_root_mode = settings.EFSW_STORAGE_ROOT_MODE
+        if not os.path.exists(storage_root):
+            os.makedirs(storage_root, storage_root_mode)
+        else:
+            if init_mode == cls.INIT_MODE_REWRITE_IF_EXISTS:
+                if settings.APP_ENV.lower() != 'prod':
+                    # Предварительное переименования появилось из-за того, что в Windows существует задержка между
+                    # исполнением команды rmtree и фактическим удалением папки, а переименование происходит сразу
+                    tmp_name = '_{0}'.format(storage_root)
+                    os.rename(storage_root, tmp_name)
+                    shutil.rmtree(tmp_name)
+                    os.mkdir(storage_root, storage_root_mode)
+                else:
+                    raise RuntimeError(storage_errors.STORAGE_ROOT_REWRITE_FORBIDDEN)
+
+    def initiate_storage_base(self, init_mode=None):
+        storage_root = os.path.normpath(settings.EFSW_STORAGE_ROOT)
+        if not os.path.exists(storage_root):
+            raise StorageRootNotFound(storage_root)
+        init_mode = init_mode if init_mode is not None else self.INIT_MODE_SKIP_IF_EXISTS
+        storage_path = self.get_base_path()
+        if not os.path.exists(storage_path):
+            os.mkdir(storage_path, settings.EFSW_STORAGE_BASE_DIR_MODE)
+        else:
+            if init_mode == self.INIT_MODE_REWRITE_IF_EXISTS:
+                if settings.APP_ENV.lower() != 'prod':
+                    tmp_name = '_{0}'.format(storage_path)
+                    os.rename(storage_path, tmp_name)
+                    shutil.rmtree(tmp_name)
+                    os.mkdir(storage_path, settings.EFSW_STORAGE_BASE_DIR_MODE)
+                else:
+                    raise RuntimeError(storage_errors.STORAGE_BASE_DIR_REWRITE_FORBIDDEN)
 
 
 class FileStorageObject(models.Model):

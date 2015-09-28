@@ -1,17 +1,16 @@
-import json
-import datetime
+import os
 
 from django.test import TestCase
-from django.core import urlresolvers, paginator
+from django.core import urlresolvers
 
 from mmkit.conf import settings
 from efsw.conversion import models
 from efsw.common.utils.testcases import LoginRequiredTestCase, JsonResponseTestCase
+from efsw.conversion.fixtures import conversionprofile, conversiontask
+from efsw.common.models import FileStorage
 
 
 class TaskListTestCase(TestCase):
-
-    fixtures = []
 
     def test_list(self):
         response = self.client.get(urlresolvers.reverse('efsw.conversion:task:list'))
@@ -80,3 +79,112 @@ class TaskListTestCase(TestCase):
             len(response.context['tasks_enqueued']),
             models.ConversionTask.objects.filter(status=models.ConversionTask.STATUS_ENQUEUED).count()
         )
+
+
+class TaskNewTestCase(LoginRequiredTestCase):
+
+    def test_variables(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.conversion:task:new'))
+        self.assertIn('form', response.context)
+        self.assertIn('input_formset', response.context)
+        self.assertIn('output_formset', response.context)
+
+
+class TaskCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    fixtures = ['filestorage.json']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.conversion:task:create_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_invalid_form(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'FORM_INVALID')
+
+    def test_invalid_formset(self):
+        conversionprofile.load_data()
+        self._login_user()
+        data = {
+            'name': 'Тестовое имя',
+            'profile': 1
+        }
+        response = self.client.post(self.url, data)
+        self.assertJsonError(response, 'FORMSET_ERROR')
+        data = {
+            'name': 'Тестовое имя',
+            'profile': 1,
+            'inputs-TOTAL_FORMS': 1,
+            'inputs-INITIAL_FORMS': 1,
+            'inputs-MIN_NUM_FORMS': 1,
+            'inputs-MAX_NUM_FORMS': 1,
+            'outputs-TOTAL_FORMS': 1,
+            'outputs-INITIAL_FORMS': 1,
+            'outputs-MIN_NUM_FORMS': 1,
+            'outputs-MAX_NUM_FORMS': 1,
+        }
+        response = self.client.post(self.url, data)
+        self.assertJsonError(response, 'FORMSET_INVALID')
+        errors = self.get_json_errors(response)
+        self.assertIn('inputs', errors)
+        self.assertIn('outputs', errors)
+
+    def test_valid(self):
+        conversionprofile.load_data()
+        self._login_user()
+        FileStorage.initiate_storage_root(FileStorage.INIT_MODE_SKIP_IF_EXISTS)
+        fs_in = FileStorage.objects.get(pk='1ac9873a-8cf0-49e1-8a9a-7709930aa8af')
+        fs_in.initiate_storage_base(FileStorage.INIT_MODE_SKIP_IF_EXISTS)
+        fs_path = fs_in.get_base_path()
+        open(os.path.join(fs_path, 'in'), 'w').close()
+        fs_out = FileStorage.objects.get(pk='11e00904-0f3d-4bfa-a3a9-9c716f87bc01')
+        fs_out.initiate_storage_base(FileStorage.INIT_MODE_SKIP_IF_EXISTS)
+        fs_path = fs_out.get_base_path()
+        try:
+            os.remove(os.path.join(fs_path, 'out'))
+        except FileNotFoundError:
+            pass
+        data = {
+            'name': 'Тестовое имя',
+            'profile': 1,
+            'inputs-TOTAL_FORMS': 1,
+            'inputs-INITIAL_FORMS': 1,
+            'inputs-MIN_NUM_FORMS': 1,
+            'inputs-MAX_NUM_FORMS': 1,
+            'outputs-TOTAL_FORMS': 1,
+            'outputs-INITIAL_FORMS': 1,
+            'outputs-MIN_NUM_FORMS': 1,
+            'outputs-MAX_NUM_FORMS': 1,
+            'inputs-0-storage': '1ac9873a-8cf0-49e1-8a9a-7709930aa8af',
+            'inputs-0-path': 'in',
+            'outputs-0-storage': '11e00904-0f3d-4bfa-a3a9-9c716f87bc01',
+            'outputs-0-path': 'out',
+        }
+        response = self.client.post(self.url, data)
+        self.assertJsonOk(response)
+
+
+class TaskShowTestCase(TestCase):
+
+    def setUp(self):
+        conversiontask.load_data()
+
+    def test_404(self):
+        response = self.client.get(urlresolvers.reverse(
+            'efsw.conversion:task:show', args=('e0593092-fbc5-4b20-10f4-677f8954220f', ))
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_normal(self):
+        response = self.client.get(urlresolvers.reverse(
+            'efsw.conversion:task:show', args=('e0593092-fbc5-4b20-99f4-677f8954220f', ))
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertIn('task', response.context)

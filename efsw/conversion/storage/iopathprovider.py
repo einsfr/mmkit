@@ -28,4 +28,4 @@ class FileStorageIOPathProvider(AbstractIOPathProvider):
             type(self)._storage_cache[self.storage_id] = (storage, datetime.now() + type(self).STORAGE_CACHE_LIFETIME)
         else:
             storage = type(self)._storage_cache[self.storage_id][0]
-        return os.path.normpath(os.path.join(storage.get_root_path(), self.path))
+        return os.path.normpath(os.path.join(storage.get_base_path(), self.path))
