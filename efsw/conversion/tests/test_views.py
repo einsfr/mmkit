@@ -1,7 +1,8 @@
 import os
+import math
 
 from django.test import TestCase
-from django.core import urlresolvers
+from django.core import urlresolvers, paginator
 
 from mmkit.conf import settings
 from efsw.conversion import models
@@ -188,3 +189,33 @@ class TaskShowTestCase(TestCase):
         )
         self.assertEqual(200, response.status_code)
         self.assertIn('task', response.context)
+
+
+class ProfileListTestCase(TestCase):
+
+    def setUp(self):
+        conversionprofile.load_data()
+
+    def test_list(self):
+        response = self.client.get(urlresolvers.reverse('efsw.conversion:profile:list'))
+        self.assertIsInstance(response.context['profiles'], paginator.Page)
+        page_count = math.ceil(
+            models.ConversionProfile.objects.count() / getattr(settings, 'EFSW_CONVERTER_PROFILES_PER_PAGE')
+        )
+        self.assertEqual(1, response.context['profiles'].number)
+        self.assertEqual(page_count, response.context['profiles'].paginator.num_pages)
+
+
+class ProfileShowTestCase(TestCase):
+
+    def setUp(self):
+        conversionprofile.load_data()
+
+    def test_404(self):
+        response = self.client.get(urlresolvers.reverse('efsw.conversion:profile:show', args=(1000000, )))
+        self.assertEqual(404, response.status_code)
+
+    def test_normal(self):
+        response = self.client.get(urlresolvers.reverse('efsw.conversion:profile:show', args=(1, )))
+        self.assertEqual(200, response.status_code)
+        self.assertIn('profile', response.context)
