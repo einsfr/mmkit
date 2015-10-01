@@ -219,3 +219,84 @@ class ProfileShowTestCase(TestCase):
         response = self.client.get(urlresolvers.reverse('efsw.conversion:profile:show', args=(1, )))
         self.assertEqual(200, response.status_code)
         self.assertIn('profile', response.context)
+
+
+class ProfileNewTestCase(LoginRequiredTestCase):
+
+    def test_variables(self):
+        self._login_user()
+        response = self.client.get(urlresolvers.reverse('efsw.conversion:profile:new'))
+        self.assertIn('form', response.context)
+        self.assertIn('input_formset', response.context)
+        self.assertIn('output_formset', response.context)
+
+
+class ProfileCreateJsonTestCase(LoginRequiredTestCase, JsonResponseTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.conversion:profile:create_json')
+
+    def test_wrong_method(self):
+        self._login_user()
+        response = self.client.get(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_invalid_form(self):
+        self._login_user()
+        response = self.client.post(self.url)
+        self.assertJsonError(response, 'FORM_INVALID')
+
+    def test_invalid_formset(self):
+        self._login_user()
+        data = {
+            'name': 'Тестовый профиль'
+        }
+        response = self.client.post(self.url, data)
+        self.assertJsonError(response, 'FORMSET_ERROR')
+        data = {
+            'name': 'Тестовое имя',
+            'inputs-TOTAL_FORMS': 1,
+            'inputs-INITIAL_FORMS': 1,
+            'inputs-MIN_NUM_FORMS': 1,
+            'inputs-MAX_NUM_FORMS': 1,
+            'outputs-TOTAL_FORMS': 1,
+            'outputs-INITIAL_FORMS': 1,
+            'outputs-MIN_NUM_FORMS': 1,
+            'outputs-MAX_NUM_FORMS': 1,
+        }
+        response = self.client.post(self.url, data)
+        self.assertJsonOk(response)
+        profile = models.ConversionProfile.objects.get(name='Тестовое имя')
+        self.assertEqual(1, len(profile.args_builder.inputs))
+        self.assertEqual(1, len(profile.args_builder.outputs))
+
+
+class ProfileShowJson(JsonResponseTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = urlresolvers.reverse('efsw.conversion:profile:show_json')
+
+    def setUp(self):
+        conversionprofile.load_data()
+
+    def test_invalid(self):
+        response = self.client.get(self.url)
+        self.assertJsonError(response, 'REQUIRED_REQUEST_PARAMETER_IS_MISSING')
+        response = self.client.get('{0}?id=abc'.format(self.url))
+        self.assertJsonError(response, 'UNEXPECTED_REQUEST_PARAMETER_VALUE')
+        response = self.client.get('{0}?id=1000000'.format(self.url))
+        self.assertJsonError(response, 'PROFILE_NOT_FOUND')
+
+    def test_valid(self):
+        response = self.client.get('{0}?id=1'.format(self.url))
+        self.assertJsonOk(response)
+        data = self.get_json_data(response)
+        self.assertIn('name', data)
+        self.assertIn('description', data)
+        self.assertIn('inputs', data)
+        self.assertIn('outputs', data)
+        self.assertEqual(1, len(data['inputs']))
+        self.assertEqual(1, len(data['outputs']))
+

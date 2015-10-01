@@ -218,6 +218,9 @@ class JsonResponseTestCase(TestCase):
     def get_json_content(self, response):
         return json.loads(response.content.decode())
 
+    def get_json_data(self, response):
+        return self.get_json_content(response)['data']
+
     def get_json_errors(self, response):
-        return self.get_json_content(response)['data']['errors']
+        return self.get_json_data(response)['errors']
 
