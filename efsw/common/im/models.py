@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class MessageParticipant(models.Model):
@@ -12,7 +13,21 @@ class MessageParticipant(models.Model):
 
     id = models.UUIDField(
         primary_key=True,
-        default=uuid.uuid4
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        related_name='+',
+        editable=False,
+        verbose_name='пользователь'
+    )
+
+    msg_class = models.CharField(
+        verbose_name='класс сообщения',
+        editable=False
     )
 
 
@@ -25,7 +40,8 @@ class Message(models.Model):
 
     id = models.UUIDField(
         primary_key=True,
-        default=uuid.uuid4
+        default=uuid.uuid4,
+        editable=False
     )
 
     content = models.TextField(

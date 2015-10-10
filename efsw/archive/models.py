@@ -134,7 +134,7 @@ class ItemLog(models.Model):
 
     action = models.CharField(max_length=3, choices=ACTION_DICT.items())
 
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, null=True, related_name='+')
 
     def __str__(self):
         if self.user:
