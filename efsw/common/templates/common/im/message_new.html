@@ -1,0 +1,66 @@
+{% extends 'common/im/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Новое сообщение{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        require(['jquery', 'knockout', 'common/generic_form_model'], function ($, ko, model) {
+            $(document).ready(function () {
+                ko.applyBindings(new model(
+                        '#message_new_form',
+                        "{% url 'efsw.common.im:message:create_json' %}",
+                        function(response) {
+                            window.location.href = response.data;
+                        }
+                ));
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h2>Новое сообщение</h2>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form id="message_new_form">
+                <div class="form-group" data-bind="css: { 'has-error': errors().content }">
+                    <label for="{{ form.content.id_for_label }}">Текст сообщения</label>
+                    <div>
+                        {{ form.content }}
+                        <span class="help-block"
+                              data-bind="visible: errors().content, text: errors().content"
+                              style="display: none;"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 form-group" data-bind="css: { 'has-error': errors().receiver }">
+                        <label for="{{ form.receiver.id_for_label }}">Получатели</label>
+                        <div>
+                            {{ form.receiver }}
+                            <span class="help-block"
+                                  data-bind="visible: errors().receiver, text: errors().receiver"
+                                  style="display: none;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Дополнительные параметры</label>
+                            <div class="checkbox">
+                                <label>{{ form.important }}Важное</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="alert alert-danger"
+                 data-bind="visible: error_msg(), text: error_msg()"
+                 style="display: none;"></div>
+        </div>
+        <div class="panel-footer text-center">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bind="event: { click: submit_form }">Отправить</button>
+        </div>
+    </div>
+{% endblock %}
