@@ -4,33 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class MessageParticipant(models.Model):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'участник обмена сообщениями'
-        verbose_name_plural = 'участники обмена сообщениями'
-
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-
-    user = models.ForeignKey(
-        User,
-        null=True,
-        related_name='+',
-        editable=False,
-        verbose_name='пользователь'
-    )
-
-    msg_class = models.CharField(
-        verbose_name='класс сообщения',
-        editable=False
-    )
-
-
 class Message(models.Model):
 
     class Meta:
@@ -49,15 +22,17 @@ class Message(models.Model):
     )
 
     sender = models.ForeignKey(
-        MessageParticipant,
-        related_name='sended_messages',
+        User,
+        null=True,
+        related_name='+',
         editable=False,
         verbose_name='отправитель'
     )
 
-    reciever = models.ForeignKey(
-        MessageParticipant,
-        related_name='recieved_messages',
+    receiver = models.ForeignKey(
+        User,
+        related_name='+',
+        editable=False,
         verbose_name='получатель'
     )
 
@@ -80,4 +55,11 @@ class Message(models.Model):
     postponed = models.BooleanField(
         default=False,
         verbose_name='отложено'
+    )
+
+    msg_class = models.CharField(
+        blank=True,
+        max_length=64,
+        editable=False,
+        verbose_name='класс сообщения'
     )
