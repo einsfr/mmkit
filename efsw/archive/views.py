@@ -332,7 +332,7 @@ def item_update_locations_json(request):
         storage = storages_dict[l['storage_id']]
         l_obj = models.ItemFileLocation(
             item=item,
-            file_object=storage.get_or_create_file_object(l['path'])
+            file_object=storage.get_or_create_file_object(l['path'].replace('\\', '/'))
         )
         l_obj.save()
     return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))

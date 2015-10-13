@@ -589,6 +589,23 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         self.assertIn('60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f36d', paths)
         self.assertIn('test/path/normal', paths)
 
+    def test_slashes(self):
+        self._login_user()
+        post_data = {
+            'locations': json.dumps([
+                {
+                    'id': '',
+                    'path': '60\\40\\41\\604041e3-7aaa-4c8a-b25c-8d287cc0f374',
+                    'storage_id': '1ac9873a-8cf0-49e1-8a9a-7709930aa8af'
+                }
+            ])
+        }
+        response = self.client.post('{0}?id={1}'.format(self.request_url, 1), post_data)
+        self.assertJsonOk(response)
+        item = models.Item.objects.get(pk=1)
+        paths = [l.file_object.path for l in item.file_locations.all()]
+        self.assertIn('60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f374', paths)
+
 
 class ItemEditTestCase(LoginRequiredTestCase):
 
