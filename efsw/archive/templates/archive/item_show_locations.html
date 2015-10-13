@@ -57,11 +57,12 @@
                                             <span class="url">{{ url.format_win }}</span>
                                             <a href="#" title="Скопировать ссылку" class="fa fa-copy"></a>
                                         </li>
+                                    {% else %}
+                                        <li>
+                                            <span class="url">{{ url }}</span>
+                                            <a href="#" title="Скопировать ссылку" class="fa fa-copy"></a>
+                                        </li>
                                     {% endif %}
-                                    <li>
-                                        <span class="url">{{ url }}</span>
-                                        <a href="#" title="Скопировать ссылку" class="fa fa-copy"></a>
-                                    </li>
                                 {% endfor %}
                             </ul>
                         </td>

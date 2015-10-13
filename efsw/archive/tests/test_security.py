@@ -44,7 +44,7 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
             SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit_locations', args=(1, )),
                 anonymous=False,
-                perm_codename='change_item'
+                perm_codename='change_itemfilelocation'
             ),
             SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:edit_links', args=(1, )),

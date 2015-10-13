@@ -84,7 +84,7 @@ item_patterns = [
             # Тесты: url sec
             url(
                 r'^edit/locations/$',
-                permission_required('archive.change_item')(views.item_edit_locations),
+                permission_required('archive.change_itemfilelocation')(views.item_edit_locations),
                 name='edit_locations'
             ),
             # items/12/edit/links/ Редактирование существующего элемента - связи (GET)
