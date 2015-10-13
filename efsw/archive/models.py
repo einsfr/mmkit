@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.core import urlresolvers
 from django.contrib.auth.models import User
@@ -96,10 +98,10 @@ class ItemFileLocation(models.Model):
     class Meta:
         app_label = 'archive'
         default_permissions = ('change', )
+        unique_together = (('file_object', 'item'), )
 
-    file_object = models.OneToOneField(
+    file_object = models.ForeignKey(
         common_models.FileStorageObject,
-        primary_key=True,
         related_name='+'
     )
 

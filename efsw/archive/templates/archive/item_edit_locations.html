@@ -13,7 +13,7 @@
                 view_model.init({
                     'locations': [{% for l in item.file_locations.all %}
                         {
-                            'id': '{{ l.file_object_id|escapejs }}',
+                            'id': '{{ l.id }}',
                             'path': '{{ l.file_object.path|escapejs }}',
                             'storage_id': '{{ l.file_object.storage_id|escapejs }}',
                             'storage_name': '{{ l.file_object.storage.name|escapejs }}'

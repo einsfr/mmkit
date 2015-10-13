@@ -570,7 +570,7 @@ class ItemUpdateLocationsJsonTestCase(LoginRequiredTestCase, JsonResponseTestCas
         post_data = {
             'locations': json.dumps([
                 {
-                    'id': '604041e3-7aaa-4c8a-b25c-8d287cc0f36d',
+                    'id': '1',
                     'path': '60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f36d',
                     'storage_id': '1ac9873a-8cf0-49e1-8a9a-7709930aa8af'
                 },
