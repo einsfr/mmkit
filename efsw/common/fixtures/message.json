@@ -1,0 +1,16 @@
+[
+  {
+    "model": "common.Message",
+    "pk": "cac07ef7-8b89-4b9f-8bdc-91625ddc36bd",
+    "fields": {
+      "content": "Как дела?",
+      "sender": 1,
+      "receiver": 2,
+      "sended": "2015-10-13T12:24:52+03:00",
+      "readed": "2015-10-13T12:25:23+03:00",
+      "important": false,
+      "postponed": false,
+      "msg_class": "usr"
+    }
+  }
+]

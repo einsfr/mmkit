@@ -1,0 +1,74 @@
+[
+  {
+    "fields": {
+      "is_superuser": true,
+      "date_joined": "2015-03-21T12:43:40.678Z",
+      "user_permissions": [],
+      "is_staff": true,
+      "groups": [],
+      "is_active": true,
+      "username": "admin",
+      "password": "pbkdf2_sha256$20000$TmUIUt7N3PBt$OXKu+XiOPgyO34kB7zibkkHSANRwAxa+kOnKoodeHdQ=",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "last_login": "2015-10-08T06:30:21.221Z"
+    },
+    "model": "auth.user",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "is_superuser": false,
+      "date_joined": "2015-10-13T18:41:38Z",
+      "user_permissions": [],
+      "is_staff": false,
+      "groups": [],
+      "is_active": true,
+      "username": "i.ivanov",
+      "password": "pbkdf2_sha256$20000$amAn7iCDE37u$BcIloRaEjwN+1I7EzKlfgFu+IelS/jxdfZBKg40ZVho=",
+      "first_name": "\u0418\u0432\u0430\u043d",
+      "last_name": "\u0418\u0432\u0430\u043d\u043e\u0432",
+      "email": "i.ivanov@example.com",
+      "last_login": null
+    },
+    "model": "auth.user",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "is_superuser": false,
+      "date_joined": "2015-10-13T18:42:19Z",
+      "user_permissions": [],
+      "is_staff": false,
+      "groups": [],
+      "is_active": true,
+      "username": "p.petrov",
+      "password": "pbkdf2_sha256$20000$7DUpdgvHubK9$xUQSTPlyrfFk2E+2mB4zsKLVnr5QepQqT36Si0YZHVQ=",
+      "first_name": "\u041f\u0451\u0442\u0440",
+      "last_name": "",
+      "email": "",
+      "last_login": null
+    },
+    "model": "auth.user",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "is_superuser": false,
+      "date_joined": "2015-10-13T18:42:40Z",
+      "user_permissions": [],
+      "is_staff": false,
+      "groups": [],
+      "is_active": true,
+      "username": "s.sidorov",
+      "password": "pbkdf2_sha256$20000$Xv0UlJFprjLg$CkmC22Moxee/BVN0W0NjO7P+4xB7HrhuIt2xAyY/vJk=",
+      "first_name": "",
+      "last_name": "\u0421\u0438\u0434\u043e\u0440\u043e\u0432",
+      "email": "s.sidorov@example.com",
+      "last_login": null
+    },
+    "model": "auth.user",
+    "pk": 4
+  }
+]
