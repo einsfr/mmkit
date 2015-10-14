@@ -70,5 +70,23 @@
     },
     "model": "auth.user",
     "pk": 4
+  },
+  {
+    "fields": {
+      "last_name": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c",
+      "username": "non.active",
+      "date_joined": "2015-10-14T05:38:55Z",
+      "user_permissions": [],
+      "is_active": false,
+      "groups": [],
+      "email": "",
+      "last_login": null,
+      "password": "pbkdf2_sha256$20000$lZzTcAb1qHUR$VLAFOxMIzk4fHS9WxRE3egt+DJ0TXlOFIe7RAQeZVPg=",
+      "is_staff": false,
+      "is_superuser": false,
+      "first_name": "\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0439"
+    },
+    "model": "auth.user",
+    "pk": 5
   }
 ]

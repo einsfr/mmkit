@@ -21,17 +21,17 @@ msg_patterns = [
     )
 ]
 
-dialog_patterns = [
-    # dialogs/list/
+conv_patterns = [
+    # conversations/list/
     # Тесты:
     url(
         r'^list/$',
-        login_required()(views.dialog_list),
+        login_required()(views.conversation_list),
         name='list'
     )
 ]
 
 urlpatterns = [
     url(r'^messages/', include((msg_patterns, 'message', 'message'))),
-    url(r'^dialogs/', include((dialog_patterns, 'dialog', 'dialog')))
+    url(r'^conversations/', include((conv_patterns, 'conversation', 'conversation')))
 ]

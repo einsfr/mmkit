@@ -29,7 +29,7 @@ class MessageCreateForm(forms.Form):
     )
 
     receiver = UserModelMultipleChoiceField(
-        queryset=User.objects.order_by('first_name', 'last_name').all(),
+        queryset=User.objects.filter(is_active=True).order_by('first_name', 'last_name'),
         label='получатели',
         required=True,
         widget=widgets.SelectMultiple(attrs={
