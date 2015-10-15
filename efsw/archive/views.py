@@ -5,6 +5,7 @@ from django import shortcuts
 from django.views.decorators import http
 from django.conf import settings
 from django.core import urlresolvers
+from django.contrib.auth.decorators import permission_required
 
 from efsw.archive import models, forms, errors
 from efsw.common.search import elastic
@@ -130,6 +131,7 @@ def item_list(request, page='1'):
 
 
 @http.require_GET
+@permission_required('archive.add_item')
 def item_new(request):
     form = forms.ItemCreateForm()
     return shortcuts.render(request, 'archive/item_new.html', {'form': form})
@@ -137,6 +139,7 @@ def item_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.add_item', raise_exception=True)
 def item_create_json(request):
     form = forms.ItemCreateForm(request.POST)
     if form.is_valid():
@@ -202,6 +205,7 @@ LINK_TYPE_INCLUDES = 2
 
 @require_ajax
 @http.require_GET
+@permission_required('archive.change_item', raise_exception=True)
 def item_check_links_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+', include_id=r'\d+', type=r'\d+')
     if type(p_result) != dict:
@@ -232,6 +236,7 @@ def item_check_links_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.change_item', raise_exception=True)
 def item_update_links_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
     if type(p_result) != dict:
@@ -290,6 +295,7 @@ def item_update_links_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.change_itemfilelocation', raise_exception=True)
 def item_update_locations_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
     if type(p_result) != dict:
@@ -339,11 +345,13 @@ def item_update_locations_json(request):
 
 
 @http.require_GET
+@permission_required('archive.change_item')
 def item_edit(request, item_id):
     return item_edit_properties(request, item_id)
 
 
 @http.require_GET
+@permission_required('archive.change_item')
 def item_edit_properties(request, item_id):
     item = shortcuts.get_object_or_404(models.Item, pk=item_id)
     form = forms.ItemUpdatePropertiesForm(instance=item)
@@ -354,6 +362,7 @@ def item_edit_properties(request, item_id):
 
 
 @http.require_GET
+@permission_required('archive.change_itemfilelocation')
 def item_edit_locations(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.prefetch_related(
@@ -368,6 +377,7 @@ def item_edit_locations(request, item_id):
 
 
 @http.require_GET
+@permission_required('archive.change_item')
 def item_edit_links(request, item_id):
     item = shortcuts.get_object_or_404(
         models.Item.objects.prefetch_related('includes', 'included_in'),
@@ -380,6 +390,7 @@ def item_edit_links(request, item_id):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.change_item', raise_exception=True)
 def item_update_properties_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
     if type(p_result) != dict:
@@ -410,6 +421,7 @@ def category_list(request, page='1'):
 
 
 @http.require_GET
+@permission_required('archive.add_itemcategory')
 def category_new(request):
     form = forms.ItemCategoryForm()
     return shortcuts.render(request, 'archive/category_new.html', {'form': form})
@@ -417,6 +429,7 @@ def category_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.add_itemcategory', raise_exception=True)
 def category_create_json(request):
     form = forms.ItemCategoryForm(request.POST)
     if form.is_valid():
@@ -438,6 +451,7 @@ def category_show_items(request, category_id, page='1'):
 
 
 @http.require_GET
+@permission_required('archive.change_itemcategory')
 def category_edit(request, category_id):
     cat = shortcuts.get_object_or_404(models.ItemCategory, pk=category_id)
     form = forms.ItemCategoryForm(instance=cat)
@@ -449,6 +463,7 @@ def category_edit(request, category_id):
 
 @require_ajax
 @http.require_POST
+@permission_required('archive.change_itemcategory', raise_exception=True)
 def category_update_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id=r'\d+')
     if type(p_result) != dict:

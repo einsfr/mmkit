@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-from django.contrib.auth.decorators import permission_required
 
 from efsw.archive import views
 
@@ -24,7 +23,7 @@ item_patterns = [
     # Тесты: url sec
     url(
         r'^new/$',
-        permission_required('archive.add_item')(views.item_new),
+        views.item_new,
         name='new'
     ),
     # items/12/...
@@ -70,28 +69,28 @@ item_patterns = [
             # Тесты: url sec
             url(
                 r'^edit/$',
-                permission_required('archive.change_item')(views.item_edit),
+                views.item_edit,
                 name='edit'
             ),
             # items/12/edit/properties/ Редактирование существующего элемента - свойства (GET)
             # Тесты: url sec
             url(
                 r'^edit/properties/$',
-                permission_required('archive.change_item')(views.item_edit_properties),
+                views.item_edit_properties,
                 name='edit_properties'
             ),
             # items/12/edit/locations/ Редактирование существующего элемента - расположение (GET)
             # Тесты: url sec
             url(
                 r'^edit/locations/$',
-                permission_required('archive.change_itemfilelocation')(views.item_edit_locations),
+                views.item_edit_locations,
                 name='edit_locations'
             ),
             # items/12/edit/links/ Редактирование существующего элемента - связи (GET)
             # Тесты: url sec
             url(
                 r'^edit/links/$',
-                permission_required('archive.change_item')(views.item_edit_links),
+                views.item_edit_links,
                 name='edit_links'
             ),
         ])
@@ -108,28 +107,28 @@ item_patterns = [
     # Тесты: url sec
     url(
         r'^update/links/json/$',
-        permission_required('archive.change_item')(views.item_update_links_json),
+        views.item_update_links_json,
         name='update_links_json'
     ),
     # items/update/locations/json/?id=12 Положение этого элемента в хранилищах - обновление (JSON, POST)
     # Тесты: url sec
     url(
         r'^update/locations/json/$',
-        permission_required('archive.change_itemfilelocation')(views.item_update_locations_json),
+        views.item_update_locations_json,
         name='update_locations_json'
     ),
     # items/create/json/ Добавление нового элемента - операция с БД (POST)
     # Тесты: url sec
     url(
         r'^create/json/$',
-        permission_required('archive.add_item')(views.item_create_json),
+        views.item_create_json,
         name='create_json'
     ),
     # items/update/properties/json/ Обновление существующего элемента (POST)
     # Тесты: url sec
     url(
         r'^update/properties/json/$',
-        permission_required('archive.change_item')(views.item_update_properties_json),
+        views.item_update_properties_json,
         name='update_properties_json'
     ),
 ]
@@ -154,7 +153,7 @@ category_patterns = [
     # Тесты: url sec
     url(
         r'^new/$',
-        permission_required('archive.add_itemcategory')(views.category_new),
+        views.category_new,
         name='new'
     ),
     # categories/3/...
@@ -179,7 +178,7 @@ category_patterns = [
             # Тесты: url sec
             url(
                 r'^edit/$',
-                permission_required('archive.change_itemcategory')(views.category_edit),
+                views.category_edit,
                 name='edit'
             ),
         ])
@@ -189,14 +188,14 @@ category_patterns = [
     # Тесты: url sec
     url(
         r'^create/json/$',
-        permission_required('archive.add_itemcategory')(views.category_create_json),
+        views.category_create_json,
         name='create_json'
     ),
     # categories/update/json/?id=3 Редактирование существующей категории - действие (POST)
     # Тесты: url sec
     url(
         r'^update/json/$',
-        permission_required('archive.change_itemcategory')(views.category_update_json),
+        views.category_update_json,
         name='update_json'
     ),
 ]

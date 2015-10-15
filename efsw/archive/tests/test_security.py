@@ -54,7 +54,11 @@ class ArchiveSecurityTestCase(AbstractSecurityTestCase):
 
             # ------------------------- Item JSON -------------------------
 
-            SecurityTestConditions(urlresolvers.reverse('efsw.archive:item:check_links_json')),
+            SecurityTestConditions(
+                urlresolvers.reverse('efsw.archive:item:check_links_json'),
+                anonymous=False,
+                perm_codename='change_item'
+            ),
             SecurityTestConditions(
                 urlresolvers.reverse('efsw.archive:item:update_links_json'),
                 anonymous=False,
