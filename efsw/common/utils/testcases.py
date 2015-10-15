@@ -3,7 +3,7 @@ import json
 from django.test import TestCase
 from django.core import urlresolvers
 from django.contrib.auth.models import User, Permission
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 
 from efsw.common.http.response import JsonWithStatusResponse
 
@@ -46,7 +46,7 @@ class SecurityTestConditions:
         self.anonymous = anonymous
         self.method = method
         self.perm_codename = perm_codename
-        self.status_codes = status_codes if status_codes is not None else [200, 302]
+        self.status_codes = status_codes if status_codes is not None else [200, 302, 403]
 
 
 class AbstractSecurityTestCase(TestCase):
@@ -65,7 +65,9 @@ class AbstractSecurityTestCase(TestCase):
         User.objects.filter(id__in=users_to_remove).delete()
 
     def assertNotLoginRequired(self, response, condition):
-        if isinstance(response, HttpResponseRedirect):
+        if isinstance(response, HttpResponseForbidden):
+            raise AssertionError('Access denied.')
+        elif isinstance(response, HttpResponseRedirect):
             self.assertNotEqual(self._get_login_path().format(condition.url), response.url)
         else:
             redirect_chain = getattr(response, 'redirect_chain', None)
@@ -73,7 +75,9 @@ class AbstractSecurityTestCase(TestCase):
                 self.assertNotEqual(self._get_login_path().format(condition.url), redirect_chain[0][0])
 
     def assertLoginRequired(self, response, condition):
-        if isinstance(response, HttpResponseRedirect):
+        if isinstance(response, HttpResponseForbidden):
+            return
+        elif isinstance(response, HttpResponseRedirect):
             self.assertEqual(self._get_login_path().format(condition.url), response.url)
         else:
             redirect_chain = getattr(response, 'redirect_chain', None)

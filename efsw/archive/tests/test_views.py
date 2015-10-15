@@ -304,7 +304,7 @@ class ItemShowLogTestCase(TestCase):
         self.assertContains(response, 'Описание элемента - Журнал')
 
 
-class ItemCheckLinksJsonTestCase(TestCase):
+class ItemCheckLinksJsonTestCase(LoginRequiredTestCase):
 
     fixtures = ['item.json', 'itemcategory.json']
 
@@ -313,6 +313,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.request_url = urlresolvers.reverse('efsw.archive:item:check_links_json')
 
     def test_wrong_type(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}'.format(self.request_url, 1, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -330,6 +331,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('ITEM_LINK_TYPE_UNKNOWN', json_content['status_ext'])
 
     def test_include_self(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 4, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -337,6 +339,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('ITEM_LINK_SELF_SELF', json_content['status_ext'])
 
     def test_include_non_int(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 'non-int', 3, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -349,6 +352,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('UNEXPECTED_REQUEST_PARAMETER_VALUE', json_content['status_ext'])
 
     def test_id_not_set(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&type={2}'.format(self.request_url, 1, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -361,6 +365,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('REQUIRED_REQUEST_PARAMETER_IS_MISSING', json_content['status_ext'])
 
     def test_nonexist_item(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 1000000, 8, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -368,6 +373,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_nonexist_include(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 1000000, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())
@@ -375,6 +381,7 @@ class ItemCheckLinksJsonTestCase(TestCase):
         self.assertEqual('ITEM_NOT_FOUND', json_content['status_ext'])
 
     def test_normal(self):
+        self._login_user()
         response = self.client.get('{0}?id={1}&include_id={2}&type={3}'.format(self.request_url, 4, 8, 2))
         self.assertIsInstance(response, JsonWithStatusResponse)
         json_content = json.loads(response.content.decode())

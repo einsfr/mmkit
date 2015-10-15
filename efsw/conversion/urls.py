@@ -1,5 +1,4 @@
 from django.conf.urls import include, url
-from django.contrib.auth.decorators import permission_required
 
 from efsw.conversion import views
 
@@ -43,7 +42,7 @@ task_patterns = [
     # Тесты: sec url
     url(
         r'^new/$',
-        permission_required('conversion.add_conversiontask')(views.task_new),
+        views.task_new,
         name='new'
     ),
     # tasks/e0593092-fbc5-4b20-99f4-677f8954220f/...
@@ -63,7 +62,7 @@ task_patterns = [
     # Тесты: sec url
     url(
         r'^create/json/$',
-        permission_required('conversion.add_conversiontask')(views.task_create_json),
+        views.task_create_json,
         name='create_json'
     ),
 ]
@@ -87,7 +86,7 @@ profile_patterns = [
     # Тесты: sec url
     url(
         r'^new/$',
-        permission_required('conversion.add_conversionprofile')(views.profile_new),
+        views.profile_new,
         name='new'
     ),
     # profiles/2/...
@@ -114,7 +113,7 @@ profile_patterns = [
     # Тесты: sec url
     url(
         r'^create/json/$',
-        permission_required('conversion.add_conversionprofile')(views.profile_create_json),
+        views.profile_create_json,
         name='create_json'
     ),
 ]

@@ -9,6 +9,7 @@ from django.views.decorators import http
 from django.forms.formsets import formset_factory
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
+from django.contrib.auth.decorators import permission_required
 
 from efsw.conversion import models, forms, errors
 from efsw.conversion.converter import args
@@ -95,6 +96,7 @@ def task_list_enqueued(request):
 
 
 @http.require_GET
+@permission_required('conversion.add_conversiontask')
 def task_new(request):
     input_formset_class = formset_factory(forms.InputLocationForm, formset=forms.BaseIOFormSet,
                                           min_num=0, max_num=0, extra=0)
@@ -109,6 +111,7 @@ def task_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('conversion.add_conversiontask', raise_exception=True)
 def task_create_json(request):
     task_form = forms.TaskCreateForm(request.POST)
     if task_form.is_valid():
@@ -191,6 +194,7 @@ def profile_show(request, profile_id):
 
 
 @http.require_GET
+@permission_required('conversion.add_conversionprofile')
 def profile_new(request):
     input_formset_class = formset_factory(forms.IOForm, formset=forms.BaseIOFormSet,
                                           min_num=1, max_num=None, extra=0)
@@ -205,6 +209,7 @@ def profile_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('conversion.add_conversionprofile', raise_exception=True)
 def profile_create_json(request):
     profile_form = forms.ProfileCreateForm(request.POST)
     if profile_form.is_valid():
