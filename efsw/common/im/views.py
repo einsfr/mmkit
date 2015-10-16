@@ -7,7 +7,6 @@ from efsw.common.im import models
 from efsw.common.im import forms
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.http.decorators import require_ajax
-from efsw.common import errors as common_errors
 
 
 @http.require_GET
@@ -29,5 +28,5 @@ def message_create_json(request):
 @login_required()
 def conversation_list(request):
     user = request.user
-    if not user.is_authenticated():
-        raise RuntimeError(common_errors.USER_NOT_AUTHENTICATED)
+    conversations = models.Conversation.objects.filter(participants__contains=user.id).order_by('-updated')
+

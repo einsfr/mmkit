@@ -5,6 +5,51 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 
 
+class Conversation(models.Model):
+
+    class Meta:
+        app_label = 'common'
+        verbose_name = 'разговор'
+        verbose_name_plural = 'разговоры'
+
+    TYPE_DIALOG = 0
+
+    TYPES = {
+        TYPE_DIALOG: 'диалог'
+    }
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    updated = models.DateTimeField(
+        editable=False,
+        db_index=True,
+        verbose_name='последнее обновление'
+    )
+
+    participants = ArrayField(
+        models.PositiveIntegerField(),
+        db_index=True,
+        verbose_name='участники разговора'
+    )
+
+    conv_type = models.IntegerField(
+        editable=False,
+        choices=TYPES.items(),
+        verbose_name='тип разговора'
+    )
+
+    def save(self, *args, **kwargs):
+        p = self.participants
+        if type(self.participants) == 'list':
+            self.participants = [u.id for u in self.participants if isinstance(u, User)]
+        super().save(*args, **kwargs)
+        self.participants = p
+
+
 class Message(models.Model):
 
     class Meta:
@@ -63,45 +108,9 @@ class Message(models.Model):
         verbose_name='класс сообщения'
     )
 
-
-class Conversation(models.Model):
-
-    class Meta:
-        app_label = 'common'
-        verbose_name = 'разговор'
-        verbose_name_plural = 'разговоры'
-
-    TYPE_DIALOG = 0
-
-    TYPES = {
-        TYPE_DIALOG: 'диалог'
-    }
-
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-
-    updated = models.DateTimeField(
+    conversation = models.ForeignKey(
+        Conversation,
+        related_name='messages',
         editable=False,
-        verbose_name='последнее обновление'
+        verbose_name='разговор'
     )
-
-    participants = ArrayField(
-        models.PositiveIntegerField(),
-        verbose_name='участники разговора'
-    )
-
-    conv_type = models.IntegerField(
-        editable=False,
-        choices=TYPES.items(),
-        verbose_name='тип разговора'
-    )
-
-    def save(self, *args, **kwargs):
-        p = self.participants
-        if type(self.participants) == 'list':
-            self.participants = [u.id for u in self.participants if isinstance(u, User)]
-        super().save(*args, **kwargs)
-        self.participants = p
