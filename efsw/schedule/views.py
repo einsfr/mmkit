@@ -8,6 +8,7 @@ from django.views.decorators import http
 from django.http import Http404
 from django.db.models import Q
 from django.core import urlresolvers
+from django.contrib.auth.decorators import permission_required
 
 from efsw.schedule import models, forms, errors
 from efsw.common.http.response import JsonWithStatusResponse
@@ -203,11 +204,13 @@ def lineup_show_current(request, channel_id=None):
 
 
 @http.require_GET
+@permission_required('schedule.change_lineup')
 def lineup_edit(request, lineup_id):
     return lineup_edit_structure(request, lineup_id)
 
 
 @http.require_GET
+@permission_required('schedule.change_lineup')
 def lineup_edit_properties(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/lineup_edit_properties.html', {
@@ -217,6 +220,7 @@ def lineup_edit_properties(request, lineup_id):
 
 
 @http.require_GET
+@permission_required('schedule.change_lineup')
 def lineup_edit_structure(request, lineup_id):
     lineup = shortcuts.get_object_or_404(models.Lineup, pk=lineup_id)
     return shortcuts.render(request, 'schedule/lineup_edit_structure.html', {
@@ -227,6 +231,7 @@ def lineup_edit_structure(request, lineup_id):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_lineup')
 def lineup_update_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -247,6 +252,7 @@ def lineup_update_json(request):
 
 
 @http.require_GET
+@permission_required('schedule.add_lineup')
 def lineup_new(request):
     return shortcuts.render(request, 'schedule/lineup_new.html', {
         'form': forms.LineupCreateForm()
@@ -255,6 +261,7 @@ def lineup_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.add_lineup', raise_exception=True)
 def lineup_create_json(request):
     form = forms.LineupCreateForm(request.POST)
     if form.is_valid():
@@ -275,6 +282,7 @@ def lineup_create_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.add_lineup', raise_exception=True)
 def lineup_copy_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -305,6 +313,7 @@ def lineup_copy_json(request):
 
 @require_ajax
 @http.require_GET
+@permission_required('schedule.add_lineup', raise_exception=True)
 def lineup_copy_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_copy_modal.html', {
         'form': forms.LineupCopyForm()
@@ -313,6 +322,7 @@ def lineup_copy_part_modal(request):
 
 @require_ajax
 @http.require_GET
+@permission_required('schedule.change_lineup', raise_exception=True)
 def lineup_activate_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_activate_modal.html', {
         'form': forms.LineupActivateForm()
@@ -321,6 +331,7 @@ def lineup_activate_part_modal(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_lineup', raise_exception=True)
 def lineup_activate_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -348,12 +359,14 @@ def lineup_activate_json(request):
 
 @require_ajax
 @http.require_GET
+@permission_required('schedule.change_lineup', raise_exception=True)
 def lineup_make_draft_part_modal(request):
     return shortcuts.render(request, 'schedule/_lineup_make_draft_modal.html')
 
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_lineup', raise_exception=True)
 def lineup_make_draft_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -404,6 +417,7 @@ def program_list(request, page=1):
 
 
 @http.require_GET
+@permission_required('schedule.add_program')
 def program_new(request):
     form = forms.ProgramCreateForm()
     return shortcuts.render(request, 'schedule/program_new.html', {'form': form})
@@ -411,6 +425,7 @@ def program_new(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.add_program', raise_exception=True)
 def program_create_json(request):
     form = forms.ProgramCreateForm(request.POST)
     if form.is_valid():
@@ -493,6 +508,7 @@ def pp_show_json(request):
 
 @require_ajax
 @http.require_GET
+@permission_required('schedule.change_programposition', raise_exception=True)
 def pp_edit_part_modal(request):
     return shortcuts.render(request, 'schedule/_pp_edit_modal.html', {
         'pp_edit_form': forms.ProgramPositionEditForm()
@@ -501,6 +517,7 @@ def pp_edit_part_modal(request):
 
 @require_ajax
 @http.require_GET
+@permission_required('schedule.change_programposition', raise_exception=True)
 def pp_edit_json(request):
 
     def format_pp_dict(pp):
@@ -535,6 +552,7 @@ def pp_edit_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_programposition', raise_exception=True)
 def pp_delete_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -564,6 +582,7 @@ def pp_delete_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_programposition', raise_exception=True)
 def pp_update_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -686,6 +705,7 @@ def channel_list(request, page=1):
 
 
 @http.require_GET
+@permission_required('schedule.add_channel')
 def channel_new(request):
     return shortcuts.render(request, 'schedule/channel_new.html', {
         'form': forms.ChannelCreateForm()
@@ -702,6 +722,7 @@ def channel_show_lineups(request, channel_id, page=1):
 
 
 @http.require_GET
+@permission_required('schedule.change_channel')
 def channel_edit(request, channel_id):
     channel = shortcuts.get_object_or_404(models.Channel, pk=channel_id)
     form = forms.ChannelCreateForm(instance=channel)
@@ -713,6 +734,7 @@ def channel_edit(request, channel_id):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.add_channel', raise_exception=True)
 def channel_create_json(request):
     form = forms.ChannelCreateForm(request.POST)
     if form.is_valid():
@@ -724,6 +746,7 @@ def channel_create_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_channel', raise_exception=True)
 def channel_update_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -743,6 +766,7 @@ def channel_update_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_channel', raise_exception=True)
 def channel_activate_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
@@ -761,6 +785,7 @@ def channel_activate_json(request):
 
 @require_ajax
 @http.require_POST
+@permission_required('schedule.change_channel', raise_exception=True)
 def channel_deactivate_json(request):
     p_result = params.parse_params_or_get_json_error(request.GET, id='\d+')
     if type(p_result) != dict:
