@@ -11,6 +11,7 @@ class Conversation(models.Model):
         app_label = 'common'
         verbose_name = 'разговор'
         verbose_name_plural = 'разговоры'
+        default_permissions = []
 
     TYPE_DIALOG = 0
 
@@ -50,6 +51,11 @@ class Message(models.Model):
         app_label = 'common'
         verbose_name = 'сообщение'
         verbose_name_plural = 'сообщения'
+        default_permissions = []
+        permissions = (
+            ('send_message', 'Can send messages'),
+            ('receive_message', 'Can receive messages'),
+        )
 
     id = models.UUIDField(
         primary_key=True,
@@ -76,13 +82,13 @@ class Message(models.Model):
         verbose_name='получатель'
     )
 
-    sended = models.DateTimeField(
+    sent = models.DateTimeField(
         auto_now_add=True,
         editable=False,
         verbose_name='время отправления'
     )
 
-    readed = models.DateTimeField(
+    read = models.DateTimeField(
         editable=False,
         null=True,
         verbose_name='время прочтения'
@@ -108,10 +114,11 @@ class Message(models.Model):
     )
 
 
-class ConversationLastMessageCache(models.Model):
+class ConversationLastMessage(models.Model):
 
     class Meta:
         app_label = 'common'
+        default_permissions = []
 
     conversation = models.OneToOneField(
         Conversation,

@@ -24,6 +24,23 @@ class UnexpectedParameterValueException(Exception):
 
 
 def parse_params(params_dict: dict, **params_criteria):
+    """
+    Function for parsing request parameters in request.GET or request.POST dictionaries.
+    :param params_dict: Request parameters dictionary
+    :param params_criteria: Parsing rules
+    :raise RequiredParameterIsMissingException: If a required parameter is missing
+    :raise UnexpectedParameterValueException: If a parameter has invalid value
+
+    The parsing rules are passed via keyword arguments - request parameter as an argument's name and a parsing rule
+    as its value. A value could be:
+
+        - *None* is used for optional parameters. Default value for absent parameters: '' (an empty string).
+        - *String* is used as a regular expression for required parameters.
+        - *Callable* is used for complex rules. If parameter is missing - default value ('') will be used. If returned
+          value is False - exception will be raised; if True - parameter's value will be passed to the result dict.
+
+    Values in the result dictionary are always strings, as in request.GET and request.POST dictionaries.
+    """
     result = {}
     for n, c in params_criteria.items():
         if c is None:
@@ -41,7 +58,7 @@ def parse_params(params_dict: dict, **params_criteria):
             result[n] = params_dict[n]
         elif callable(c):
             # Значит, там какая-то функция, True - значение параметра верное, False - нет
-            value = params_dict.get(n, None)
+            value = params_dict.get(n, '')
             if c(value):
                 result[n] = value
             else:
