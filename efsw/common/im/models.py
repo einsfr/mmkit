@@ -24,14 +24,8 @@ class Conversation(models.Model):
         editable=False
     )
 
-    updated = models.DateTimeField(
-        editable=False,
-        db_index=True,
-        verbose_name='последнее обновление'
-    )
-
     participants = ArrayField(
-        models.PositiveIntegerField(),
+        models.IntegerField(),
         db_index=True,
         verbose_name='участники разговора'
     )
@@ -72,7 +66,6 @@ class Message(models.Model):
         null=True,
         related_name='+',
         editable=False,
-        db_index=True,
         verbose_name='отправитель'
     )
 
@@ -80,7 +73,6 @@ class Message(models.Model):
         User,
         related_name='+',
         editable=False,
-        db_index=True,
         verbose_name='получатель'
     )
 
@@ -113,4 +105,23 @@ class Message(models.Model):
         related_name='messages',
         editable=False,
         verbose_name='разговор'
+    )
+
+
+class ConversationLastMessageCache(models.Model):
+
+    class Meta:
+        app_label = 'common'
+
+    conversation = models.OneToOneField(
+        Conversation,
+        primary_key=True,
+        editable=False,
+        related_name='last_message'
+    )
+
+    message = models.OneToOneField(
+        Message,
+        editable=False,
+        related_name='+'
     )

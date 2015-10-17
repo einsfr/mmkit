@@ -9,7 +9,8 @@
       "sended": "2015-10-13T12:24:52+03:00",
       "readed": "2015-10-13T12:25:23+03:00",
       "important": false,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "335ad4f9-fe0d-4808-a052-a6687ee6ede9"
     }
   },
   {
@@ -22,7 +23,8 @@
       "sended": "2015-10-13T12:25:50+03:00",
       "readed": "2015-10-13T12:26:23+03:00",
       "important": false,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "335ad4f9-fe0d-4808-a052-a6687ee6ede9"
     }
   },
   {
@@ -35,7 +37,8 @@
       "sended": "2015-10-13T12:26:40+03:00",
       "readed": "2015-10-13T12:26:53+03:00",
       "important": true,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "335ad4f9-fe0d-4808-a052-a6687ee6ede9"
     }
   },
   {
@@ -48,7 +51,8 @@
       "sended": "2015-10-13T12:27:00+03:00",
       "readed": "2015-10-13T12:27:13+03:00",
       "important": false,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "335ad4f9-fe0d-4808-a052-a6687ee6ede9"
     }
   },
   {
@@ -61,7 +65,8 @@
       "sended": "2015-10-13T12:25:00+03:00",
       "readed": null,
       "important": false,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "0fa79ac2-b4e3-4947-80cd-1ec6d17066eb"
     }
   },
   {
@@ -74,7 +79,8 @@
       "sended": "2015-10-13T13:57:00+03:00",
       "readed": null,
       "important": true,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "855aef25-4d9b-42d9-a294-3e0640c34bc5"
     }
   },
   {
@@ -87,7 +93,8 @@
       "sended": "2015-10-13T14:07:00+03:00",
       "readed": null,
       "important": true,
-      "msg_class": "usr"
+      "msg_class": "usr",
+      "conversation": "ebdabe52-a81c-41dd-a0b3-51639f96a4db"
     }
   }
 ]

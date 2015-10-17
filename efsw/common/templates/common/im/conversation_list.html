@@ -1,0 +1,15 @@
+{% extends 'common/im/_app_base.html' %}
+
+{% block title %}{{ block.super }} - Разговоры{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+    <h2>Разговоры</h2>
+    {% for c in conversations %}
+        {{ c.id }}<br>
+    {% endfor %}
+{% endblock %}
