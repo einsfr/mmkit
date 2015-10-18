@@ -2,6 +2,7 @@ from django import shortcuts
 from django.conf import settings
 from django.views.decorators import http
 from django.contrib.auth.decorators import permission_required
+from django.utils import timezone
 
 from efsw.common.im import models
 from efsw.common.im import forms
@@ -29,9 +30,6 @@ def message_create_json(request):
 @permission_required('common.receive_message')
 def conversation_list(request):
     user = request.user
-    conversations = models.Conversation.objects.filter(
-        participants__contains=[user.id]
-    ).order_by('-last_message__message__sent').select_related('last_message__message')
     return shortcuts.render(request, 'common/im/conversation_list.html')
 
 
@@ -40,11 +38,14 @@ def conversation_list(request):
 @permission_required('common.receive_message', raise_exception=True)
 def conversation_list_json(request):
     user = request.user
-    parse_result = params.parse_params_or_get_json_error(
-        request.GET, last_update=r'(?:^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d*)?$)|(?:^$)'
-    )
-    if type(parse_result) != dict:
-        return parse_result
+    conversations = models.Conversation.objects.filter(
+        participants__contains=[user.id]
+    ).order_by('-last_message__message__sent').select_related('last_message__message')
+    newest_message_dt = max([c.last_message.message.sent for c in conversations])
+    im_update_channel = models.IMUpdateChannel(user=user, newest_message_dt=newest_message_dt,
+                                               last_time_used=timezone.now())
+    im_update_channel.save()
+    request.session['im_update_channel_id'] = im_update_channel.id
 
 
 @require_ajax

@@ -153,7 +153,12 @@ class IMUpdateChannel(models.Model):
         verbose_name='пользователь'
     )
 
-    last_update = models.DateTimeField(
+    newest_message_dt = models.DateTimeField(
         editable=False,
-        verbose_name='последнее обновление'
+        verbose_name='дата и время отправления самого нового сообщения'
+    )
+
+    last_time_used = models.DateTimeField(
+        editable=False,
+        verbose_name='дата и время последнего обращения к каналу'
     )
