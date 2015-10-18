@@ -132,3 +132,28 @@ class ConversationLastMessage(models.Model):
         editable=False,
         related_name='+'
     )
+
+
+class IMUpdateChannel(models.Model):
+
+    class Meta:
+        app_label = 'common'
+        default_permissions = []
+
+    id = models.UUIDField(
+        primary_key=True,
+        editable=False,
+        default=uuid.uuid4
+    )
+
+    user = models.ForeignKey(
+        User,
+        editable=False,
+        related_name='+',
+        verbose_name='пользователь'
+    )
+
+    last_update = models.DateTimeField(
+        editable=False,
+        verbose_name='последнее обновление'
+    )

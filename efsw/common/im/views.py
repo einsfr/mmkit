@@ -37,7 +37,7 @@ def conversation_list(request):
 
 @require_ajax
 @http.require_GET
-@permission_required('common.receive_message')
+@permission_required('common.receive_message', raise_exception=True)
 def conversation_list_json(request):
     user = request.user
     parse_result = params.parse_params_or_get_json_error(
@@ -45,3 +45,10 @@ def conversation_list_json(request):
     )
     if type(parse_result) != dict:
         return parse_result
+
+
+@require_ajax
+@http.require_GET
+@permission_required('common.receive_message', raise_exception=True)
+def conversation_list_updates_json(request):
+    pass
