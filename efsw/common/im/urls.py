@@ -27,6 +27,13 @@ conv_patterns = [
         r'^list/$',
         views.conversation_list,
         name='list'
+    ),
+    # conversations/list/json/
+    # Тесты:
+    url(
+        r'^list/json/$',
+        views.conversation_list_json,
+        name='list_json'
     )
 ]
 

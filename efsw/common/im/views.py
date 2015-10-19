@@ -33,19 +33,32 @@ def conversation_list(request):
     return shortcuts.render(request, 'common/im/conversation_list.html')
 
 
-@require_ajax
+def _prepare_conversation_for_json(conversation_dict):
+    return {
+        'id': str(conversation_dict['id']),
+        'last_message__message__content': conversation_dict['last_message__message__content'],
+        'last_message__message__sent': conversation_dict['last_message__message__sent'].isoformat()
+    }
+
+
+# @require_ajax
 @http.require_GET
 @permission_required('common.receive_message', raise_exception=True)
 def conversation_list_json(request):
     user = request.user
-    conversations = models.Conversation.objects.filter(
+    conversations = list(models.Conversation.objects.filter(
         participants__contains=[user.id]
-    ).order_by('-last_message__message__sent').select_related('last_message__message')
-    newest_message_dt = max([c.last_message.message.sent for c in conversations])
+    ).order_by('-last_message__message__sent').select_related(
+        'last_message__message', 'last_message__message__sender', 'last_message__message__receiver'
+    ).values(
+        'id', 'last_message__message__content', 'last_message__message__sent'
+    ))
+    newest_message_dt = max([c['last_message__message__sent'] for c in conversations])
     im_update_channel = models.IMUpdateChannel(user=user, newest_message_dt=newest_message_dt,
                                                last_time_used=timezone.now())
     im_update_channel.save()
-    request.session['im_update_channel_id'] = im_update_channel.id
+    request.session['im_update_channel_id'] = str(im_update_channel.id)
+    return JsonWithStatusResponse(list(map(_prepare_conversation_for_json, conversations)))
 
 
 @require_ajax
