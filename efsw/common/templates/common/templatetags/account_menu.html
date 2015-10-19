@@ -3,7 +3,7 @@
         {% if user.is_authenticated %}
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
-                    {{ user.get_username }} <span class="caret"></span>
+                    {{ user_repr }} <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                     <li>

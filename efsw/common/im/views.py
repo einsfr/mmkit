@@ -8,7 +8,6 @@ from efsw.common.im import models
 from efsw.common.im import forms
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.http.decorators import require_ajax
-from efsw.common.utils import params
 
 
 @http.require_GET
@@ -37,7 +36,10 @@ def _prepare_conversation_for_json(conversation_dict):
     return {
         'id': str(conversation_dict['id']),
         'last_message__message__content': conversation_dict['last_message__message__content'],
-        'last_message__message__sent': conversation_dict['last_message__message__sent'].isoformat()
+        'last_message__message__sent': timezone.localtime(conversation_dict['last_message__message__sent']).isoformat(),
+        'last_message__message__read': timezone.localtime(
+            conversation_dict['last_message__message__read']
+        ).isoformat() if conversation_dict['last_message__message__read'] is not None else None,
     }
 
 
@@ -51,7 +53,7 @@ def conversation_list_json(request):
     ).order_by('-last_message__message__sent').select_related(
         'last_message__message', 'last_message__message__sender', 'last_message__message__receiver'
     ).values(
-        'id', 'last_message__message__content', 'last_message__message__sent'
+        'id', 'last_message__message__content', 'last_message__message__sent', 'last_message__message__read'
     ))
     newest_message_dt = max([c['last_message__message__sent'] for c in conversations])
     im_update_channel = models.IMUpdateChannel(user=user, newest_message_dt=newest_message_dt,
