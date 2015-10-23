@@ -19,6 +19,10 @@ a.fa:hover, a.fa:active, a.fa:focus {
     cursor: pointer;
 }
 
+#lineup_table tbody td:hover {
+    text-decoration: underline;
+}
+
 #lineup_table tbody td.locked {
     background: #dddddd;
 }

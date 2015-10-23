@@ -1,26 +1,44 @@
 from django.test import TestCase
-from django.db import connection
+from django.db import connection, models
 
 from efsw.common.db.models.ordered_model import OrderedModel
 
 
 class SimpleOrderedModel(OrderedModel):
-    pass
+
+    class Meta:
+        app_label = 'common'
 
 
 class AnotherOrderedModel(OrderedModel):
-    pass
+
+    class Meta:
+        app_label = 'common'
+
+
+class DomainOrderedModel(OrderedModel):
+
+    class Meta:
+        app_label = 'common'
+
+    order_domain_field = 'domain'
+
+    domain = models.PositiveIntegerField()
 
 
 class OrderedModelTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         with connection.schema_editor() as schema_editor:
             schema_editor.create_model(SimpleOrderedModel())
+            schema_editor.create_model(DomainOrderedModel())
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with connection.schema_editor() as schema_editor:
             schema_editor.delete_model(SimpleOrderedModel())
+            schema_editor.delete_model(DomainOrderedModel())
 
     def assertObjectsValuesEqual(self, check_list):
         self.assertEqual(
@@ -28,19 +46,42 @@ class OrderedModelTestCase(TestCase):
             list(SimpleOrderedModel.objects.all().values_list('id', 'order'))
         )
 
+    def assertDomainObjectsValuesEqual(self, check_list):
+        self.assertEqual(
+            check_list,
+            list(DomainOrderedModel.objects.all().order_by('id').values_list('id', 'order'))
+        )
+
     def test_append(self):
         for i in range(0, 5):
             SimpleOrderedModel().save()
         self.assertObjectsValuesEqual([(1, 0), (2, 1), (3, 2), (4, 3), (5, 4), ])
 
+    def test_append_domain(self):
+        for i in range(0, 6):
+            DomainOrderedModel(domain=1 if i % 2 == 0 else 2).save()
+        self.assertDomainObjectsValuesEqual([(1, 0), (2, 0), (3, 1), (4, 1), (5, 2), (6, 2), ])
+
     def test_pk_not_set_empty_order_set(self):
         SimpleOrderedModel(order=5).save()
         self.assertObjectsValuesEqual([(1, 0), ])
+
+    def test_pk_not_set_empty_order_set_domain(self):
+        DomainOrderedModel(order=5, domain=1).save()
+        DomainOrderedModel(order=5, domain=2).save()
+        self.assertDomainObjectsValuesEqual([(1, 0), (2, 0)])
 
     def test_pk_not_set_order_exceeds(self):
         SimpleOrderedModel().save()
         SimpleOrderedModel(order=5).save()
         self.assertObjectsValuesEqual([(1, 0), (2, 1), ])
+
+    def test_pk_not_set_order_exceeds_domain(self):
+        DomainOrderedModel(domain=1).save()
+        DomainOrderedModel(order=5, domain=1).save()
+        DomainOrderedModel(domain=2).save()
+        DomainOrderedModel(order=5, domain=2).save()
+        self.assertDomainObjectsValuesEqual([(1, 0), (2, 1), (3, 0), (4, 1), ])
 
     def test_pk_not_set_insert(self):
         for i in range(0, 5):
@@ -49,6 +90,14 @@ class OrderedModelTestCase(TestCase):
         self.assertObjectsValuesEqual([(6, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
         SimpleOrderedModel(order=3).save()
         self.assertObjectsValuesEqual([(6, 0), (1, 1), (2, 2), (7, 3), (3, 4), (4, 5), (5, 6)])
+
+    def test_pk_not_set_insert_domain(self):
+        for i in range(0, 6):
+            DomainOrderedModel(domain=1 if i % 2 == 0 else 2).save()
+        DomainOrderedModel(order=0, domain=1).save()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (3, 1), (4, 2), (5, 2), (6, 3), (7, 0)])
+        SimpleOrderedModel(order=1, domain=2).save()
+        self.assertObjectsValuesEqual([(1, 0), (2, 1), (3, 2), (4, 2), (5, 3), (6, 3), (7, 0), (8, 1)])
 
     def test_pk_not_set_insert_below_min(self):
         for i in range(0, 5):

@@ -1,10 +1,12 @@
 import datetime
+import uuid
 
 from django.db import models
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
 
 from efsw.common.db.models.fields.color import ColorField
+from efsw.common.db.models.ordered_model import OrderedModel
 
 
 class Channel(models.Model):
@@ -263,3 +265,63 @@ class ProgramPosition(models.Model):
                 raise ValidationError(self.ERR_TEXT_END_BEFORE_START)
             if self.start_time == self.end_time and (self.start_time != lineup.start_time):
                 raise ValidationError(self.ERR_TEXT_START_END_EQUAL_24)
+
+
+class DayLineup(models.Model):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'программа на день'
+        verbose_name_plural = 'программы на день'
+
+    id = models.UUIDField(
+        primary_key=True,
+        editable=False,
+        default=uuid.uuid4
+    )
+
+    day = models.DateField(
+        verbose_name='дата'
+    )
+
+    start_time = models.TimeField(
+        verbose_name='время начала эфирных суток'
+    )
+
+    end_time = models.TimeField(
+        verbose_name='время окончания эфирных суток'
+    )
+
+    channel = models.ForeignKey(
+        Channel,
+        related_name='+',
+        verbose_name='канал',
+    )
+
+
+class DayLineupTemplate(models.Model):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'шаблон программы на день'
+        verbose_name_plural = 'шаблоны программ на день'
+
+    name = models.CharField(
+        verbose_name='имя шаблона',
+        unique=True,
+        max_length=255
+    )
+
+    start_time = models.TimeField(
+        verbose_name='время начала эфирных суток'
+    )
+
+    end_time = models.TimeField(
+        verbose_name='время окончания эфирных суток'
+    )
+
+    channel = models.ForeignKey(
+        Channel,
+        related_name='+',
+        verbose_name='канал',
+    )
