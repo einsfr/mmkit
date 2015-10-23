@@ -124,8 +124,8 @@ class OrderedModel(models.Model):
         swap_with.save(skip_reorder=True)
 
     @classmethod
-    def order_check(cls, order_domain_field=None):
-        if order_domain_field is None:
+    def order_check(cls):
+        if not cls.order_domain_field:
             order_list = list(cls.objects.order_by('order', '-id').values_list('id', 'order'))
             if not order_list or len(order_list) == 1:
                 return
@@ -134,12 +134,12 @@ class OrderedModel(models.Model):
                     cls.objects.filter(pk=v[0]).update(order=k + cls.MIN_ORDER_VALUE)
         else:
             order_domain_values = list(
-                cls.objects.order_by(order_domain_field).distinct(order_domain_field).values_list(
-                    order_domain_field, flat=True)
+                cls.objects.order_by(cls.order_domain_field).distinct(cls.order_domain_field).values_list(
+                    cls.order_domain_field, flat=True)
             )
             for odv in order_domain_values:
                 order_list = list(
-                    cls.objects.filter((order_domain_field, odv)).order_by('order', '-id').values_list('id', 'order')
+                    cls.objects.filter((cls.order_domain_field, odv)).order_by('order', '-id').values_list('id', 'order')
                 )
                 if not order_list or len(order_list) == 1:
                     continue

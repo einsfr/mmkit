@@ -225,7 +225,7 @@ class OrderedModelTestCase(TestCase):
     def test_order_check_domain(self):
         disorder_list = [(1, 1), (1, 1), (1, 2), (2, 2), (3, 1), (2, 1), (4, 1), (4, 1), (4, 2), (5, 1), (6, 2), (8, 2)]
         DomainOrderedModel.objects.bulk_create([DomainOrderedModel(order=o, domain=d) for o, d in disorder_list])
-        DomainOrderedModel.order_check(order_domain_field='domain')
+        DomainOrderedModel.order_check()
         self.assertEqual(
             list(DomainOrderedModel.objects.order_by('id').values_list('order', flat=True)),
             [1, 0, 0, 1, 3, 2, 5, 4, 2, 6, 3, 4]
