@@ -8,6 +8,7 @@ from efsw.common.im import models
 from efsw.common.im import forms
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.http.decorators import require_ajax
+from efsw.common.accounts.utils import format_username
 
 
 @http.require_GET
@@ -35,15 +36,22 @@ def conversation_list(request):
 def _prepare_conversation_for_json(conversation_dict):
     return {
         'id': str(conversation_dict['id']),
-        'last_message__message__content': conversation_dict['last_message__message__content'],
-        'last_message__message__sent': timezone.localtime(conversation_dict['last_message__message__sent']).isoformat(),
-        'last_message__message__read': timezone.localtime(
+        'type': conversation_dict['conv_type'],
+        'lm_content': conversation_dict['last_message__message__content'],
+        'lm_sent': timezone.localtime(conversation_dict['last_message__message__sent']).isoformat(),
+        'lm_read': timezone.localtime(
             conversation_dict['last_message__message__read']
         ).isoformat() if conversation_dict['last_message__message__read'] is not None else None,
+        'lm_sender_repr': format_username(
+            username=conversation_dict['last_message__message__sender__username'],
+            first_name=conversation_dict['last_message__message__sender__first_name'],
+            last_name=conversation_dict['last_message__message__sender__last_name']
+        ),
+        'lm_sender_is_active': conversation_dict['last_message__message__sender__is_active']
     }
 
 
-# @require_ajax
+@require_ajax
 @http.require_GET
 @permission_required('common.receive_message', raise_exception=True)
 def conversation_list_json(request):
@@ -51,9 +59,12 @@ def conversation_list_json(request):
     conversations = list(models.Conversation.objects.filter(
         participants__contains=[user.id]
     ).order_by('-last_message__message__sent').select_related(
-        'last_message__message', 'last_message__message__sender', 'last_message__message__receiver'
+        'last_message__message', 'last_message__message__sender'
     ).values(
-        'id', 'last_message__message__content', 'last_message__message__sent', 'last_message__message__read'
+        'id', 'conv_type', 'last_message__message__content', 'last_message__message__sent',
+        'last_message__message__read', 'last_message__message__sender__username',
+        'last_message__message__sender__first_name', 'last_message__message__sender__last_name',
+        'last_message__message__sender__is_active',
     ))
     newest_message_dt = max([c['last_message__message__sent'] for c in conversations])
     im_update_channel = models.IMUpdateChannel(user=user, newest_message_dt=newest_message_dt,
