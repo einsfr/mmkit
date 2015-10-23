@@ -25,9 +25,9 @@ class ParamsTestCase(TestCase):
 
     def test_callable(self):
         self.assertEqual(
-            {'a': 'abc123', 'b': None, 'c': '123'},
+            {'a': 'abc123', 'b': '', 'c': '123'},
             params.parse_params(
                 {'a': 'abc123', 'c': '123'},
-                a=lambda x: x == 'abc123', b=lambda x: x is None, c=lambda x: x is None or x == '123'
+                a=lambda x: x == 'abc123', b=lambda x: x == '', c=lambda x: x == '' or x == '123'
             )
         )
