@@ -267,7 +267,28 @@ class ProgramPosition(models.Model):
                 raise ValidationError(self.ERR_TEXT_START_END_EQUAL_24)
 
 
-class DayLineup(models.Model):
+class AbstractDayLineup(models.Model):
+
+    class Meta:
+        app_label = 'schedule'
+        abstract = True
+
+    start_time = models.TimeField(
+        verbose_name='время начала эфирных суток'
+    )
+
+    end_time = models.TimeField(
+        verbose_name='время окончания эфирных суток'
+    )
+
+    channel = models.ForeignKey(
+        Channel,
+        related_name='+',
+        verbose_name='канал',
+    )
+
+
+class DayLineup(AbstractDayLineup):
 
     class Meta:
         app_label = 'schedule'
@@ -284,22 +305,35 @@ class DayLineup(models.Model):
         verbose_name='дата'
     )
 
-    start_time = models.TimeField(
-        verbose_name='время начала эфирных суток'
+
+class AbstractDayLineupItem(OrderedModel):
+
+    class Meta:
+        app_label = 'schedule'
+        abstract = True
+
+    id = models.UUIDField(
+        primary_key=True,
+        editable=False,
+        default=uuid.uuid4
     )
 
-    end_time = models.TimeField(
-        verbose_name='время окончания эфирных суток'
+
+class DayLineupItem(AbstractDayLineupItem):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'элемент программы на день'
+        verbose_name_plural = 'элементы программы на день'
+
+    day_lineup = models.ForeignKey(
+        DayLineup,
+        related_name='items',
+        verbose_name='программа на день'
     )
 
-    channel = models.ForeignKey(
-        Channel,
-        related_name='+',
-        verbose_name='канал',
-    )
 
-
-class DayLineupTemplate(models.Model):
+class DayLineupTemplate(AbstractDayLineup):
 
     class Meta:
         app_label = 'schedule'
@@ -312,16 +346,16 @@ class DayLineupTemplate(models.Model):
         max_length=255
     )
 
-    start_time = models.TimeField(
-        verbose_name='время начала эфирных суток'
-    )
 
-    end_time = models.TimeField(
-        verbose_name='время окончания эфирных суток'
-    )
+class DayLineupTemplateItem(AbstractDayLineupItem):
 
-    channel = models.ForeignKey(
-        Channel,
-        related_name='+',
-        verbose_name='канал',
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'элемент шаблона программы на день'
+        verbose_name_plural = 'элементы шаблона программы на день'
+
+    day_lineup_template = models.ForeignKey(
+        DayLineupTemplate,
+        related_name='items',
+        verbose_name='шаблон программы на день'
     )
