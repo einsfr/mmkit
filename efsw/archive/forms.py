@@ -2,7 +2,7 @@ from django import forms
 from django.forms import widgets
 
 from efsw.archive import models
-from efsw.common import models as common_models
+from efsw.storage import models as storage_models
 
 from efsw.common.datetime.period import DatePeriod
 
@@ -51,7 +51,7 @@ class ItemUpdatePropertiesForm(forms.ModelForm):
 class ItemUpdateLocationsForm(forms.Form):
 
     storage = forms.ModelChoiceField(
-        queryset=common_models.FileStorage.objects.filter(allowed_usage__contains=['archive']),
+        queryset=storage_models.FileStorage.objects.filter(allowed_usage__contains=['archive']),
         label='Хранилище',
         empty_label=None,
         widget=widgets.Select(attrs={

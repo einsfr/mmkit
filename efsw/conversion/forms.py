@@ -4,8 +4,8 @@ from django.forms.formsets import BaseFormSet
 from django.core.exceptions import ValidationError
 
 from efsw.conversion import models
-from efsw.common.models import FileStorage
-from efsw.common.storage import errors
+from efsw.storage.models import FileStorage
+from efsw.storage import errors
 
 
 class TaskCreateForm(forms.Form):

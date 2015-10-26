@@ -1,0 +1,30 @@
+[
+  {
+    "model": "im.ConversationLastMessage",
+    "pk": "335ad4f9-fe0d-4808-a052-a6687ee6ede9",
+    "fields": {
+      "message": "bd99dd2c-37c7-4504-9f04-d6ab5aaf9340"
+    }
+  },
+  {
+    "model": "im.ConversationLastMessage",
+    "pk": "0fa79ac2-b4e3-4947-80cd-1ec6d17066eb",
+    "fields": {
+      "message": "b0b1973c-5d73-4fc6-b1cc-85951774d5e5"
+    }
+  },
+  {
+    "model": "im.ConversationLastMessage",
+    "pk": "855aef25-4d9b-42d9-a294-3e0640c34bc5",
+    "fields": {
+      "message": "7049b385-afbd-431a-bd32-28ab6e79ffcb"
+    }
+  },
+  {
+    "model": "im.ConversationLastMessage",
+    "pk": "ebdabe52-a81c-41dd-a0b3-51639f96a4db",
+    "fields": {
+      "message": "f356f0e7-d013-483e-80c9-1f5c3567b5e8"
+    }
+  }
+]

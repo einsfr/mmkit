@@ -13,7 +13,8 @@ from efsw.common.datetime import period
 from efsw.common.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.db import pagination
-from efsw.common import models as common_models, errors as common_errors
+from efsw.storage import models as storage_models
+from efsw.common import errors as common_errors
 from efsw.common.http.decorators import require_ajax
 from efsw.common.utils import params
 
@@ -317,7 +318,7 @@ def item_update_locations_json(request):
         return JsonWithStatusResponse.ok(urlresolvers.reverse('efsw.archive:item:edit_links', args=(item.id, )))
     storage_ids_list = [l['storage_id'] for l in locations]
     storage_ids = set(storage_ids_list)
-    storages = common_models.FileStorage.objects.filter(id__in=storage_ids)
+    storages = storage_models.FileStorage.objects.filter(id__in=storage_ids)
     if len(storage_ids) != len(storages):
         missing_ids = storage_ids - set(s.id for s in storages)
         return JsonWithStatusResponse.error(

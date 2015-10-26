@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 
 from efsw.conversion.converter.args import AbstractIOPathProvider
-from efsw.common.models import FileStorage
+from efsw.storage.models import FileStorage
 
 
 class FileStorageIOPathProvider(AbstractIOPathProvider):

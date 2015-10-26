@@ -1,0 +1,82 @@
+[
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "604041e3-7aaa-4c8a-b25c-8d287cc0f36d",
+    "fields": {
+      "storage": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+      "path": "60/40/41/604041e3-7aaa-4c8a-b25c-8d287cc0f36d"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "0ece49e1-858f-4d65-9486-3c68ef1a2390",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "0e/ce/49/0ece49e1-858f-4d65-9486-3c68ef1a2390"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "d23963d3-4861-4352-95e5-cc3f18d81911",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "d2/39/63/d23963d3-4861-4352-95e5-cc3f18d81911"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "e0b00fa0-4612-447f-b91a-1311ef2df3dc",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "e0/b0/0f/e0b00fa0-4612-447f-b91a-1311ef2df3dc"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "85fe88e6-0322-4f27-adb7-ff5b53565f26",
+    "fields": {
+      "storage": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+      "path": "85/fe/88/85fe88e6-0322-4f27-adb7-ff5b53565f26"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "33c88578-b149-4684-a17a-c6c24003664e",
+    "fields": {
+      "storage": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+      "path": "33/c8/85/33c88578-b149-4684-a17a-c6c24003664e"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "2730bf25-af69-4c1a-9435-34b18aefd7e6",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "27/30/bf/2730bf25-af69-4c1a-9435-34b18aefd7e6"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "96e83041-becb-4413-b635-de5bdae9c383",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "96/e8/30/96e83041-becb-4413-b635-de5bdae9c383"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "ea035c88-7ff3-4e9c-818c-1bcf3f462893",
+    "fields": {
+      "storage": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+      "path": "ea/03/5c/ea035c88-7ff3-4e9c-818c-1bcf3f462893"
+    }
+  },
+  {
+    "model": "storage.FileStorageObject",
+    "pk": "9231279e-c593-46b9-be72-079e0e472a32",
+    "fields": {
+      "storage": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "path": "92/31/27/9231279e-c593-46b9-be72-079e0e472a32"
+    }
+  }
+]

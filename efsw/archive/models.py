@@ -3,7 +3,7 @@ from django.core import urlresolvers
 from django.contrib.auth.models import User
 
 from efsw.common.search.models import IndexableModel
-from efsw.common import models as common_models
+from efsw.storage import models as storage_models
 
 
 class ItemCategory(models.Model):
@@ -99,7 +99,7 @@ class ItemFileLocation(models.Model):
         unique_together = (('file_object', 'item'), )
 
     file_object = models.ForeignKey(
-        common_models.FileStorageObject,
+        storage_models.FileStorageObject,
         related_name='+'
     )
 

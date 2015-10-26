@@ -8,7 +8,7 @@ class ScheduleSecurityTestCase(AbstractSecurityTestCase):
     fixtures = ['channel.json', 'lineup.json', 'program.json', 'programposition.json']
 
     def _get_login_path(self):
-        return 'http://testserver/common/accounts/login/?next={0}'
+        return 'http://testserver/accounts/login/?next={0}'
 
     def _get_test_conditions(self):
         return [

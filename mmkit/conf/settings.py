@@ -26,10 +26,15 @@ INSTALLED_APPS = (
     'efsw.common',
     'efsw.schedule',
     'efsw.conversion',
+    'efsw.accounts',
+    'efsw.im',
+    'efsw.home',
+    'efsw.storage',
 )
 
 modules = (r'@efsw\.', 'common', 'celery', APP_ENV, 'local')
 merge = ('INSTALLED_APPS', 'STATICFILES_DIRS', 'EFSW_ELASTIC_INIT_INDICES', 'CELERY_QUEUES')
+
 
 def recursive_merge(from_dict, to_dict, root=True):
     for (k, v) in from_dict.items():
@@ -76,7 +81,7 @@ for module_name in modules:
     else:
         installed_apps = globals().get('INSTALLED_APPS')
         if not installed_apps:
-            raise RuntimeError('Использовать @ для загрузки конфигураций из приложений можно только загрузки '
+            raise RuntimeError('Использовать @ для загрузки конфигураций из приложений можно только после загрузки '
                                'части конфигурации, содержащей переменную INSTALLED_APPS.')
         r = re.compile(module_name)
         import_list = ['{0}.{1}'.format(app, APP_DEFAULT_SETTINGS_MODULE) for app in installed_apps if r.match(app)]

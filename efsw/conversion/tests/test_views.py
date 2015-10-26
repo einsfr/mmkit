@@ -8,7 +8,7 @@ from mmkit.conf import settings
 from efsw.conversion import models
 from efsw.common.utils.testcases import LoginRequiredTestCase, JsonResponseTestCase
 from efsw.conversion.fixtures import conversionprofile, conversiontask
-from efsw.common.models import FileStorage
+from efsw.storage.models import FileStorage
 
 
 class TaskListTestCase(TestCase):

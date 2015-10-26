@@ -1,0 +1,45 @@
+[
+  {
+    "model": "storage.FileStorage",
+    "pk": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+    "fields": {
+      "name": "Главное файловое хранилище",
+      "base_dir": "11e00904-0f3d-4bfa-a3a9-9c716f87bc01",
+      "access_protocols": {
+        "smb": "smb://main_storage"
+      },
+      "read_only": false,
+      "allowed_usage": [
+        "archive", "conversion_out"
+      ]
+    }
+  },
+  {
+    "model": "storage.FileStorage",
+    "pk": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+    "fields": {
+      "name": "Тестовое файловое хранилище",
+      "base_dir": "1ac9873a-8cf0-49e1-8a9a-7709930aa8af",
+      "access_protocols": {
+        "http": "http://main_storage"
+      },
+      "read_only": true,
+      "allowed_usage": [
+        "archive", "conversion_in"
+      ]
+    }
+  },
+  {
+    "model": "storage.FileStorage",
+    "pk": "1ac9873a-8cf0-49e1-8a9a-7709930cc8bf",
+    "fields": {
+      "name": "Неразрешённое хранилище",
+      "base_dir": "1ac9873a-8cf0-49e1-8a9a-7709930cc8bf",
+      "access_protocols": {
+        "http": "http://forbidden_storage"
+      },
+      "read_only": true,
+      "allowed_usage": []
+    }
+  }
+]

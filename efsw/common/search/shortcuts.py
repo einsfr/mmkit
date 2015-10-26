@@ -23,6 +23,7 @@ def create_model_index_doc(instance: models.IndexableModel):
             id=instance.id
         )
 
+
 def update_model_index_doc(instance: models.IndexableModel):
     es_cm = elastic.get_connection_manager()
     try:

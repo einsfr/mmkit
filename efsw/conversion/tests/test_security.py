@@ -9,7 +9,7 @@ class ConversionSecurityTestCase(AbstractSecurityTestCase):
     fixtures = []
 
     def _get_login_path(self):
-        return 'http://testserver/common/accounts/login/?next={0}'
+        return 'http://testserver/accounts/login/?next={0}'
 
     def _get_test_conditions(self):
         return [
