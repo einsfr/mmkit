@@ -3,8 +3,7 @@ import time
 
 from django.conf import settings
 
-from efsw.common.search import exceptions
-from efsw.common import default_settings as common_default_settings
+from efsw.search import exceptions
 
 
 _es_cm_instance = None
@@ -18,10 +17,10 @@ def get_connection_manager():
 
 
 def es_enabled():
-    return not getattr(settings, 'EFSW_ELASTIC_DISABLE', common_default_settings.EFSW_ELASTIC_DISABLE)
+    return not settings.EFSW_ELASTIC_DISABLE
 
 
-class EsConnectionManager():
+class EsConnectionManager:
 
     def __init__(self):
         self._es_instance = None
@@ -50,21 +49,13 @@ class EsConnectionManager():
                 self._set_es_instance()
             else:
                 # Если уже были
-                err_check_int = getattr(
-                    settings,
-                    'EFSW_ELASTIC_ERROR_CHECK_INTERVAL',
-                    common_default_settings.EFSW_ELASTIC_ERROR_CHECK_INTERVAL
-                )
+                err_check_int = settings.EFSW_ELASTIC_ERROR_CHECK_INTERVAL
                 if time.time() - self._es_instance_timestamp >= err_check_int >= 0:
                     self._set_es_instance()
                 else:
                     return None
         else:
-            max_time_delta = getattr(
-                settings,
-                'EFSW_ELASTIC_CHECK_INTERVAL',
-                common_default_settings.EFSW_ELASTIC_CHECK_INTERVAL
-            )
+            max_time_delta = settings.EFSW_ELASTIC_CHECK_INTERVAL
             if time.time() - self._es_instance_timestamp >= max_time_delta >= 0:
                 self._set_es_instance()
 
@@ -82,11 +73,7 @@ class EsConnectionManager():
 
     def get_es_index_prefix(self):
         if self._es_index_prefix is None:
-            self._es_index_prefix = getattr(
-                settings,
-                'EFSW_ELASTIC_INDEX_PREFIX',
-                common_default_settings.EFSW_ELASTIC_INDEX_PREFIX
-            )
+            self._es_index_prefix = settings.EFSW_ELASTIC_INDEX_PREFIX
         return self._es_index_prefix
 
     def prefix_index_name(self, index_name):

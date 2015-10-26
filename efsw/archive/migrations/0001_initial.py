@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import efsw.common.search.models
+import efsw.search.models
 from django.conf import settings
 
 
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'элемент',
                 'verbose_name_plural': 'элементы',
             },
-            bases=(efsw.common.search.models.IndexableModel, models.Model),
+            bases=(efsw.search.models.IndexableModel, models.Model),
         ),
         migrations.CreateModel(
             name='ItemCategory',

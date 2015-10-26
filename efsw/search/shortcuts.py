@@ -2,10 +2,10 @@ import json
 
 from elasticsearch import NotFoundError, RequestError
 
-from efsw.common.search import models, elastic
+from efsw.search import models, elastic
 
 
-def create_model_index_doc(instance: models.IndexableModel):
+def create_model_index_doc(instance):
     es_cm = elastic.get_connection_manager()
     if es_cm.get_es().exists(
         es_cm.prefix_index_name(instance.get_index_name()),
@@ -24,7 +24,7 @@ def create_model_index_doc(instance: models.IndexableModel):
         )
 
 
-def update_model_index_doc(instance: models.IndexableModel):
+def update_model_index_doc(instance):
     es_cm = elastic.get_connection_manager()
     try:
         es_cm.get_es().update(
@@ -45,7 +45,7 @@ def update_model_index_doc(instance: models.IndexableModel):
             raise
 
 
-def delete_model_index_doc(instance: models.IndexableModel):
+def delete_model_index_doc(instance):
     es_cm = elastic.get_connection_manager()
     es_cm.get_es().delete(
         es_cm.prefix_index_name(instance.get_index_name()),

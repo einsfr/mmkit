@@ -1,6 +1,6 @@
 
 
-class IndexableModel():
+class IndexableModel:
 
     @staticmethod
     def get_index_name():

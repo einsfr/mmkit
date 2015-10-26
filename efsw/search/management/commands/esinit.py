@@ -5,8 +5,7 @@ import json
 from django.core.management import base
 from django.conf import settings
 
-from efsw.common.search import elastic
-from efsw.common import default_settings
+from efsw.search import elastic
 
 
 class Command(base.BaseCommand):
@@ -33,7 +32,7 @@ class Command(base.BaseCommand):
         if es is None:
             print('Ошибка соединения с кластером - выполнение прекращено')
             return
-        init_indices = getattr(settings, 'EFSW_ELASTIC_INIT_INDICES', ())
+        init_indices = settings.EFSW_ELASTIC_INIT_INDICES
         if not init_indices:
             if verbosity:
                 print('Список индексов для инициализации пустой - пропускаем')
@@ -61,13 +60,12 @@ class Command(base.BaseCommand):
         if verbosity:
             print('Загрузка индексов для инициализации завершена. Всего загружено: {0}'.format(count))
         if not options['nowait']:
-            timeout = getattr(settings, 'EFSW_ELASTIC_TIMEOUT', default_settings.EFSW_ELASTIC_TIMEOUT)
+            timeout = settings.EFSW_ELASTIC_TIMEOUT
             if verbosity:
                 print('Ожидание готовности поискового кластера...')
             es.cluster.health(wait_for_status='yellow', timeout=int(timeout))
             if verbosity:
                 print('Готово!')
-
 
     def _create_index(self, es_cm, path, replace, verbosity):
         es = es_cm.get_es()

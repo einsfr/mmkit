@@ -2,7 +2,7 @@ from django.db import models
 from django.core import urlresolvers
 from django.contrib.auth.models import User
 
-from efsw.common.search.models import IndexableModel
+from efsw.search.models import IndexableModel
 from efsw.storage import models as storage_models
 
 

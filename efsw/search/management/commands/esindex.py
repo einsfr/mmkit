@@ -6,7 +6,7 @@ from django.db.utils import OperationalError
 
 from elasticsearch import helpers
 
-from efsw.common.search import elastic, models
+from efsw.search import elastic, models
 
 
 class Command(base.BaseCommand):

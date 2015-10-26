@@ -8,9 +8,9 @@ from django.core.management import call_command
 
 from elasticsearch import helpers
 
-from efsw.common.search.query import EsSearchQuery
-from efsw.common.search import elastic
-from efsw.common.search.exceptions import WrongParametersException, ExecutedQueryChangeException
+from efsw.search.query import EsSearchQuery
+from efsw.search import elastic
+from efsw.search.exceptions import WrongParametersException, ExecutedQueryChangeException
 
 
 class SearchQueryTestCase(TestCase):
@@ -92,13 +92,13 @@ class SearchQueryExecTestCase(TestCase):
     @override_settings(EFSW_ELASTIC_DISABLE=False)
     def test_exec(self):
         init_indices = (
-            os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'sqindex.json'),
+            os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'search', 'tests', 'sqindex.json'),
         )
         with self.settings(EFSW_ELASTIC_INIT_INDICES=init_indices):
             call_command('esinit', replace=True, verbosity=2)
         es_cm = elastic.get_connection_manager()
         es = es_cm.get_es()
-        doc_list_path = os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'common', 'tests', 'sqdocs.json')
+        doc_list_path = os.path.join(getattr(settings, 'BASE_DIR'), 'efsw', 'search', 'tests', 'sqdocs.json')
         with open(doc_list_path) as fp:
             bulk_actions = json.load(fp)
         helpers.bulk(es, bulk_actions, refresh=True)

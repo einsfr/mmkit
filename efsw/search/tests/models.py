@@ -1,6 +1,6 @@
 from django.db import models
 
-from efsw.common.search.models import IndexableModel
+from efsw.search.models import IndexableModel
 
 
 class IndexableTestModel(IndexableModel, models.Model):

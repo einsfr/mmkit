@@ -1,8 +1,8 @@
 from django.dispatch import receiver
 from django.db.models import signals
 
-from efsw.common.search.models import IndexableModel
-from efsw.common.search import elastic, shortcuts as es_shortcuts
+from efsw.search.models import IndexableModel
+from efsw.search import elastic, shortcuts as es_shortcuts
 
 
 @receiver(signals.post_save)

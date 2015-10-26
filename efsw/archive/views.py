@@ -8,9 +8,9 @@ from django.core import urlresolvers
 from django.contrib.auth.decorators import permission_required
 
 from efsw.archive import models, forms, errors
-from efsw.common.search import elastic
+from efsw.search import elastic
 from efsw.common.datetime import period
-from efsw.common.search.query import EsSearchQuery
+from efsw.search.query import EsSearchQuery
 from efsw.common.http.response import JsonWithStatusResponse
 from efsw.common.db import pagination
 from efsw.storage import models as storage_models

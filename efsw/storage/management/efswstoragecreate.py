@@ -3,8 +3,8 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from efsw.common.models import FileStorage
-from efsw.common.storage import utils as storage_utils
+from efsw.storage.models import FileStorage
+from efsw.storage import utils as storage_utils
 
 
 class Command(BaseCommand):

@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     'efsw.im',
     'efsw.home',
     'efsw.storage',
+    'efsw.search'
 )
 
 modules = (r'@efsw\.', 'common', 'celery', APP_ENV, 'local')

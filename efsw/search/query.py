@@ -1,8 +1,6 @@
 from django.conf import settings
 
-from efsw.common.search.exceptions import WrongParametersException,\
-    EmptyQueryException, ExecutedQueryChangeException
-from efsw.common import default_settings
+from efsw.search.exceptions import WrongParametersException, EmptyQueryException, ExecutedQueryChangeException
 
 
 class EsSearchQuery:
@@ -76,11 +74,7 @@ class EsSearchQuery:
                 from_ = int(k.start)
             else:
                 from_ = 0
-            max_size = getattr(
-                settings,
-                'EFSW_ELASTIC_MAX_SEARCH_RESULTS',
-                default_settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
-            )
+            max_size = settings.EFSW_ELASTIC_MAX_SEARCH_RESULTS
             if k.stop is not None:
                 size = int(k.stop) - from_
                 if size > max_size:
@@ -91,11 +85,14 @@ class EsSearchQuery:
                 step = int(k.step)
             else:
                 step = None
+            return from_, size, step
         elif isinstance(k, int):
             from_ = k
             size = 1
             step = None
-        return from_, size, step
+            return from_, size, step
+        else:
+            raise TypeError
 
     def __getitem__(self, k):
         if not isinstance(k, (slice, int)):
