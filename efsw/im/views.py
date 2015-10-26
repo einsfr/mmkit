@@ -12,7 +12,7 @@ from efsw.accounts.utils import format_username
 
 
 @http.require_GET
-@permission_required('common.send_message')
+@permission_required('im.send_message')
 def message_new(request):
     return shortcuts.render(request, 'im/message_new.html', {
         'form': forms.MessageCreateForm()
@@ -21,13 +21,13 @@ def message_new(request):
 
 @require_ajax
 @http.require_POST
-@permission_required('common.send_message', raise_exception=True)
+@permission_required('im.send_message', raise_exception=True)
 def message_create_json(request):
     pass
 
 
 @http.require_GET
-@permission_required('common.receive_message')
+@permission_required('im.receive_message')
 def conversation_list(request):
     user = request.user
     return shortcuts.render(request, 'im/conversation_list.html')
@@ -53,7 +53,7 @@ def _prepare_conversation_for_json(conversation_dict):
 
 @require_ajax
 @http.require_GET
-@permission_required('common.receive_message', raise_exception=True)
+@permission_required('im.receive_message', raise_exception=True)
 def conversation_list_json(request):
     user = request.user
     conversations = list(models.Conversation.objects.filter(
@@ -76,6 +76,6 @@ def conversation_list_json(request):
 
 @require_ajax
 @http.require_GET
-@permission_required('common.receive_message', raise_exception=True)
+@permission_required('im.receive_message', raise_exception=True)
 def conversation_list_updates_json(request):
     pass
