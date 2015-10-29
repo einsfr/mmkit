@@ -432,8 +432,8 @@ class ProgramIssuePart(OrderedModel):
         verbose_name='выпуск программы'
     )
 
-    file_name = models.CharField(
-        verbose_name='имя файла',
+    file_path = models.CharField(
+        verbose_name='путь к файлу (или его имя)',
         max_length=255,
     )
 
