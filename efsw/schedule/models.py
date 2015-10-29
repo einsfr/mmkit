@@ -359,3 +359,71 @@ class DayLineupTemplateItem(AbstractDayLineupItem):
         related_name='items',
         verbose_name='шаблон программы на день'
     )
+
+
+class ProgramSeries(models.Model):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'цикл программ'
+        verbose_name_plural = 'циклы программ'
+        unique_together = ('program', 'name')
+
+    name = models.CharField(
+        verbose_name='название цикла',
+        max_length=255
+    )
+
+    program = models.ForeignKey(
+        Program,
+        related_name='series',
+        verbose_name='программа'
+    )
+
+
+class ProgramIssue(OrderedModel):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'выпуск программы'
+        verbose_name_plural = 'выпуски программы'
+        unique_together = ('series', 'code')
+
+    order_domain_field = 'series'
+
+    name = models.CharField(
+        verbose_name='название',
+        max_length=255,
+        unique=True
+    )
+
+    series = models.ManyToManyField(
+        ProgramSeries,
+        related_name='issues',
+        verbose_name='цикл программ'
+    )
+
+    code = models.CharField(
+        verbose_name='код',
+        max_length=32
+    )
+
+    # сюда добавить ссылку на архивный элемент, которая может быть null
+
+
+class ProgramIssuePart(OrderedModel):
+
+    class Meta:
+        app_label = 'schedule'
+        verbose_name = 'часть выпуска программы'
+        verbose_name_plural = 'части выпуска программы'
+
+    order_domain_field = 'issue'
+
+    issue = models.ForeignKey(
+        ProgramIssue,
+        related_name='parts',
+        verbose_name='выпуск программы'
+    )
+
+    # сюда добавить названия файлов и их длительность
