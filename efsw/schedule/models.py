@@ -295,6 +295,7 @@ class DayLineup(AbstractDayLineup):
         app_label = 'schedule'
         verbose_name = 'программа на день'
         verbose_name_plural = 'программы на день'
+        unique_together = ('channel', 'day')
 
     id = models.UUIDField(
         primary_key=True,
@@ -327,6 +328,8 @@ class DayLineupItem(AbstractDayLineupItem):
         verbose_name = 'элемент программы на день'
         verbose_name_plural = 'элементы программы на день'
 
+    order_domain_field = 'day_lineup'
+
     day_lineup = models.ForeignKey(
         DayLineup,
         related_name='items',
@@ -340,10 +343,10 @@ class DayLineupTemplate(AbstractDayLineup):
         app_label = 'schedule'
         verbose_name = 'шаблон программы на день'
         verbose_name_plural = 'шаблоны программ на день'
+        unique_together = ('channel', 'name')
 
     name = models.CharField(
         verbose_name='имя шаблона',
-        unique=True,
         max_length=255
     )
 
@@ -354,6 +357,8 @@ class DayLineupTemplateItem(AbstractDayLineupItem):
         app_label = 'schedule'
         verbose_name = 'элемент шаблона программы на день'
         verbose_name_plural = 'элементы шаблона программы на день'
+
+    order_domain_field = 'day_lineup_template'
 
     day_lineup_template = models.ForeignKey(
         DayLineupTemplate,
@@ -432,9 +437,10 @@ class ProgramIssuePart(OrderedModel):
         verbose_name='выпуск программы'
     )
 
-    file_path = models.CharField(
-        verbose_name='путь к файлу (или его имя)',
+    file_name = models.CharField(
+        verbose_name='имя файла',
         max_length=255,
+        null=True
     )
 
     duration = models.TimeField(
