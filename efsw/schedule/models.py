@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 from efsw.common.db.models.fields.color import ColorField
 from efsw.common.db.models.ordered_model import OrderedModel
+import efsw.archive.models as archive_models
 
 
 class Channel(models.Model):
@@ -408,7 +409,12 @@ class ProgramIssue(OrderedModel):
         max_length=32
     )
 
-    # сюда добавить ссылку на архивный элемент, которая может быть null
+    archive_item = models.ForeignKey(
+        archive_models.Item,
+        related_name='+',
+        verbose_name='элемент архива',
+        null=True
+    )
 
 
 class ProgramIssuePart(OrderedModel):
@@ -426,4 +432,11 @@ class ProgramIssuePart(OrderedModel):
         verbose_name='выпуск программы'
     )
 
-    # сюда добавить названия файлов и их длительность
+    file_name = models.CharField(
+        verbose_name='имя файла',
+        max_length=255,
+    )
+
+    duration = models.TimeField(
+        verbose_name='длительность',
+    )
