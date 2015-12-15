@@ -42,7 +42,7 @@ class OptionsHandler:
 
 class ArgumentsBuilder(OptionsHandler):
 
-    DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin']
+    DEFAULT_CONVERT_ARGS = ['-hide_banner', '-n', '-nostdin', '-loglevel', 'warning', '-stats']
 
     def __init__(self, in_objects=None, out_objects=None, options=None):
 
